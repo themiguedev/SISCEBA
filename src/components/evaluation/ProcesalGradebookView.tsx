@@ -1,0 +1,363 @@
+import React, { useState } from 'react';
+import { useApp } from '../../context/AppContext';
+import { QualitativeScore, LiteralScore } from '../../types';
+import {
+  Save,
+  CheckCircle2,
+  AlertTriangle,
+  Sparkles,
+  Bot,
+  BrainCircuit,
+  Calculator,
+  Search,
+  Filter,
+  ArrowRight,
+  TrendingDown,
+  TrendingUp,
+  HelpCircle
+} from 'lucide-react';
+
+interface ProcesalGradebookViewProps {
+  onNavigateToAI?: () => void;
+}
+
+export const ProcesalGradebookView: React.FC<ProcesalGradebookViewProps> = ({ onNavigateToAI }) => {
+  const {
+    levelStudents,
+    levelAreas,
+    indicators,
+    currentLevel,
+    activeLapso,
+    currentSection,
+    evaluations,
+    recordEvaluation,
+    bulkRecordEvaluations,
+    generateAIActionPlan
+  } = useApp();
+
+  const [selectedAreaId, setSelectedAreaId] = useState<string>(levelAreas[0]?.id || '');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [savedAlert, setSavedAlert] = useState(false);
+  const [generatedStudentId, setGeneratedStudentId] = useState<string | null>(null);
+
+  const currentArea = levelAreas.find(a => a.id === selectedAreaId) || levelAreas[0];
+  const areaIndicators = indicators.filter(
+    i => i.areaId === selectedAreaId && i.level === currentLevel && i.lapso === activeLapso
+  );
+
+  // Local state grid: studentId -> { [indicatorId]: number | qualitative }
+  const [gridScores, setGridScores] = useState<Record<string, Record<string, any>>>({});
+
+  // Sync with existing evaluations
+  React.useEffect(() => {
+    const map: Record<string, Record<string, any>> = {};
+    levelStudents.forEach(stu => {
+      map[stu.id] = {};
+      areaIndicators.forEach(ind => {
+        const found = evaluations.find(
+          e =>
+            e.studentId === stu.id &&
+            e.areaId === selectedAreaId &&
+            e.moment === 'PROCESAL' &&
+            e.lapso === activeLapso &&
+            e.indicatorId === ind.id
+        );
+        if (found) {
+          map[stu.id][ind.id] =
+            currentLevel === 'MEDIA_GENERAL'
+              ? found.scoreNumeric
+              : found.scoreQualitative || 'C';
+        } else {
+          // Default mock grade based on student id
+          if (currentLevel === 'MEDIA_GENERAL') {
+            map[stu.id][ind.id] = stu.id.includes('stu-med-3') ? 8 : 17;
+          } else {
+            map[stu.id][ind.id] = stu.id.includes('stu-ini-3') ? 'EP' : 'C';
+          }
+        }
+      });
+    });
+    setGridScores(map);
+  }, [selectedAreaId, activeLapso, currentLevel, levelStudents]);
+
+  const handleCellChange = (studentId: string, indicatorId: string, value: any) => {
+    setGridScores(prev => ({
+      ...prev,
+      [studentId]: {
+        ...(prev[studentId] || {}),
+        [indicatorId]: value
+      }
+    }));
+  };
+
+  const handleSaveAll = () => {
+    const recordsToSave: Parameters<typeof bulkRecordEvaluations>[0] = [];
+
+    levelStudents.forEach(stu => {
+      const studentMap = gridScores[stu.id] || {};
+      areaIndicators.forEach(ind => {
+        const val = studentMap[ind.id];
+        if (val !== undefined) {
+          recordsToSave.push({
+            studentId: stu.id,
+            areaId: selectedAreaId,
+            indicatorId: ind.id,
+            moment: 'PROCESAL',
+            lapso: activeLapso,
+            scoreNumeric: currentLevel === 'MEDIA_GENERAL' ? Number(val) : undefined,
+            scoreQualitative: currentLevel !== 'MEDIA_GENERAL' ? (val as QualitativeScore) : undefined,
+            observations: `Registro procesal continuo - Lapso ${activeLapso}`,
+            teacherId: 'docente-titular'
+          });
+        }
+      });
+    });
+
+    bulkRecordEvaluations(recordsToSave);
+    setSavedAlert(true);
+    setTimeout(() => setSavedAlert(false), 3000);
+  };
+
+  // Helper to compute average for Media General
+  const computeStudentAverage = (studentId: string): number => {
+    const studentMap = gridScores[studentId] || {};
+    const values = areaIndicators.map(ind => Number(studentMap[ind.id])).filter(v => !isNaN(v));
+    if (values.length === 0) return 0;
+    const sum = values.reduce((a, b) => a + b, 0);
+    return Math.round((sum / values.length) * 10) / 10;
+  };
+
+  const filteredStudents = levelStudents.filter(s =>
+    s.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    s.cedula.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  return (
+    <div className="space-y-6">
+      {/* Top Banner */}
+      <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-cba-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#D4AF37]"></span>
+            <span className="text-xs font-bold text-[#2C2E53] uppercase tracking-wider">
+              Cuaderno Digital de Seguimiento
+            </span>
+          </div>
+          <h2 className="text-2xl font-black text-[#2C2E53] mt-1">
+            Evaluación Procesal Continua ({currentLevel.replace('_', ' ')})
+          </h2>
+          <p className="text-sm text-slate-500 mt-1">
+            Registro sistemático de indicadores en tiempo real con cálculo ponderado y detección temprana de dificultades.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleSaveAll}
+            className="flex items-center gap-2 px-5 py-2.5 bg-[#2C2E53] text-[#D4AF37] hover:bg-[#232543] font-black rounded-xl text-xs shadow-md transition-all"
+          >
+            <Save className="w-4 h-4" />
+            Guardar Calificaciones
+          </button>
+        </div>
+      </div>
+
+      {savedAlert && (
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-xl flex items-center gap-2 text-xs font-bold shadow-sm animate-in fade-in">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+          Registros procesales actualizados y sincronizados con éxito.
+        </div>
+      )}
+
+      {/* Filter and Area Selector */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <label htmlFor="select-procesal-area" className="text-xs font-bold text-[#2C2E53]">
+            Área:
+          </label>
+          <select
+            id="select-procesal-area"
+            value={selectedAreaId}
+            onChange={(e) => setSelectedAreaId(e.target.value)}
+            aria-label="Seleccionar área de formación para evaluación procesal"
+            className="w-full sm:w-72 px-3 py-2 bg-slate-50 rounded-xl border border-slate-200 text-xs font-black text-[#2C2E53] focus:ring-2 focus:ring-[#2C2E53]"
+          >
+            {levelAreas.map(a => (
+              <option key={a.id} value={a.id}>{a.name} ({a.code})</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="relative w-full sm:w-64">
+          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Buscar estudiante..."
+            className="w-full pl-9 pr-3 py-2 bg-slate-50 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-[#2C2E53]"
+          />
+        </div>
+      </div>
+
+      {/* Gradebook Grid Table */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-cba-card overflow-hidden">
+        <div className="p-4 bg-[#2C2E53] text-white flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Calculator className="w-4 h-4 text-[#D4AF37]" />
+            <span className="font-extrabold text-xs tracking-wide">
+              {currentArea?.name} • Sección {currentSection} • Lapso {activeLapso}
+            </span>
+          </div>
+          <span className="text-[11px] text-slate-300">
+            {areaIndicators.length} Indicadores Activos en el Lapso
+          </span>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-slate-50 text-slate-700 uppercase font-black tracking-wider text-[10px] border-b border-slate-200">
+              <tr>
+                <th className="py-3 px-4 sticky left-0 bg-slate-50 z-10 w-60">Estudiante</th>
+                {areaIndicators.map(ind => (
+                  <th key={ind.id} className="py-3 px-3 text-center min-w-[130px]" title={ind.description}>
+                    <span className="block font-black text-[#2C2E53]">{ind.code}</span>
+                    <span className="text-[9px] text-slate-400 font-semibold truncate block max-w-[120px]">
+                      {ind.description.slice(0, 30)}...
+                    </span>
+                    {ind.weight && (
+                      <span className="text-[9px] text-amber-700 bg-amber-50 px-1 py-0.2 rounded font-extrabold">
+                        {ind.weight}%
+                      </span>
+                    )}
+                  </th>
+                ))}
+                {currentLevel === 'MEDIA_GENERAL' && (
+                  <th className="py-3 px-4 text-center font-black text-[#2C2E53] bg-amber-50/70 min-w-[90px]">
+                    Promedio Procesal
+                  </th>
+                )}
+                <th className="py-3 px-4 text-center min-w-[120px]">Acciones Pedagógicas</th>
+              </tr>
+            </thead>
+
+            <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+              {filteredStudents.map((stu) => {
+                const studentScores = gridScores[stu.id] || {};
+                const avg = computeStudentAverage(stu.id);
+                const isUnderperforming = currentLevel === 'MEDIA_GENERAL' && avg < 10;
+
+                return (
+                  <tr
+                    key={stu.id}
+                    className={`hover:bg-slate-50 transition-colors ${
+                      isUnderperforming ? 'bg-red-50/30' : ''
+                    }`}
+                  >
+                    {/* Student Info Cell */}
+                    <td className="py-3 px-4 sticky left-0 bg-white z-10 border-r border-slate-100">
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-full bg-[#2C2E53] text-[#D4AF37] font-bold flex items-center justify-center text-xs overflow-hidden shrink-0">
+                          {stu.avatarUrl ? (
+                            <img src={stu.avatarUrl} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            stu.fullName.charAt(0)
+                          )}
+                        </div>
+                        <div className="truncate">
+                          <span className="font-extrabold text-[#2C2E53] block text-xs truncate">
+                            {stu.fullName}
+                          </span>
+                          <span className="text-[10px] text-slate-400">{stu.cedula}</span>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Indicator Cells */}
+                    {areaIndicators.map((ind) => {
+                      const val = studentScores[ind.id];
+
+                      return (
+                        <td key={ind.id} className="py-2 px-3 text-center">
+                          {currentLevel === 'MEDIA_GENERAL' ? (
+                            <input
+                              type="number"
+                              min={1}
+                              max={20}
+                              value={val ?? ''}
+                              onChange={(e) =>
+                                handleCellChange(stu.id, ind.id, Number(e.target.value))
+                              }
+                              aria-label={`Calificación de ${stu.fullName} en ${ind.code}`}
+                              className={`w-14 p-1 text-center font-black rounded-lg border text-xs focus:ring-2 focus:ring-[#2C2E53] ${
+                                Number(val) >= 16
+                                  ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                                  : Number(val) >= 10
+                                  ? 'bg-blue-50 text-blue-800 border-blue-300'
+                                  : 'bg-red-50 text-red-800 border-red-300 font-black'
+                              }`}
+                            />
+                          ) : (
+                            <select
+                              value={val || 'C'}
+                              onChange={(e) => handleCellChange(stu.id, ind.id, e.target.value)}
+                              aria-label={`Valoración cualitativa de ${stu.fullName} en ${ind.code}`}
+                              className="p-1 text-xs font-black rounded-lg bg-slate-50 border border-slate-200 text-[#2C2E53]"
+                            >
+                              <option value="C">C (Consolidado)</option>
+                              <option value="EP">EP (En Proceso)</option>
+                              <option value="I">I (Iniciado)</option>
+                            </select>
+                          )}
+                        </td>
+                      );
+                    })}
+
+                    {/* Media General Weighted Average */}
+                    {currentLevel === 'MEDIA_GENERAL' && (
+                      <td className="py-2 px-4 text-center bg-amber-50/40">
+                        <span
+                          className={`text-xs font-black px-2.5 py-1 rounded-full border ${
+                            avg >= 16
+                              ? 'bg-emerald-100 text-emerald-900 border-emerald-300'
+                              : avg >= 10
+                              ? 'bg-blue-100 text-blue-900 border-blue-300'
+                              : 'bg-red-100 text-red-900 border-red-300 animate-pulse'
+                          }`}
+                        >
+                          {avg} / 20
+                        </span>
+                      </td>
+                    )}
+
+                    {/* Actions Cell */}
+                    <td className="py-2 px-4 text-center">
+                      {isUnderperforming ? (
+                        <button
+                          onClick={() => {
+                            generateAIActionPlan(stu.id, selectedAreaId);
+                            setGeneratedStudentId(stu.id);
+                            if (onNavigateToAI) onNavigateToAI();
+                          }}
+                          className="flex items-center justify-center gap-1 w-full px-2.5 py-1 text-[11px] font-extrabold bg-gradient-to-r from-red-600 to-amber-600 text-white rounded-lg shadow-sm hover:opacity-95 transition-all"
+                          title="Generar plan de refuerzo remedial con Inteligencia Artificial"
+                        >
+                          <Bot className="w-3.5 h-3.5" />
+                          Plan IA
+                        </button>
+                      ) : (
+                        <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                          En norma
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+};
