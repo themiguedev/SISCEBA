@@ -1,6 +1,8 @@
 # SICE-CBA • Sistema Integral de Control y Evaluación
 ### U.E.P. Colegio Bellas Artes — Maracaibo, Venezuela (Año Lectivo 2026-2027)
 
+[![Deploy to GitHub Pages](https://github.com/themiguedev/SISCEBA/actions/workflows/deploy.yml/badge.svg)](https://github.com/themiguedev/SISCEBA/actions/workflows/deploy.yml)
+
 SICE-CBA es la plataforma integral de gestión curricular, planificación docente, evaluación multidimensional y comunicación pedagógica institucional, desarrollada para sustituir definitivamente al antiguo sistema SEO ante las exigencias tecnológicas contemporáneas.
 
 ---
