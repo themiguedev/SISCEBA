@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { AIActionPlan } from '../../types';
 import {
-  Bot,
+  ClipboardList,
   Sparkles,
   CheckCircle2,
   AlertTriangle,
@@ -75,12 +75,12 @@ export const AIActionPlansView: React.FC = () => {
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-[#D4AF37]"></span>
             <span className="text-xs font-bold text-[#2C2E53] uppercase tracking-wider flex items-center gap-1.5">
-              <Bot className="w-3.5 h-3.5 text-[#D4AF37]" />
-              Inteligencia Artificial Pedagógica Bellas Artes
+              <ClipboardList className="w-3.5 h-3.5 text-[#D4AF37]" />
+              Acompañamiento Pedagógico Bellas Artes
             </span>
           </div>
           <h2 className="text-2xl font-black text-[#2C2E53] mt-1">
-            Planes de Acción Personalizados (IA)
+            Planes de Acción Personalizados
           </h2>
           <p className="text-sm text-slate-500 mt-1">
             Generación automatizada de rutas de aprendizaje adaptativas y bucle de retroalimentación docente para superar dificultades académicas.
@@ -103,7 +103,7 @@ export const AIActionPlansView: React.FC = () => {
             <Sparkles className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="font-extrabold text-sm">Generador Asistido de Planes de Acción</h3>
+            <h3 className="font-extrabold text-sm">Generador de Planes de Acción</h3>
             <p className="text-xs text-slate-300">
               Selecciona un estudiante y asignatura para diagnosticar brechas y generar recomendaciones didácticas individualizadas.
             </p>
@@ -144,7 +144,7 @@ export const AIActionPlansView: React.FC = () => {
               </span>
             ) : (
               <span className="flex items-center gap-1.5">
-                <Bot className="w-4 h-4" /> Generar con IA
+                <Sparkles className="w-4 h-4" /> Generar Plan
               </span>
             )}
           </button>
@@ -163,7 +163,7 @@ export const AIActionPlansView: React.FC = () => {
         {/* Left List of Generated Plans */}
         <div className="space-y-3 no-print">
           <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block px-1">
-            Expedientes de Planes IA ({aiActionPlans.length})
+            Expedientes de Planes ({aiActionPlans.length})
           </span>
 
           {aiActionPlans.map(plan => {
@@ -197,10 +197,6 @@ export const AIActionPlansView: React.FC = () => {
                 <p className="text-[11px] text-slate-500 truncate mt-0.5 font-medium">
                   {pArea?.name} • Lapso {plan.lapso}
                 </p>
-                <div className="flex items-center gap-1 text-[10px] text-[#D4AF37] font-bold mt-2">
-                  <Sparkles className="w-3 h-3" />
-                  <span>Confianza IA: {plan.aiConfidenceScore}%</span>
-                </div>
               </div>
             );
           })}
@@ -222,12 +218,6 @@ export const AIActionPlansView: React.FC = () => {
                   <p className="text-xs text-slate-300">
                     Área: {area?.name} • Lapso {activePlan.lapso} • Cédula: {student?.cedula}
                   </p>
-                </div>
-
-                <div className="text-right">
-                  <span className="text-xs font-black bg-[#D4AF37] text-[#2C2E53] px-2.5 py-1 rounded-full">
-                    IA SCORE: {activePlan.aiConfidenceScore}%
-                  </span>
                 </div>
               </div>
 

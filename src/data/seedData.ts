@@ -9,7 +9,17 @@ import {
   EvaluationRecord,
   AIActionPlan,
   CouncilMeetingMinute,
-  RemedialActionPlan
+  RemedialActionPlan,
+  PassRecord,
+  DailyAttendanceRecord,
+  SubjectAttendanceAccumulated,
+  ConductEntry,
+  DocumentRequest,
+  AdministrativeBlockEntry,
+  TitleRecord,
+  SchoolYearConfig,
+  CommunityNotice,
+  BirthdayPerson
 } from '../types';
 
 export const INITIAL_AREAS: SubjectArea[] = [
@@ -1277,7 +1287,7 @@ export const INITIAL_COUNCIL_MINUTES: CouncilMeetingMinute[] = [
       'Prof. Marcos Andrade (Física)',
       'Lic. Mariana Duque (Psicología Escolar)'
     ],
-    agendaSummary: 'Análisis de rendimiento académico del 1er Lapso, seguimiento de planes de acción con IA y aprobación de reevaluaciones remediales.',
+    agendaSummary: 'Análisis de rendimiento académico del 1er Lapso, seguimiento de planes de acción personalizados y aprobación de reevaluaciones remediales.',
     adjustedScores: [
       {
         studentId: 'stu-med-3',
@@ -1285,7 +1295,7 @@ export const INITIAL_COUNCIL_MINUTES: CouncilMeetingMinute[] = [
         areaName: 'Matemáticas',
         previousScore: '08',
         newScore: '12',
-        justification: 'Superación satisfactoria del Plan de Acción Personalizado con IA y reevaluación demostrada en taller de recuperación.'
+        justification: 'Superación satisfactoria del Plan de Acción Personalizado y reevaluación demostrada en taller de recuperación.'
       }
     ],
     criticalCases: [
@@ -1300,3 +1310,362 @@ export const INITIAL_COUNCIL_MINUTES: CouncilMeetingMinute[] = [
     signed: true
   }
 ];
+
+// ==========================================
+// --- GESTIÓN INSTITUCIONAL SICE-CBA ---
+// ==========================================
+
+export const INITIAL_PASSES: PassRecord[] = [
+  {
+    id: 'pass-001',
+    ticketNumber: 'RET-2026-0842',
+    studentId: 'stu-med-3',
+    studentName: 'Mateo Sebastián Chacín Portillo',
+    gradeSection: '4to Año A',
+    date: '2026-09-17',
+    time: '07:22 AM',
+    reason: 'Inconveniente de transporte vehicular en Av. Bella Vista',
+    authorizedBy: 'Portería Principal / Prof. Marcos Andrade',
+    printed: true
+  },
+  {
+    id: 'pass-002',
+    ticketNumber: 'RET-2026-0843',
+    studentId: 'stu-pri-2',
+    studentName: 'Diego Alejandro Mendoza Silva',
+    gradeSection: '3er Grado A',
+    date: '2026-09-17',
+    time: '07:35 AM',
+    reason: 'Cita médica odontológica matutina con justificativo anexo',
+    authorizedBy: 'Portería Principal / Coordinación Primaria',
+    printed: false
+  },
+  {
+    id: 'pass-003',
+    ticketNumber: 'RET-2026-0844',
+    studentId: 'stu-med-1',
+    studentName: 'Andrés Eduardo Silva Bermúdez',
+    gradeSection: '4to Año A',
+    date: '2026-09-16',
+    time: '07:18 AM',
+    reason: 'Retraso de transporte escolar colectivo',
+    authorizedBy: 'Portería Principal',
+    printed: true
+  }
+];
+
+export const INITIAL_DAILY_ATTENDANCE: DailyAttendanceRecord[] = [
+  {
+    id: 'att-d-1',
+    studentId: 'stu-med-1',
+    studentName: 'Andrés Eduardo Silva Bermúdez',
+    gradeSection: '4to Año A',
+    date: '2026-09-17',
+    status: 'PRESENTE',
+    lapso: 1
+  },
+  {
+    id: 'att-d-2',
+    studentId: 'stu-med-2',
+    studentName: 'Camila Isabella Urdaneta Moreno',
+    gradeSection: '4to Año A',
+    date: '2026-09-17',
+    status: 'PRESENTE',
+    lapso: 1
+  },
+  {
+    id: 'att-d-3',
+    studentId: 'stu-med-3',
+    studentName: 'Mateo Sebastián Chacín Portillo',
+    gradeSection: '4to Año A',
+    date: '2026-09-17',
+    status: 'RETRASO',
+    justification: 'Pase por retraso RET-2026-0842',
+    lapso: 1
+  },
+  {
+    id: 'att-d-4',
+    studentId: 'stu-med-4',
+    studentName: 'Sofía Valentina Morales Rincón',
+    gradeSection: '4to Año A',
+    date: '2026-09-17',
+    status: 'INASISTENCIA_JUSTIFICADA',
+    justification: 'Reposo médico pediátrico por afección respiratoria',
+    lapso: 1
+  },
+  {
+    id: 'att-d-5',
+    studentId: 'stu-med-5',
+    studentName: 'Sebastián Alejandro Romero Parra',
+    gradeSection: '4to Año A',
+    date: '2026-09-17',
+    status: 'PRESENTE',
+    lapso: 1
+  }
+];
+
+export const INITIAL_ACCUMULATED_ATTENDANCE: SubjectAttendanceAccumulated[] = [
+  {
+    id: 'att-acc-1',
+    studentId: 'stu-med-3',
+    studentName: 'Mateo Sebastián Chacín Portillo',
+    areaId: 'med-mat',
+    areaName: 'Matemáticas',
+    gradeSection: '4to Año A',
+    lapso: 1,
+    totalClasses: 32,
+    unjustifiedAbsences: 6,
+    justifiedAbsences: 2,
+    absencePercentage: 18.75,
+    exceedsLimit: false
+  },
+  {
+    id: 'att-acc-2',
+    studentId: 'stu-med-4',
+    studentName: 'Sofía Valentina Morales Rincón',
+    areaId: 'med-qui',
+    areaName: 'Química',
+    gradeSection: '4to Año A',
+    lapso: 1,
+    totalClasses: 28,
+    unjustifiedAbsences: 2,
+    justifiedAbsences: 4,
+    absencePercentage: 7.14,
+    exceedsLimit: false
+  },
+  {
+    id: 'att-acc-3',
+    studentId: 'stu-med-5',
+    studentName: 'Sebastián Alejandro Romero Parra',
+    areaId: 'med-fis',
+    areaName: 'Física',
+    gradeSection: '4to Año A',
+    lapso: 1,
+    totalClasses: 26,
+    unjustifiedAbsences: 7,
+    justifiedAbsences: 1,
+    absencePercentage: 26.92,
+    exceedsLimit: true
+  }
+];
+
+export const INITIAL_CONDUCTS: ConductEntry[] = [
+  {
+    id: 'cond-01',
+    studentId: 'stu-med-3',
+    studentName: 'Mateo Sebastián Chacín Portillo',
+    gradeSection: '4to Año A',
+    date: '2026-09-15',
+    lapso: 1,
+    type: 'LEVE',
+    description: 'Uso de teléfono celular en horario no autorizado durante clase de Química.',
+    agreements: 'Entrega del dispositivo a coordinación hasta culminar la jornada y compromiso escrito.',
+    reportedBy: 'Prof. Químico / Coordinación de Convivencia'
+  },
+  {
+    id: 'cond-02',
+    studentId: 'stu-med-2',
+    studentName: 'Camila Isabella Urdaneta Moreno',
+    gradeSection: '4to Año A',
+    date: '2026-09-12',
+    lapso: 1,
+    type: 'POSITIVA',
+    description: 'Liderazgo exemplar y apoyo voluntario en tutoría de pares para compañeros de 1er año.',
+    agreements: 'Felicitación asentada en el expediente académico del Colegio Bellas Artes.',
+    reportedBy: 'Prof. Elena Barrios'
+  }
+];
+
+export const INITIAL_DOCUMENT_REQUESTS: DocumentRequest[] = [
+  {
+    id: 'doc-req-101',
+    trackingCode: 'SOL-CBA-2026-019',
+    representativeName: 'Ing. Carlos Urdaneta',
+    studentName: 'Camila Isabella Urdaneta Moreno',
+    gradeSection: '4to Año A',
+    documentType: 'Constancia de Estudio',
+    department: 'Control de Estudios',
+    requestDate: '2026-09-14',
+    elapsedDays: 3,
+    status: 'LISTO_ENTREGA',
+    notes: 'Requiere sello húmedo y firma del director para trámite de visa.'
+  },
+  {
+    id: 'doc-req-102',
+    trackingCode: 'SOL-CBA-2026-020',
+    representativeName: 'Dra. María Bermúdez',
+    studentName: 'Andrés Eduardo Silva Bermúdez',
+    gradeSection: '4to Año A',
+    documentType: 'Notas Certificadas',
+    department: 'Control de Estudios',
+    requestDate: '2026-09-10',
+    elapsedDays: 7,
+    status: 'EN_TRAMITE',
+    notes: 'Certificación de 1° a 3° año en formato oficial ministerial.'
+  },
+  {
+    id: 'doc-req-103',
+    trackingCode: 'SOL-CBA-2026-021',
+    representativeName: 'Sr. Roberto Morales',
+    studentName: 'Sofía Valentina Morales Rincón',
+    gradeSection: '4to Año A',
+    documentType: 'Solvencia Administrativa',
+    department: 'Administración',
+    requestDate: '2026-09-16',
+    elapsedDays: 1,
+    status: 'LISTO_ENTREGA',
+    notes: 'Solvencia de matrícula para seguro escolar.'
+  },
+  {
+    id: 'doc-req-104',
+    trackingCode: 'SOL-CBA-2026-022',
+    representativeName: 'Lic. Patricia Portillo',
+    studentName: 'Mateo Sebastián Chacín Portillo',
+    gradeSection: '4to Año A',
+    documentType: 'Carta de Buena Conducta',
+    department: 'Dirección',
+    requestDate: '2026-09-15',
+    elapsedDays: 2,
+    status: 'PENDIENTE',
+    notes: 'Para postulación deportiva en club de natación intercolegial.'
+  }
+];
+
+export const INITIAL_ADMIN_BLOCKS: AdministrativeBlockEntry[] = [
+  {
+    id: 'block-01',
+    representativeId: 'rep-mor-01',
+    representativeName: 'Sr. David Colina Villalobos',
+    studentId: 'stu-block-99',
+    studentName: 'Franco David Colina Rivas',
+    gradeSection: '2do Año B',
+    reason: 'Mora administrativa en mensualidades escolares acumuladas (Mayo - Julio 2026).',
+    blockDate: '2026-09-01',
+    active: true,
+    debtAmount: '$180.00'
+  }
+];
+
+export const INITIAL_TITLES: TitleRecord[] = [
+  {
+    id: 'tit-01',
+    studentId: 'stu-med-1',
+    studentName: 'Andrés Eduardo Silva Bermúdez',
+    cedula: 'V-32.890.112',
+    schoolYear: '2026-2027',
+    graduationYear: '2027',
+    serialNumber: 'MIN-MPPE-2027-09412',
+    tomo: 'LVII',
+    folio: '084',
+    registeredCode: 'CBA-TIT-482',
+    calibrated: true
+  },
+  {
+    id: 'tit-02',
+    studentId: 'stu-med-2',
+    studentName: 'Camila Isabella Urdaneta Moreno',
+    cedula: 'V-32.954.887',
+    schoolYear: '2026-2027',
+    graduationYear: '2027',
+    serialNumber: 'MIN-MPPE-2027-09413',
+    tomo: 'LVII',
+    folio: '085',
+    registeredCode: 'CBA-TIT-483',
+    calibrated: true
+  }
+];
+
+export const INITIAL_SCHOOL_YEAR_CONFIG: SchoolYearConfig = {
+  year: '2026-2027',
+  isCurrent: true,
+  lapsos: [
+    {
+      lapso: 1,
+      name: '1er Lapso (Septiembre - Diciembre 2026)',
+      startDate: '2026-09-15',
+      endDate: '2026-12-18',
+      isGradingOpen: true // Regla de negocio: Activo para carga
+    },
+    {
+      lapso: 2,
+      name: '2do Lapso (Enero - Marzo 2027)',
+      startDate: '2027-01-11',
+      endDate: '2027-03-26',
+      isGradingOpen: false
+    },
+    {
+      lapso: 3,
+      name: '3er Lapso (Abril - Julio 2027)',
+      startDate: '2027-04-12',
+      endDate: '2027-07-09',
+      isGradingOpen: false
+    }
+  ]
+};
+
+export const INITIAL_COMMUNITY_NOTICES: CommunityNotice[] = [
+  {
+    id: 'not-01',
+    title: 'Apertura Formal del Año Escolar 2026-2027 y Nuevos Laboratorios STEAM',
+    content: 'La Junta Directiva y la Dirección General del Colegio Bellas Artes dan la más cordial bienvenida a toda la comunidad estudiantil. Anunciamos la inauguración de las nuevas estaciones de robótica educativa y diseño creativo.',
+    date: '16-09-2026',
+    type: 'NOTICIA',
+    targetAudience: 'TODOS',
+    author: 'Dirección General CBA',
+    pinned: true
+  },
+  {
+    id: 'not-02',
+    title: 'Cronograma Oficial de Entrega de Planificaciones Quincenales a Coordinación',
+    content: 'Se recuerda al personal docente de Inicial, Primaria y Media General que la fecha límite para consignar el modelo de planificación a revisión del primer corte es este viernes 25 de septiembre.',
+    date: '17-09-2026',
+    type: 'ANUNCIO_URGENTE',
+    targetAudience: 'DOCENTES',
+    author: 'Unidad de Control y Evaluación (UCE)'
+  },
+  {
+    id: 'not-03',
+    title: 'Reunión General de Padres y Representantes: Inducción a la Plataforma CBA',
+    content: 'Invitamos a todas las familias este jueves 24 a las 5:00 PM en el Auditorio del plantel para la presentación de los módulos interactivos de consulta y seguimiento.',
+    date: '15-09-2026',
+    type: 'EVENTO',
+    targetAudience: 'REPRESENTANTES',
+    author: 'Comité de Padres y Familias'
+  }
+];
+
+export const INITIAL_BIRTHDAYS: BirthdayPerson[] = [
+  {
+    id: 'b-01',
+    fullName: 'Prof. Elena Barrios',
+    role: 'Docente',
+    gradeOrArea: 'Castellano y Literatura (Media General)',
+    birthDate: '17 de Septiembre',
+    isToday: true
+  },
+  {
+    id: 'b-02',
+    fullName: 'Diego Alejandro Mendoza Silva',
+    role: 'Estudiante',
+    gradeOrArea: '3er Grado A (Primaria)',
+    birthDate: '17 de Septiembre',
+    isToday: true
+  },
+  {
+    id: 'b-03',
+    fullName: 'Lic. Lissette Chacín',
+    role: 'Personal',
+    gradeOrArea: 'Coordinación Pedagógica',
+    birthDate: '20 de Septiembre',
+    isToday: false
+  },
+  {
+    id: 'b-04',
+    fullName: 'Sofía Valentina Morales Rincón',
+    role: 'Estudiante',
+    gradeOrArea: '4to Año A',
+    birthDate: '22 de Septiembre',
+    isToday: false
+  }
+];
+

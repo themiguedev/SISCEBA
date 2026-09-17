@@ -14,7 +14,18 @@ import {
   RemedialActionPlan,
   CouncilMeetingMinute,
   PlanStatus,
-  QualitativeScore
+  QualitativeScore,
+  PassRecord,
+  DailyAttendanceRecord,
+  SubjectAttendanceAccumulated,
+  ConductEntry,
+  DocumentRequest,
+  AdministrativeBlockEntry,
+  TitleRecord,
+  SchoolYearConfig,
+  CommunityNotice,
+  BirthdayPerson,
+  MainNavigationTab
 } from '../types';
 import {
   INITIAL_AREAS,
@@ -27,11 +38,24 @@ import {
   INITIAL_EVALUATION_RECORDS,
   INITIAL_AI_ACTION_PLANS,
   INITIAL_REMEDIAL_PLANS,
-  INITIAL_COUNCIL_MINUTES
+  INITIAL_COUNCIL_MINUTES,
+  INITIAL_PASSES,
+  INITIAL_DAILY_ATTENDANCE,
+  INITIAL_ACCUMULATED_ATTENDANCE,
+  INITIAL_CONDUCTS,
+  INITIAL_DOCUMENT_REQUESTS,
+  INITIAL_ADMIN_BLOCKS,
+  INITIAL_TITLES,
+  INITIAL_SCHOOL_YEAR_CONFIG,
+  INITIAL_COMMUNITY_NOTICES,
+  INITIAL_BIRTHDAYS
 } from '../data/seedData';
 
 interface AppContextType {
   // Navigation & Session
+  isAuthenticated: boolean;
+  login: (username: string, password?: string, role?: UserRole) => boolean;
+  logout: () => void;
   currentLevel: EducationalLevel;
   setCurrentLevel: (level: EducationalLevel) => void;
   currentRole: UserRole;
@@ -90,6 +114,38 @@ interface AppContextType {
   createCouncilMinute: (minute: Omit<CouncilMeetingMinute, 'id'>) => void;
   signCouncilMinute: (minuteId: string) => void;
 
+  // --- Gestiones Institucionales SICE-CBA ---
+  passes: PassRecord[];
+  addPass: (pass: Omit<PassRecord, 'id' | 'ticketNumber'>) => PassRecord;
+  deletePass: (passId: string) => void;
+  printPass: (passId: string) => void;
+
+  dailyAttendance: DailyAttendanceRecord[];
+  markDailyAttendance: (studentId: string, status: DailyAttendanceRecord['status'], justification?: string) => void;
+  accumulatedAttendance: SubjectAttendanceAccumulated[];
+
+  conducts: ConductEntry[];
+  addConduct: (conduct: Omit<ConductEntry, 'id'>) => ConductEntry;
+
+  documentRequests: DocumentRequest[];
+  updateDocumentStatus: (requestId: string, status: DocumentRequest['status']) => void;
+  addDocumentRequest: (req: Omit<DocumentRequest, 'id' | 'trackingCode' | 'elapsedDays'>) => DocumentRequest;
+
+  adminBlocks: AdministrativeBlockEntry[];
+  toggleAdminBlock: (blockId: string) => void;
+
+  titles: TitleRecord[];
+  saveTitleRecord: (record: TitleRecord) => void;
+
+  schoolYearConfig: SchoolYearConfig;
+  toggleLapsoGrading: (lapso: 1 | 2 | 3) => void;
+  isLapsoOpenForGrading: boolean;
+
+  communityNotices: CommunityNotice[];
+  addCommunityNotice: (notice: Omit<CommunityNotice, 'id'>) => CommunityNotice;
+
+  birthdays: BirthdayPerson[];
+
   // Helpers
   resetToSeedData: () => void;
 }
@@ -102,6 +158,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [currentRole, setCurrentRole] = useState<UserRole>('DOCENTE');
   const [activeLapso, setActiveLapso] = useState<1 | 2 | 3>(1);
   const [currentSection, setCurrentSection] = useState<string>('4to Año A');
+
+  // Authentication & Session States
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    const saved = localStorage.getItem('sisceba_auth_session');
+    return saved === 'true';
+  });
+
+  const login = (_username: string, _password?: string, role?: UserRole) => {
+    setIsAuthenticated(true);
+    localStorage.setItem('sisceba_auth_session', 'true');
+    if (role) {
+      setCurrentRole(role);
+    }
+    return true;
+  };
+
+  const logout = () => {
+    setIsAuthenticated(false);
+    localStorage.setItem('sisceba_auth_session', 'false');
+  };
 
   // Synchronize section when level changes
   useEffect(() => {
@@ -170,7 +246,87 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return saved ? JSON.parse(saved) : INITIAL_COUNCIL_MINUTES;
   });
 
+  // --- Estados de Gestión Institucional SICE-CBA ---
+  const [passes, setPasses] = useState<PassRecord[]>(() => {
+    const saved = localStorage.getItem('sisceba_passes');
+    return saved ? JSON.parse(saved) : INITIAL_PASSES;
+  });
+
+  const [dailyAttendance, setDailyAttendance] = useState<DailyAttendanceRecord[]>(() => {
+    const saved = localStorage.getItem('sisceba_daily_attendance');
+    return saved ? JSON.parse(saved) : INITIAL_DAILY_ATTENDANCE;
+  });
+
+  const [accumulatedAttendance, setAccumulatedAttendance] = useState<SubjectAttendanceAccumulated[]>(() => {
+    const saved = localStorage.getItem('sisceba_accumulated_attendance');
+    return saved ? JSON.parse(saved) : INITIAL_ACCUMULATED_ATTENDANCE;
+  });
+
+  const [conducts, setConducts] = useState<ConductEntry[]>(() => {
+    const saved = localStorage.getItem('sisceba_conducts');
+    return saved ? JSON.parse(saved) : INITIAL_CONDUCTS;
+  });
+
+  const [documentRequests, setDocumentRequests] = useState<DocumentRequest[]>(() => {
+    const saved = localStorage.getItem('sisceba_document_requests');
+    return saved ? JSON.parse(saved) : INITIAL_DOCUMENT_REQUESTS;
+  });
+
+  const [adminBlocks, setAdminBlocks] = useState<AdministrativeBlockEntry[]>(() => {
+    const saved = localStorage.getItem('sisceba_admin_blocks');
+    return saved ? JSON.parse(saved) : INITIAL_ADMIN_BLOCKS;
+  });
+
+  const [titles, setTitles] = useState<TitleRecord[]>(() => {
+    const saved = localStorage.getItem('sisceba_titles');
+    return saved ? JSON.parse(saved) : INITIAL_TITLES;
+  });
+
+  const [schoolYearConfig, setSchoolYearConfig] = useState<SchoolYearConfig>(() => {
+    const saved = localStorage.getItem('sisceba_school_year_config');
+    return saved ? JSON.parse(saved) : INITIAL_SCHOOL_YEAR_CONFIG;
+  });
+
+  const [communityNotices, setCommunityNotices] = useState<CommunityNotice[]>(() => {
+    const saved = localStorage.getItem('sisceba_community_notices');
+    return saved ? JSON.parse(saved) : INITIAL_COMMUNITY_NOTICES;
+  });
+
+  const [birthdays] = useState<BirthdayPerson[]>(INITIAL_BIRTHDAYS);
+
   // Sync to LocalStorage on change
+  useEffect(() => {
+    localStorage.setItem('sisceba_passes', JSON.stringify(passes));
+  }, [passes]);
+
+  useEffect(() => {
+    localStorage.setItem('sisceba_daily_attendance', JSON.stringify(dailyAttendance));
+  }, [dailyAttendance]);
+
+  useEffect(() => {
+    localStorage.setItem('sisceba_conducts', JSON.stringify(conducts));
+  }, [conducts]);
+
+  useEffect(() => {
+    localStorage.setItem('sisceba_document_requests', JSON.stringify(documentRequests));
+  }, [documentRequests]);
+
+  useEffect(() => {
+    localStorage.setItem('sisceba_admin_blocks', JSON.stringify(adminBlocks));
+  }, [adminBlocks]);
+
+  useEffect(() => {
+    localStorage.setItem('sisceba_titles', JSON.stringify(titles));
+  }, [titles]);
+
+  useEffect(() => {
+    localStorage.setItem('sisceba_school_year_config', JSON.stringify(schoolYearConfig));
+  }, [schoolYearConfig]);
+
+  useEffect(() => {
+    localStorage.setItem('sisceba_community_notices', JSON.stringify(communityNotices));
+  }, [communityNotices]);
+
   useEffect(() => {
     localStorage.setItem('sisceba_competencies', JSON.stringify(competencies));
   }, [competencies]);
@@ -485,6 +641,102 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
   };
 
+  // --- Handlers de Gestión Institucional SICE-CBA ---
+  const isLapsoOpenForGrading = schoolYearConfig.lapsos.find(l => l.lapso === activeLapso)?.isGradingOpen ?? true;
+
+  const toggleLapsoGrading = (lapso: 1 | 2 | 3) => {
+    setSchoolYearConfig(prev => ({
+      ...prev,
+      lapsos: prev.lapsos.map(l => (l.lapso === lapso ? { ...l, isGradingOpen: !l.isGradingOpen } : l))
+    }));
+  };
+
+  const addPass = (pass: Omit<PassRecord, 'id' | 'ticketNumber'>): PassRecord => {
+    const newPass: PassRecord = {
+      ...pass,
+      id: `pass-${Date.now()}`,
+      ticketNumber: `RET-2026-${Math.floor(1000 + Math.random() * 9000)}`
+    };
+    setPasses(prev => [newPass, ...prev]);
+    return newPass;
+  };
+
+  const deletePass = (passId: string) => {
+    setPasses(prev => prev.filter(p => p.id !== passId));
+  };
+
+  const printPass = (passId: string) => {
+    setPasses(prev => prev.map(p => (p.id === passId ? { ...p, printed: true } : p)));
+  };
+
+  const markDailyAttendance = (studentId: string, status: DailyAttendanceRecord['status'], justification?: string) => {
+    const today = new Date().toISOString().split('T')[0];
+    const stu = students.find(s => s.id === studentId);
+    setDailyAttendance(prev => {
+      const filtered = prev.filter(a => !(a.studentId === studentId && a.date === today));
+      const newRec: DailyAttendanceRecord = {
+        id: `att-${Date.now()}-${studentId}`,
+        studentId,
+        studentName: stu?.fullName || 'Estudiante',
+        gradeSection: stu ? `${stu.grade} ${stu.section}` : currentSection,
+        date: today,
+        status,
+        justification,
+        lapso: activeLapso
+      };
+      return [newRec, ...filtered];
+    });
+  };
+
+  const addConduct = (conduct: Omit<ConductEntry, 'id'>): ConductEntry => {
+    const newEntry: ConductEntry = {
+      ...conduct,
+      id: `cond-${Date.now()}`
+    };
+    setConducts(prev => [newEntry, ...prev]);
+    return newEntry;
+  };
+
+  const updateDocumentStatus = (requestId: string, status: DocumentRequest['status']) => {
+    setDocumentRequests(prev => prev.map(d => (d.id === requestId ? { ...d, status } : d)));
+  };
+
+  const addDocumentRequest = (req: Omit<DocumentRequest, 'id' | 'trackingCode' | 'elapsedDays'>): DocumentRequest => {
+    const newReq: DocumentRequest = {
+      ...req,
+      id: `doc-req-${Date.now()}`,
+      trackingCode: `SOL-CBA-2026-${Math.floor(100 + Math.random() * 900)}`,
+      elapsedDays: 0
+    };
+    setDocumentRequests(prev => [newReq, ...prev]);
+    return newReq;
+  };
+
+  const toggleAdminBlock = (blockId: string) => {
+    setAdminBlocks(prev => prev.map(b => (b.id === blockId ? { ...b, active: !b.active } : b)));
+  };
+
+  const saveTitleRecord = (record: TitleRecord) => {
+    setTitles(prev => {
+      const idx = prev.findIndex(t => t.id === record.id || t.studentId === record.studentId);
+      if (idx >= 0) {
+        const copy = [...prev];
+        copy[idx] = record;
+        return copy;
+      }
+      return [...prev, record];
+    });
+  };
+
+  const addCommunityNotice = (notice: Omit<CommunityNotice, 'id'>): CommunityNotice => {
+    const newNotice: CommunityNotice = {
+      ...notice,
+      id: `not-${Date.now()}`
+    };
+    setCommunityNotices(prev => [newNotice, ...prev]);
+    return newNotice;
+  };
+
   const resetToSeedData = () => {
     localStorage.clear();
     setCompetencies(INITIAL_COMPETENCIES);
@@ -497,11 +749,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setAiActionPlans(INITIAL_AI_ACTION_PLANS);
     setRemedialPlans(INITIAL_REMEDIAL_PLANS);
     setCouncilMinutes(INITIAL_COUNCIL_MINUTES);
+    setPasses(INITIAL_PASSES);
+    setDailyAttendance(INITIAL_DAILY_ATTENDANCE);
+    setAccumulatedAttendance(INITIAL_ACCUMULATED_ATTENDANCE);
+    setConducts(INITIAL_CONDUCTS);
+    setDocumentRequests(INITIAL_DOCUMENT_REQUESTS);
+    setAdminBlocks(INITIAL_ADMIN_BLOCKS);
+    setTitles(INITIAL_TITLES);
+    setSchoolYearConfig(INITIAL_SCHOOL_YEAR_CONFIG);
+    setCommunityNotices(INITIAL_COMMUNITY_NOTICES);
   };
 
   return (
     <AppContext.Provider
       value={{
+        isAuthenticated,
+        login,
+        logout,
         currentLevel,
         setCurrentLevel,
         currentRole,
@@ -542,6 +806,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         councilMinutes,
         createCouncilMinute,
         signCouncilMinute,
+        passes,
+        addPass,
+        deletePass,
+        printPass,
+        dailyAttendance,
+        markDailyAttendance,
+        accumulatedAttendance,
+        conducts,
+        addConduct,
+        documentRequests,
+        updateDocumentStatus,
+        addDocumentRequest,
+        adminBlocks,
+        toggleAdminBlock,
+        titles,
+        saveTitleRecord,
+        schoolYearConfig,
+        toggleLapsoGrading,
+        isLapsoOpenForGrading,
+        communityNotices,
+        addCommunityNotice,
+        birthdays,
         resetToSeedData
       }}
     >

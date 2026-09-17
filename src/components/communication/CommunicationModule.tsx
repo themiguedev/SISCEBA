@@ -7,7 +7,7 @@ import { RemedialInterventionView } from './RemedialInterventionView';
 import { InstitutionalReportsView } from './InstitutionalReportsView';
 import {
   FileText,
-  Bot,
+  ClipboardList,
   Scale,
   BookOpen,
   FileCheck,
@@ -28,7 +28,7 @@ export const CommunicationModule: React.FC<CommunicationModuleProps> = ({
   const subTabs = [
     { id: 'BOLETIN', label: 'Boletín Informativo', icon: FileText },
     ...(currentLevel === 'MEDIA_GENERAL'
-      ? [{ id: 'IA_ACTION_PLANS', label: 'Planes Acción IA', icon: Bot, isNew: true }]
+      ? [{ id: 'IA_ACTION_PLANS', label: 'Planes de Acción Personalizados', icon: ClipboardList, isNew: false }]
       : []),
     { id: 'ACTAS_CONSEJO', label: 'Actas de Consejo & Ajustes', icon: Scale },
     ...(currentLevel === 'MEDIA_GENERAL'

@@ -1,7 +1,8 @@
 {
   "name": "sisceba-antigravity",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "author": "Ing. en Informática Miguelangel Contreras Guillén",
   "type": "module",
   "scripts": {
     "dev": "vite",

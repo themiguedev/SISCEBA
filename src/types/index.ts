@@ -1,6 +1,6 @@
 export type EducationalLevel = 'INICIAL' | 'PRIMARIA' | 'MEDIA_GENERAL';
 
-export type UserRole = 'DOCENTE' | 'COORDINACION' | 'REPRESENTANTE' | 'ESTUDIANTE';
+export type UserRole = 'DOCENTE' | 'COORDINACION' | 'COORDINADOR' | 'DIRECTOR' | 'ADMINISTRADOR' | 'REPRESENTANTE' | 'ESTUDIANTE';
 
 export type SubjectType = 'REGULAR' | 'INTEGRADA' | 'ESPECIALIZADA';
 
@@ -206,3 +206,144 @@ export interface CouncilMeetingMinute {
   resolutions: string[];
   signed: boolean;
 }
+
+// ==========================================
+// --- GESTIÓN INSTITUCIONAL SICE-CBA ---
+// ==========================================
+
+export interface PassRecord {
+  id: string;
+  ticketNumber: string;
+  studentId: string;
+  studentName: string;
+  gradeSection: string;
+  date: string; // YYYY-MM-DD
+  time: string; // HH:mm AM/PM
+  reason: string;
+  authorizedBy: string;
+  printed: boolean;
+}
+
+export interface DailyAttendanceRecord {
+  id: string;
+  studentId: string;
+  studentName: string;
+  gradeSection: string;
+  date: string;
+  status: 'PRESENTE' | 'INASISTENCIA_JUSTIFICADA' | 'INASISTENCIA_INJUSTIFICADA' | 'RETRASO';
+  justification?: string;
+  lapso: 1 | 2 | 3;
+}
+
+export interface SubjectAttendanceAccumulated {
+  id: string;
+  studentId: string;
+  studentName: string;
+  areaId: string;
+  areaName: string;
+  gradeSection: string;
+  lapso: 1 | 2 | 3;
+  totalClasses: number;
+  unjustifiedAbsences: number;
+  justifiedAbsences: number;
+  absencePercentage: number;
+  exceedsLimit: boolean; // > 25% según reglamento
+}
+
+export interface ConductEntry {
+  id: string;
+  studentId: string;
+  studentName: string;
+  gradeSection: string;
+  date: string;
+  lapso: 1 | 2 | 3;
+  type: 'POSITIVA' | 'LEVE' | 'GRAVE' | 'MUY_GRAVE';
+  description: string;
+  agreements: string;
+  reportedBy: string;
+}
+
+export interface DocumentRequest {
+  id: string;
+  trackingCode: string;
+  representativeName: string;
+  studentName: string;
+  gradeSection: string;
+  documentType: 'Constancia de Estudio' | 'Notas Certificadas' | 'Carta de Buena Conducta' | 'Solvencia Administrativa' | 'Certificación de Título';
+  department: 'Control de Estudios' | 'Administración' | 'Dirección';
+  requestDate: string;
+  elapsedDays: number;
+  status: 'PENDIENTE' | 'EN_TRAMITE' | 'LISTO_ENTREGA' | 'ENTREGADO';
+  notes?: string;
+}
+
+export interface AdministrativeBlockEntry {
+  id: string;
+  representativeId: string;
+  representativeName: string;
+  studentId: string;
+  studentName: string;
+  gradeSection: string;
+  reason: string;
+  blockDate: string;
+  active: boolean;
+  debtAmount?: string;
+}
+
+export interface TitleRecord {
+  id: string;
+  studentId: string;
+  studentName: string;
+  cedula: string;
+  schoolYear: string;
+  graduationYear: string;
+  serialNumber: string;
+  tomo: string;
+  folio: string;
+  registeredCode: string;
+  calibrated: boolean;
+}
+
+export interface SchoolYearConfig {
+  year: string;
+  isCurrent: boolean;
+  lapsos: {
+    lapso: 1 | 2 | 3;
+    name: string;
+    startDate: string;
+    endDate: string;
+    isGradingOpen: boolean; // Regla de negocio oficial de bloqueo: "No existen lapsos habilitados para la carga de registros"
+  }[];
+}
+
+export interface CommunityNotice {
+  id: string;
+  title: string;
+  content: string;
+  date: string;
+  type: 'NOTICIA' | 'ANUNCIO_URGENTE' | 'EVENTO';
+  targetAudience: 'TODOS' | 'DOCENTES' | 'REPRESENTANTES' | 'ESTUDIANTES';
+  author: string;
+  pinned?: boolean;
+}
+
+export interface BirthdayPerson {
+  id: string;
+  fullName: string;
+  role: 'Docente' | 'Estudiante' | 'Personal';
+  gradeOrArea: string;
+  birthDate: string;
+  isToday: boolean;
+}
+
+export type MainNavigationTab = 
+  | 'ESCRITORIO'
+  | 'GESTION'
+  | 'INICIAL'
+  | 'PRIMARIA'
+  | 'MEDIA_GENERAL'
+  | 'CONSULTAS'
+  | 'COMUNIDAD'
+  | 'CONFIGURACION'
+  | 'AYUDA';
+

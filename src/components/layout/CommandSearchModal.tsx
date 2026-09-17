@@ -8,13 +8,14 @@ import {
   FileText,
   Sparkles,
   ArrowRight,
-  GraduationCap
+  GraduationCap,
+  ClipboardList
 } from 'lucide-react';
 
 interface CommandSearchModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onNavigate: (tab: 'PLANIFICACION' | 'EVALUACION' | 'COMUNICACION', subTab: string) => void;
+  onNavigate: (tab: any, subTab?: string) => void;
 }
 
 export const CommandSearchModal: React.FC<CommandSearchModalProps> = ({
@@ -51,32 +52,46 @@ export const CommandSearchModal: React.FC<CommandSearchModalProps> = ({
 
   const quickActions = [
     {
+      title: 'Pases por Retraso y Portería',
+      category: 'Gestión Escolar',
+      tab: 'GESTION',
+      subTab: 'PASES',
+      icon: ClipboardList
+    },
+    {
+      title: 'Asistente de Inscripciones (Wizard)',
+      category: 'Gestión Escolar',
+      tab: 'GESTION',
+      subTab: 'INSCRIPCIONES',
+      icon: GraduationCap
+    },
+    {
+      title: 'Documentos Solicitados y Constancias (SLA)',
+      category: 'Gestión Escolar',
+      tab: 'GESTION',
+      subTab: 'DOCUMENTOS',
+      icon: FileText
+    },
+    {
       title: 'Plan Quincenal en Curso',
       category: 'Planificación',
-      tab: 'PLANIFICACION' as const,
+      tab: currentLevel,
       subTab: 'PLAN_QUINCENAL',
       icon: BookOpen
     },
     {
       title: 'Registro de Evaluación Procesal',
       category: 'Evaluación',
-      tab: 'EVALUACION' as const,
+      tab: currentLevel,
       subTab: 'PROCESAL',
       icon: FileText
     },
     {
-      title: 'Generar Boletín Informativo',
-      category: 'Comunicación',
-      tab: 'COMUNICACION' as const,
-      subTab: 'BOLETIN',
-      icon: GraduationCap
-    },
-    {
-      title: 'Planes de Acción con IA',
-      category: 'Inteligencia Artificial',
-      tab: 'COMUNICACION' as const,
-      subTab: 'IA_ACTION_PLANS',
-      icon: Sparkles
+      title: 'Mapa del Sitio y Auditoría de Rutas',
+      category: 'Ayuda',
+      tab: 'AYUDA',
+      subTab: 'MAPA_SITIO',
+      icon: BookOpen
     }
   ].filter(action => action.title.toLowerCase().includes(query.toLowerCase()) || action.category.toLowerCase().includes(query.toLowerCase()));
 

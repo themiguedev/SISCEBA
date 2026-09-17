@@ -281,7 +281,7 @@ export const InstitutionalReportsView: React.FC = () => {
                     <td className="py-2.5 px-4">Cumple y supera la meta institucional proyectada para el lapso.</td>
                   </tr>
                   <tr>
-                    <td className="py-2.5 px-3 font-bold text-[#2C2E53]">Planes de Acción con IA Aplicados</td>
+                    <td className="py-2.5 px-3 font-bold text-[#2C2E53]">Planes de Acción Personalizados Aplicados</td>
                     <td className="py-2.5 px-3 text-center font-black text-[#D4AF37]">1 Activo</td>
                     <td className="py-2.5 px-4">Estudiante en evolución favorable con superación de brechas.</td>
                   </tr>
