@@ -129,7 +129,7 @@ export const InstitutionalReportsView: React.FC = () => {
         <div className="flex items-center justify-between border-b-2 border-[#2C2E53] pb-4">
           <div className="flex items-center gap-4">
             <div className="h-14 w-24 flex items-center justify-center">
-              <img src="/logo-cba.png" alt="Colegio Bellas Artes" className="h-full w-auto object-contain" />
+              <img src={`${import.meta.env.BASE_URL}logo-cba.png`} alt="Colegio Bellas Artes" className="h-full w-auto object-contain" />
             </div>
             <div>
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">

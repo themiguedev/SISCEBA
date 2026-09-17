@@ -153,7 +153,7 @@ const SiscebaMainApp: React.FC = () => {
                 <div className="flex items-center gap-3 text-center md:text-left">
                   <div className="h-9 px-2 rounded-xl bg-white flex items-center justify-center border border-[#D4AF37]/60 shadow-md">
                     <img
-                      src="/logo-cba.png"
+                      src={`${import.meta.env.BASE_URL}logo-cba.png`}
                       alt="Colegio Bellas Artes"
                       className="h-6 w-auto object-contain"
                     />
@@ -284,7 +284,7 @@ const SiscebaMainApp: React.FC = () => {
           <div className="flex items-center gap-3 text-center md:text-left">
             <div className="h-9 px-2 rounded-lg bg-white flex items-center justify-center border border-[#D4AF37]/50 shadow-sm">
               <img
-                src="/logo-cba.png"
+                src={`${import.meta.env.BASE_URL}logo-cba.png`}
                 alt="Colegio Bellas Artes"
                 className="h-6 w-auto object-contain"
               />

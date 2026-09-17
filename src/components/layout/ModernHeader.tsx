@@ -87,7 +87,7 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
           <div className="flex items-center gap-3">
             <div className="h-10 px-2.5 rounded-xl bg-white flex items-center justify-center shadow-lg shadow-black/20 border border-[#D4AF37]/60 group relative">
               <img
-                src="/logo-cba.png"
+                src={`${import.meta.env.BASE_URL}logo-cba.png`}
                 alt="Colegio Bellas Artes"
                 className="h-7 w-auto object-contain"
               />

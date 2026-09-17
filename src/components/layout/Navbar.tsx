@@ -52,7 +52,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Brand */}
         <div className="flex items-center space-x-3">
           <div className="h-10 px-2 rounded-xl bg-white flex items-center justify-center shadow-md border border-[#D4AF37]/50">
-            <img src="/logo-cba.png" alt="Colegio Bellas Artes" className="h-7 w-auto object-contain" />
+            <img src={`${import.meta.env.BASE_URL}logo-cba.png`} alt="Colegio Bellas Artes" className="h-7 w-auto object-contain" />
           </div>
           <div>
             <div className="flex items-center space-x-2">
