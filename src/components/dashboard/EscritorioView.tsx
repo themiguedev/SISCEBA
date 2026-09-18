@@ -20,9 +20,27 @@ import {
   HelpCircle
 } from 'lucide-react';
 
-export const EscritorioView: React.FC = () => {
+export type EscritorioTab = 'DASHBOARD' | 'PERFIL' | 'SUGERENCIAS';
+
+interface EscritorioViewProps {
+  activeSubTab?: EscritorioTab;
+  setActiveSubTab?: (tab: EscritorioTab) => void;
+}
+
+export const EscritorioView: React.FC<EscritorioViewProps> = ({
+  activeSubTab,
+  setActiveSubTab
+}) => {
   const { currentRole, birthdays } = useApp();
-  const [activeTab, setActiveTab] = useState<'DASHBOARD' | 'PERFIL' | 'SUGERENCIAS'>('DASHBOARD');
+  const [internalActiveTab, setInternalActiveTab] = useState<EscritorioTab>('DASHBOARD');
+
+  const activeTab = activeSubTab || internalActiveTab;
+  const setActiveTab = (tab: EscritorioTab) => {
+    if (setActiveSubTab) {
+      setActiveSubTab(tab);
+    }
+    setInternalActiveTab(tab);
+  };
 
   // Profile Form State
   const [profileComment, setProfileComment] = useState('Coordinación de Evaluación y Docencia - Colegio Bellas Artes');
@@ -55,15 +73,15 @@ export const EscritorioView: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Top Unified Navigation & View Switcher */}
-      <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-[#1B1C33] text-[#D4AF37] flex items-center justify-center font-black text-lg shadow-sm border border-[#2C2E53]">
+          <div className="w-11 h-11 rounded-xl bg-[#1B1C33] text-[#D4AF37] flex items-center justify-center font-black text-lg shadow-sm border border-[#2C2E53] shrink-0">
             CB
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-base font-extrabold text-[#2C2E53]">Escritorio de Operaciones y Control</h2>
-              <span className="text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded-full bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/30">
+              <h2 className="text-base font-extrabold text-[#2C2E53] dark:text-white">Escritorio de Operaciones y Control</h2>
+              <span className="text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded-full bg-sky-500/15 text-sky-600 dark:text-sky-300 border border-sky-500/30">
                 Auditoría Institucional
               </span>
             </div>
@@ -74,38 +92,38 @@ export const EscritorioView: React.FC = () => {
         </div>
 
         {/* Subtabs Pill Switcher */}
-        <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-inner shrink-0">
+        <div className="flex items-center bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200 dark:border-slate-700/60 shadow-inner shrink-0">
           <button
             onClick={() => setActiveTab('DASHBOARD')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
               activeTab === 'DASHBOARD'
-                ? 'bg-[#2C2E53] text-[#D4AF37] shadow-sm'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                ? 'bg-[#1B1C33] text-sky-300 shadow-sm border border-sky-400/40'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/60'
             }`}
           >
-            <Monitor className="w-3.5 h-3.5" />
+            <Monitor className={`w-3.5 h-3.5 ${activeTab === 'DASHBOARD' ? 'text-sky-400' : 'text-slate-500'}`} />
             Tablero Principal
           </button>
           <button
             onClick={() => setActiveTab('PERFIL')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
               activeTab === 'PERFIL'
-                ? 'bg-[#2C2E53] text-[#D4AF37] shadow-sm'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                ? 'bg-[#1B1C33] text-sky-300 shadow-sm border border-sky-400/40'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/60'
             }`}
           >
-            <User className="w-3.5 h-3.5" />
+            <User className={`w-3.5 h-3.5 ${activeTab === 'PERFIL' ? 'text-sky-400' : 'text-slate-500'}`} />
             Mi Perfil
           </button>
           <button
             onClick={() => setActiveTab('SUGERENCIAS')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
               activeTab === 'SUGERENCIAS'
-                ? 'bg-[#2C2E53] text-[#D4AF37] shadow-sm'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                ? 'bg-[#1B1C33] text-sky-300 shadow-sm border border-sky-400/40'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/60'
             }`}
           >
-            <Lightbulb className="w-3.5 h-3.5" />
+            <Lightbulb className={`w-3.5 h-3.5 ${activeTab === 'SUGERENCIAS' ? 'text-sky-400' : 'text-slate-500'}`} />
             Ideas y Sugerencias
           </button>
         </div>
@@ -246,20 +264,20 @@ export const EscritorioView: React.FC = () => {
                     key={b.id}
                     className={`p-3 rounded-xl border transition-all ${
                       b.isToday
-                        ? 'bg-gradient-to-r from-amber-500/10 to-amber-100/50 border-amber-300'
-                        : 'bg-slate-50 border-slate-100'
+                        ? 'bg-gradient-to-r from-amber-500/10 to-amber-100/50 dark:from-amber-950/40 dark:to-amber-900/20 border-amber-300 dark:border-amber-500/40'
+                        : 'bg-slate-50 dark:bg-white/[0.03] border-slate-100 dark:border-white/10'
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <p className="font-bold text-xs text-slate-800">{b.fullName}</p>
+                      <p className="font-bold text-xs text-slate-800 dark:text-[#F8FAFC]">{b.fullName}</p>
                       {b.isToday && (
-                        <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded bg-amber-500 text-white animate-pulse">
+                        <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded bg-amber-500 text-white dark:bg-amber-500/20 dark:text-amber-300 dark:border dark:border-amber-500/40 animate-pulse">
                           ¡HOY!
                         </span>
                       )}
                     </div>
-                    <p className="text-[11px] text-slate-500 mt-0.5">{b.gradeOrArea}</p>
-                    <p className="text-[10px] text-slate-400 mt-1 flex items-center gap-1 font-medium">
+                    <p className="text-[11px] text-slate-500 dark:text-slate-300 mt-0.5">{b.gradeOrArea}</p>
+                    <p className="text-[10px] text-slate-400 dark:text-slate-400 mt-1 flex items-center gap-1 font-medium">
                       <Calendar className="w-3 h-3 text-[#D4AF37]" />
                       {b.birthDate}
                     </p>

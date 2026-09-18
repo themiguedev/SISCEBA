@@ -16,9 +16,25 @@ import {
   X
 } from 'lucide-react';
 
-export const ComunidadModule: React.FC = () => {
+interface ComunidadModuleProps {
+  activeSubTab?: 'NOTICIAS' | 'CUMPLEANOS' | 'COMUNICADOS';
+  setActiveSubTab?: (subTab: 'NOTICIAS' | 'CUMPLEANOS' | 'COMUNICADOS') => void;
+}
+
+export const ComunidadModule: React.FC<ComunidadModuleProps> = ({
+  activeSubTab,
+  setActiveSubTab
+}) => {
   const { communityNotices, addCommunityNotice, birthdays } = useApp();
-  const [activeTab, setActiveTab] = useState<'NOTICIAS' | 'CUMPLEANOS' | 'COMUNICADOS'>('NOTICIAS');
+  const [internalActiveTab, setInternalActiveTab] = useState<'NOTICIAS' | 'CUMPLEANOS' | 'COMUNICADOS'>('NOTICIAS');
+
+  const activeTab = activeSubTab || internalActiveTab;
+  const setActiveTab = (tab: 'NOTICIAS' | 'CUMPLEANOS' | 'COMUNICADOS') => {
+    if (setActiveSubTab) {
+      setActiveSubTab(tab);
+    }
+    setInternalActiveTab(tab);
+  };
   const [isNewModalOpen, setIsNewModalOpen] = useState(false);
 
   // New Notice State
@@ -79,38 +95,38 @@ export const ComunidadModule: React.FC = () => {
         </div>
 
         {/* Subtabs Switcher */}
-        <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+        <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
           <button
             onClick={() => setActiveTab('NOTICIAS')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
               activeTab === 'NOTICIAS'
-                ? 'bg-[#2C2E53] text-[#D4AF37] shadow-sm'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-[#261523] text-pink-300 shadow-sm border border-pink-500/40'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
-            <Megaphone className="w-3.5 h-3.5" />
+            <Megaphone className={`w-3.5 h-3.5 ${activeTab === 'NOTICIAS' ? 'text-pink-400' : 'text-slate-400'}`} />
             Noticias y Avisos
           </button>
           <button
             onClick={() => setActiveTab('CUMPLEANOS')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
               activeTab === 'CUMPLEANOS'
-                ? 'bg-[#2C2E53] text-[#D4AF37] shadow-sm'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-[#261523] text-pink-300 shadow-sm border border-pink-500/40'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
-            <Cake className="w-3.5 h-3.5" />
+            <Cake className={`w-3.5 h-3.5 ${activeTab === 'CUMPLEANOS' ? 'text-pink-400' : 'text-slate-400'}`} />
             Cumpleañeros
           </button>
           <button
             onClick={() => setActiveTab('COMUNICADOS')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
               activeTab === 'COMUNICADOS'
-                ? 'bg-[#2C2E53] text-[#D4AF37] shadow-sm'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-[#261523] text-pink-300 shadow-sm border border-pink-500/40'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
-            <Send className="w-3.5 h-3.5" />
+            <Send className={`w-3.5 h-3.5 ${activeTab === 'COMUNICADOS' ? 'text-pink-400' : 'text-slate-400'}`} />
             Mensajería Masiva
           </button>
         </div>
@@ -195,21 +211,21 @@ export const ComunidadModule: React.FC = () => {
                 key={b.id}
                 className={`p-4 rounded-xl border text-center space-y-1.5 transition ${
                   b.isToday
-                    ? 'bg-gradient-to-b from-amber-50 to-amber-100/40 border-amber-300 ring-2 ring-amber-300/50 shadow-md'
-                    : 'bg-slate-50 border-slate-200'
+                    ? 'bg-gradient-to-b from-amber-50 to-amber-100/40 dark:from-amber-950/40 dark:to-amber-900/20 border-amber-300 dark:border-amber-500/40 ring-2 ring-amber-300/50 dark:ring-amber-500/20 shadow-md'
+                    : 'bg-slate-50 dark:bg-white/[0.03] border-slate-200 dark:border-white/10'
                 }`}
               >
-                <div className="w-12 h-12 rounded-full mx-auto bg-[#2C2E53] text-[#D4AF37] flex items-center justify-center font-black text-lg shadow-sm">
+                <div className="w-12 h-12 rounded-full mx-auto bg-[#2C2E53] dark:bg-amber-950/60 dark:border dark:border-amber-500/30 text-[#D4AF37] flex items-center justify-center font-black text-lg shadow-sm">
                   {b.fullName.charAt(0)}
                 </div>
                 {b.isToday && (
-                  <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500 text-white inline-block">
+                  <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500 text-white dark:bg-amber-500/20 dark:text-amber-300 dark:border dark:border-amber-500/40 inline-block shadow-xs">
                     ¡Cumpleaños Hoy!
                   </span>
                 )}
-                <h4 className="font-bold text-xs text-slate-900 leading-snug">{b.fullName}</h4>
-                <p className="text-[11px] text-slate-500">{b.gradeOrArea}</p>
-                <p className="text-[11px] font-extrabold text-[#2C2E53] pt-1">{b.birthDate}</p>
+                <h4 className="font-bold text-xs text-slate-900 dark:text-[#F8FAFC] leading-snug">{b.fullName}</h4>
+                <p className="text-[11px] text-slate-500 dark:text-slate-300">{b.gradeOrArea}</p>
+                <p className="text-[11px] font-extrabold text-[#2C2E53] dark:text-amber-300 pt-1">{b.birthDate}</p>
               </div>
             ))}
           </div>

@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 
 export const PasesRetrasoView: React.FC = () => {
-  const { passes, addPass, deletePass, printPass, students } = useApp();
+  const { passes, addPass, deletePass, printPass, students, sendNotification } = useApp();
   const [selectedDate, setSelectedDate] = useState<string>('2026-09-17');
   const [searchTerm, setSearchTerm] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -51,6 +51,20 @@ export const PasesRetrasoView: React.FC = () => {
       reason: passReason,
       authorizedBy: authorizedBy,
       printed: false
+    });
+
+    // Despacho de notificación al representante y alumno
+    sendNotification({
+      title: `Aviso de Portería • Pase de Retraso #${newPass.ticketNumber}`,
+      message: `Se registró el ingreso tardío a las ${passTime} para el estudiante ${stu.fullName} (${stu.grade} "${stu.section}"). Motivo: ${passReason}. Representante legal notificado.`,
+      category: 'ASISTENCIA',
+      priority: 'MEDIA',
+      recipientRole: 'REPRESENTANTE',
+      recipientName: stu.representativeName,
+      studentName: stu.fullName,
+      actionTab: 'GESTION',
+      actionSubTab: 'PASES',
+      deliveryChannels: ['PORTAL', 'SMS_WHATSAPP']
     });
 
     setIsCreateModalOpen(false);
@@ -299,66 +313,169 @@ export const PasesRetrasoView: React.FC = () => {
 
       {/* PRINTABLE PASS TICKET PREVIEW MODAL */}
       {activeTicketToPrint && (
-        <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-300 animate-in zoom-in-95 duration-200">
-            {/* Printable Ticket Layout */}
-            <div className="border-2 border-dashed border-slate-300 p-4 rounded-xl bg-slate-50/50 text-center">
-              <div className="flex items-center justify-center gap-2 mb-1">
-                <School className="w-5 h-5 text-[#2C2E53]" />
-                <h4 className="font-extrabold text-sm text-[#2C2E53]">Colegio Bellas Artes</h4>
+        <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 print:p-0 print:static print:bg-transparent print:backdrop-blur-none">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-300 print:shadow-none print:border-none print:p-2 animate-in zoom-in-95 duration-200">
+            {/* Modal Non-print Header */}
+            <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-200 no-print">
+              <div className="flex items-center gap-2">
+                <Ticket className="w-4 h-4 text-[#D4AF37]" />
+                <h3 className="text-xs font-black text-[#2C2E53]">
+                  Vista Previa del Talonario Oficial
+                </h3>
               </div>
-              <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">
-                BOLETA DE PASE POR RETRASO
-              </p>
-              <div className="my-2 py-1 px-3 bg-[#2C2E53] text-[#D4AF37] rounded-lg font-mono font-black text-xs inline-block">
-                {activeTicketToPrint.ticketNumber}
-              </div>
+              <button
+                onClick={() => setActiveTicketToPrint(null)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
 
-              <div className="text-left text-xs space-y-1.5 mt-3 pt-3 border-t border-slate-200">
-                <p>
-                  <span className="font-bold text-slate-600">Estudiante:</span>{' '}
-                  <span className="font-extrabold text-slate-900">{activeTicketToPrint.studentName}</span>
-                </p>
-                <p>
-                  <span className="font-bold text-slate-600">Curso:</span> {activeTicketToPrint.gradeSection}
-                </p>
-                <p>
-                  <span className="font-bold text-slate-600">Fecha y Hora:</span> {activeTicketToPrint.date} •{' '}
-                  <span className="font-bold text-slate-800">{activeTicketToPrint.time}</span>
-                </p>
-                <p>
-                  <span className="font-bold text-slate-600">Motivo:</span> {activeTicketToPrint.reason}
-                </p>
-              </div>
+            {/* TALONARIO DUPLICADO OFICIAL CBA */}
+            <div className="space-y-4">
+              {/* TALÓN 1: COPIA REPRESENTANTE / ESTUDIANTE */}
+              <div className="border border-slate-400 rounded-2xl p-4 bg-slate-50/50 print:bg-white text-center relative overflow-hidden">
+                <span className="absolute top-2 right-2 text-[9px] font-black uppercase px-2 py-0.5 rounded bg-[#2C2E53] text-[#D4AF37]">
+                  Copia 1: Alumno / Familia
+                </span>
 
-              <div className="mt-6 pt-6 border-t border-slate-300 grid grid-cols-2 gap-4 text-center">
-                <div>
-                  <div className="h-0.5 bg-slate-400 w-full mb-1"></div>
-                  <p className="text-[9px] font-bold text-slate-500">Portería / Control</p>
+                <div className="flex items-center justify-center gap-2 mb-1">
+                  <School className="w-5 h-5 text-[#2C2E53]" />
+                  <div>
+                    <h4 className="font-black text-xs text-[#2C2E53] uppercase tracking-wide">
+                      U.E.P. Colegio Bellas Artes
+                    </h4>
+                    <span className="text-[9px] text-slate-500 font-semibold block">
+                      Maracaibo • Control de Acceso y Asistencia
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <div className="h-0.5 bg-slate-400 w-full mb-1"></div>
-                  <p className="text-[9px] font-bold text-slate-500">Docente de Aula</p>
+
+                <div className="my-1.5 py-0.5 px-3 bg-[#2C2E53] text-[#D4AF37] rounded-lg font-mono font-black text-xs inline-block">
+                  BOLETA N° {activeTicketToPrint.ticketNumber}
+                </div>
+
+                <div className="text-left text-xs space-y-1 mt-2 pt-2 border-t border-slate-300">
+                  <div className="grid grid-cols-2 gap-1">
+                    <p>
+                      <span className="font-bold text-slate-500 text-[10px] block">Estudiante:</span>
+                      <strong className="text-slate-900">{activeTicketToPrint.studentName}</strong>
+                    </p>
+                    <p>
+                      <span className="font-bold text-slate-500 text-[10px] block">Curso / Sección:</span>
+                      <strong className="text-slate-900">{activeTicketToPrint.gradeSection}</strong>
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-1 pt-1">
+                    <p>
+                      <span className="font-bold text-slate-500 text-[10px] block">Fecha y Hora:</span>
+                      <span className="text-slate-800 font-semibold">{activeTicketToPrint.date} • {activeTicketToPrint.time}</span>
+                    </p>
+                    <p>
+                      <span className="font-bold text-slate-500 text-[10px] block">Autorizado por:</span>
+                      <span className="text-slate-800 font-semibold truncate block">{activeTicketToPrint.authorizedBy}</span>
+                    </p>
+                  </div>
+                  <p className="pt-1">
+                    <span className="font-bold text-slate-500 text-[10px] block">Causa declarada:</span>
+                    <span className="text-slate-700 italic">{activeTicketToPrint.reason}</span>
+                  </p>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-slate-300 grid grid-cols-2 gap-4 text-center">
+                  <div>
+                    <div className="h-0.5 bg-slate-400 w-full mb-1"></div>
+                    <p className="text-[8px] font-bold text-slate-600 uppercase">Portería / Control</p>
+                  </div>
+                  <div>
+                    <div className="h-0.5 bg-slate-400 w-full mb-1"></div>
+                    <p className="text-[8px] font-bold text-slate-600 uppercase">Docente de Aula</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* LÍNEA DE CORTE CON TIJERAS */}
+              <div className="relative flex items-center justify-center my-2">
+                <div className="border-t-2 border-dashed border-slate-400 w-full"></div>
+                <span className="absolute bg-white px-3 text-[10px] text-slate-500 font-mono flex items-center gap-1 font-bold">
+                  ✂️ CORTAR AQUÍ • TALONARIO OFICIAL
+                </span>
+              </div>
+
+              {/* TALÓN 2: COPIA CONTROL DE PORTERÍA / ARCHIVO */}
+              <div className="border border-slate-400 rounded-2xl p-4 bg-slate-50/50 print:bg-white text-center relative overflow-hidden">
+                <span className="absolute top-2 right-2 text-[9px] font-black uppercase px-2 py-0.5 rounded bg-slate-200 text-slate-800">
+                  Copia 2: Portería / Archivo
+                </span>
+
+                <div className="flex items-center justify-center gap-2 mb-1">
+                  <School className="w-5 h-5 text-[#2C2E53]" />
+                  <div>
+                    <h4 className="font-black text-xs text-[#2C2E53] uppercase tracking-wide">
+                      U.E.P. Colegio Bellas Artes
+                    </h4>
+                    <span className="text-[9px] text-slate-500 font-semibold block">
+                      Auditoría Diaria • Boleta de Retraso
+                    </span>
+                  </div>
+                </div>
+
+                <div className="my-1.5 py-0.5 px-3 bg-[#2C2E53] text-[#D4AF37] rounded-lg font-mono font-black text-xs inline-block">
+                  BOLETA N° {activeTicketToPrint.ticketNumber}
+                </div>
+
+                <div className="text-left text-xs space-y-1 mt-2 pt-2 border-t border-slate-300">
+                  <div className="grid grid-cols-2 gap-1">
+                    <p>
+                      <span className="font-bold text-slate-500 text-[10px] block">Estudiante:</span>
+                      <strong className="text-slate-900">{activeTicketToPrint.studentName}</strong>
+                    </p>
+                    <p>
+                      <span className="font-bold text-slate-500 text-[10px] block">Curso / Sección:</span>
+                      <strong className="text-slate-900">{activeTicketToPrint.gradeSection}</strong>
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-1 pt-1">
+                    <p>
+                      <span className="font-bold text-slate-500 text-[10px] block">Fecha y Hora:</span>
+                      <span className="text-slate-800 font-semibold">{activeTicketToPrint.date} • {activeTicketToPrint.time}</span>
+                    </p>
+                    <p>
+                      <span className="font-bold text-slate-500 text-[10px] block">Autorizado por:</span>
+                      <span className="text-slate-800 font-semibold truncate block">{activeTicketToPrint.authorizedBy}</span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-slate-300 grid grid-cols-2 gap-4 text-center">
+                  <div>
+                    <div className="h-0.5 bg-slate-400 w-full mb-1"></div>
+                    <p className="text-[8px] font-bold text-slate-600 uppercase">Firma del Representante</p>
+                  </div>
+                  <div>
+                    <div className="h-0.5 bg-slate-400 w-full mb-1"></div>
+                    <p className="text-[8px] font-bold text-slate-600 uppercase">Sello de Control CBA</p>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="mt-4 flex items-center justify-between">
+            {/* Non-print Footer Buttons */}
+            <div className="mt-5 flex items-center justify-between no-print pt-3 border-t border-slate-200">
               <button
                 onClick={() => setActiveTicketToPrint(null)}
-                className="px-3 py-1.5 text-xs font-bold text-slate-500 hover:text-slate-800"
+                className="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-800 rounded-xl"
               >
                 Cerrar
               </button>
               <button
                 onClick={() => {
                   window.print();
-                  setActiveTicketToPrint(null);
                 }}
-                className="px-4 py-2 bg-[#2C2E53] hover:bg-[#1B1C33] text-[#D4AF37] font-bold text-xs rounded-xl shadow-md flex items-center gap-1.5"
+                className="px-5 py-2.5 bg-[#2C2E53] hover:bg-[#1B1C33] text-[#D4AF37] font-black text-xs rounded-xl shadow-md flex items-center gap-2 cursor-pointer"
               >
                 <Printer className="w-4 h-4" />
-                Imprimir Boleto
+                Imprimir Boleta Duplicada
               </button>
             </div>
           </div>

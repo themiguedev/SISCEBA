@@ -9,7 +9,10 @@ import {
   Sparkles,
   ArrowRight,
   GraduationCap,
-  ClipboardList
+  ClipboardList,
+  Monitor,
+  Compass,
+  HelpCircle
 } from 'lucide-react';
 
 interface CommandSearchModalProps {
@@ -52,6 +55,27 @@ export const CommandSearchModal: React.FC<CommandSearchModalProps> = ({
 
   const quickActions = [
     {
+      title: 'Tablero Principal / Auditoría',
+      category: 'Escritorio',
+      tab: 'ESCRITORIO',
+      subTab: 'DASHBOARD',
+      icon: Monitor
+    },
+    {
+      title: 'Mi Perfil de Usuario',
+      category: 'Escritorio',
+      tab: 'ESCRITORIO',
+      subTab: 'PERFIL',
+      icon: User
+    },
+    {
+      title: 'Ideas y Sugerencias CBA',
+      category: 'Escritorio',
+      tab: 'ESCRITORIO',
+      subTab: 'SUGERENCIAS',
+      icon: Sparkles
+    },
+    {
       title: 'Pases por Retraso y Portería',
       category: 'Gestión Escolar',
       tab: 'GESTION',
@@ -87,11 +111,18 @@ export const CommandSearchModal: React.FC<CommandSearchModalProps> = ({
       icon: FileText
     },
     {
+      title: 'Manual de Uso y Guía Rápida',
+      category: 'Ayuda',
+      tab: 'AYUDA',
+      subTab: 'MANUAL',
+      icon: BookOpen
+    },
+    {
       title: 'Mapa del Sitio y Auditoría de Rutas',
       category: 'Ayuda',
       tab: 'AYUDA',
       subTab: 'MAPA_SITIO',
-      icon: BookOpen
+      icon: Compass
     }
   ].filter(action => action.title.toLowerCase().includes(query.toLowerCase()) || action.category.toLowerCase().includes(query.toLowerCase()));
 

@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   X
 } from 'lucide-react';
+import { LogoSeasonalAccessory } from './LogoSeasonalAccessory';
 
 interface LoginViewProps {
   onLoginSuccess?: () => void;
@@ -93,7 +94,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
         </div>
       </div>
 
-      {/* Main Central Card - Faithfully structured after reference with SICE-CBA colors */}
+      {/* Main Central Card - Clean, perfectly centered */}
       <div className="relative z-10 w-full max-w-[430px] bg-white rounded-none sm:rounded-[3px] shadow-[0_20px_50px_rgba(0,0,0,0.35)] border border-[#D4AF37]/30 px-8 sm:px-10 pt-8 pb-10 transition-all duration-300 animate-in fade-in zoom-in-95">
         {/* Title: UNIDAD EDUCATIVA - BELLAS ARTES with Golden Accent Line */}
         <div className="text-center pb-4 mb-5 border-b border-slate-200 relative">
@@ -104,16 +105,13 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
           <div className="absolute -bottom-[1px] left-1/4 right-1/4 h-[2px] bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent" />
         </div>
 
-        {/* Institutional Crest Logo with Gold Aura */}
-        <div className="flex flex-col items-center justify-center mb-6 group cursor-default">
-          <div className="h-16 flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
-            <img
-              src={`${import.meta.env.BASE_URL}logo-cba.png`}
-              alt="Colegio Bellas Artes"
-              className="h-14 w-auto object-contain drop-shadow-md"
-            />
+        {/* Institutional Crest Logo with Seasonal Festive Accessory */}
+        <div className="flex flex-col items-center justify-center mb-6">
+          <div className="relative flex items-center justify-center">
+            <div className="absolute inset-0 -m-3 rounded-full bg-white/5 dark:bg-white/10 blur-xl pointer-events-none opacity-0 dark:opacity-100 transition-opacity duration-300" />
+            <LogoSeasonalAccessory />
           </div>
-          <p className="text-[11px] text-slate-500 font-semibold mt-1 text-center tracking-tight">
+          <p className="text-[11px] text-slate-500 font-semibold mt-3 text-center tracking-tight">
             Sistema Integral de Control y Evaluación • <span className="text-[#D4AF37] font-bold">SICE-CBA</span>
           </p>
         </div>

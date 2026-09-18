@@ -42,7 +42,8 @@ export const MapaDelSitioView: React.FC<MapaDelSitioViewProps> = ({ onNavigate }
       submodule: 'Tablero Principal / Dashboard',
       roleRequired: 'TODOS',
       description: 'Métricas de sesión, auditoría de accesos y widgets institucionales.',
-      targetTab: 'ESCRITORIO'
+      targetTab: 'ESCRITORIO',
+      targetSubTab: 'DASHBOARD'
     },
     {
       id: 'map-2',
@@ -50,7 +51,8 @@ export const MapaDelSitioView: React.FC<MapaDelSitioViewProps> = ({ onNavigate }
       submodule: 'Perfil de Usuario',
       roleRequired: 'TODOS',
       description: 'Gestión de credenciales, preferencias de notificación y datos personales.',
-      targetTab: 'ESCRITORIO'
+      targetTab: 'ESCRITORIO',
+      targetSubTab: 'PERFIL'
     },
     {
       id: 'map-3',
@@ -58,7 +60,8 @@ export const MapaDelSitioView: React.FC<MapaDelSitioViewProps> = ({ onNavigate }
       submodule: 'Ideas y Sugerencias',
       roleRequired: 'TODOS',
       description: 'Canal de retroalimentación directa con el equipo técnico de desarrollo.',
-      targetTab: 'ESCRITORIO'
+      targetTab: 'ESCRITORIO',
+      targetSubTab: 'SUGERENCIAS'
     },
 
     // Gestión
@@ -189,15 +192,17 @@ export const MapaDelSitioView: React.FC<MapaDelSitioViewProps> = ({ onNavigate }
       submodule: 'Rendimiento Estudiantil (Sábana de Notas)',
       roleRequired: 'ADM',
       description: 'ADM / UCE: Consulta centralizada de notas de todos los estudiantes.',
-      targetTab: 'CONSULTAS'
+      targetTab: 'CONSULTAS',
+      targetSubTab: 'RENDIMIENTO'
     },
     {
       id: 'map-18',
       module: 'Comunidad',
       submodule: 'Noticias, Anuncios y Cumpleañeros',
       roleRequired: 'TODOS',
-      description: 'Canales de comunicación institucional y avisos escolares.',
-      targetTab: 'COMUNIDAD'
+      description: 'Canal de comunicación institucional y avisos escolares.',
+      targetTab: 'COMUNIDAD',
+      targetSubTab: 'NOTICIAS'
     },
     {
       id: 'map-19',
@@ -205,7 +210,8 @@ export const MapaDelSitioView: React.FC<MapaDelSitioViewProps> = ({ onNavigate }
       submodule: 'Años Escolares y Apertura de Lapsos',
       roleRequired: 'ADM',
       description: 'ADM: Apertura y cierre de ventanas para la regla de carga docente.',
-      targetTab: 'CONFIGURACION'
+      targetTab: 'CONFIGURACION',
+      targetSubTab: 'LAPSOS'
     }
   ];
 

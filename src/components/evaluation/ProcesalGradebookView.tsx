@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { QualitativeScore, LiteralScore } from '../../types';
+import { QualitativeScore, LiteralScore, NotificationDeliveryChannel } from '../../types';
+import { PublishGradesModal } from './PublishGradesModal';
 import {
   Save,
+  Send,
   CheckCircle2,
   AlertTriangle,
   Sparkles,
@@ -14,7 +16,8 @@ import {
   ArrowRight,
   TrendingDown,
   TrendingUp,
-  HelpCircle
+  HelpCircle,
+  Bell
 } from 'lucide-react';
 
 interface ProcesalGradebookViewProps {
@@ -32,12 +35,15 @@ export const ProcesalGradebookView: React.FC<ProcesalGradebookViewProps> = ({ on
     evaluations,
     recordEvaluation,
     bulkRecordEvaluations,
-    generateAIActionPlan
+    generateAIActionPlan,
+    sendNotification
   } = useApp();
 
   const [selectedAreaId, setSelectedAreaId] = useState<string>(levelAreas[0]?.id || '');
   const [searchTerm, setSearchTerm] = useState('');
   const [savedAlert, setSavedAlert] = useState(false);
+  const [publishedAlert, setPublishedAlert] = useState<string | null>(null);
+  const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
   const [generatedStudentId, setGeneratedStudentId] = useState<string | null>(null);
 
   const currentArea = levelAreas.find(a => a.id === selectedAreaId) || levelAreas[0];
@@ -118,6 +124,34 @@ export const ProcesalGradebookView: React.FC<ProcesalGradebookViewProps> = ({ on
     setTimeout(() => setSavedAlert(false), 3000);
   };
 
+  const handlePublishConfirm = (channels: NotificationDeliveryChannel[]) => {
+    handleSaveAll();
+
+    const channelLabels: Record<NotificationDeliveryChannel, string> = {
+      PORTAL: 'Portal CBA',
+      EMAIL: 'Correo',
+      SMS_WHATSAPP: 'SMS/WhatsApp'
+    };
+    const channelsText = channels.map((c) => channelLabels[c]).join(', ');
+
+    sendNotification({
+      title: `Notas Publicadas • ${currentArea.name}`,
+      message: `El docente ha cargado las notas del Lapso ${activeLapso} en ${currentArea.name} (${currentSection}). Notificación despachada a ${levelStudents.length} representantes y alumnos vía ${channelsText}.`,
+      category: 'CALIFICACIONES',
+      priority: 'ALTA',
+      recipientRole: 'TODOS',
+      studentName: currentSection,
+      actionTab: currentLevel,
+      actionSubTab: 'BOLETIN',
+      deliveryChannels: channels
+    });
+
+    setPublishedAlert(
+      `¡Calificaciones de ${currentArea.name} publicadas con éxito! Se notificó a ${levelStudents.length} representantes y alumnos vía ${channelsText}.`
+    );
+    setTimeout(() => setPublishedAlert(null), 6000);
+  };
+
   // Helper to compute average for Media General
   const computeStudentAverage = (studentId: string): number => {
     const studentMap = gridScores[studentId] || {};
@@ -147,25 +181,49 @@ export const ProcesalGradebookView: React.FC<ProcesalGradebookViewProps> = ({ on
             Evaluación Procesal Continua ({currentLevel.replace('_', ' ')})
           </h2>
           <p className="text-sm text-slate-500 mt-1">
-            Registro sistemático de indicadores en tiempo real con cálculo ponderado y detección temprana de dificultades.
+            Registro sistemático de indicadores en tiempo real con cálculo ponderado y notificación automática a familias.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5 flex-wrap">
           <button
             onClick={handleSaveAll}
-            className="flex items-center gap-2 px-5 py-2.5 bg-[#2C2E53] text-[#D4AF37] hover:bg-[#232543] font-black rounded-xl text-xs shadow-md transition-all"
+            className="flex items-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition-all"
+            title="Guardar cambios localmente"
           >
-            <Save className="w-4 h-4" />
-            Guardar Calificaciones
+            <Save className="w-4 h-4 text-slate-500" />
+            Guardar Borrador
+          </button>
+
+          <button
+            onClick={() => setIsPublishModalOpen(true)}
+            className="flex items-center gap-2 px-5 py-2.5 bg-[#2C2E53] hover:bg-[#1B1C33] text-[#D4AF37] font-black rounded-xl text-xs shadow-md hover:shadow-lg transition-all border border-[#D4AF37]/30 cursor-pointer"
+            title="Publicar calificaciones y enviar notificación a padres y alumnos"
+          >
+            <Send className="w-4 h-4 text-[#D4AF37]" />
+            Publicar & Notificar a Familias
           </button>
         </div>
       </div>
 
-      {savedAlert && (
+      {publishedAlert && (
+        <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-300 text-emerald-950 px-4 py-3.5 rounded-2xl flex items-center justify-between gap-3 text-xs font-bold shadow-md animate-in fade-in slide-in-from-top-2">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-sm">
+              <Bell className="w-4 h-4" />
+            </div>
+            <span>{publishedAlert}</span>
+          </div>
+          <span className="text-[10px] uppercase tracking-wider bg-emerald-200/80 px-2 py-0.5 rounded-md text-emerald-900 shrink-0 font-extrabold">
+            Omnicanal Entregado
+          </span>
+        </div>
+      )}
+
+      {savedAlert && !publishedAlert && (
         <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-xl flex items-center gap-2 text-xs font-bold shadow-sm animate-in fade-in">
           <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-          Registros procesales actualizados y sincronizados con éxito.
+          Registros procesales guardados en borrador con éxito.
         </div>
       )}
 
@@ -358,6 +416,17 @@ export const ProcesalGradebookView: React.FC<ProcesalGradebookViewProps> = ({ on
           </table>
         </div>
       </div>
+
+      {/* Publish & Omnichannel Dispatch Modal */}
+      <PublishGradesModal
+        isOpen={isPublishModalOpen}
+        onClose={() => setIsPublishModalOpen(false)}
+        onConfirm={handlePublishConfirm}
+        areaName={currentArea?.name || 'Asignatura'}
+        lapso={activeLapso}
+        studentCount={levelStudents.length}
+        gradeSection={currentSection}
+      />
     </div>
   );
 };

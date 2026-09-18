@@ -53,10 +53,6 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight">
               Panel Académico Ejecutivo
             </h1>
-
-            <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl font-medium">
-              U.E.P. Colegio Bellas Artes • <span className="text-[#D4AF37] italic">"Tradición, Excelencia y Formación Integral"</span> • Maracaibo
-            </p>
           </div>
 
           {/* Quick Shortcuts */}
@@ -91,7 +87,7 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
       {/* Bento Grid Telemetry Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
         {/* Card 1: Students */}
-        <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm hover:shadow-md transition group">
+        <div className="bg-white dark:bg-slate-900/60 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition group">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Estudiantes</span>
             <div className="w-8 h-8 rounded-xl bg-blue-50 text-[#2C2E53] flex items-center justify-center group-hover:scale-110 transition">

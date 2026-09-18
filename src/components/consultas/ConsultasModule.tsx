@@ -13,9 +13,25 @@ import {
   BookOpen
 } from 'lucide-react';
 
-export const ConsultasModule: React.FC = () => {
+interface ConsultasModuleProps {
+  activeSubTab?: 'RENDIMIENTO' | 'ESTADISTICAS' | 'NOMINAS';
+  setActiveSubTab?: (subTab: 'RENDIMIENTO' | 'ESTADISTICAS' | 'NOMINAS') => void;
+}
+
+export const ConsultasModule: React.FC<ConsultasModuleProps> = ({
+  activeSubTab,
+  setActiveSubTab
+}) => {
   const { students, evaluations, areas, currentLevel, activeLapso } = useApp();
-  const [activeTab, setActiveTab] = useState<'RENDIMIENTO' | 'ESTADISTICAS' | 'NOMINAS'>('RENDIMIENTO');
+  const [internalActiveTab, setInternalActiveTab] = useState<'RENDIMIENTO' | 'ESTADISTICAS' | 'NOMINAS'>('RENDIMIENTO');
+
+  const activeTab = activeSubTab || internalActiveTab;
+  const setActiveTab = (tab: 'RENDIMIENTO' | 'ESTADISTICAS' | 'NOMINAS') => {
+    if (setActiveSubTab) {
+      setActiveSubTab(tab);
+    }
+    setInternalActiveTab(tab);
+  };
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredStudents = students.filter(
@@ -43,38 +59,38 @@ export const ConsultasModule: React.FC = () => {
 
         <div className="flex items-center gap-2">
           {/* Subtabs Switcher */}
-          <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+          <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
             <button
               onClick={() => setActiveTab('RENDIMIENTO')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                 activeTab === 'RENDIMIENTO'
-                  ? 'bg-[#2C2E53] text-[#D4AF37] shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-[#14232B] text-cyan-300 shadow-sm border border-cyan-500/40'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
-              <FileSpreadsheet className="w-3.5 h-3.5" />
+              <FileSpreadsheet className={`w-3.5 h-3.5 ${activeTab === 'RENDIMIENTO' ? 'text-cyan-400' : 'text-slate-400'}`} />
               Sábana de Notas
             </button>
             <button
               onClick={() => setActiveTab('ESTADISTICAS')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                 activeTab === 'ESTADISTICAS'
-                  ? 'bg-[#2C2E53] text-[#D4AF37] shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-[#14232B] text-cyan-300 shadow-sm border border-cyan-500/40'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
-              <BarChart3 className="w-3.5 h-3.5" />
+              <BarChart3 className={`w-3.5 h-3.5 ${activeTab === 'ESTADISTICAS' ? 'text-cyan-400' : 'text-slate-400'}`} />
               Estadísticas
             </button>
             <button
               onClick={() => setActiveTab('NOMINAS')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                 activeTab === 'NOMINAS'
-                  ? 'bg-[#2C2E53] text-[#D4AF37] shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-[#14232B] text-cyan-300 shadow-sm border border-cyan-500/40'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
-              <Users className="w-3.5 h-3.5" />
+              <Users className={`w-3.5 h-3.5 ${activeTab === 'NOMINAS' ? 'text-cyan-400' : 'text-slate-400'}`} />
               Nómina General
             </button>
           </div>
@@ -91,8 +107,33 @@ export const ConsultasModule: React.FC = () => {
 
       {/* VIEW 1: RENDIMIENTO ESTUDIANTIL CONSOLIDADO */}
       {activeTab === 'RENDIMIENTO' && (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-cba-card overflow-hidden">
-          <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-cba-card overflow-hidden print:border-none print:shadow-none print-landscape">
+          {/* Official Printable Institutional Header */}
+          <div className="hidden print:block mb-3 border-b-2 border-[#2C2E53] pb-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <img
+                  src={`${import.meta.env.BASE_URL}logo-cba.png`}
+                  alt="Colegio Bellas Artes"
+                  className="h-10 w-auto object-contain"
+                />
+                <div>
+                  <span className="text-[9px] font-black uppercase text-slate-500 block">
+                    República Bolivariana de Venezuela • MPPE • Código DEA S0432D2305
+                  </span>
+                  <h1 className="text-sm font-black text-[#2C2E53] tracking-tight">
+                    U.E.P. COLEGIO BELLAS ARTES • SÁBANA OFICIAL DE RENDIMIENTO ESTUDIANTIL
+                  </h1>
+                </div>
+              </div>
+              <div className="text-right text-[10px]">
+                <span className="font-extrabold text-[#2C2E53] block">LAPSO {activeLapso} • 2026-2027</span>
+                <span className="text-slate-500">Maracaibo, Estado Zulia</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4 no-print">
             <div className="flex items-center gap-2">
               <span className="font-bold text-xs text-slate-700">Consolidado por Alumno: Lapso {activeLapso}</span>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#D4AF37]/15 text-[#94721C]">
@@ -162,6 +203,27 @@ export const ConsultasModule: React.FC = () => {
                 })}
               </tbody>
             </table>
+          </div>
+
+          {/* Printable Official Signatures & Footer */}
+          <div className="hidden print:block pt-6 print-signatures">
+            <div className="grid grid-cols-3 gap-6 text-center text-[10px]">
+              <div className="border-t border-slate-400 pt-1">
+                <strong className="block text-[#2C2E53]">Lic. Carolina Sánchez</strong>
+                <span className="text-slate-500">Coordinación de Evaluación</span>
+              </div>
+              <div className="border-t border-slate-400 pt-1">
+                <strong className="block text-[#2C2E53]">Prof. Docente Guía</strong>
+                <span className="text-slate-500">Docente de Asignatura</span>
+              </div>
+              <div className="border-t border-slate-400 pt-1">
+                <strong className="block text-[#2C2E53]">Dirección Académica CBA</strong>
+                <span className="text-slate-500">Sello de Control y Auditoría</span>
+              </div>
+            </div>
+            <div className="mt-3 text-[8px] text-slate-400 font-mono text-center">
+              Documento Oficial del Sistema Integral de Control y Evaluación (SICE-CBA) • U.E.P. Colegio Bellas Artes • Emisión: {new Date().toLocaleDateString('es-VE')}
+            </div>
           </div>
         </div>
       )}

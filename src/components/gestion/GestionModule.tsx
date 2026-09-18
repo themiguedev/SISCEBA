@@ -95,7 +95,7 @@ export const GestionModule: React.FC<GestionModuleProps> = ({
   return (
     <div className="space-y-4">
       {/* Ergonomic Subtabs Bar */}
-      <div className="bg-white rounded-2xl p-1.5 border border-slate-200/90 shadow-sm flex items-center gap-1.5 overflow-x-auto">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl p-1.5 border border-slate-200/90 dark:border-slate-800 shadow-sm flex items-center gap-1.5 overflow-x-auto no-scrollbar">
         {subTabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeSubTab === tab.id;
@@ -106,11 +106,11 @@ export const GestionModule: React.FC<GestionModuleProps> = ({
               onClick={() => setActiveSubTab(tab.id)}
               className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all shrink-0 select-none ${
                 isActive
-                  ? 'bg-[#2C2E53] text-[#D4AF37] shadow-md border border-[#D4AF37]/30'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
+                  ? 'bg-[#162721] text-emerald-300 shadow-md border border-emerald-500/40'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800'
               }`}
             >
-              <Icon className={`w-4 h-4 ${isActive ? 'text-[#D4AF37]' : 'text-slate-400'}`} />
+              <Icon className={`w-4 h-4 ${isActive ? 'text-emerald-400' : 'text-slate-400'}`} />
               <div className="text-left">
                 <div className="flex items-center gap-1.5">
                   <span className={isActive ? 'text-white' : ''}>{tab.label}</span>

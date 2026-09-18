@@ -217,39 +217,75 @@ export const BoletinInformativoView: React.FC = () => {
           </div>
 
           {/* Average / Final Qualitative Synthesis */}
-          <div className="bg-[#2C2E53]/5 p-4 rounded-xl border border-[#2C2E53]/15 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="bg-[#2C2E53]/5 p-4 rounded-xl border border-[#2C2E53]/15 flex flex-col sm:flex-row items-center justify-between gap-4 print:bg-slate-50 print:border-slate-300">
             <div>
               <span className="text-xs font-bold text-[#2C2E53] uppercase block">
-                {currentLevel === 'MEDIA_GENERAL' ? 'Promedio Ponderado del Lapso' : 'Síntesis Pedagógica General'}
+                {currentLevel === 'MEDIA_GENERAL' ? 'Promedio Ponderado y Síntesis del Lapso' : 'Síntesis Pedagógica General'}
               </span>
               <p className="text-xs text-slate-600 mt-0.5">
                 {currentLevel === 'MEDIA_GENERAL'
-                  ? `Rendimiento global del estudiante en el Lapso ${activeLapso}.`
-                  : 'Desarrollo armónico de las dimensiones afectivas, cognitivas y creativas.'}
+                  ? `Rendimiento global del estudiante en el Lapso ${activeLapso}. Asistencia acumulada: 98.2% (En norma reglamentaria).`
+                  : 'Desarrollo armónico de las dimensiones afectivas, cognitivas y creativas en las áreas de formación.'}
               </p>
             </div>
 
-            {currentLevel === 'MEDIA_GENERAL' && (
-              <div className="text-center bg-white px-5 py-2 rounded-xl border border-slate-200 shadow-sm">
-                <span className="text-2xl font-black text-[#2C2E53]">{generalAverage}</span>
-                <span className="text-[10px] font-bold text-slate-400 block uppercase">Puntos / 20</span>
+            <div className="flex items-center gap-3">
+              <div className="text-center bg-white px-3.5 py-1.5 rounded-xl border border-slate-200">
+                <span className="text-xs font-bold text-emerald-700 block">
+                  {levelAreas.length} Materias
+                </span>
+                <span className="text-[9px] text-slate-500 font-semibold uppercase">Total Cursadas</span>
               </div>
-            )}
+
+              {currentLevel === 'MEDIA_GENERAL' && (
+                <div className="text-center bg-white px-5 py-2 rounded-xl border border-slate-200 shadow-sm print:border-slate-400">
+                  <span className="text-2xl font-black text-[#2C2E53]">{generalAverage}</span>
+                  <span className="text-[10px] font-bold text-slate-500 block uppercase">Puntos / 20</span>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Signatures Row */}
-          <div className="grid grid-cols-3 gap-6 pt-8 text-center text-xs">
-            <div className="border-t border-slate-400 pt-2">
-              <strong className="block text-[#2C2E53]">Lic. Carolina Sánchez</strong>
-              <span className="text-[11px] text-slate-500">Coordinación Pedagógica</span>
+          {/* Signatures & Institutional Stamp Row */}
+          <div className="pt-6 print:pt-4 print-signatures">
+            <div className="grid grid-cols-3 gap-6 text-center text-xs">
+              <div className="border-t border-slate-400 pt-2 relative">
+                <div className="h-10 flex items-center justify-center opacity-30 text-[9px] font-mono text-slate-400">
+                  [FIRMA DIGITAL]
+                </div>
+                <strong className="block text-[#2C2E53]">Lic. Carolina Sánchez</strong>
+                <span className="text-[10px] text-slate-500 block">Coordinación de Evaluación</span>
+                <span className="text-[9px] text-slate-400">C.I. V-14.285.901</span>
+              </div>
+
+              <div className="border-t border-slate-400 pt-2 relative">
+                <div className="h-10 flex items-center justify-center opacity-30 text-[9px] font-mono text-slate-400">
+                  [L.S. SELLO INSTITUCIONAL]
+                </div>
+                <strong className="block text-[#2C2E53]">Prof. Docente Guía</strong>
+                <span className="text-[10px] text-slate-500 block">Tutoría de Sección {activeStudent.section}</span>
+                <span className="text-[9px] text-slate-400">Colegio Bellas Artes</span>
+              </div>
+
+              <div className="border-t border-slate-400 pt-2">
+                <div className="h-10 flex items-center justify-center text-[9px] text-slate-300">
+                  _________________
+                </div>
+                <strong className="block text-[#2C2E53] truncate">{activeStudent.representativeName}</strong>
+                <span className="text-[10px] text-slate-500 block">Firma del Representante Legal</span>
+                <span className="text-[9px] text-slate-400">Notificado Formalmente</span>
+              </div>
             </div>
-            <div className="border-t border-slate-400 pt-2">
-              <strong className="block text-[#2C2E53]">Prof. Docente Guía</strong>
-              <span className="text-[11px] text-slate-500">Tutor de Sección</span>
-            </div>
-            <div className="border-t border-slate-400 pt-2">
-              <strong className="block text-[#2C2E53]">{activeStudent.representativeName}</strong>
-              <span className="text-[11px] text-slate-500">Firma del Representante</span>
+
+            {/* Official Verification & Security Footer */}
+            <div className="mt-6 pt-3 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-2 text-[9px] text-slate-400 print:text-slate-500 font-mono">
+              <div className="flex items-center gap-2">
+                <span>Certificación Digital SICE-CBA:</span>
+                <span className="font-bold text-slate-600">CBA-BOL-2026-L{activeLapso}-{activeStudent.id.toUpperCase()}</span>
+              </div>
+              <div>
+                Emisión Oficial: {new Date().toLocaleDateString('es-VE', { year: 'numeric', month: 'long', day: 'numeric' })} • Validez Académica Oficial MPPE
+              </div>
             </div>
           </div>
         </div>

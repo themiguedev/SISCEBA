@@ -25,8 +25,10 @@ import {
   Cake,
   Megaphone,
   Sliders,
-  Sparkles
+  Sparkles,
+  Palette
 } from 'lucide-react';
+import { SeasonalAccessoryIcon } from '../auth/LogoSeasonalAccessory';
 
 interface ModernSidebarProps {
   isOpen: boolean;
@@ -52,6 +54,9 @@ interface SidebarSection {
   icon: React.ComponentType<{ className?: string }>;
   color: string;
   badge: string;
+  activeBadgeBg?: string;
+  activeSubTabStyle?: string;
+  subTabActiveIcon?: string;
   subTabs: SidebarSubTab[];
 }
 
@@ -78,8 +83,8 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
     }));
   }, [activeTab]);
 
-  const toggleSection = (sectionId: string, e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
+  const toggleSection = (sectionId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
     setExpandedSections((prev) => ({
       ...prev,
       [sectionId]: !prev[sectionId]
@@ -87,11 +92,8 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
   };
 
   const handleSectionClick = (section: SidebarSection) => {
-    if (activeTab === section.id) {
-      toggleSection(section.id);
-    } else {
-      setActiveTab(section.id);
-      setActiveSubTab(section.subTabs[0].id);
+    setActiveTab(section.id);
+    if (!expandedSections[section.id]) {
       setExpandedSections((prev) => ({
         ...prev,
         [section.id]: true
@@ -109,8 +111,11 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
       label: 'Escritorio de Control',
       shortLabel: 'Escritorio',
       icon: Monitor,
-      color: 'text-amber-400',
+      color: 'text-sky-400',
       badge: 'Dashboard',
+      activeBadgeBg: 'bg-sky-500/20 text-sky-300 border border-sky-500/30',
+      activeSubTabStyle: 'bg-sky-500/15 text-sky-200 border-l-2 border-sky-400 font-bold shadow-sm',
+      subTabActiveIcon: 'text-sky-300',
       subTabs: [
         { id: 'DASHBOARD', label: 'Tablero Principal', icon: Monitor },
         { id: 'PERFIL', label: 'Mi Perfil de Usuario', icon: UserCheck },
@@ -125,6 +130,9 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
       icon: ClipboardList,
       color: 'text-emerald-400',
       badge: `${passes.length} Pases`,
+      activeBadgeBg: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30',
+      activeSubTabStyle: 'bg-emerald-500/15 text-emerald-200 border-l-2 border-emerald-400 font-bold shadow-sm',
+      subTabActiveIcon: 'text-emerald-300',
       subTabs: [
         { id: 'INSCRIPCIONES', label: 'Inscripciones (Wizard)', icon: UserCheck },
         { id: 'PASES', label: 'Pases por Retraso', icon: Clock },
@@ -144,8 +152,11 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
       label: 'Educación Inicial',
       shortLabel: 'Inicial',
       icon: BookOpen,
-      color: 'text-amber-400',
+      color: 'text-amber-300',
       badge: 'Cualitativa',
+      activeBadgeBg: 'bg-amber-500/20 text-amber-200 border border-amber-500/30',
+      activeSubTabStyle: 'bg-amber-500/15 text-amber-100 border-l-2 border-amber-400 font-bold shadow-sm',
+      subTabActiveIcon: 'text-amber-300',
       subTabs: [
         { id: 'AREAS_PERFILES', label: 'Áreas de Desarrollo', icon: Layers },
         { id: 'BANCO_COMPETENCIAS', label: 'Banco de Dimensiones', icon: Award },
@@ -162,8 +173,11 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
       label: 'Educación Primaria',
       shortLabel: 'Primaria',
       icon: Layers,
-      color: 'text-emerald-400',
+      color: 'text-teal-400',
       badge: 'Literal A-E',
+      activeBadgeBg: 'bg-teal-500/20 text-teal-300 border border-teal-500/30',
+      activeSubTabStyle: 'bg-teal-500/15 text-teal-200 border-l-2 border-teal-400 font-bold shadow-sm',
+      subTabActiveIcon: 'text-teal-300',
       subTabs: [
         { id: 'AREAS_PERFILES', label: 'Áreas de Formación', icon: Layers },
         { id: 'BANCO_COMPETENCIAS', label: 'Competencias e Indicadores', icon: Award },
@@ -180,8 +194,11 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
       label: 'Media General',
       shortLabel: 'Media General',
       icon: GraduationCap,
-      color: 'text-blue-400',
+      color: 'text-indigo-400',
       badge: '01 - 20',
+      activeBadgeBg: 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30',
+      activeSubTabStyle: 'bg-indigo-500/15 text-indigo-200 border-l-2 border-indigo-400 font-bold shadow-sm',
+      subTabActiveIcon: 'text-indigo-300',
       subTabs: [
         { id: 'AREAS_PERFILES', label: 'Asignaturas (24 Materias)', icon: Layers },
         { id: 'BANCO_ESTRATEGIAS', label: 'Estrategias y Ponderaciones', icon: FileSpreadsheet },
@@ -202,8 +219,11 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
       label: 'Consultas y Reportes',
       shortLabel: 'Consultas',
       icon: BarChart3,
-      color: 'text-sky-400',
+      color: 'text-cyan-400',
       badge: 'Sábana',
+      activeBadgeBg: 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30',
+      activeSubTabStyle: 'bg-cyan-500/15 text-cyan-200 border-l-2 border-cyan-400 font-bold shadow-sm',
+      subTabActiveIcon: 'text-cyan-300',
       subTabs: [
         { id: 'RENDIMIENTO', label: 'Sábana de Calificaciones', icon: FileSpreadsheet },
         { id: 'ESTADISTICAS', label: 'Estadísticas de Rendimiento', icon: BarChart3 },
@@ -218,6 +238,9 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
       icon: MessageSquare,
       color: 'text-pink-400',
       badge: 'Noticias',
+      activeBadgeBg: 'bg-pink-500/20 text-pink-300 border border-pink-500/30',
+      activeSubTabStyle: 'bg-pink-500/15 text-pink-200 border-l-2 border-pink-400 font-bold shadow-sm',
+      subTabActiveIcon: 'text-pink-300',
       subTabs: [
         { id: 'NOTICIAS', label: 'Noticias y Cartelera', icon: Megaphone },
         { id: 'CUMPLEANOS', label: 'Cumpleañeros de la Semana', icon: Cake },
@@ -230,23 +253,31 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
       label: 'Configuración del Plantel',
       shortLabel: 'Configuración',
       icon: Settings,
-      color: 'text-slate-400',
+      color: 'text-violet-400',
       badge: 'Control',
+      activeBadgeBg: 'bg-violet-500/20 text-violet-300 border border-violet-500/30',
+      activeSubTabStyle: 'bg-violet-500/15 text-violet-200 border-l-2 border-violet-400 font-bold shadow-sm',
+      subTabActiveIcon: 'text-violet-300',
       subTabs: [
         { id: 'LAPSOS', label: 'Años Escolares y Apertura Lapsos', icon: Clock },
         { id: 'ESTRUCTURA', label: 'Estructura de Cursos y Aulas', icon: Layers },
-        { id: 'DOCENTES', label: 'Carga Horaria y Docentes Guías', icon: UserCheck }
+        { id: 'DOCENTES', label: 'Carga Horaria y Docentes Guías', icon: UserCheck },
+        { id: 'TEMAS', label: 'Apariencia y Temas', icon: Palette }
       ]
     },
     {
       id: 'AYUDA',
       categoryGroup: 'INSTITUCIONAL',
-      label: 'Ayuda y Mapa del Sitio',
-      shortLabel: 'Mapa del Sitio',
-      icon: Compass,
+      label: 'Ayuda y Manual de Uso',
+      shortLabel: 'Ayuda & Manual',
+      icon: HelpCircle,
       color: 'text-amber-300',
-      badge: 'Auditoría',
+      badge: 'Guía',
+      activeBadgeBg: 'bg-amber-500/20 text-amber-200 border border-amber-500/30',
+      activeSubTabStyle: 'bg-amber-500/15 text-amber-100 border-l-2 border-amber-400 font-bold shadow-sm',
+      subTabActiveIcon: 'text-amber-300',
       subTabs: [
+        { id: 'MANUAL', label: 'Manual de Uso Interactivo', icon: BookOpen },
         { id: 'MAPA_SITIO', label: 'Mapa General del Sistema', icon: Compass }
       ]
     }
@@ -272,33 +303,33 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
       >
         {/* Mobile Header in Drawer */}
         <div className="lg:hidden p-4 border-b border-[#2C2E53] flex items-center justify-between bg-[#141525] shrink-0">
-          <div
-            onClick={() => {
-              onCloseMobile();
-              onGoHome?.();
-            }}
-            className="flex items-center gap-3 cursor-pointer group"
-            title="Ir al inicio"
-          >
-            <div className="h-9 px-2 rounded-xl bg-white flex items-center justify-center border border-[#D4AF37]/60 group-hover:border-[#D4AF37] shadow-sm transition">
+          <div className="flex items-center gap-3">
+            {/* Logo Button - Only logo is clickable */}
+            <button
+              type="button"
+              onClick={() => {
+                onCloseMobile();
+                onGoHome?.();
+              }}
+              className="relative flex items-center justify-center shrink-0 group focus:outline-none transition p-1 -ml-1 rounded-lg hover:bg-white/5 cursor-pointer"
+              title="Ir al inicio"
+            >
               <img
                 src={`${import.meta.env.BASE_URL}logo-cba.png`}
                 alt="Colegio Bellas Artes"
-                className="h-6 w-auto object-contain"
+                className="h-7 w-auto object-contain brightness-0 invert drop-shadow-[0_2px_8px_rgba(212,175,55,0.3)] group-hover:scale-105 transition-transform"
               />
-            </div>
-            <div>
+              <SeasonalAccessoryIcon sizeClass="w-4 h-4" className="-top-1 -right-1" />
+            </button>
+            <div className="select-none cursor-default">
               <div className="flex items-center gap-2">
-                <span className="font-extrabold text-sm tracking-wider text-white group-hover:text-[#D4AF37] transition">
+                <span className="font-extrabold text-sm tracking-wider text-white">
                   SICE-CBA
                 </span>
                 <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/40">
                   2026-2027
                 </span>
               </div>
-              <p className="text-[10px] text-slate-400 group-hover:text-slate-300 font-medium transition">
-                Colegio Bellas Artes
-              </p>
             </div>
           </div>
           <button
@@ -311,7 +342,7 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
         </div>
 
         {/* Navigation Sections */}
-        <div className="flex-1 overflow-y-auto py-4 px-3 space-y-5">
+        <div className="flex-1 overflow-y-auto no-scrollbar py-4 px-3 space-y-4">
           {navigationSections.map((section, index) => {
             const isSectionActive = activeTab === section.id;
             const isSectionExpanded = !!expandedSections[section.id];
@@ -326,10 +357,10 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
                 {/* Group Separator Label */}
                 {isOpen && isFirstOfGroup && (
                   <div className="pt-2 pb-1 px-2">
-                    <span className="text-[9px] font-black uppercase tracking-widest text-[#D4AF37]/80">
-                      {section.categoryGroup === 'PRINCIPAL' && 'Control & Gestión'}
-                      {section.categoryGroup === 'NIVELES' && 'Niveles Pedagógicos'}
-                      {section.categoryGroup === 'INSTITUCIONAL' && 'Institucional & Soporte'}
+                    <span className="text-[10px] font-black uppercase tracking-wider text-[#D4AF37]">
+                      {section.categoryGroup === 'PRINCIPAL' && 'CONTROL & GESTIÓN'}
+                      {section.categoryGroup === 'NIVELES' && 'NIVELES PEDAGÓGICOS'}
+                      {section.categoryGroup === 'INSTITUCIONAL' && 'INSTITUCIONAL & SOPORTE'}
                     </span>
                   </div>
                 )}
@@ -340,7 +371,7 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
                   className={`w-full flex items-center justify-between p-2.5 rounded-xl transition-all duration-200 group cursor-pointer select-none ${
                     isSectionActive
                       ? 'bg-gradient-to-r from-[#2C2E53] to-[#252747] text-white shadow-lg border border-[#D4AF37]/40'
-                      : 'hover:bg-[#2C2E53]/40 text-slate-400 hover:text-slate-200'
+                      : 'hover:bg-white/[0.06] text-slate-400 hover:text-slate-200'
                   }`}
                   title={section.label}
                   role="button"
@@ -354,7 +385,7 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <div
-                      className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
+                      className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all shrink-0 ${
                         isSectionActive
                           ? 'bg-[#D4AF37] text-slate-950 font-black shadow-md'
                           : 'bg-[#141525] text-slate-400 group-hover:text-white'
@@ -377,7 +408,7 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
                     <button
                       type="button"
                       onClick={(e) => toggleSection(section.id, e)}
-                      className="p-1 rounded-lg hover:bg-[#141525]/60 transition-colors focus:outline-none"
+                      className="p-1 rounded-lg hover:bg-white/10 transition-colors focus:outline-none"
                       title={
                         isSectionExpanded
                           ? `Colapsar ${section.shortLabel}`
@@ -413,14 +444,20 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
                             }
                             setActiveSubTab(sub.id);
                           }}
-                          className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
+                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all group ${
                             isSubActive
-                              ? 'bg-[#D4AF37]/15 text-[#D4AF37] border-l-2 border-[#D4AF37] font-bold'
-                              : 'text-slate-400 hover:text-slate-200 hover:bg-[#2C2E53]/30'
+                              ? (section.activeSubTabStyle || 'bg-white/10 text-white font-bold shadow-sm')
+                              : 'text-slate-300 hover:text-white hover:bg-white/[0.08]'
                           }`}
                         >
                           <div className="flex items-center gap-2 truncate">
-                            <SubIcon className="w-3.5 h-3.5 shrink-0 opacity-80" />
+                            <SubIcon
+                              className={`w-3.5 h-3.5 shrink-0 transition-colors ${
+                                isSubActive
+                                  ? (section.subTabActiveIcon || 'text-white')
+                                  : 'text-slate-400 group-hover:text-slate-200'
+                              }`}
+                            />
                             <span className="truncate">{sub.label}</span>
                           </div>
                         </button>
@@ -437,8 +474,7 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
         <div className="p-3 border-t border-[#2C2E53] bg-[#141525] shrink-0 text-center">
           {isOpen ? (
             <div className="text-[10px] text-slate-400 font-medium">
-              <span className="text-[#D4AF37] font-extrabold block">SICE-CBA</span>
-              <span>Colegio Bellas Artes</span>
+              <span className="text-[#D4AF37] font-extrabold block text-[11px]">SICE-CBA</span>
             </div>
           ) : (
             <div className="w-8 h-8 rounded-lg bg-white/5 mx-auto flex items-center justify-center text-[10px] font-black text-[#D4AF37]">

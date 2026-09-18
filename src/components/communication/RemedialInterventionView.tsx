@@ -22,7 +22,8 @@ export const RemedialInterventionView: React.FC = () => {
     currentLevel,
     remedialPlans,
     addRemedialPlan,
-    updateRemedialStatus
+    updateRemedialStatus,
+    sendNotification
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'REVISION' | 'MATERIA_PENDIENTE'>('MATERIA_PENDIENTE');
@@ -48,6 +49,8 @@ export const RemedialInterventionView: React.FC = () => {
     e.preventDefault();
     if (!newStudentId || !newSubject) return;
 
+    const targetStudent = levelStudents.find(s => s.id === newStudentId);
+
     addRemedialPlan({
       studentId: newStudentId,
       subjectName: newSubject,
@@ -59,6 +62,19 @@ export const RemedialInterventionView: React.FC = () => {
       evaluationSchedule: 'Octubre a Diciembre 2026',
       remedialExamDate: newExamDate,
       status: 'PENDIENTE'
+    });
+
+    sendNotification({
+      title: `Plan de Nivelación Activado • ${newSubject}`,
+      message: `Se ha establecido un Protocolo de Nivelación y Acompañamiento Pedagógico para ${targetStudent?.fullName || 'el estudiante'} en ${newSubject}. Tutor asignado: ${newTeacherTutor}.`,
+      category: 'CALIFICACIONES',
+      priority: 'ALTA',
+      recipientRole: 'REPRESENTANTE',
+      recipientName: targetStudent?.representativeName,
+      studentName: targetStudent?.fullName,
+      actionTab: 'MEDIA_GENERAL',
+      actionSubTab: 'REMEDIALES',
+      deliveryChannels: ['PORTAL', 'EMAIL', 'SMS_WHATSAPP']
     });
 
     setIsCreateModalOpen(false);

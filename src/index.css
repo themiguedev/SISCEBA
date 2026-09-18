@@ -4,7 +4,7 @@
 
 @layer base {
   body {
-    @apply bg-slate-50 text-slate-900 antialiased font-sans;
+    @apply bg-slate-50 text-slate-900 antialiased font-sans transition-colors duration-200;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 }
@@ -28,19 +28,863 @@
   background: #94a3b8;
 }
 
-/* Print Styles for Official Bellas Artes Documents & Bulletins */
+/* Dark mode scrollbars */
+.dark ::-webkit-scrollbar-track,
+html.dark ::-webkit-scrollbar-track {
+  background: #141525;
+}
+
+.dark ::-webkit-scrollbar-thumb,
+html.dark ::-webkit-scrollbar-thumb {
+  background: #2D3154;
+  border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover,
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #43487A;
+}
+
+/* Utility to completely hide scrollbar while preserving scrollability */
+.no-scrollbar::-webkit-scrollbar,
+.scrollbar-none::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.no-scrollbar,
+.scrollbar-none {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+/* Scrollbars inside dark cards/banners have transparent tracks */
+[class*="bg-[#2C2E53]"] ::-webkit-scrollbar-track,
+[class*="from-[#2C2E53]"] ::-webkit-scrollbar-track,
+[class*="bg-[#1B1C33]"] ::-webkit-scrollbar-track,
+[class*="from-[#1B1C33]"] ::-webkit-scrollbar-track,
+[class*="bg-[#141525]"] ::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+[class*="bg-[#2C2E53]"] ::-webkit-scrollbar-thumb,
+[class*="from-[#2C2E53]"] ::-webkit-scrollbar-thumb,
+[class*="bg-[#1B1C33]"] ::-webkit-scrollbar-thumb,
+[class*="from-[#1B1C33]"] ::-webkit-scrollbar-thumb,
+[class*="bg-[#141525]"] ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-radius: 4px;
+}
+
+/* ============================================================
+   SICE-CBA THEME SYSTEM (VARIABLES & CLASS OVERRIDES)
+   ============================================================ */
+
+/* 1. PALETAS BASE Y VARIABLES */
+:root,
+[data-theme="cba-classic"] {
+  --theme-primary: #2C2E53;
+  --theme-primary-hover: #353866;
+  --theme-primary-dark: #242646;
+  --theme-secondary: #1B1C33;
+  --theme-surface-dark: #141525;
+  --theme-border-dark: #414474;
+  --theme-accent: #D4AF37;
+  --theme-accent-hover: #b89327;
+  --theme-accent-text-light: #8F6B00;
+  --theme-accent-text-dark: #F3CC49;
+  --theme-bg-light: #F8FAFC;
+  --theme-bg-dark: #0B0E14;
+  --theme-card-dark: #151A23;
+}
+
+[data-theme="emerald"] {
+  --theme-primary: #064E3B;
+  --theme-primary-hover: #08634c;
+  --theme-primary-dark: #04382a;
+  --theme-secondary: #022C22;
+  --theme-surface-dark: #011A14;
+  --theme-border-dark: #0F5C47;
+  --theme-accent: #10B981;
+  --theme-accent-hover: #059669;
+  --theme-accent-text-light: #047857;
+  --theme-accent-text-dark: #34D399;
+  --theme-bg-light: #F0FDF4;
+  --theme-bg-dark: #051A14;
+  --theme-card-dark: #0A211B;
+}
+
+[data-theme="burgundy"] {
+  --theme-primary: #581C28;
+  --theme-primary-hover: #6D2232;
+  --theme-primary-dark: #42141E;
+  --theme-secondary: #370F18;
+  --theme-surface-dark: #24080F;
+  --theme-border-dark: #702636;
+  --theme-accent: #F59E0B;
+  --theme-accent-hover: #D97706;
+  --theme-accent-text-light: #B45309;
+  --theme-accent-text-dark: #FBBF24;
+  --theme-bg-light: #FFF1F2;
+  --theme-bg-dark: #1C080D;
+  --theme-card-dark: #240E14;
+}
+
+[data-theme="caribbean"] {
+  --theme-primary: #0C4A6E;
+  --theme-primary-hover: #075985;
+  --theme-primary-dark: #073854;
+  --theme-secondary: #082F49;
+  --theme-surface-dark: #041E30;
+  --theme-border-dark: #0E5C8A;
+  --theme-accent: #38BDF8;
+  --theme-accent-hover: #0EA5E9;
+  --theme-accent-text-light: #0284C7;
+  --theme-accent-text-dark: #38BDF8;
+  --theme-bg-light: #F0F9FF;
+  --theme-bg-dark: #071622;
+  --theme-card-dark: #0B202F;
+}
+
+[data-theme="warm-sepia"] {
+  --theme-primary: #4A3B32;
+  --theme-primary-hover: #5C4A3F;
+  --theme-primary-dark: #3A2E27;
+  --theme-secondary: #332720;
+  --theme-surface-dark: #221A15;
+  --theme-border-dark: #614E43;
+  --theme-accent: #C28B56;
+  --theme-accent-hover: #A67341;
+  --theme-accent-text-light: #92400E;
+  --theme-accent-text-dark: #FBBF24;
+  --theme-bg-light: #FAF7F2;
+  --theme-bg-dark: #181411;
+  --theme-card-dark: #221A16;
+}
+
+[data-theme="midnight"] {
+  --theme-primary: #1E1B4B;
+  --theme-primary-hover: #2E286E;
+  --theme-primary-dark: #16133B;
+  --theme-secondary: #0F0E2A;
+  --theme-surface-dark: #0A091E;
+  --theme-border-dark: #2E2A6B;
+  --theme-accent: #818CF8;
+  --theme-accent-hover: #6366F1;
+  --theme-accent-text-light: #4338CA;
+  --theme-accent-text-dark: #A5B4FC;
+  --theme-bg-light: #EEF2FF;
+  --theme-bg-dark: #090818;
+  --theme-card-dark: #12102E;
+}
+
+
+/* 2. COLOR PRIMARIO (Fondos, botones, bordes, degradados) */
+.bg-\[\#2C2E53\] {
+  background-color: var(--theme-primary) !important;
+}
+.hover\:bg-\[\#2C2E53\]:hover {
+  background-color: var(--theme-primary) !important;
+}
+.bg-\[\#353866\] {
+  background-color: var(--theme-primary-hover) !important;
+}
+.hover\:bg-\[\#353866\]:hover {
+  background-color: var(--theme-primary-hover) !important;
+}
+.hover\:bg-\[\#242646\]:hover {
+  background-color: var(--theme-primary-dark) !important;
+}
+
+html:not(.dark) .text-\[\#2C2E53\] {
+  color: var(--theme-primary) !important;
+}
+.hover\:text-\[\#2C2E53\]:hover {
+  color: var(--theme-primary) !important;
+}
+
+.border-\[\#2C2E53\] {
+  border-color: var(--theme-primary) !important;
+}
+.border-\[\#414474\] {
+  border-color: var(--theme-border-dark) !important;
+}
+
+.from-\[\#2C2E53\] {
+  --tw-gradient-from: var(--theme-primary) var(--tw-gradient-from-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+.hover\:from-\[\#353866\]:hover {
+  --tw-gradient-from: var(--theme-primary-hover) var(--tw-gradient-from-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+.via-\[\#242646\] {
+  --tw-gradient-via: var(--theme-primary-dark) var(--tw-gradient-via-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-via), var(--tw-gradient-to) !important;
+}
+.to-\[\#252747\] {
+  --tw-gradient-to: var(--theme-primary-dark) var(--tw-gradient-to-position) !important;
+}
+.hover\:to-\[\#242646\]:hover {
+  --tw-gradient-to: var(--theme-primary-dark) var(--tw-gradient-to-position) !important;
+}
+
+/* Translucidez primaria */
+.bg-\[\#2C2E53\]\/70 {
+  background-color: color-mix(in srgb, var(--theme-primary) 70%, transparent) !important;
+}
+.bg-\[\#2C2E53\]\/50 {
+  background-color: color-mix(in srgb, var(--theme-primary) 50%, transparent) !important;
+}
+.bg-\[\#2C2E53\]\/40 {
+  background-color: color-mix(in srgb, var(--theme-primary) 40%, transparent) !important;
+}
+.bg-\[\#2C2E53\]\/30 {
+  background-color: color-mix(in srgb, var(--theme-primary) 30%, transparent) !important;
+}
+.hover\:bg-\[\#2C2E53\]\/40:hover {
+  background-color: color-mix(in srgb, var(--theme-primary) 40%, transparent) !important;
+}
+.hover\:bg-\[\#2C2E53\]\/30:hover {
+  background-color: color-mix(in srgb, var(--theme-primary) 30%, transparent) !important;
+}
+.border-\[\#414474\]\/50 {
+  border-color: color-mix(in srgb, var(--theme-border-dark) 50%, transparent) !important;
+}
+.shadow-\[\#2C2E53\]\/40 {
+  --tw-shadow-color: color-mix(in srgb, var(--theme-primary) 40%, transparent) !important;
+}
+.shadow-\[\#2C2E53\]\/30 {
+  --tw-shadow-color: color-mix(in srgb, var(--theme-primary) 30%, transparent) !important;
+}
+
+
+/* 3. COLOR SECUNDARIO (Cabecera, barra lateral, paneles profundos) */
+.bg-\[\#1B1C33\] {
+  background-color: var(--theme-secondary) !important;
+}
+.border-\[\#1B1C33\] {
+  border-color: var(--theme-secondary) !important;
+}
+.text-\[\#1B1C33\] {
+  color: var(--theme-secondary) !important;
+}
+.from-\[\#1B1C33\] {
+  --tw-gradient-from: var(--theme-secondary) var(--tw-gradient-from-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+.to-\[\#1B1C33\] {
+  --tw-gradient-to: var(--theme-secondary) var(--tw-gradient-to-position) !important;
+}
+
+.bg-\[\#141525\] {
+  background-color: var(--theme-surface-dark) !important;
+}
+.bg-\[\#141525\]\/80 {
+  background-color: color-mix(in srgb, var(--theme-surface-dark) 80%, transparent) !important;
+}
+.hover\:bg-\[\#141525\]:hover {
+  background-color: var(--theme-surface-dark) !important;
+}
+.hover\:bg-\[\#141525\]\/60:hover {
+  background-color: color-mix(in srgb, var(--theme-surface-dark) 60%, transparent) !important;
+}
+
+
+/* 4. COLOR DE ACENTO (Dorado / Resaltes / Insignias / Anillos) */
+.bg-\[\#D4AF37\] {
+  background-color: var(--theme-accent) !important;
+}
+.hover\:bg-\[\#b89327\]:hover {
+  background-color: var(--theme-accent-hover) !important;
+}
+/* Tipografía de acento con contraste adaptativo según modo y contenedor */
+html:not(.dark) .text-\[\#D4AF37\] {
+  color: var(--theme-accent-text-light) !important;
+}
+
+/* En contenedores oscuros, encabezados, barras o degradados oscuros, usar acento luminoso */
+header .text-\[\#D4AF37\],
+footer .text-\[\#D4AF37\],
+.bg-\[\#2C2E53\] .text-\[\#D4AF37\],
+.bg-\[\#1B1C33\] .text-\[\#D4AF37\],
+.bg-\[\#141525\] .text-\[\#D4AF37\],
+html.dark .text-\[\#D4AF37\] {
+  color: var(--theme-accent-text-dark) !important;
+}
+
+html:not(.dark) .text-\[\#D4AF37\]\/80 {
+  color: color-mix(in srgb, var(--theme-accent-text-light) 80%, transparent) !important;
+}
+header .text-\[\#D4AF37\]\/80,
+footer .text-\[\#D4AF37\]\/80,
+.bg-\[\#2C2E53\] .text-\[\#D4AF37\]\/80,
+.bg-\[\#1B1C33\] .text-\[\#D4AF37\]\/80,
+html.dark .text-\[\#D4AF37\]\/80 {
+  color: color-mix(in srgb, var(--theme-accent-text-dark) 80%, transparent) !important;
+}
+
+html:not(.dark) .hover\:text-\[\#D4AF37\]:hover {
+  color: var(--theme-accent-text-light) !important;
+}
+header .hover\:text-\[\#D4AF37\]:hover,
+footer .hover\:text-\[\#D4AF37\]:hover,
+html.dark .hover\:text-\[\#D4AF37\]:hover {
+  color: var(--theme-accent-text-dark) !important;
+}
+
+.border-\[\#D4AF37\] {
+  border-color: var(--theme-accent) !important;
+}
+.hover\:border-\[\#D4AF37\]:hover {
+  border-color: var(--theme-accent) !important;
+}
+
+.via-\[\#D4AF37\] {
+  --tw-gradient-via: var(--theme-accent) var(--tw-gradient-via-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-via), var(--tw-gradient-to) !important;
+}
+.via-\[\#D4AF37\]\/20 {
+  --tw-gradient-via: color-mix(in srgb, var(--theme-accent) 20%, transparent) var(--tw-gradient-via-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-via), var(--tw-gradient-to) !important;
+}
+
+.bg-\[\#D4AF37\]\/20 {
+  background-color: color-mix(in srgb, var(--theme-accent) 20%, transparent) !important;
+}
+.bg-\[\#D4AF37\]\/15 {
+  background-color: color-mix(in srgb, var(--theme-accent) 15%, transparent) !important;
+}
+.bg-\[\#D4AF37\]\/10 {
+  background-color: color-mix(in srgb, var(--theme-accent) 10%, transparent) !important;
+}
+.bg-\[\#D4AF37\]\/5 {
+  background-color: color-mix(in srgb, var(--theme-accent) 5%, transparent) !important;
+}
+
+.border-\[\#D4AF37\]\/50 {
+  border-color: color-mix(in srgb, var(--theme-accent) 50%, transparent) !important;
+}
+.border-\[\#D4AF37\]\/40 {
+  border-color: color-mix(in srgb, var(--theme-accent) 40%, transparent) !important;
+}
+.border-\[\#D4AF37\]\/30 {
+  border-color: color-mix(in srgb, var(--theme-accent) 30%, transparent) !important;
+}
+.border-\[\#D4AF37\]\/20 {
+  border-color: color-mix(in srgb, var(--theme-accent) 20%, transparent) !important;
+}
+
+.ring-\[\#D4AF37\] {
+  --tw-ring-color: var(--theme-accent) !important;
+}
+.ring-\[\#D4AF37\]\/50 {
+  --tw-ring-color: color-mix(in srgb, var(--theme-accent) 50%, transparent) !important;
+}
+.ring-\[\#D4AF37\]\/30 {
+  --tw-ring-color: color-mix(in srgb, var(--theme-accent) 30%, transparent) !important;
+}
+.ring-\[\#D4AF37\]\/25 {
+  --tw-ring-color: color-mix(in srgb, var(--theme-accent) 25%, transparent) !important;
+}
+.ring-\[\#D4AF37\]\/20 {
+  --tw-ring-color: color-mix(in srgb, var(--theme-accent) 20%, transparent) !important;
+}
+
+.shadow-\[\#D4AF37\]\/20 {
+  --tw-shadow-color: color-mix(in srgb, var(--theme-accent) 20%, transparent) !important;
+}
+.shadow-\[\#D4AF37\]\/15 {
+  --tw-shadow-color: color-mix(in srgb, var(--theme-accent) 15%, transparent) !important;
+}
+
+/* Indicador de pestaña lateral activa */
+.border-l-2.border-\[\#D4AF37\] {
+  border-left-color: var(--theme-accent) !important;
+}
+
+/* Selección de texto */
+::selection,
+.selection\:bg-\[\#D4AF37\]::selection {
+  background-color: var(--theme-accent) !important;
+  color: #000000 !important;
+}
+
+
+/* 5. FONDOS GENERALES (MODO CLARO Y MODO OSCURO) */
+/* En Modo Claro: */
+html:not(.dark) body {
+  background-color: var(--theme-bg-light) !important;
+}
+html:not(.dark) .bg-\[\#F8FAFC\] {
+  background-color: var(--theme-bg-light) !important;
+}
+
+/* En Modo Oscuro: */
+html.dark {
+  color-scheme: dark;
+}
+
+html.dark body {
+  background-color: var(--theme-bg-dark) !important;
+  color: #F1F5F9 !important;
+}
+
+html.dark .bg-\[\#F8FAFC\] {
+  background-color: var(--theme-bg-dark) !important;
+}
+
+/* Cards, barras de navegación y modales en Modo Oscuro */
+html.dark .bg-white:not(.force-light):not([data-force-light]),
+html.dark .bg-white\/95:not(.force-light):not([data-force-light]),
+html.dark .bg-white\/90:not(.force-light):not([data-force-light]),
+html.dark .bg-white\/85:not(.force-light):not([data-force-light]),
+html.dark .bg-white\/80:not(.force-light):not([data-force-light]) {
+  background-color: var(--theme-card-dark) !important;
+  color: #F8FAFC !important;
+}
+
+/* Soporte para elementos que deben permanecer claros (como maquetas o previsualizaciones) */
+html.dark .force-light,
+html.dark [data-force-light] {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+}
+html.dark .force-light-text,
+html.dark .force-light .force-light-text,
+html.dark [data-force-light] .force-light-text {
+  color: #0F172A !important;
+}
+
+/* Preservar contrastes de elementos simulados dentro de force-light */
+html.dark .force-light .bg-slate-100,
+html.dark [data-force-light] .bg-slate-100 {
+  background-color: #F1F5F9 !important;
+}
+html.dark .force-light .bg-slate-200,
+html.dark [data-force-light] .bg-slate-200 {
+  background-color: #E2E8F0 !important;
+}
+html.dark .force-light .bg-slate-300,
+html.dark [data-force-light] .bg-slate-300 {
+  background-color: #CBD5E1 !important;
+}
+html.dark .force-light .bg-slate-700\/80,
+html.dark [data-force-light] .bg-slate-700\/80 {
+  background-color: rgba(51, 65, 85, 0.8) !important;
+}
+html.dark .force-light .border-slate-200,
+html.dark [data-force-light] .border-slate-200 {
+  border-color: #E2E8F0 !important;
+}
+
+/* Superficies neutras en Modo Oscuro (incluyendo cualquier variante con opacidad /80, /70, /50) */
+html.dark [class*="bg-slate-50"]:not(.force-light):not([data-force-light]) {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+}
+html.dark [class*="bg-slate-100"]:not(.force-light):not([data-force-light]) {
+  background-color: rgba(255, 255, 255, 0.07) !important;
+}
+html.dark [class*="bg-slate-200"]:not(.force-light):not([data-force-light]) {
+  background-color: rgba(255, 255, 255, 0.10) !important;
+}
+
+/* Bordes en Modo Oscuro - sutiles, limpios y oscuros */
+html.dark .border-slate-100 {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+html.dark .border-slate-200,
+html.dark .border-slate-200\/90,
+html.dark .border-slate-200\/80 {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+html.dark .border-slate-300 {
+  border-color: rgba(255, 255, 255, 0.18) !important;
+}
+html.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* 5. TIPOGRAFÍA Y LEGIBILIDAD EN MODO OSCURO (Alto Contraste Amigable a la Vista) */
+html.dark .text-slate-900:not(.force-light-text),
+html.dark .text-slate-800:not(.force-light-text),
+html.dark .text-slate-700:not(.force-light-text),
+html.dark .text-\[\#2C2E53\]:not(.force-light-text) {
+  color: #F8FAFC !important;
+}
+
+html.dark .text-slate-600:not(.force-light-text),
+html.dark .text-slate-500:not(.force-light-text) {
+  color: #CBD5E1 !important;
+}
+
+html.dark .text-slate-400:not(.force-light-text) {
+  color: #94A3B8 !important;
+}
+
+/* Insignias / Badges y Cajas de Alerta en Modo Oscuro - Colores vivos y texto de alto contraste */
+html.dark [class*="bg-emerald-50"]:not(.force-light):not([data-force-light]),
+html.dark [class*="bg-emerald-100"]:not(.force-light):not([data-force-light]),
+html.dark [class*="bg-emerald-200"]:not(.force-light):not([data-force-light]),
+html.dark [class*="bg-green-50"]:not(.force-light):not([data-force-light]),
+html.dark [class*="bg-green-100"]:not(.force-light):not([data-force-light]),
+html.dark [class*="bg-green-200"]:not(.force-light):not([data-force-light]) {
+  background-color: rgba(16, 185, 129, 0.16) !important;
+}
+html.dark .text-emerald-950:not(.force-light-text),
+html.dark .text-emerald-900:not(.force-light-text),
+html.dark .text-green-950:not(.force-light-text),
+html.dark .text-green-900:not(.force-light-text) {
+  color: #34D399 !important;
+}
+html.dark .text-emerald-800:not(.force-light-text),
+html.dark .text-emerald-700:not(.force-light-text),
+html.dark .text-green-800:not(.force-light-text),
+html.dark .text-green-700:not(.force-light-text) {
+  color: #A7F3D0 !important;
+}
+html.dark .text-emerald-600:not(.force-light-text),
+html.dark .text-green-600:not(.force-light-text) {
+  color: #34D399 !important;
+}
+
+html.dark [class*="bg-amber-50"]:not(.force-light):not([data-force-light]),
+html.dark [class*="bg-amber-100"]:not(.force-light):not([data-force-light]),
+html.dark [class*="bg-amber-200"]:not(.force-light):not([data-force-light]),
+html.dark [class*="bg-yellow-50"]:not(.force-light):not([data-force-light]),
+html.dark [class*="bg-yellow-100"]:not(.force-light):not([data-force-light]),
+html.dark [class*="bg-yellow-200"]:not(.force-light):not([data-force-light]),
+html.dark [class*="bg-orange-50"]:not(.force-light):not([data-force-light]),
+html.dark [class*="bg-orange-100"]:not(.force-light):not([data-force-light]) {
+  background-color: rgba(245, 158, 11, 0.16) !important;
+}
+html.dark .text-amber-950:not(.force-light-text),
+html.dark .text-amber-900:not(.force-light-text),
+html.dark .text-yellow-950:not(.force-light-text),
+html.dark .text-yellow-900:not(.force-light-text),
+html.dark .text-orange-950:not(.force-light-text),
+html.dark .text-orange-900:not(.force-light-text) {
+  color: #FBBF24 !important;
+}
+html.dark .text-amber-800:not(.force-light-text),
+html.dark .text-amber-700:not(.force-light-text),
+html.dark .text-yellow-800:not(.force-light-text),
+html.dark .text-yellow-700:not(.force-light-text),
+html.dark .text-orange-800:not(.force-light-text),
+html.dark .text-orange-700:not(.force-light-text) {
+  color: #FDE68A !important;
+}
+html.dark .text-amber-600:not(.force-light-text),
+html.dark .text-yellow-600:not(.force-light-text) {
+  color: #FBBF24 !important;
+}
+
+html.dark [class*="bg-rose-50"]:not(.force-light):not([data-force-light]),
+html.dark [class*="bg-rose-100"]:not(.force-light):not([data-force-light]),
+html.dark [class*="bg-rose-200"]:not(.force-light):not([data-force-light]),
+html.dark [class*="bg-red-50"]:not(.force-light):not([data-force-light]),
+html.dark [class*="bg-red-100"]:not(.force-light):not([data-force-light]),
+html.dark [class*="bg-red-200"]:not(.force-light):not([data-force-light]) {
+  background-color: rgba(244, 63, 94, 0.16) !important;
+}
+html.dark .text-rose-950:not(.force-light-text),
+html.dark .text-rose-900:not(.force-light-text),
+html.dark .text-red-950:not(.force-light-text),
+html.dark .text-red-900:not(.force-light-text) {
+  color: #FDA4AF !important;
+}
+html.dark .text-rose-800:not(.force-light-text),
+html.dark .text-rose-700:not(.force-light-text),
+html.dark .text-red-800:not(.force-light-text),
+html.dark .text-red-700:not(.force-light-text) {
+  color: #FECDD3 !important;
+}
+html.dark .text-rose-600:not(.force-light-text),
+html.dark .text-red-600:not(.force-light-text) {
+  color: #FDA4AF !important;
+}
+
+html.dark [class*="bg-blue-50"]:not(.force-light):not([data-force-light]),
+html.dark [class*="bg-blue-100"]:not(.force-light):not([data-force-light]),
+html.dark [class*="bg-blue-200"]:not(.force-light):not([data-force-light]),
+html.dark [class*="bg-indigo-50"]:not(.force-light):not([data-force-light]),
+html.dark [class*="bg-indigo-100"]:not(.force-light):not([data-force-light]),
+html.dark [class*="bg-indigo-200"]:not(.force-light):not([data-force-light]),
+html.dark [class*="bg-sky-50"]:not(.force-light):not([data-force-light]),
+html.dark [class*="bg-sky-100"]:not(.force-light):not([data-force-light]),
+html.dark [class*="bg-sky-200"]:not(.force-light):not([data-force-light]) {
+  background-color: rgba(59, 130, 246, 0.16) !important;
+}
+html.dark .text-blue-950:not(.force-light-text),
+html.dark .text-blue-900:not(.force-light-text),
+html.dark .text-indigo-950:not(.force-light-text),
+html.dark .text-indigo-900:not(.force-light-text),
+html.dark .text-sky-950:not(.force-light-text),
+html.dark .text-sky-900:not(.force-light-text) {
+  color: #93C5FD !important;
+}
+html.dark .text-blue-800:not(.force-light-text),
+html.dark .text-blue-700:not(.force-light-text),
+html.dark .text-indigo-800:not(.force-light-text),
+html.dark .text-indigo-700:not(.force-light-text),
+html.dark .text-sky-800:not(.force-light-text),
+html.dark .text-sky-700:not(.force-light-text) {
+  color: #BAE6FD !important;
+}
+html.dark .text-blue-600:not(.force-light-text),
+html.dark .text-indigo-600:not(.force-light-text),
+html.dark .text-sky-600:not(.force-light-text) {
+  color: #93C5FD !important;
+}
+
+html.dark [class*="bg-purple-50"]:not(.force-light):not([data-force-light]),
+html.dark [class*="bg-purple-100"]:not(.force-light):not([data-force-light]),
+html.dark [class*="bg-purple-200"]:not(.force-light):not([data-force-light]),
+html.dark [class*="bg-violet-50"]:not(.force-light):not([data-force-light]),
+html.dark [class*="bg-violet-100"]:not(.force-light):not([data-force-light]),
+html.dark [class*="bg-violet-200"]:not(.force-light):not([data-force-light]) {
+  background-color: rgba(168, 85, 247, 0.16) !important;
+}
+html.dark .text-purple-950:not(.force-light-text),
+html.dark .text-purple-900:not(.force-light-text),
+html.dark .text-violet-950:not(.force-light-text),
+html.dark .text-violet-900:not(.force-light-text) {
+  color: #D8B4FE !important;
+}
+html.dark .text-purple-800:not(.force-light-text),
+html.dark .text-purple-700:not(.force-light-text),
+html.dark .text-violet-800:not(.force-light-text),
+html.dark .text-violet-700:not(.force-light-text) {
+  color: #E9D5FF !important;
+}
+html.dark .text-purple-600:not(.force-light-text),
+html.dark .text-violet-600:not(.force-light-text) {
+  color: #D8B4FE !important;
+}
+
+/* Bordes de Badges y Cajas de Alerta en Modo Oscuro */
+html.dark [class*="border-emerald-100"],
+html.dark [class*="border-emerald-200"],
+html.dark [class*="border-emerald-300"],
+html.dark [class*="border-green-100"],
+html.dark [class*="border-green-200"],
+html.dark [class*="border-green-300"] {
+  border-color: rgba(16, 185, 129, 0.3) !important;
+}
+html.dark [class*="border-amber-100"],
+html.dark [class*="border-amber-200"],
+html.dark [class*="border-amber-300"],
+html.dark [class*="border-yellow-100"],
+html.dark [class*="border-yellow-200"],
+html.dark [class*="border-yellow-300"] {
+  border-color: rgba(245, 158, 11, 0.3) !important;
+}
+html.dark [class*="border-rose-100"],
+html.dark [class*="border-rose-200"],
+html.dark [class*="border-rose-300"],
+html.dark [class*="border-red-100"],
+html.dark [class*="border-red-200"],
+html.dark [class*="border-red-300"] {
+  border-color: rgba(244, 63, 94, 0.3) !important;
+}
+html.dark [class*="border-blue-100"],
+html.dark [class*="border-blue-200"],
+html.dark [class*="border-blue-300"],
+html.dark [class*="border-sky-100"],
+html.dark [class*="border-sky-200"],
+html.dark [class*="border-sky-300"],
+html.dark [class*="border-indigo-100"],
+html.dark [class*="border-indigo-200"],
+html.dark [class*="border-indigo-300"] {
+  border-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+/* Gradientes de Cumpleaños y Celebraciones en Modo Oscuro */
+html.dark .from-amber-50 {
+  --tw-gradient-from: rgba(245, 158, 11, 0.20) var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgba(245, 158, 11, 0) var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+html.dark [class*="to-amber-100"] {
+  --tw-gradient-to: rgba(245, 158, 11, 0.08) var(--tw-gradient-to-position) !important;
+}
+html.dark [class*="ring-amber-300"] {
+  --tw-ring-color: rgba(245, 158, 11, 0.3) !important;
+}
+
+/* Tablas en Modo Oscuro */
+html.dark th {
+  color: #CBD5E1 !important;
+}
+html.dark td {
+  color: #E2E8F0 !important;
+}
+html.dark tr.hover\:bg-slate-50:hover,
+html.dark tr:hover {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+}
+
+/* Entradas de formulario en Modo Oscuro */
+html.dark input:not([type="checkbox"]):not([type="radio"]),
+html.dark select,
+html.dark textarea {
+  background-color: rgba(0, 0, 0, 0.35) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  color: #F1F5F9 !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #64748B !important;
+}
+
+/* Hover en Modo Oscuro para cualquier variante neutra */
+html.dark [class*="hover:bg-slate-50"]:hover,
+html.dark [class*="hover:bg-slate-100"]:hover,
+html.dark [class*="hover:bg-slate-200"]:hover,
+html.dark tr[class*="hover:bg-slate-50"]:hover,
+html.dark tr[class*="hover:bg-slate-100"]:hover {
+  background-color: rgba(255, 255, 255, 0.07) !important;
+}
+
+/* Barra de desplazamiento en Modo Oscuro */
+html.dark ::-webkit-scrollbar-track {
+  background: var(--theme-bg-dark);
+}
+html.dark ::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--theme-card-dark) 60%, white);
+}
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--theme-card-dark) 45%, white);
+}
+
+/* 6. LOGO INSTITUCIONAL CBA EN MODO OSCURO (Silueta Blanca Nítida y Amigable a la Vista) */
+html.dark .group\/logo img,
+html.dark img[src*="logo-cba.png"]:not(.force-light *):not(.no-dark-invert) {
+  filter: brightness(0) invert(1) drop-shadow(0 2px 8px rgba(255, 255, 255, 0.22)) drop-shadow(0 0 12px rgba(212, 175, 55, 0.25)) !important;
+  opacity: 0.96;
+}
+
+/* ============================================================
+   PRINT STYLES FOR OFFICIAL BELLAS ARTES DOCUMENTS & BULLETINS
+   ============================================================ */
 @media print {
-  .no-print {
+  /* 1. Ocultar componentes de aplicación web (Chrome de la app) */
+  header,
+  aside,
+  nav,
+  .no-print,
+  #shortcut-toast,
+  .dev-hud,
+  button:not(.print-include),
+  input[type="range"],
+  input[type="search"],
+  .fixed:not(.print-modal-container):not(.print-ticket-root),
+  [role="dialog"]:not(.printable-dialog),
+  .floating-quick-actions {
     display: none !important;
   }
-  .print-only {
-    display: block !important;
+
+  /* 2. Configuración de página y márgenes oficiales */
+  @page {
+    size: letter portrait;
+    margin: 8mm 10mm 8mm 10mm;
   }
+
+  @page landscape-sheet {
+    size: letter landscape;
+    margin: 6mm 8mm 6mm 8mm;
+  }
+
+  .print-landscape {
+    page: landscape-sheet !important;
+  }
+
+  /* 3. Lienzo de impresión limpio y preservación exacta de colores y contrastes */
+  *,
+  *::before,
+  *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+  }
+
+  html,
   body {
-    background: white !important;
-    color: black !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 10pt !important;
+    line-height: 1.3 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
   }
+
+  /* 4. Expansión limpia de contenedores imprimibles */
+  main,
+  .printable-sheet,
+  .max-w-4xl,
+  .max-w-5xl,
+  .max-w-6xl,
+  .max-w-7xl,
+  .mx-auto {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  /* 5. Tablas oficiales en papel: encabezados fijos por página y líneas nítidas */
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    page-break-inside: auto;
+  }
+
+  thead {
+    display: table-header-group !important;
+  }
+
+  tr {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  th,
+  td {
+    border: 1px solid #94a3b8 !important;
+    padding: 3px 5px !important;
+  }
+
+  th {
+    background-color: #2C2E53 !important;
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* 6. Evitar cortes en firmas y sellos */
+  .print-signatures,
+  .print-avoid-break {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* 7. Logos e imágenes oficiales nítidos */
+  img {
+    max-width: 100% !important;
+    filter: none !important;
+  }
+
+  /* 8. Saltos de página controlados */
   .page-break {
-    page-break-after: always;
+    page-break-after: always !important;
+    break-after: page !important;
   }
 }
+

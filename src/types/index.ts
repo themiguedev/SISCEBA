@@ -347,3 +347,22 @@ export type MainNavigationTab =
   | 'CONFIGURACION'
   | 'AYUDA';
 
+export type NotificationCategory = 'CALIFICACIONES' | 'ASISTENCIA' | 'DOCUMENTOS' | 'INSTITUCIONAL' | 'SISTEMA';
+export type NotificationDeliveryChannel = 'PORTAL' | 'EMAIL' | 'SMS_WHATSAPP';
+
+export interface SystemNotification {
+  id: string;
+  title: string;
+  message: string;
+  timestamp: string;
+  read: boolean;
+  category: NotificationCategory;
+  priority: 'BAJA' | 'MEDIA' | 'ALTA';
+  recipientRole: 'TODOS' | 'REPRESENTANTE' | 'ESTUDIANTE' | 'DOCENTE' | 'COORDINACION';
+  recipientName?: string;
+  studentName?: string;
+  actionTab?: MainNavigationTab;
+  actionSubTab?: string;
+  deliveryChannels: NotificationDeliveryChannel[];
+}
+
