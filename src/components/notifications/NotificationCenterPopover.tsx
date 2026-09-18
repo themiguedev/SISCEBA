@@ -91,9 +91,17 @@ export const NotificationCenterPopover: React.FC<NotificationCenterPopoverProps>
         )}
       </button>
 
+      {/* Backdrop para cerrar en móvil */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-40 sm:hidden"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
       {/* Popover Dropdown Card */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-[#1B1C33] rounded-2xl shadow-2xl border border-slate-200 dark:border-[#414474] z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-x-3 top-16 sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-2 w-auto sm:w-96 max-h-[85vh] overflow-hidden flex flex-col bg-white dark:bg-[#1B1C33] rounded-2xl shadow-2xl border border-slate-200 dark:border-[#414474] z-50 animate-in fade-in zoom-in-95 duration-150">
           {/* Header */}
           <div className="p-3.5 sm:p-4 bg-gradient-to-r from-[#1B1C33] to-[#252747] text-white flex items-center justify-between border-b border-[#414474]/50">
             <div className="flex items-center gap-2">

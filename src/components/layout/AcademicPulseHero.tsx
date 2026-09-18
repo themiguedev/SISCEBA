@@ -36,11 +36,11 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
   return (
     <section aria-label="Resumen ejecutivo institucional" className="space-y-4 mb-6">
       {/* Top Banner with Actions */}
-      <div className="bg-gradient-to-r from-[#2C2E53] via-[#242646] to-[#1B1C33] rounded-3xl p-6 sm:p-7 text-white shadow-xl border border-[#414474]/50 relative overflow-hidden">
+      <div className="bg-gradient-to-r from-[#2C2E53] via-[#242646] to-[#1B1C33] rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-7 text-white shadow-xl border border-[#414474]/50 relative overflow-hidden">
         {/* Subtle Background Pattern */}
         <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 rounded-full bg-[#D4AF37]/5 blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6">
           <div>
             <div className="flex items-center gap-2 mb-2">
               <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/40 text-[10px] font-black tracking-widest uppercase">

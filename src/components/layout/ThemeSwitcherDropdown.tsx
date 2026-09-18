@@ -84,9 +84,17 @@ export const ThemeSwitcherDropdown: React.FC<ThemeSwitcherDropdownProps> = ({
         />
       </button>
 
+      {/* Backdrop para cerrar en móvil */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-40 sm:hidden"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
       {/* Popover Desplegable */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-[#1B1C33] border border-[#2C2E53] rounded-2xl shadow-2xl p-4 z-50 animate-in fade-in zoom-in-95 text-white space-y-4">
+        <div className="fixed inset-x-3 top-16 sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-2 w-auto sm:w-96 max-h-[85vh] overflow-y-auto bg-[#1B1C33] border border-[#2C2E53] rounded-2xl shadow-2xl p-4 z-50 animate-in fade-in zoom-in-95 text-white space-y-4">
           {/* Cabecera del Popover */}
           <div className="flex items-center justify-between border-b border-white/10 pb-3">
             <div className="flex items-center gap-2">

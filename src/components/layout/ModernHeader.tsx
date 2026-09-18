@@ -189,7 +189,7 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
             <button
               type="button"
               onClick={onOpenShortcuts}
-              className="p-1.5 sm:p-2 rounded-xl bg-[#141525] hover:bg-[#2C2E53] text-[#D4AF37] border border-[#2C2E53] transition shadow-inner shrink-0"
+              className="hidden sm:flex p-1.5 sm:p-2 rounded-xl bg-[#141525] hover:bg-[#2C2E53] text-[#D4AF37] border border-[#2C2E53] transition shadow-inner shrink-0"
               title="Atajos de Teclado del Sistema (Presiona ?)"
             >
               <Keyboard className="w-4 h-4" />
@@ -213,25 +213,31 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
               <ChevronDown className="w-3 h-3 text-slate-400 shrink-0" />
             </button>
             {lapsoMenuOpen && (
-              <div className="absolute right-0 mt-2 w-44 bg-[#1B1C33] border border-[#414474] rounded-xl shadow-2xl p-1 z-50 animate-in fade-in zoom-in-95">
-                {[1, 2, 3].map((l) => (
-                  <button
-                    key={l}
-                    onClick={() => {
-                      setActiveLapso(l as 1 | 2 | 3);
-                      setLapsoMenuOpen(false);
-                    }}
-                    className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold transition ${
-                      activeLapso === l
-                        ? 'bg-[#2C2E53] text-[#D4AF37]'
-                        : 'text-slate-300 hover:bg-[#2C2E53]/50'
-                    }`}
-                  >
-                    <span>Lapso {l} {l === 1 ? '(En Curso)' : ''}</span>
-                    {activeLapso === l && <CheckCircle2 className="w-3.5 h-3.5 text-[#D4AF37]" />}
-                  </button>
-                ))}
-              </div>
+              <>
+                <div
+                  className="fixed inset-0 z-40 sm:hidden"
+                  onClick={() => setLapsoMenuOpen(false)}
+                />
+                <div className="absolute right-0 mt-2 w-44 bg-[#1B1C33] border border-[#414474] rounded-xl shadow-2xl p-1 z-50 animate-in fade-in zoom-in-95">
+                  {[1, 2, 3].map((l) => (
+                    <button
+                      key={l}
+                      onClick={() => {
+                        setActiveLapso(l as 1 | 2 | 3);
+                        setLapsoMenuOpen(false);
+                      }}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold transition ${
+                        activeLapso === l
+                          ? 'bg-[#2C2E53] text-[#D4AF37]'
+                          : 'text-slate-300 hover:bg-[#2C2E53]/50'
+                      }`}
+                    >
+                      <span>Lapso {l} {l === 1 ? '(En Curso)' : ''}</span>
+                      {activeLapso === l && <CheckCircle2 className="w-3.5 h-3.5 text-[#D4AF37]" />}
+                    </button>
+                  ))}
+                </div>
+              </>
             )}
           </div>
 
@@ -249,43 +255,49 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
               <ChevronDown className="w-3 h-3 text-slate-400 shrink-0" />
             </button>
             {roleMenuOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-[#1B1C33] border border-[#414474] rounded-xl shadow-2xl p-1.5 z-50 animate-in fade-in zoom-in-95">
-                <div className="px-3 py-1.5 border-b border-[#2C2E53] mb-1">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                    Modo de Operación
-                  </span>
-                </div>
-                {(['DOCENTE', 'COORDINADOR', 'DIRECTOR'] as UserRole[]).map((r) => (
-                  <button
-                    key={r}
-                    onClick={() => {
-                      setCurrentRole(r);
-                      setRoleMenuOpen(false);
-                    }}
-                    className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold transition ${
-                      currentRole === r
-                        ? 'bg-[#2C2E53] text-[#D4AF37]'
-                        : 'text-slate-300 hover:bg-[#2C2E53]/50'
-                    }`}
-                  >
-                    <span>{r}</span>
-                    {currentRole === r && <ShieldCheck className="w-3.5 h-3.5 text-[#D4AF37]" />}
-                  </button>
-                ))}
+              <>
+                <div
+                  className="fixed inset-0 z-40 sm:hidden"
+                  onClick={() => setRoleMenuOpen(false)}
+                />
+                <div className="absolute right-0 mt-2 w-56 bg-[#1B1C33] border border-[#414474] rounded-xl shadow-2xl p-1.5 z-50 animate-in fade-in zoom-in-95">
+                  <div className="px-3 py-1.5 border-b border-[#2C2E53] mb-1">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                      Modo de Operación
+                    </span>
+                  </div>
+                  {(['DOCENTE', 'COORDINADOR', 'DIRECTOR'] as UserRole[]).map((r) => (
+                    <button
+                      key={r}
+                      onClick={() => {
+                        setCurrentRole(r);
+                        setRoleMenuOpen(false);
+                      }}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold transition ${
+                        currentRole === r
+                          ? 'bg-[#2C2E53] text-[#D4AF37]'
+                          : 'text-slate-300 hover:bg-[#2C2E53]/50'
+                      }`}
+                    >
+                      <span>{r}</span>
+                      {currentRole === r && <ShieldCheck className="w-3.5 h-3.5 text-[#D4AF37]" />}
+                    </button>
+                  ))}
 
-                <div className="pt-1.5 mt-1.5 border-t border-[#2C2E53]">
-                  <button
-                    onClick={() => {
-                      setRoleMenuOpen(false);
-                      logout();
-                    }}
-                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold text-rose-400 hover:bg-rose-500/20 hover:text-rose-300 transition"
-                  >
-                    <span>Cerrar Sesión</span>
-                    <LogOut className="w-3.5 h-3.5" />
-                  </button>
+                  <div className="pt-1.5 mt-1.5 border-t border-[#2C2E53]">
+                    <button
+                      onClick={() => {
+                        setRoleMenuOpen(false);
+                        logout();
+                      }}
+                      className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold text-rose-400 hover:bg-rose-500/20 hover:text-rose-300 transition"
+                    >
+                      <span>Cerrar Sesión</span>
+                      <LogOut className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
-              </div>
+              </>
             )}
           </div>
 
@@ -301,7 +313,7 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
       </div>
 
       {/* Mobile Level Selector Bar (when screen is < 1024px) */}
-      <div className="lg:hidden px-4 py-2 border-t border-[#2C2E53] bg-[#141525] flex items-center justify-between gap-1 overflow-x-auto">
+      <div className="lg:hidden px-2 py-1.5 border-t border-[#2C2E53] bg-[#141525] flex items-center justify-between gap-1 overflow-x-auto no-scrollbar">
         {(['INICIAL', 'PRIMARIA', 'MEDIA_GENERAL'] as EducationalLevel[]).map((lvl) => {
           const isCurrentModule = activeTab === lvl;
           const isContextLevel = currentLevel === lvl;
@@ -316,14 +328,14 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
                   onSelectLevel(lvl);
                 }
               }}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition ${
+              className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition ${
                 isSelected
                   ? 'bg-[#2C2E53] text-[#D4AF37] border border-[#D4AF37]/40 shadow-sm'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               <span>{data.icon}</span>
-              <span>{lvl.replace('_', ' ')}</span>
+              <span>{lvl === 'MEDIA_GENERAL' ? 'Media General' : lvl.replace('_', ' ')}</span>
             </button>
           );
         })}
