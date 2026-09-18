@@ -303,15 +303,22 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
       {/* Mobile Level Selector Bar (when screen is < 1024px) */}
       <div className="lg:hidden px-4 py-2 border-t border-[#2C2E53] bg-[#141525] flex items-center justify-between gap-1 overflow-x-auto">
         {(['INICIAL', 'PRIMARIA', 'MEDIA_GENERAL'] as EducationalLevel[]).map((lvl) => {
-          const isSelected = currentLevel === lvl;
+          const isCurrentModule = activeTab === lvl;
+          const isContextLevel = currentLevel === lvl;
+          const isSelected = isCurrentModule || (isContextLevel && (activeTab === 'ESCRITORIO' || !['INICIAL', 'PRIMARIA', 'MEDIA_GENERAL'].includes(activeTab || '')));
           const data = levelDetails[lvl];
           return (
             <button
               key={lvl}
-              onClick={() => setCurrentLevel(lvl)}
+              onClick={() => {
+                setCurrentLevel(lvl);
+                if (onSelectLevel) {
+                  onSelectLevel(lvl);
+                }
+              }}
               className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition ${
                 isSelected
-                  ? 'bg-[#2C2E53] text-[#D4AF37] border border-[#D4AF37]/40'
+                  ? 'bg-[#2C2E53] text-[#D4AF37] border border-[#D4AF37]/40 shadow-sm'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >

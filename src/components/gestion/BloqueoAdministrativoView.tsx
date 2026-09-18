@@ -61,6 +61,7 @@ export const BloqueoAdministrativoView: React.FC = () => {
 
       {/* Table */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-cba-card overflow-hidden">
+        <div className="overflow-x-auto">
         <table className="w-full text-left text-xs">
           <thead className="bg-[#1B1C33] text-white uppercase text-[10px] tracking-wider font-extrabold">
             <tr>
@@ -124,6 +125,7 @@ export const BloqueoAdministrativoView: React.FC = () => {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

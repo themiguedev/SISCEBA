@@ -99,6 +99,9 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
         [section.id]: true
       }));
     }
+    if (section.id === 'ESCRITORIO' && typeof window !== 'undefined' && window.innerWidth < 1024) {
+      onCloseMobile();
+    }
   };
 
   const pendingDocsCount = documentRequests.filter((d) => d.status === 'PENDIENTE').length;
@@ -443,6 +446,9 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
                               setActiveTab(section.id);
                             }
                             setActiveSubTab(sub.id);
+                            if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+                              onCloseMobile();
+                            }
                           }}
                           className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all group ${
                             isSubActive

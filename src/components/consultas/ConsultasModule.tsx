@@ -57,47 +57,49 @@ export const ConsultasModule: React.FC<ConsultasModuleProps> = ({
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
           {/* Subtabs Switcher */}
-          <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
+          <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 overflow-x-auto no-scrollbar">
             <button
               onClick={() => setActiveTab('RENDIMIENTO')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
                 activeTab === 'RENDIMIENTO'
                   ? 'bg-[#14232B] text-cyan-300 shadow-sm border border-cyan-500/40'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
-              <FileSpreadsheet className={`w-3.5 h-3.5 ${activeTab === 'RENDIMIENTO' ? 'text-cyan-400' : 'text-slate-400'}`} />
-              Sábana de Notas
+              <FileSpreadsheet className={`w-3.5 h-3.5 shrink-0 ${activeTab === 'RENDIMIENTO' ? 'text-cyan-400' : 'text-slate-400'}`} />
+              <span className="hidden sm:inline">Sábana de Notas</span>
+              <span className="sm:hidden">Sábana</span>
             </button>
             <button
               onClick={() => setActiveTab('ESTADISTICAS')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
                 activeTab === 'ESTADISTICAS'
                   ? 'bg-[#14232B] text-cyan-300 shadow-sm border border-cyan-500/40'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
-              <BarChart3 className={`w-3.5 h-3.5 ${activeTab === 'ESTADISTICAS' ? 'text-cyan-400' : 'text-slate-400'}`} />
+              <BarChart3 className={`w-3.5 h-3.5 shrink-0 ${activeTab === 'ESTADISTICAS' ? 'text-cyan-400' : 'text-slate-400'}`} />
               Estadísticas
             </button>
             <button
               onClick={() => setActiveTab('NOMINAS')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
                 activeTab === 'NOMINAS'
                   ? 'bg-[#14232B] text-cyan-300 shadow-sm border border-cyan-500/40'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
-              <Users className={`w-3.5 h-3.5 ${activeTab === 'NOMINAS' ? 'text-cyan-400' : 'text-slate-400'}`} />
-              Nómina General
+              <Users className={`w-3.5 h-3.5 shrink-0 ${activeTab === 'NOMINAS' ? 'text-cyan-400' : 'text-slate-400'}`} />
+              <span className="hidden sm:inline">Nómina General</span>
+              <span className="sm:hidden">Nómina</span>
             </button>
           </div>
 
           <button
             onClick={() => window.print()}
-            className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition"
+            className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition self-start sm:self-center"
             title="Imprimir Consulta"
           >
             <Printer className="w-4 h-4" />

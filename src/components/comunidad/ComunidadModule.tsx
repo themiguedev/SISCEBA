@@ -95,39 +95,42 @@ export const ComunidadModule: React.FC<ComunidadModuleProps> = ({
         </div>
 
         {/* Subtabs Switcher */}
-        <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
+        <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 overflow-x-auto no-scrollbar">
           <button
             onClick={() => setActiveTab('NOTICIAS')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
               activeTab === 'NOTICIAS'
                 ? 'bg-[#261523] text-pink-300 shadow-sm border border-pink-500/40'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
-            <Megaphone className={`w-3.5 h-3.5 ${activeTab === 'NOTICIAS' ? 'text-pink-400' : 'text-slate-400'}`} />
-            Noticias y Avisos
+            <Megaphone className={`w-3.5 h-3.5 shrink-0 ${activeTab === 'NOTICIAS' ? 'text-pink-400' : 'text-slate-400'}`} />
+            <span className="hidden sm:inline">Noticias y Avisos</span>
+            <span className="sm:hidden">Noticias</span>
           </button>
           <button
             onClick={() => setActiveTab('CUMPLEANOS')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
               activeTab === 'CUMPLEANOS'
                 ? 'bg-[#261523] text-pink-300 shadow-sm border border-pink-500/40'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
-            <Cake className={`w-3.5 h-3.5 ${activeTab === 'CUMPLEANOS' ? 'text-pink-400' : 'text-slate-400'}`} />
-            Cumpleañeros
+            <Cake className={`w-3.5 h-3.5 shrink-0 ${activeTab === 'CUMPLEANOS' ? 'text-pink-400' : 'text-slate-400'}`} />
+            <span className="hidden sm:inline">Cumpleañeros</span>
+            <span className="sm:hidden">Cumpleaños</span>
           </button>
           <button
             onClick={() => setActiveTab('COMUNICADOS')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
               activeTab === 'COMUNICADOS'
                 ? 'bg-[#261523] text-pink-300 shadow-sm border border-pink-500/40'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
-            <Send className={`w-3.5 h-3.5 ${activeTab === 'COMUNICADOS' ? 'text-pink-400' : 'text-slate-400'}`} />
-            Mensajería Masiva
+            <Send className={`w-3.5 h-3.5 shrink-0 ${activeTab === 'COMUNICADOS' ? 'text-pink-400' : 'text-slate-400'}`} />
+            <span className="hidden sm:inline">Mensajería Masiva</span>
+            <span className="sm:hidden">Mensajería</span>
           </button>
         </div>
       </div>

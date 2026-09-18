@@ -59,6 +59,29 @@ html.dark ::-webkit-scrollbar-thumb:hover {
   scrollbar-width: none !important;
 }
 
+/* ============================================================
+   RESPONSIVE UTILITIES — SICE-CBA
+   ============================================================ */
+
+/* Horizontal-scroll table wrapper with iOS momentum scroll */
+.responsive-table {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+/* Mobile-safe modals: full-height scroll, safe-area insets */
+.modal-responsive {
+  max-height: calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 2rem);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent horizontal overflow on the entire page */
+body {
+  overflow-x: hidden;
+}
+
 /* Scrollbars inside dark cards/banners have transparent tracks */
 [class*="bg-[#2C2E53]"] ::-webkit-scrollbar-track,
 [class*="from-[#2C2E53]"] ::-webkit-scrollbar-track,

@@ -67,50 +67,54 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
+        <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 overflow-x-auto no-scrollbar">
           <button
             onClick={() => setActiveTab('LAPSOS')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
               activeTab === 'LAPSOS'
                 ? 'bg-[#20162B] text-violet-300 shadow-sm border border-violet-500/40'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
-            <Calendar className={`w-3.5 h-3.5 ${activeTab === 'LAPSOS' ? 'text-violet-400' : 'text-slate-400'}`} />
-            Años Escolares y Lapsos
+            <Calendar className={`w-3.5 h-3.5 shrink-0 ${activeTab === 'LAPSOS' ? 'text-violet-400' : 'text-slate-400'}`} />
+            <span className="hidden sm:inline">Años Escolares y Lapsos</span>
+            <span className="sm:hidden">Lapsos</span>
           </button>
           <button
             onClick={() => setActiveTab('ESTRUCTURA')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
               activeTab === 'ESTRUCTURA'
                 ? 'bg-[#20162B] text-violet-300 shadow-sm border border-violet-500/40'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
-            <Layers className={`w-3.5 h-3.5 ${activeTab === 'ESTRUCTURA' ? 'text-violet-400' : 'text-slate-400'}`} />
-            Grados y Secciones
+            <Layers className={`w-3.5 h-3.5 shrink-0 ${activeTab === 'ESTRUCTURA' ? 'text-violet-400' : 'text-slate-400'}`} />
+            <span className="hidden sm:inline">Grados y Secciones</span>
+            <span className="sm:hidden">Estructura</span>
           </button>
           <button
             onClick={() => setActiveTab('DOCENTES')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
               activeTab === 'DOCENTES'
                 ? 'bg-[#20162B] text-violet-300 shadow-sm border border-violet-500/40'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
-            <UserCheck className={`w-3.5 h-3.5 ${activeTab === 'DOCENTES' ? 'text-violet-400' : 'text-slate-400'}`} />
-            Carga Horaria y Docentes
+            <UserCheck className={`w-3.5 h-3.5 shrink-0 ${activeTab === 'DOCENTES' ? 'text-violet-400' : 'text-slate-400'}`} />
+            <span className="hidden sm:inline">Carga Horaria y Docentes</span>
+            <span className="sm:hidden">Docentes</span>
           </button>
           <button
             onClick={() => setActiveTab('TEMAS')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
               activeTab === 'TEMAS'
                 ? 'bg-[#20162B] text-violet-300 shadow-sm border border-violet-500/40'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
-            <Palette className={`w-3.5 h-3.5 ${activeTab === 'TEMAS' ? 'text-violet-400' : 'text-slate-400'}`} />
-            Apariencia y Temas
+            <Palette className={`w-3.5 h-3.5 shrink-0 ${activeTab === 'TEMAS' ? 'text-violet-400' : 'text-slate-400'}`} />
+            <span className="hidden sm:inline">Apariencia y Temas</span>
+            <span className="sm:hidden">Temas</span>
           </button>
         </div>
       </div>
@@ -159,7 +163,7 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
           </div>
 
           <div className="bg-white rounded-2xl border border-slate-200 shadow-cba-card overflow-hidden">
-            <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+            <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <School className="w-4 h-4 text-[#D4AF37]" />
                 <h3 className="font-extrabold text-sm text-[#2C2E53]">
@@ -169,6 +173,7 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
               <span className="text-xs text-slate-400 font-semibold">3 Lapsos Pedagógicos</span>
             </div>
 
+            <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="bg-[#1B1C33] text-white uppercase text-[10px] tracking-wider font-extrabold">
                 <tr>
@@ -221,6 +226,7 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         </div>
       )}
@@ -279,32 +285,32 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
           </div>
 
           <div className="space-y-2 text-xs">
-            <div className="p-3 rounded-xl border border-slate-200 flex items-center justify-between">
+            <div className="p-3 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <p className="font-bold text-slate-900">Prof. Alejandro Rivas</p>
                 <p className="text-slate-500 text-[11px]">Matemáticas • 22h semanales</p>
               </div>
-              <span className="px-2.5 py-1 rounded-lg bg-slate-100 font-bold text-slate-700">
+              <span className="px-2.5 py-1 rounded-lg bg-slate-100 font-bold text-slate-700 self-start sm:self-center">
                 Docente Guía: 4to Año A
               </span>
             </div>
 
-            <div className="p-3 rounded-xl border border-slate-200 flex items-center justify-between">
+            <div className="p-3 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <p className="font-bold text-slate-900">Prof. Elena Barrios</p>
                 <p className="text-slate-500 text-[11px]">Castellano y Creación Literaria • 20h semanales</p>
               </div>
-              <span className="px-2.5 py-1 rounded-lg bg-slate-100 font-bold text-slate-700">
+              <span className="px-2.5 py-1 rounded-lg bg-slate-100 font-bold text-slate-700 self-start sm:self-center">
                 Docente Guía: 4to Año B
               </span>
             </div>
 
-            <div className="p-3 rounded-xl border border-slate-200 flex items-center justify-between">
+            <div className="p-3 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <p className="font-bold text-slate-900">Prof. Marcos Andrade</p>
                 <p className="text-slate-500 text-[11px]">Física y Laboratorio • 18h semanales</p>
               </div>
-              <span className="px-2.5 py-1 rounded-lg bg-slate-100 font-bold text-slate-700">
+              <span className="px-2.5 py-1 rounded-lg bg-slate-100 font-bold text-slate-700 self-start sm:self-center">
                 Docente Guía: 3er Año A
               </span>
             </div>

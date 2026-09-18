@@ -29,7 +29,9 @@ import { AyudaModule } from './components/ayuda/AyudaModule';
 import { BookOpen, ClipboardList, MessageSquare, WifiOff } from 'lucide-react';
 
 const SiscebaMainApp: React.FC = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth >= 1024 : true
+  );
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [shortcutsModalOpen, setShortcutsModalOpen] = useState(false);
   const [devHUDOpen, setDevHUDOpen] = useState(false);
@@ -490,39 +492,42 @@ const SiscebaMainApp: React.FC = () => {
               {(activeTab === 'INICIAL' || activeTab === 'PRIMARIA' || activeTab === 'MEDIA_GENERAL') && (
                 <div className="space-y-6">
                   {/* Pedagogical Pillar Switcher */}
-                  <div className="bg-white dark:bg-slate-900 rounded-2xl p-2 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-2 overflow-x-auto no-scrollbar">
+                  <div className="bg-white dark:bg-slate-900 rounded-2xl p-1.5 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-1.5 overflow-x-auto no-scrollbar">
                     <button
                       onClick={() => setLevelPillarTab('PLANIFICACION')}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                      className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
                         levelPillarTab === 'PLANIFICACION'
                           ? 'bg-[#2C2E53] text-[#D4AF37] shadow-sm'
                           : 'text-slate-600 hover:bg-slate-100'
                       }`}
                     >
-                      <BookOpen className="w-4 h-4" />
-                      Planificación Pedagógica
+                      <BookOpen className="w-4 h-4 shrink-0" />
+                      <span className="hidden sm:inline">Planificación Pedagógica</span>
+                      <span className="sm:hidden">Planificación</span>
                     </button>
                     <button
                       onClick={() => setLevelPillarTab('EVALUACION')}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                      className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
                         levelPillarTab === 'EVALUACION'
                           ? 'bg-[#2C2E53] text-[#D4AF37] shadow-sm'
                           : 'text-slate-600 hover:bg-slate-100'
                       }`}
                     >
-                      <ClipboardList className="w-4 h-4" />
-                      Evaluación Continua
+                      <ClipboardList className="w-4 h-4 shrink-0" />
+                      <span className="hidden sm:inline">Evaluación Continua</span>
+                      <span className="sm:hidden">Evaluación</span>
                     </button>
                     <button
                       onClick={() => setLevelPillarTab('COMUNICACION')}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                      className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
                         levelPillarTab === 'COMUNICACION'
                           ? 'bg-[#2C2E53] text-[#D4AF37] shadow-sm'
                           : 'text-slate-600 hover:bg-slate-100'
                       }`}
                     >
-                      <MessageSquare className="w-4 h-4" />
-                      Comunicación y Reportes
+                      <MessageSquare className="w-4 h-4 shrink-0" />
+                      <span className="hidden sm:inline">Comunicación y Reportes</span>
+                      <span className="sm:hidden">Comunicación</span>
                     </button>
                   </div>
 
