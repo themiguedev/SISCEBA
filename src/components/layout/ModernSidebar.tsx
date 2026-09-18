@@ -329,7 +329,7 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
                 <span className="font-extrabold text-sm tracking-wider text-white">
                   SICE-CBA
                 </span>
-                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/40">
+                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-amber-400/15 text-amber-300 border border-amber-400/30">
                   2026-2027
                 </span>
               </div>
@@ -359,8 +359,9 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
               <div key={section.id} className="space-y-1">
                 {/* Group Separator Label */}
                 {isOpen && isFirstOfGroup && (
-                  <div className="pt-2 pb-1 px-2">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-[#D4AF37]">
+                  <div className="pt-3 pb-1.5 px-2 flex items-center">
+                    <span className="text-[11px] font-extrabold uppercase tracking-wider text-amber-200 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-300 shrink-0"></span>
                       {section.categoryGroup === 'PRINCIPAL' && 'CONTROL & GESTIÓN'}
                       {section.categoryGroup === 'NIVELES' && 'NIVELES PEDAGÓGICOS'}
                       {section.categoryGroup === 'INSTITUCIONAL' && 'INSTITUCIONAL & SOPORTE'}
@@ -480,10 +481,10 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
         <div className="p-3 border-t border-[#2C2E53] bg-[#141525] shrink-0 text-center">
           {isOpen ? (
             <div className="text-[10px] text-slate-400 font-medium">
-              <span className="text-[#D4AF37] font-extrabold block text-[11px]">SICE-CBA</span>
+              <span className="text-amber-300 font-extrabold block text-[11px]">SICE-CBA</span>
             </div>
           ) : (
-            <div className="w-8 h-8 rounded-lg bg-white/5 mx-auto flex items-center justify-center text-[10px] font-black text-[#D4AF37]">
+            <div className="w-8 h-8 rounded-lg bg-white/5 mx-auto flex items-center justify-center text-[10px] font-black text-amber-300">
               CB
             </div>
           )}
