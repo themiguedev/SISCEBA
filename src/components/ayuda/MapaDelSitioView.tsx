@@ -68,7 +68,7 @@ export const MapaDelSitioView: React.FC<MapaDelSitioViewProps> = ({ onNavigate }
     {
       id: 'map-4',
       module: 'Gestión',
-      submodule: 'Inscripciones (Wizard en 3 Pasos)',
+      submodule: 'Inscripciones (En 3 Pasos)',
       roleRequired: 'ADM',
       description: 'ADM: Admisión formal de estudiantes vinculando representante, alumno y grado.',
       targetTab: 'GESTION',

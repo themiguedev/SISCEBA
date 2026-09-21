@@ -137,7 +137,7 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
       activeSubTabStyle: 'bg-emerald-500/15 text-emerald-200 border-l-2 border-emerald-400 font-bold shadow-sm',
       subTabActiveIcon: 'text-emerald-300',
       subTabs: [
-        { id: 'INSCRIPCIONES', label: 'Inscripciones (Wizard)', icon: UserCheck },
+        { id: 'INSCRIPCIONES', label: 'Inscripciones', icon: UserCheck },
         { id: 'PASES', label: 'Pases por Retraso', icon: Clock },
         { id: 'INASISTENCIAS', label: 'Inasistencias (Diarias / Lapso)', icon: Users },
         { id: 'CONDUCTAS', label: 'Conductas y Faltas', icon: ShieldAlert },

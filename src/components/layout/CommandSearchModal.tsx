@@ -83,7 +83,7 @@ export const CommandSearchModal: React.FC<CommandSearchModalProps> = ({
       icon: ClipboardList
     },
     {
-      title: 'Asistente de Inscripciones (Wizard)',
+      title: 'Asistente de Inscripciones',
       category: 'Gestión Escolar',
       tab: 'GESTION',
       subTab: 'INSCRIPCIONES',

@@ -49,7 +49,7 @@ export const CompactWorkspaceHeader: React.FC<CompactWorkspaceHeaderProps> = ({
 
   const subTabLabels: Record<string, string> = {
     // Gestión
-    INSCRIPCIONES: 'Inscripciones (Wizard)',
+    INSCRIPCIONES: 'Inscripciones',
     PASES: 'Pases por Retraso',
     INASISTENCIAS: 'Inasistencias (Diarias / Lapso)',
     CONDUCTAS: 'Conductas y Faltas',

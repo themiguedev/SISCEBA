@@ -187,7 +187,7 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
     },
     {
       id: 'guia-4',
-      title: 'Asistente de Inscripciones en 3 Pasos (Wizard)',
+      title: 'Asistente de Inscripciones en 3 Pasos',
       category: 'Gestión',
       roleRequired: 'ADM',
       summary: 'Registro formal de alumnos regulares y nuevos ingresos vinculando datos familiares, académicos y de salud.',

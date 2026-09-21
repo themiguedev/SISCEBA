@@ -37,7 +37,7 @@ export const GestionModule: React.FC<GestionModuleProps> = ({
     {
       id: 'INSCRIPCIONES',
       label: 'Inscripciones',
-      sublabel: 'Wizard 3 Pasos',
+      sublabel: 'En 3 Pasos',
       icon: UserCheck
     },
     {
