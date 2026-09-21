@@ -19,7 +19,8 @@ import {
   TitleRecord,
   SchoolYearConfig,
   CommunityNotice,
-  BirthdayPerson
+  BirthdayPerson,
+  AppUser
 } from '../types';
 
 export const INITIAL_AREAS: SubjectArea[] = [
@@ -1668,4 +1669,85 @@ export const INITIAL_BIRTHDAYS: BirthdayPerson[] = [
     isToday: false
   }
 ];
+
+export const INITIAL_USERS: AppUser[] = [
+  {
+    id: 'usr-admin-1',
+    username: 'admin',
+    password: 'cba2026*admin',
+    fullName: 'Ing. Administrador General',
+    email: 'admin@bellasartes.edu.ve',
+    role: 'ADMINISTRADOR',
+    defaultLevel: 'MEDIA_GENERAL',
+    active: true,
+    avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150'
+  },
+  {
+    id: 'usr-director-1',
+    username: 'director',
+    password: 'cba2026*director',
+    fullName: 'Prof. Director General CBA',
+    email: 'direccion@bellasartes.edu.ve',
+    role: 'DIRECTOR',
+    defaultLevel: 'MEDIA_GENERAL',
+    active: true,
+    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150'
+  },
+  {
+    id: 'usr-coord-1',
+    username: 'coordinacion',
+    password: 'cba2026*coord',
+    fullName: 'Lic. Lissette Chacín',
+    email: 'coordinacion@bellasartes.edu.ve',
+    role: 'COORDINACION',
+    defaultLevel: 'MEDIA_GENERAL',
+    active: true,
+    avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150'
+  },
+  {
+    id: 'usr-docente-1',
+    username: 'docente',
+    password: 'cba2026*docente',
+    fullName: 'Prof. Marcos Andrade',
+    email: 'mandrade@bellasartes.edu.ve',
+    role: 'DOCENTE',
+    defaultLevel: 'MEDIA_GENERAL',
+    active: true,
+    avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150'
+  },
+  {
+    id: 'usr-docente-pri',
+    username: 'docente_primaria',
+    password: 'cba2026*primaria',
+    fullName: 'Prof. Elena Barrios',
+    email: 'ebarrios@bellasartes.edu.ve',
+    role: 'DOCENTE',
+    defaultLevel: 'PRIMARIA',
+    active: true,
+    avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150'
+  },
+  {
+    id: 'usr-rep-1',
+    username: 'representante',
+    password: 'cba2026*padre',
+    fullName: 'Ing. Carlos Urdaneta',
+    email: 'curdaneta@oilfield.com',
+    role: 'REPRESENTANTE',
+    defaultLevel: 'MEDIA_GENERAL',
+    active: true,
+    avatarUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150'
+  },
+  {
+    id: 'usr-est-1',
+    username: 'estudiante',
+    password: 'cba2026*alumno',
+    fullName: 'Camila Isabella Urdaneta Moreno',
+    email: 'camila.urdaneta@bellasartes.edu.ve',
+    role: 'ESTUDIANTE',
+    defaultLevel: 'MEDIA_GENERAL',
+    active: true,
+    avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150'
+  }
+];
+
 

@@ -2,6 +2,18 @@ export type EducationalLevel = 'INICIAL' | 'PRIMARIA' | 'MEDIA_GENERAL';
 
 export type UserRole = 'DOCENTE' | 'COORDINACION' | 'COORDINADOR' | 'DIRECTOR' | 'ADMINISTRADOR' | 'REPRESENTANTE' | 'ESTUDIANTE';
 
+export interface AppUser {
+  id: string;
+  username: string;
+  password?: string;
+  fullName: string;
+  email: string;
+  role: UserRole;
+  defaultLevel: EducationalLevel;
+  active: boolean;
+  avatarUrl?: string;
+}
+
 export type SubjectType = 'REGULAR' | 'INTEGRADA' | 'ESPECIALIZADA';
 
 export interface SubjectArea {

@@ -269,7 +269,21 @@ CREATE TABLE IF NOT EXISTS system_notifications (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 18. TRIGGERS PARA UPDATED_AT
+-- 18. TABLA DE USUARIOS Y ROLES (MODOS DE OPERACIÓN)
+CREATE TABLE IF NOT EXISTS app_users (
+    id VARCHAR(60) PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(100) NOT NULL,
+    full_name VARCHAR(150) NOT NULL,
+    email VARCHAR(120),
+    role VARCHAR(30) NOT NULL CHECK (role IN ('DOCENTE', 'COORDINACION', 'COORDINADOR', 'DIRECTOR', 'ADMINISTRADOR', 'REPRESENTANTE', 'ESTUDIANTE')),
+    default_level VARCHAR(20) DEFAULT 'MEDIA_GENERAL' CHECK (default_level IN ('INICIAL', 'PRIMARIA', 'MEDIA_GENERAL')),
+    active BOOLEAN DEFAULT TRUE,
+    avatar_url TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 19. TRIGGERS PARA UPDATED_AT
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -391,3 +405,10 @@ DROP POLICY IF EXISTS "Permitir lectura general a system_notifications" ON syste
 DROP POLICY IF EXISTS "Permitir escritura general a system_notifications" ON system_notifications;
 CREATE POLICY "Permitir lectura general a system_notifications" ON system_notifications FOR SELECT USING (true);
 CREATE POLICY "Permitir escritura general a system_notifications" ON system_notifications FOR ALL USING (true);
+
+ALTER TABLE app_users ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Permitir lectura general a app_users" ON app_users;
+DROP POLICY IF EXISTS "Permitir escritura general a app_users" ON app_users;
+CREATE POLICY "Permitir lectura general a app_users" ON app_users FOR SELECT USING (true);
+CREATE POLICY "Permitir escritura general a app_users" ON app_users FOR ALL USING (true);
+

@@ -13,7 +13,8 @@ import {
   AdministrativeBlockEntry,
   TitleRecord,
   CommunityNotice,
-  SystemNotification
+  SystemNotification,
+  AppUser
 } from '../types';
 
 /**
@@ -761,6 +762,51 @@ export const supabaseSaveNotification = async (notif: SystemNotification): Promi
       action_tab: notif.actionTab || null,
       action_sub_tab: notif.actionSubTab || null,
       delivery_channels: notif.deliveryChannels || ['PORTAL']
+    });
+    return !error;
+  } catch {
+    return false;
+  }
+};
+
+// ==========================================
+// 14. USUARIOS DEL SISTEMA (app_users)
+// ==========================================
+export const supabaseFetchUsers = async (): Promise<AppUser[] | null> => {
+  if (!isSupabaseConfigured()) return null;
+  try {
+    const { data, error } = await supabase.from('app_users').select('*');
+    if (error || !data || data.length === 0) return null;
+
+    return data.map(row => ({
+      id: row.id,
+      username: row.username,
+      password: row.password,
+      fullName: row.full_name,
+      email: row.email,
+      role: row.role,
+      defaultLevel: row.default_level || 'MEDIA_GENERAL',
+      active: row.active ?? true,
+      avatarUrl: row.avatar_url
+    }));
+  } catch {
+    return null;
+  }
+};
+
+export const supabaseSaveUser = async (user: AppUser): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('app_users').upsert({
+      id: user.id,
+      username: user.username,
+      password: user.password,
+      full_name: user.fullName,
+      email: user.email,
+      role: user.role,
+      default_level: user.defaultLevel,
+      active: user.active,
+      avatar_url: user.avatarUrl
     });
     return !error;
   } catch {

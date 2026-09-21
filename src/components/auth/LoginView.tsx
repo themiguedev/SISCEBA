@@ -19,12 +19,12 @@ interface LoginViewProps {
 }
 
 export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
-  const { login } = useApp();
+  const { login, users } = useApp();
 
   const [username, setUsername] = useState(() => {
     return localStorage.getItem('sisceba_remembered_user') || 'admin';
   });
-  const [password, setPassword] = useState('••••••••');
+  const [password, setPassword] = useState('cba2026*admin');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [capsLockActive, setCapsLockActive] = useState(false);
@@ -55,9 +55,15 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
     }
 
     setTimeout(() => {
+      const ok = login(username, password);
+      if (!ok) {
+        setLoginState('IDLE');
+        setErrorMsg('Contraseña incorrecta para el usuario indicado.');
+        return;
+      }
+
       setLoginState('SUCCESS');
       setTimeout(() => {
-        login(username, password);
         onLoginSuccess?.();
       }, 350);
     }, 450);
@@ -256,6 +262,45 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
               )}
               {loginState === 'IDLE' && <span>INGRESAR</span>}
             </button>
+          </div>
+
+          {/* Cuentas de Prueba por Modo de Operación */}
+          <div className="pt-3 mt-3 border-t border-slate-100">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2 text-center">
+              Cuentas de Prueba por Modo de Operación
+            </p>
+            <div className="flex flex-wrap gap-1.5 justify-center">
+              {users.map((u) => {
+                const isSelected = username.toLowerCase() === u.username.toLowerCase();
+                return (
+                  <button
+                    key={u.id}
+                    type="button"
+                    onClick={() => {
+                      setUsername(u.username);
+                      setPassword(u.password || '');
+                      setErrorMsg('');
+                    }}
+                    className={`px-2 py-1 rounded text-[10px] font-bold transition border cursor-pointer ${
+                      isSelected
+                        ? 'bg-[#2C2E53] text-[#D4AF37] border-[#D4AF37] shadow-sm scale-105'
+                        : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
+                    }`}
+                    title={`Usuario: ${u.username} • Rol: ${u.role}`}
+                  >
+                    {u.role === 'ADMINISTRADOR' && '👑 Admin'}
+                    {u.role === 'DIRECTOR' && '🏛️ Director'}
+                    {u.role === 'COORDINACION' && '📋 Coord.'}
+                    {u.role === 'DOCENTE' && (u.defaultLevel === 'PRIMARIA' ? '🎨 Doc. Primaria' : '🔬 Doc. Media')}
+                    {u.role === 'REPRESENTANTE' && '👨‍👩‍👦 Representante'}
+                    {u.role === 'ESTUDIANTE' && '🎒 Estudiante'}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-[9px] text-slate-400 text-center mt-2 italic">
+              Haz clic en cualquiera para autocompletar sus credenciales oficiales.
+            </p>
           </div>
         </form>
       </div>

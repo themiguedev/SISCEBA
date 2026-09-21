@@ -26,7 +26,8 @@ import {
   CommunityNotice,
   BirthdayPerson,
   MainNavigationTab,
-  SystemNotification
+  SystemNotification,
+  AppUser
 } from '../types';
 import {
   INITIAL_AREAS,
@@ -49,7 +50,8 @@ import {
   INITIAL_TITLES,
   INITIAL_SCHOOL_YEAR_CONFIG,
   INITIAL_COMMUNITY_NOTICES,
-  INITIAL_BIRTHDAYS
+  INITIAL_BIRTHDAYS,
+  INITIAL_USERS
 } from '../data/seedData';
 import { isSupabaseConfigured, checkSupabaseConnection } from '../lib/supabaseClient';
 import {
@@ -67,6 +69,7 @@ import {
   supabaseFetchTitleRecords,
   supabaseFetchCommunityNotices,
   supabaseFetchNotifications,
+  supabaseFetchUsers,
   supabaseSaveEvaluation,
   supabaseBulkSaveEvaluations,
   supabaseSaveDidacticPlan,
@@ -78,12 +81,15 @@ import {
   supabaseSaveAdminBlock,
   supabaseSaveTitleRecord,
   supabaseSaveCommunityNotice,
-  supabaseSaveNotification
+  supabaseSaveNotification,
+  supabaseSaveUser
 } from '../services/supabaseService';
 
 interface AppContextType {
   // Navigation & Session
   isAuthenticated: boolean;
+  currentUser: AppUser | null;
+  users: AppUser[];
   login: (username: string, password?: string, role?: UserRole) => boolean;
   logout: () => void;
   currentLevel: EducationalLevel;
@@ -260,24 +266,75 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [activeLapso, setActiveLapso] = useState<1 | 2 | 3>(1);
   const [currentSection, setCurrentSection] = useState<string>('4to Año A');
 
+  // User & Accounts Store
+  const [users, setUsers] = useState<AppUser[]>(() => {
+    const saved = localStorage.getItem('sisceba_users');
+    return saved ? JSON.parse(saved) : INITIAL_USERS;
+  });
+
+  const [currentUser, setCurrentUser] = useState<AppUser | null>(() => {
+    const saved = localStorage.getItem('sisceba_current_user');
+    return saved ? JSON.parse(saved) : INITIAL_USERS[0];
+  });
+
   // Authentication & Session States
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     const saved = localStorage.getItem('sisceba_auth_session');
     return saved === 'true';
   });
 
-  const login = (_username: string, _password?: string, role?: UserRole) => {
-    setIsAuthenticated(true);
-    localStorage.setItem('sisceba_auth_session', 'true');
+  useEffect(() => {
+    localStorage.setItem('sisceba_users', JSON.stringify(users));
+  }, [users]);
+
+  useEffect(() => {
+    if (currentUser) {
+      localStorage.setItem('sisceba_current_user', JSON.stringify(currentUser));
+    } else {
+      localStorage.removeItem('sisceba_current_user');
+    }
+  }, [currentUser]);
+
+  const login = (username: string, password?: string, role?: UserRole): boolean => {
+    const trimmedUser = username.trim().toLowerCase();
+    const matched = users.find(u => u.username.toLowerCase() === trimmedUser);
+
+    if (matched) {
+      if (password && matched.password && password !== matched.password && password !== '••••••••') {
+        return false;
+      }
+      setCurrentUser(matched);
+      setCurrentRole(matched.role);
+      setCurrentLevel(matched.defaultLevel);
+      setIsAuthenticated(true);
+      localStorage.setItem('sisceba_auth_session', 'true');
+      return true;
+    }
+
+    // Fallback if user doesn't match an existing account
+    const fallbackUser: AppUser = {
+      id: `usr-${Date.now()}`,
+      username,
+      fullName: username,
+      email: '',
+      role: role || 'DOCENTE',
+      defaultLevel: currentLevel,
+      active: true
+    };
+    setCurrentUser(fallbackUser);
     if (role) {
       setCurrentRole(role);
     }
+    setIsAuthenticated(true);
+    localStorage.setItem('sisceba_auth_session', 'true');
     return true;
   };
 
   const logout = () => {
     setIsAuthenticated(false);
+    setCurrentUser(null);
     localStorage.setItem('sisceba_auth_session', 'false');
+    localStorage.removeItem('sisceba_current_user');
   };
 
   // Synchronize section when level changes
@@ -334,7 +391,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         remoteBlocks,
         remoteTitles,
         remoteNotices,
-        remoteNotifications
+        remoteNotifications,
+        remoteUsers
       ] = await Promise.all([
         supabaseFetchStudents(),
         supabaseFetchSubjectAreas(),
@@ -349,7 +407,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         supabaseFetchAdminBlocks(),
         supabaseFetchTitleRecords(),
         supabaseFetchCommunityNotices(),
-        supabaseFetchNotifications()
+        supabaseFetchNotifications(),
+        supabaseFetchUsers()
       ]);
 
       if (remoteStudents && remoteStudents.length > 0) setStudents(remoteStudents);
@@ -366,6 +425,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (remoteTitles && remoteTitles.length > 0) setTitles(remoteTitles);
       if (remoteNotices && remoteNotices.length > 0) setCommunityNotices(remoteNotices);
       if (remoteNotifications && remoteNotifications.length > 0) setNotifications(remoteNotifications);
+      if (remoteUsers && remoteUsers.length > 0) setUsers(remoteUsers);
     } catch (e) {
       console.warn('Aviso durante la sincronización inicial con Supabase:', e);
     }
@@ -1097,7 +1157,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         resetToSeedData,
         isSupabaseActive,
         supabaseStatusText,
-        refreshFromSupabase
+        refreshFromSupabase,
+        currentUser,
+        users
       }}
     >
       {children}

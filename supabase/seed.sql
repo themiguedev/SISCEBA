@@ -139,3 +139,16 @@ VALUES
 ('notif-3', 'Constancia de Estudio Lista', 'La solicitud de Constancia de Estudio (CBA-DOC-2026-081) ha sido firmada y sellada en Control de Estudios.', 'Hace 2 horas', true, 'DOCUMENTOS', 'MEDIA', 'REPRESENTANTE', 'Diego Alejandro Silva', 'GESTION', 'DOCUMENTOS', ARRAY['PORTAL', 'EMAIL']),
 ('notif-4', 'Apertura de Lapso 1 • Carga de Evaluaciones', 'Dirección y Control de Estudios han habilitado el Lapso 1 para el registro formal de planes e indicadores.', 'Ayer', true, 'INSTITUCIONAL', 'BAJA', 'DOCENTE', NULL, 'CONFIGURACION', 'LAPSOS', ARRAY['PORTAL'])
 ON CONFLICT (id) DO NOTHING;
+
+-- 11. USUARIOS Y CUENTAS DE PRUEBA (POR MODO DE OPERACIÓN)
+INSERT INTO app_users (id, username, password, full_name, email, role, default_level, active, avatar_url)
+VALUES
+('usr-admin-1', 'admin', 'cba2026*admin', 'Ing. Administrador General', 'admin@bellasartes.edu.ve', 'ADMINISTRADOR', 'MEDIA_GENERAL', true, 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150'),
+('usr-director-1', 'director', 'cba2026*director', 'Prof. Director General CBA', 'direccion@bellasartes.edu.ve', 'DIRECTOR', 'MEDIA_GENERAL', true, 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150'),
+('usr-coord-1', 'coordinacion', 'cba2026*coord', 'Lic. Lissette Chacín', 'coordinacion@bellasartes.edu.ve', 'COORDINACION', 'MEDIA_GENERAL', true, 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150'),
+('usr-docente-1', 'docente', 'cba2026*docente', 'Prof. Marcos Andrade', 'mandrade@bellasartes.edu.ve', 'DOCENTE', 'MEDIA_GENERAL', true, 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150'),
+('usr-docente-pri', 'docente_primaria', 'cba2026*primaria', 'Prof. Elena Barrios', 'ebarrios@bellasartes.edu.ve', 'DOCENTE', 'PRIMARIA', true, 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150'),
+('usr-rep-1', 'representante', 'cba2026*padre', 'Ing. Carlos Urdaneta', 'curdaneta@oilfield.com', 'REPRESENTANTE', 'MEDIA_GENERAL', true, 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150'),
+('usr-est-1', 'estudiante', 'cba2026*alumno', 'Camila Isabella Urdaneta Moreno', 'camila.urdaneta@bellasartes.edu.ve', 'ESTUDIANTE', 'MEDIA_GENERAL', true, 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150')
+ON CONFLICT (id) DO NOTHING;
+
