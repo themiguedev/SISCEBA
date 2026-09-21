@@ -58,7 +58,8 @@ export const DeveloperConsoleHUD: React.FC<DeveloperConsoleHUDProps> = ({
     students,
     areas,
     plansQuincenal,
-    evaluations
+    evaluations,
+    currentUser
   } = useApp();
 
   const { mode, palette, isDark, toggleMode, currentTheme } = useTheme();
@@ -213,30 +214,37 @@ export const DeveloperConsoleHUD: React.FC<DeveloperConsoleHUDProps> = ({
             <span className="text-[10px] font-mono text-slate-400">Ctrl+Shift+R</span>
           </div>
 
-          <div className="grid grid-cols-1 gap-1.5">
-            {AVAILABLE_ROLES.map((role) => {
-              const isSelected = currentRole === role.id;
-              return (
-                <button
-                  key={role.id}
-                  onClick={() => {
-                    setCurrentRole(role.id);
-                    onShowToast(`Rol simulado: ${role.label}`, role.desc, true);
-                  }}
-                  className={`flex items-center justify-between px-3 py-2 rounded-xl text-left font-semibold transition-all ${
-                    isSelected
-                      ? 'bg-amber-500 text-slate-950 font-black shadow-md'
-                      : 'bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/5'
-                  }`}
-                >
-                  <span className="text-xs">{role.label}</span>
-                  <span className={`text-[10px] font-mono opacity-80 ${isSelected ? 'text-slate-900' : 'text-slate-400'}`}>
-                    {role.id}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+          {currentUser?.role === 'ADMINISTRADOR' ? (
+            <div className="grid grid-cols-1 gap-1.5">
+              {AVAILABLE_ROLES.map((role) => {
+                const isSelected = currentRole === role.id;
+                return (
+                  <button
+                    key={role.id}
+                    onClick={() => {
+                      setCurrentRole(role.id);
+                      onShowToast(`Rol simulado: ${role.label}`, role.desc, true);
+                    }}
+                    className={`flex items-center justify-between px-3 py-2 rounded-xl text-left font-semibold transition-all ${
+                      isSelected
+                        ? 'bg-amber-500 text-slate-950 font-black shadow-md'
+                        : 'bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/5'
+                    }`}
+                  >
+                    <span className="text-xs">{role.label}</span>
+                    <span className={`text-[10px] font-mono opacity-80 ${isSelected ? 'text-slate-900' : 'text-slate-400'}`}>
+                      {role.id}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-xs text-slate-300">
+              <span className="text-amber-400 font-bold block mb-1">Modo Bloqueado</span>
+              La simulación de roles en la consola está reservada exclusivamente para el usuario con rol de Administrador. Su sesión actual tiene asignado el rol <span className="font-bold text-white">{currentRole}</span>.
+            </div>
+          )}
         </div>
 
         {/* 3. Academic Level & Lapso Switcher */}

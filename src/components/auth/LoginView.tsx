@@ -34,7 +34,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
   const [userFocused, setUserFocused] = useState(false);
   const [passFocused, setPassFocused] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username.trim()) {
       setErrorMsg('Por favor ingrese su usuario institucional.');
@@ -48,25 +48,28 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
     setLoginState('LOADING');
     setErrorMsg('');
 
-    if (rememberMe) {
-      localStorage.setItem('sisceba_remembered_user', username);
-    } else {
-      localStorage.removeItem('sisceba_remembered_user');
-    }
-
-    setTimeout(() => {
-      const ok = login(username, password);
-      if (!ok) {
+    try {
+      const res = await login(username, password);
+      if (!res.success) {
         setLoginState('IDLE');
-        setErrorMsg('Contraseña incorrecta para el usuario indicado.');
+        setErrorMsg(res.message || 'Credenciales inválidas. Acceso restringido a cuentas registradas en la base de datos.');
         return;
+      }
+
+      if (rememberMe) {
+        localStorage.setItem('sisceba_remembered_user', username);
+      } else {
+        localStorage.removeItem('sisceba_remembered_user');
       }
 
       setLoginState('SUCCESS');
       setTimeout(() => {
         onLoginSuccess?.();
       }, 350);
-    }, 450);
+    } catch {
+      setLoginState('IDLE');
+      setErrorMsg('Error al conectar con la base de datos institucional.');
+    }
   };
 
   const handlePasswordKey = (e: React.KeyboardEvent<HTMLInputElement>) => {

@@ -62,6 +62,7 @@ const SiscebaMainApp: React.FC = () => {
     currentRole,
     setCurrentRole,
     isAuthenticated,
+    currentUser,
     students,
     areas,
     plansQuincenal,
@@ -213,9 +214,13 @@ const SiscebaMainApp: React.FC = () => {
     }, 2200);
   };
 
-  // Dev Action: Cycle through user roles
+  // Dev Action: Cycle through user roles (solo permitido para Administrador)
   const handleCycleRole = () => {
-    const roles: UserRole[] = ['ADMINISTRADOR', 'COORDINADOR', 'DOCENTE', 'REPRESENTANTE', 'ESTUDIANTE'];
+    if (currentUser?.role !== 'ADMINISTRADOR') {
+      showToast('Acceso Restringido', 'Solo la cuenta de Administrador puede simular otros roles.', true);
+      return;
+    }
+    const roles: UserRole[] = ['ADMINISTRADOR', 'DIRECTOR', 'COORDINACION', 'DOCENTE', 'REPRESENTANTE', 'ESTUDIANTE'];
     const nextIdx = (roles.indexOf(currentRole) + 1) % roles.length;
     const nextRole = roles[nextIdx];
     setCurrentRole(nextRole);

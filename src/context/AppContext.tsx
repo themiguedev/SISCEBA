@@ -53,7 +53,7 @@ import {
   INITIAL_BIRTHDAYS,
   INITIAL_USERS
 } from '../data/seedData';
-import { isSupabaseConfigured, checkSupabaseConnection } from '../lib/supabaseClient';
+import { supabase, isSupabaseConfigured, checkSupabaseConnection } from '../lib/supabaseClient';
 import {
   supabaseFetchStudents,
   supabaseFetchSubjectAreas,
@@ -90,7 +90,7 @@ interface AppContextType {
   isAuthenticated: boolean;
   currentUser: AppUser | null;
   users: AppUser[];
-  login: (username: string, password?: string, role?: UserRole) => boolean;
+  login: (username: string, password?: string) => Promise<{ success: boolean; message?: string }>;
   logout: () => void;
   currentLevel: EducationalLevel;
   setCurrentLevel: (level: EducationalLevel) => void;
@@ -260,12 +260,6 @@ export const INITIAL_SYSTEM_NOTIFICATIONS: SystemNotification[] = [
 ];
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Session States
-  const [currentLevel, setCurrentLevel] = useState<EducationalLevel>('MEDIA_GENERAL');
-  const [currentRole, setCurrentRole] = useState<UserRole>('DOCENTE');
-  const [activeLapso, setActiveLapso] = useState<1 | 2 | 3>(1);
-  const [currentSection, setCurrentSection] = useState<string>('4to Año A');
-
   // User & Accounts Store
   const [users, setUsers] = useState<AppUser[]>(() => {
     const saved = localStorage.getItem('sisceba_users');
@@ -274,13 +268,48 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [currentUser, setCurrentUser] = useState<AppUser | null>(() => {
     const saved = localStorage.getItem('sisceba_current_user');
-    return saved ? JSON.parse(saved) : INITIAL_USERS[0];
+    const auth = localStorage.getItem('sisceba_auth_session');
+    if (auth === 'true' && saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        return null;
+      }
+    }
+    return null;
   });
+
+  // Session States
+  const [currentLevel, setCurrentLevel] = useState<EducationalLevel>(() => {
+    const saved = localStorage.getItem('sisceba_current_user');
+    if (saved) {
+      try {
+        const u = JSON.parse(saved);
+        if (u.defaultLevel) return u.defaultLevel;
+      } catch { /* ignore */ }
+    }
+    return 'MEDIA_GENERAL';
+  });
+
+  const [currentRole, setCurrentRole] = useState<UserRole>(() => {
+    const saved = localStorage.getItem('sisceba_current_user');
+    if (saved) {
+      try {
+        const u = JSON.parse(saved);
+        if (u.role) return u.role;
+      } catch { /* ignore */ }
+    }
+    return 'DOCENTE';
+  });
+
+  const [activeLapso, setActiveLapso] = useState<1 | 2 | 3>(1);
+  const [currentSection, setCurrentSection] = useState<string>('4to Año A');
 
   // Authentication & Session States
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     const saved = localStorage.getItem('sisceba_auth_session');
-    return saved === 'true';
+    const user = localStorage.getItem('sisceba_current_user');
+    return saved === 'true' && !!user;
   });
 
   useEffect(() => {
@@ -295,39 +324,84 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [currentUser]);
 
-  const login = (username: string, password?: string, role?: UserRole): boolean => {
+  const login = async (username: string, password?: string): Promise<{ success: boolean; message?: string }> => {
     const trimmedUser = username.trim().toLowerCase();
-    const matched = users.find(u => u.username.toLowerCase() === trimmedUser);
+    let matched = users.find(u => u.username.toLowerCase() === trimmedUser);
 
-    if (matched) {
-      if (password && matched.password && password !== matched.password && password !== '••••••••') {
-        return false;
+    // Si Supabase está configurado, validamos directamente contra la tabla app_users en tiempo real
+    if (isSupabaseConfigured()) {
+      try {
+        const { data, error } = await supabase
+          .from('app_users')
+          .select('*')
+          .ilike('username', trimmedUser)
+          .limit(1);
+
+        if (!error && data && data.length > 0) {
+          const row = data[0];
+          matched = {
+            id: row.id,
+            username: row.username,
+            password: row.password,
+            fullName: row.full_name,
+            email: row.email,
+            role: row.role,
+            defaultLevel: row.default_level || 'MEDIA_GENERAL',
+            active: row.active ?? true,
+            avatarUrl: row.avatar_url
+          };
+          // Actualizar en el estado local de usuarios
+          setUsers(prev => {
+            const idx = prev.findIndex(u => u.id === matched!.id || u.username.toLowerCase() === trimmedUser);
+            if (idx >= 0) {
+              const copy = [...prev];
+              copy[idx] = matched!;
+              return copy;
+            }
+            return [...prev, matched!];
+          });
+        } else if (!error && (!data || data.length === 0)) {
+          // El usuario definitivamente NO existe en la base de datos de Supabase
+          matched = undefined;
+        }
+      } catch (err) {
+        console.warn('Error verificando usuario en Supabase:', err);
       }
-      setCurrentUser(matched);
-      setCurrentRole(matched.role);
-      setCurrentLevel(matched.defaultLevel);
-      setIsAuthenticated(true);
-      localStorage.setItem('sisceba_auth_session', 'true');
-      return true;
     }
 
-    // Fallback if user doesn't match an existing account
-    const fallbackUser: AppUser = {
-      id: `usr-${Date.now()}`,
-      username,
-      fullName: username,
-      email: '',
-      role: role || 'DOCENTE',
-      defaultLevel: currentLevel,
-      active: true
-    };
-    setCurrentUser(fallbackUser);
-    if (role) {
-      setCurrentRole(role);
+    // Regla estricta: Solo cuentas registradas en la base de datos
+    if (!matched) {
+      return {
+        success: false,
+        message: 'Usuario no registrado en la base de datos institucional de SICE-CBA.'
+      };
     }
+
+    // Comprobación de estado activo
+    if (!matched.active) {
+      return {
+        success: false,
+        message: 'Esta cuenta institucional ha sido desactivada por Dirección.'
+      };
+    }
+
+    // Validación estricta de contraseña
+    if (matched.password) {
+      if (!password || (password !== matched.password && password !== '••••••••')) {
+        return {
+          success: false,
+          message: 'Contraseña incorrecta. Por favor verifique sus credenciales.'
+        };
+      }
+    }
+
+    setCurrentUser(matched);
+    setCurrentRole(matched.role);
+    setCurrentLevel(matched.defaultLevel);
     setIsAuthenticated(true);
     localStorage.setItem('sisceba_auth_session', 'true');
-    return true;
+    localStorage.setItem('sisceba_current_user', JSON.stringify(matched));
+    return { success: true };
   };
 
   const logout = () => {
@@ -425,7 +499,34 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (remoteTitles && remoteTitles.length > 0) setTitles(remoteTitles);
       if (remoteNotices && remoteNotices.length > 0) setCommunityNotices(remoteNotices);
       if (remoteNotifications && remoteNotifications.length > 0) setNotifications(remoteNotifications);
-      if (remoteUsers && remoteUsers.length > 0) setUsers(remoteUsers);
+      if (remoteUsers && remoteUsers.length > 0) {
+        setUsers(remoteUsers);
+        // Validar que la sesión activa corresponda a un usuario existente y activo en la base de datos
+        const savedUserStr = localStorage.getItem('sisceba_current_user');
+        if (savedUserStr) {
+          try {
+            const savedUser = JSON.parse(savedUserStr);
+            const verified = remoteUsers.find(
+              u => u.username.toLowerCase() === savedUser.username?.toLowerCase() && u.active
+            );
+            if (!verified) {
+              console.warn('Usuario de sesión no encontrado o inactivo en la base de datos. Cerrando sesión.');
+              setIsAuthenticated(false);
+              setCurrentUser(null);
+              localStorage.setItem('sisceba_auth_session', 'false');
+              localStorage.removeItem('sisceba_current_user');
+            } else {
+              setCurrentUser(verified);
+              setCurrentRole(verified.role);
+            }
+          } catch {
+            setIsAuthenticated(false);
+            setCurrentUser(null);
+            localStorage.setItem('sisceba_auth_session', 'false');
+            localStorage.removeItem('sisceba_current_user');
+          }
+        }
+      }
     } catch (e) {
       console.warn('Aviso durante la sincronización inicial con Supabase:', e);
     }

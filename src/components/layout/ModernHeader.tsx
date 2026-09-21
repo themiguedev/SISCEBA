@@ -51,6 +51,7 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
     activeLapso,
     setActiveLapso,
     logout,
+    currentUser,
     isSupabaseActive,
     supabaseStatusText
   } = useApp();
@@ -270,17 +271,18 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
             )}
           </div>
 
-          {/* Role Selector */}
+          {/* User Profile & Role Selector */}
           <div className="relative shrink-0">
             <button
               onClick={() => setRoleMenuOpen(!roleMenuOpen)}
               className="flex items-center gap-1.5 bg-[#2C2E53] hover:bg-[#353866] text-white px-2 sm:px-2.5 py-1.5 rounded-xl border border-[#414474] text-xs font-bold transition whitespace-nowrap"
-              title={`Rol activo: ${currentRole}`}
+              title={`Usuario: ${currentUser?.fullName || currentUser?.username || 'Usuario'} • Rol: ${currentRole}`}
             >
               <div className="w-5 h-5 rounded-full bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-[10px] text-[#D4AF37] font-black shrink-0">
-                {currentRole[0]}
+                {(currentUser?.fullName?.[0] || currentRole[0] || 'U').toUpperCase()}
               </div>
-              <span className="hidden xl:inline">{currentRole}</span>
+              <span className="hidden xl:inline max-w-[130px] truncate">{currentUser?.fullName || currentRole}</span>
+              <span className="hidden sm:inline xl:hidden">{currentRole}</span>
               <ChevronDown className="w-3 h-3 text-slate-400 shrink-0" />
             </button>
             {roleMenuOpen && (
@@ -289,29 +291,47 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
                   className="fixed inset-0 z-40 sm:hidden"
                   onClick={() => setRoleMenuOpen(false)}
                 />
-                <div className="absolute right-0 mt-2 w-56 bg-[#1B1C33] border border-[#414474] rounded-xl shadow-2xl p-1.5 z-50 animate-in fade-in zoom-in-95">
-                  <div className="px-3 py-1.5 border-b border-[#2C2E53] mb-1">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                      Modo de Operación
-                    </span>
+                <div className="absolute right-0 mt-2 w-64 bg-[#1B1C33] border border-[#414474] rounded-xl shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95">
+                  <div className="px-3 py-2 border-b border-[#2C2E53] mb-1.5">
+                    <p className="text-xs font-bold text-white truncate">
+                      {currentUser?.fullName || 'Usuario CBA'}
+                    </p>
+                    <p className="text-[10px] font-mono text-[#D4AF37]">
+                      @{currentUser?.username || 'usuario'} • {currentRole}
+                    </p>
                   </div>
-                  {(['ADMINISTRADOR', 'DIRECTOR', 'COORDINADOR', 'DOCENTE', 'REPRESENTANTE', 'ESTUDIANTE'] as UserRole[]).map((r) => (
-                    <button
-                      key={r}
-                      onClick={() => {
-                        setCurrentRole(r);
-                        setRoleMenuOpen(false);
-                      }}
-                      className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold transition ${
-                        currentRole === r
-                          ? 'bg-[#2C2E53] text-[#D4AF37]'
-                          : 'text-slate-300 hover:bg-[#2C2E53]/50'
-                      }`}
-                    >
-                      <span>{r}</span>
-                      {currentRole === r && <ShieldCheck className="w-3.5 h-3.5 text-[#D4AF37]" />}
-                    </button>
-                  ))}
+
+                  {currentUser?.role === 'ADMINISTRADOR' ? (
+                    <>
+                      <div className="px-3 py-1 mb-1">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                          Simular Rol (Modo Admin)
+                        </span>
+                      </div>
+                      {(['ADMINISTRADOR', 'DIRECTOR', 'COORDINACION', 'DOCENTE', 'REPRESENTANTE', 'ESTUDIANTE'] as UserRole[]).map((r) => (
+                        <button
+                          key={r}
+                          onClick={() => {
+                            setCurrentRole(r);
+                            setRoleMenuOpen(false);
+                          }}
+                          className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                            currentRole === r
+                              ? 'bg-[#2C2E53] text-[#D4AF37]'
+                              : 'text-slate-300 hover:bg-[#2C2E53]/50'
+                          }`}
+                        >
+                          <span>{r}</span>
+                          {currentRole === r && <ShieldCheck className="w-3.5 h-3.5 text-[#D4AF37]" />}
+                        </button>
+                      ))}
+                    </>
+                  ) : (
+                    <div className="px-3 py-2 bg-[#2C2E53]/40 rounded-lg text-[11px] text-slate-300 mb-1.5">
+                      <span className="text-[#D4AF37] font-semibold block mb-0.5">Acceso Verificado</span>
+                      Cuenta institucional CBA con permisos oficiales de <strong className="text-white">{currentRole}</strong>.
+                    </div>
+                  )}
 
                   <div className="pt-1.5 mt-1.5 border-t border-[#2C2E53]">
                     <button
