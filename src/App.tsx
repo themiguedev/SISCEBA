@@ -607,7 +607,7 @@ const SiscebaMainApp: React.FC = () => {
                     <p className="font-extrabold text-white text-sm">
                       SICE-CBA • Colegio Bellas Artes
                     </p>
-                    <span className="text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30">
+                    <span className="text-[10px] uppercase tracking-widest font-extrabold px-2 py-0.5 rounded-full bg-amber-400/15 text-amber-300 border border-amber-400/30">
                       2026-2027
                     </span>
                   </div>

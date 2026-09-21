@@ -43,11 +43,11 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/40 text-[10px] font-black tracking-widest uppercase">
-                <Sparkles className="w-3 h-3" />
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-400/15 text-amber-200 border border-amber-400/30 text-[11px] font-extrabold tracking-widest uppercase shadow-xs">
+                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
                 Año Escolar 2026 - 2027
               </span>
-              <span className="text-slate-400 text-xs font-semibold">• Lapso {activeLapso}</span>
+              <span className="text-slate-300 text-xs font-semibold">• Lapso {activeLapso}</span>
             </div>
 
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight">

@@ -124,7 +124,7 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
               <span className="font-extrabold text-sm sm:text-base tracking-wider text-white whitespace-nowrap">
                 SICE-CBA
               </span>
-              <span className="text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full bg-gradient-to-r from-[#D4AF37]/20 to-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/40 shadow-sm whitespace-nowrap shrink-0">
+              <span className="text-[10px] uppercase tracking-widest font-extrabold px-2 py-0.5 rounded-full bg-amber-400/15 text-amber-300 border border-amber-400/30 shadow-sm whitespace-nowrap shrink-0">
                 2026-2027
               </span>
             </div>
