@@ -60,7 +60,13 @@ export const checkSupabaseConnection = async (): Promise<{ connected: boolean; m
   try {
     const { error } = await supabase.from('subject_areas').select('id').limit(1);
     if (error) {
-      // Si la tabla no existe o error de auth
+      // Si el error es que la tabla aún no existe, el servidor Supabase respondió correctamente
+      if (error.code === 'PGRST205' || error.message?.includes('schema cache') || error.message?.includes('does not exist')) {
+        return {
+          connected: true,
+          message: 'Conectado a Supabase (Pendiente ejecutar schema.sql en SQL Editor)'
+        };
+      }
       return {
         connected: false,
         message: `Error al consultar Supabase: ${error.message}`
