@@ -50,7 +50,9 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
     setCurrentRole,
     activeLapso,
     setActiveLapso,
-    logout
+    logout,
+    isSupabaseActive,
+    supabaseStatusText
   } = useApp();
 
   const [roleMenuOpen, setRoleMenuOpen] = useState(false);
@@ -127,6 +129,24 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
               <span className="text-[10px] uppercase tracking-widest font-extrabold px-2 py-0.5 rounded-full bg-amber-400/15 text-amber-300 border border-amber-400/30 shadow-sm whitespace-nowrap shrink-0">
                 2026-2027
               </span>
+              {/* Supabase Status Indicator */}
+              <div
+                className={`hidden md:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold border transition ${
+                  isSupabaseActive
+                    ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                    : 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+                }`}
+                title={supabaseStatusText}
+              >
+                <span
+                  className={`w-1.5 h-1.5 rounded-full ${
+                    isSupabaseActive
+                      ? 'bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.9)] animate-pulse'
+                      : 'bg-amber-400'
+                  }`}
+                />
+                <span>{isSupabaseActive ? 'Supabase' : 'Local'}</span>
+              </div>
             </div>
           </div>
         </div>

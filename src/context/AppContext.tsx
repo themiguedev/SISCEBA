@@ -51,6 +51,35 @@ import {
   INITIAL_COMMUNITY_NOTICES,
   INITIAL_BIRTHDAYS
 } from '../data/seedData';
+import { isSupabaseConfigured, checkSupabaseConnection } from '../lib/supabaseClient';
+import {
+  supabaseFetchStudents,
+  supabaseFetchSubjectAreas,
+  supabaseFetchCompetencies,
+  supabaseFetchIndicators,
+  supabaseFetchEvaluations,
+  supabaseFetchDidacticPlans,
+  supabaseFetchPasses,
+  supabaseFetchDailyAttendance,
+  supabaseFetchConducts,
+  supabaseFetchDocumentRequests,
+  supabaseFetchAdminBlocks,
+  supabaseFetchTitleRecords,
+  supabaseFetchCommunityNotices,
+  supabaseFetchNotifications,
+  supabaseSaveEvaluation,
+  supabaseBulkSaveEvaluations,
+  supabaseSaveDidacticPlan,
+  supabaseSavePass,
+  supabaseDeletePass,
+  supabaseSaveDailyAttendance,
+  supabaseSaveConduct,
+  supabaseSaveDocumentRequest,
+  supabaseSaveAdminBlock,
+  supabaseSaveTitleRecord,
+  supabaseSaveCommunityNotice,
+  supabaseSaveNotification
+} from '../services/supabaseService';
 
 interface AppContextType {
   // Navigation & Session
@@ -157,6 +186,11 @@ interface AppContextType {
 
   // Helpers
   resetToSeedData: () => void;
+
+  // Supabase Cloud State
+  isSupabaseActive: boolean;
+  supabaseStatusText: string;
+  refreshFromSupabase: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -257,11 +291,89 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [currentLevel]);
 
+  // Supabase Cloud State
+  const [isSupabaseActive, setIsSupabaseActive] = useState<boolean>(false);
+  const [supabaseStatusText, setSupabaseStatusText] = useState<string>('Verificando conexión...');
+
   // Data Store with LocalStorage Persistence
-  const [areas] = useState<SubjectArea[]>(() => {
+  const [areas, setAreas] = useState<SubjectArea[]>(() => {
     const saved = localStorage.getItem('sisceba_areas');
     return saved ? JSON.parse(saved) : INITIAL_AREAS;
   });
+
+  const refreshFromSupabase = async () => {
+    if (!isSupabaseConfigured()) {
+      setIsSupabaseActive(false);
+      setSupabaseStatusText('Modo Local / Cache');
+      return;
+    }
+
+    setSupabaseStatusText('Conectando a Supabase...');
+    const health = await checkSupabaseConnection();
+    if (!health.connected) {
+      setIsSupabaseActive(false);
+      setSupabaseStatusText('Modo Local (Supabase desconectado)');
+      return;
+    }
+
+    setIsSupabaseActive(true);
+    setSupabaseStatusText('Conectado a Supabase');
+
+    try {
+      const [
+        remoteStudents,
+        remoteAreas,
+        remoteCompetencies,
+        remoteIndicators,
+        remoteEvaluations,
+        remotePlans,
+        remotePasses,
+        remoteAttendance,
+        remoteConducts,
+        remoteDocs,
+        remoteBlocks,
+        remoteTitles,
+        remoteNotices,
+        remoteNotifications
+      ] = await Promise.all([
+        supabaseFetchStudents(),
+        supabaseFetchSubjectAreas(),
+        supabaseFetchCompetencies(),
+        supabaseFetchIndicators(),
+        supabaseFetchEvaluations(),
+        supabaseFetchDidacticPlans(),
+        supabaseFetchPasses(),
+        supabaseFetchDailyAttendance(),
+        supabaseFetchConducts(),
+        supabaseFetchDocumentRequests(),
+        supabaseFetchAdminBlocks(),
+        supabaseFetchTitleRecords(),
+        supabaseFetchCommunityNotices(),
+        supabaseFetchNotifications()
+      ]);
+
+      if (remoteStudents && remoteStudents.length > 0) setStudents(remoteStudents);
+      if (remoteAreas && remoteAreas.length > 0) setAreas(remoteAreas);
+      if (remoteCompetencies && remoteCompetencies.length > 0) setCompetencies(remoteCompetencies);
+      if (remoteIndicators && remoteIndicators.length > 0) setIndicators(remoteIndicators);
+      if (remoteEvaluations && remoteEvaluations.length > 0) setEvaluations(remoteEvaluations);
+      if (remotePlans && remotePlans.length > 0) setPlansQuincenal(remotePlans);
+      if (remotePasses && remotePasses.length > 0) setPasses(remotePasses);
+      if (remoteAttendance && remoteAttendance.length > 0) setDailyAttendance(remoteAttendance);
+      if (remoteConducts && remoteConducts.length > 0) setConducts(remoteConducts);
+      if (remoteDocs && remoteDocs.length > 0) setDocumentRequests(remoteDocs);
+      if (remoteBlocks && remoteBlocks.length > 0) setAdminBlocks(remoteBlocks);
+      if (remoteTitles && remoteTitles.length > 0) setTitles(remoteTitles);
+      if (remoteNotices && remoteNotices.length > 0) setCommunityNotices(remoteNotices);
+      if (remoteNotifications && remoteNotifications.length > 0) setNotifications(remoteNotifications);
+    } catch (e) {
+      console.warn('Aviso durante la sincronización inicial con Supabase:', e);
+    }
+  };
+
+  useEffect(() => {
+    refreshFromSupabase();
+  }, []);
 
   const [competencies, setCompetencies] = useState<Competency[]>(() => {
     const saved = localStorage.getItem('sisceba_competencies');
@@ -377,6 +489,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       read: false
     };
     setNotifications(prev => [newNotif, ...prev]);
+    supabaseSaveNotification(newNotif).catch(err => console.warn('Supabase save notification err:', err));
   };
 
   const markNotificationAsRead = (id: string) => {
@@ -394,6 +507,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     localStorage.setItem('sisceba_system_notifications', JSON.stringify(notifications));
   }, [notifications]);
+
+  useEffect(() => {
+    localStorage.setItem('sisceba_areas', JSON.stringify(areas));
+  }, [areas]);
 
   // Sync to LocalStorage on change
   useEffect(() => {
@@ -542,27 +659,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Planning Actions
   const savePlanQuincenal = (plan: PlanQuincenal) => {
+    const updatedPlan: PlanQuincenal = { ...plan, updatedAt: new Date().toISOString().split('T')[0] };
     setPlansQuincenal(prev => {
       const idx = prev.findIndex(p => p.id === plan.id);
       if (idx >= 0) {
         const copy = [...prev];
-        copy[idx] = { ...plan, updatedAt: new Date().toISOString().split('T')[0] };
+        copy[idx] = updatedPlan;
         return copy;
       }
-      return [plan, ...prev];
+      return [updatedPlan, ...prev];
     });
+    supabaseSaveDidacticPlan(updatedPlan).catch(err => console.warn('Supabase save plan err:', err));
   };
 
   const updateQuincenalStatus = (planId: string, status: PlanStatus, feedback?: string) => {
     setPlansQuincenal(prev =>
       prev.map(p => {
         if (p.id === planId) {
-          return {
+          const updated: PlanQuincenal = {
             ...p,
             status,
             reviewFeedback: feedback !== undefined ? feedback : p.reviewFeedback,
             updatedAt: new Date().toISOString().split('T')[0]
           };
+          supabaseSaveDidacticPlan(updated).catch(err => console.warn('Supabase update plan status err:', err));
+          return updated;
         }
         return p;
       })
@@ -607,6 +728,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       );
       return [newRecord, ...filtered];
     });
+    supabaseSaveEvaluation(newRecord).catch(err => console.warn('Supabase save eval err:', err));
   };
 
   const bulkRecordEvaluations = (records: Omit<EvaluationRecord, 'id' | 'recordedAt'>[]) => {
@@ -617,6 +739,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       recordedAt: timestamp
     }));
     setEvaluations(prev => [...newRecords, ...prev]);
+    supabaseBulkSaveEvaluations(newRecords).catch(err => console.warn('Supabase bulk save eval err:', err));
   };
 
   const adjustStudentGrade = (
@@ -759,34 +882,46 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ticketNumber: `RET-2026-${Math.floor(1000 + Math.random() * 9000)}`
     };
     setPasses(prev => [newPass, ...prev]);
+    supabaseSavePass(newPass).catch(err => console.warn('Supabase save pass err:', err));
     return newPass;
   };
 
   const deletePass = (passId: string) => {
     setPasses(prev => prev.filter(p => p.id !== passId));
+    supabaseDeletePass(passId).catch(err => console.warn('Supabase delete pass err:', err));
   };
 
   const printPass = (passId: string) => {
-    setPasses(prev => prev.map(p => (p.id === passId ? { ...p, printed: true } : p)));
+    setPasses(prev =>
+      prev.map(p => {
+        if (p.id === passId) {
+          const updated = { ...p, printed: true };
+          supabaseSavePass(updated).catch(err => console.warn('Supabase print pass err:', err));
+          return updated;
+        }
+        return p;
+      })
+    );
   };
 
   const markDailyAttendance = (studentId: string, status: DailyAttendanceRecord['status'], justification?: string) => {
     const today = new Date().toISOString().split('T')[0];
     const stu = students.find(s => s.id === studentId);
+    const newRec: DailyAttendanceRecord = {
+      id: `att-${Date.now()}-${studentId}`,
+      studentId,
+      studentName: stu?.fullName || 'Estudiante',
+      gradeSection: stu ? `${stu.grade} ${stu.section}` : currentSection,
+      date: today,
+      status,
+      justification,
+      lapso: activeLapso
+    };
     setDailyAttendance(prev => {
       const filtered = prev.filter(a => !(a.studentId === studentId && a.date === today));
-      const newRec: DailyAttendanceRecord = {
-        id: `att-${Date.now()}-${studentId}`,
-        studentId,
-        studentName: stu?.fullName || 'Estudiante',
-        gradeSection: stu ? `${stu.grade} ${stu.section}` : currentSection,
-        date: today,
-        status,
-        justification,
-        lapso: activeLapso
-      };
       return [newRec, ...filtered];
     });
+    supabaseSaveDailyAttendance(newRec).catch(err => console.warn('Supabase attendance err:', err));
   };
 
   const addConduct = (conduct: Omit<ConductEntry, 'id'>): ConductEntry => {
@@ -795,11 +930,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id: `cond-${Date.now()}`
     };
     setConducts(prev => [newEntry, ...prev]);
+    supabaseSaveConduct(newEntry).catch(err => console.warn('Supabase conduct err:', err));
     return newEntry;
   };
 
   const updateDocumentStatus = (requestId: string, status: DocumentRequest['status']) => {
-    setDocumentRequests(prev => prev.map(d => (d.id === requestId ? { ...d, status } : d)));
+    setDocumentRequests(prev =>
+      prev.map(d => {
+        if (d.id === requestId) {
+          const updated = { ...d, status };
+          supabaseSaveDocumentRequest(updated).catch(err => console.warn('Supabase doc status err:', err));
+          return updated;
+        }
+        return d;
+      })
+    );
   };
 
   const addDocumentRequest = (req: Omit<DocumentRequest, 'id' | 'trackingCode' | 'elapsedDays'>): DocumentRequest => {
@@ -810,11 +955,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       elapsedDays: 0
     };
     setDocumentRequests(prev => [newReq, ...prev]);
+    supabaseSaveDocumentRequest(newReq).catch(err => console.warn('Supabase doc request err:', err));
     return newReq;
   };
 
   const toggleAdminBlock = (blockId: string) => {
-    setAdminBlocks(prev => prev.map(b => (b.id === blockId ? { ...b, active: !b.active } : b)));
+    setAdminBlocks(prev =>
+      prev.map(b => {
+        if (b.id === blockId) {
+          const updated = { ...b, active: !b.active };
+          supabaseSaveAdminBlock(updated).catch(err => console.warn('Supabase admin block err:', err));
+          return updated;
+        }
+        return b;
+      })
+    );
   };
 
   const saveTitleRecord = (record: TitleRecord) => {
@@ -827,6 +982,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       return [...prev, record];
     });
+    supabaseSaveTitleRecord(record).catch(err => console.warn('Supabase save title err:', err));
   };
 
   const addCommunityNotice = (notice: Omit<CommunityNotice, 'id'>): CommunityNotice => {
@@ -835,6 +991,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id: `not-${Date.now()}`
     };
     setCommunityNotices(prev => [newNotice, ...prev]);
+    supabaseSaveCommunityNotice(newNotice).catch(err => console.warn('Supabase notice err:', err));
     return newNotice;
   };
 
@@ -937,7 +1094,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         markNotificationAsRead,
         markAllNotificationsAsRead,
         clearNotifications,
-        resetToSeedData
+        resetToSeedData,
+        isSupabaseActive,
+        supabaseStatusText,
+        refreshFromSupabase
       }}
     >
       {children}
