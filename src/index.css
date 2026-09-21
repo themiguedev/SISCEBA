@@ -752,14 +752,55 @@ html.dark tr:hover {
 html.dark input:not([type="checkbox"]):not([type="radio"]),
 html.dark select,
 html.dark textarea {
-  background-color: rgba(0, 0, 0, 0.35) !important;
+  background-color: #1E2038 !important;
   border-color: rgba(255, 255, 255, 0.15) !important;
   color: #F1F5F9 !important;
+  color-scheme: dark !important;
 }
 
 html.dark input::placeholder,
 html.dark textarea::placeholder {
   color: #64748B !important;
+}
+
+/* ============================================================
+   ESTILOS NATIVOS DE SELECT Y OPTION (WINDOWS / MACOS / LINUX)
+   Garantiza contraste óptimo y elimina el bug de texto blanco sobre fondo blanco
+   ============================================================ */
+select {
+  color-scheme: light;
+}
+
+select option {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+  font-weight: 500;
+}
+
+html.dark select,
+.dark select,
+[data-theme="dark"] select,
+[data-mode="dark"] select {
+  color-scheme: dark !important;
+  background-color: #1E2038 !important;
+  color: #F8FAFC !important;
+}
+
+html.dark select option,
+.dark select option,
+[data-theme="dark"] select option,
+[data-mode="dark"] select option {
+  background-color: #1A1D36 !important;
+  color: #F8FAFC !important;
+  font-weight: 500;
+}
+
+html.dark select option:checked,
+.dark select option:checked,
+[data-theme="dark"] select option:checked,
+[data-mode="dark"] select option:checked {
+  background-color: #2C2E53 !important;
+  color: #D4AF37 !important;
 }
 
 /* Hover en Modo Oscuro para cualquier variante neutra */
