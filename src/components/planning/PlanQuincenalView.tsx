@@ -14,10 +14,17 @@ import {
   Clock,
   Check,
   MessageSquare,
-  FileCheck
+  FileCheck,
+  FileSpreadsheet
 } from 'lucide-react';
 
-export const PlanQuincenalView: React.FC = () => {
+interface PlanQuincenalViewProps {
+  onOpenInDesigner?: (planId?: string) => void;
+}
+
+export const PlanQuincenalView: React.FC<PlanQuincenalViewProps> = ({
+  onOpenInDesigner
+}) => {
   const {
     levelAreas,
     competencies,
@@ -145,7 +152,16 @@ export const PlanQuincenalView: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {onOpenInDesigner && (
+            <button
+              onClick={() => onOpenInDesigner()}
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-[#1A1D36] hover:bg-[#2C2E53] text-[#D4AF37] border border-[#D4AF37]/50 font-black rounded-xl text-xs shadow-md transition-all"
+            >
+              <Sparkles className="w-4 h-4 text-[#D4AF37]" />
+              <span>Diseñador Oficial CBA</span>
+            </button>
+          )}
           <button
             onClick={() => window.print()}
             className="flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition-colors"
@@ -235,6 +251,16 @@ export const PlanQuincenalView: React.FC = () => {
             <div className="flex items-center gap-2">
               {!isEditing ? (
                 <>
+                  {onOpenInDesigner && (
+                    <button
+                      onClick={() => onOpenInDesigner(activePlan.id)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-[#D4AF37] hover:bg-[#c29f2e] text-[#1B1C33] font-black rounded-xl text-xs shadow-cba-gold transition-all"
+                    >
+                      <FileSpreadsheet className="w-3.5 h-3.5" />
+                      <span>Formato Oficial PPTX</span>
+                    </button>
+                  )}
+
                   <button
                     onClick={() => setIsEditing(true)}
                     className="flex items-center gap-1.5 px-3.5 py-1.5 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl text-xs transition-colors"

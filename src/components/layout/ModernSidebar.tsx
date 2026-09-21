@@ -183,6 +183,7 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
       subTabActiveIcon: 'text-teal-300',
       subTabs: [
         { id: 'AREAS_PERFILES', label: 'Áreas de Formación', icon: Layers },
+        { id: 'DISENADOR_OFICIAL', label: 'Diseñador Didáctico Oficial', icon: Sparkles },
         { id: 'BANCO_COMPETENCIAS', label: 'Competencias e Indicadores', icon: Award },
         { id: 'BANCO_ESTRATEGIAS', label: 'Banco de Estrategias', icon: FileSpreadsheet },
         { id: 'PLAN_QUINCENAL', label: 'Plan Quincenal', icon: ClipboardList },
@@ -204,6 +205,7 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
       subTabActiveIcon: 'text-indigo-300',
       subTabs: [
         { id: 'AREAS_PERFILES', label: 'Asignaturas (24 Materias)', icon: Layers },
+        { id: 'DISENADOR_OFICIAL', label: 'Diseñador Didáctico Oficial', icon: Sparkles },
         { id: 'BANCO_ESTRATEGIAS', label: 'Estrategias y Ponderaciones', icon: FileSpreadsheet },
         { id: 'PLAN_QUINCENAL', label: 'Planes Quincenales', icon: ClipboardList },
         { id: 'PLAN_LAPSO', label: 'Planes de Lapso', icon: FileText },

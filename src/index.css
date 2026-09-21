@@ -909,5 +909,20 @@ html.dark img[src*="logo-cba.png"]:not(.force-light *):not(.no-dark-invert) {
     page-break-after: always !important;
     break-after: page !important;
   }
+
+  /* 9. Renderizado limpio de inputs y textareas en formularios oficiales imprimibles */
+  .printable-sheet textarea,
+  .printable-sheet input {
+    border: none !important;
+    background: transparent !important;
+    resize: none !important;
+    overflow: visible !important;
+    white-space: pre-wrap !important;
+    font-size: 8.5pt !important;
+    line-height: 1.25 !important;
+    padding: 0 !important;
+    color: #0f172a !important;
+    box-shadow: none !important;
+  }
 }
 

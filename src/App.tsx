@@ -105,7 +105,7 @@ const SiscebaMainApp: React.FC = () => {
     } else if (['BOLETIN', 'ACTAS_CONSEJO', 'IA_ACTION_PLANS', 'REMEDIALES', 'REPORTES_INSTITUCIONALES'].includes(sub)) {
       setLevelPillarTab('COMUNICACION');
       setCommunicationSubTab(sub);
-    } else if (['AREAS_PERFILES', 'BANCO_COMPETENCIAS', 'BANCO_ESTRATEGIAS', 'PLAN_QUINCENAL', 'PLAN_LAPSO'].includes(sub)) {
+    } else if (['DISENADOR_OFICIAL', 'AREAS_PERFILES', 'BANCO_COMPETENCIAS', 'BANCO_ESTRATEGIAS', 'PLAN_QUINCENAL', 'PLAN_LAPSO'].includes(sub)) {
       setLevelPillarTab('PLANIFICACION');
       setPlanningSubTab(sub);
     } else {

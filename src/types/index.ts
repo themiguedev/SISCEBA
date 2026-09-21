@@ -51,6 +51,16 @@ export interface Strategy {
 
 export type PlanStatus = 'BORRADOR' | 'A_REVISION' | 'DEFINITIVO';
 
+export interface DidacticPlanRow {
+  id: string;
+  contenidoOReferente: string;
+  aprendizajesEsperados: string;
+  indicadoresCompetencia: string;
+  tecnicasInstrumentos: string;
+  criteriosEvaluacion: string;
+  ponderacionPercent?: number; // Media General: 5% a 30%
+}
+
 export interface PlanQuincenal {
   id: string;
   areaId: string;
@@ -71,6 +81,18 @@ export interface PlanQuincenal {
   reviewFeedback?: string;
   reviewedBy?: string;
   updatedAt: string;
+  // Campos del Formato Oficial Bellas Artes (PPTX e Instructivos)
+  docenteName?: string;
+  schoolYear?: string; // ej: "2026 - 2027"
+  periodoQuincenal?: string; // ej: "21/09 al 02/10/2026"
+  componente?: string; // Primaria: Componente institucional
+  temaGenerador?: string; // Media General: Tema Generador
+  rows?: DidacticPlanRow[];
+  actividadesInicio?: string;
+  actividadesDesarrollo?: string;
+  actividadesCierre?: string;
+  recursos?: string;
+  fuentesConsulta?: string;
 }
 
 export interface LapsoEvaluationItem {
