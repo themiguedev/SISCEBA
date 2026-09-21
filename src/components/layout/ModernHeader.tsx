@@ -131,44 +131,53 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
           </div>
         </div>
 
-        {/* Center: Interactive Level Switcher (Pills) */}
-        <div className="hidden lg:flex items-center bg-[#141525] p-1 rounded-2xl border border-[#2C2E53] shadow-inner shrink-0">
-          {(['INICIAL', 'PRIMARIA', 'MEDIA_GENERAL'] as EducationalLevel[]).map((lvl) => {
-            const isCurrentModule = activeTab === lvl;
-            const isContextLevel = currentLevel === lvl;
-            const isSelected = isCurrentModule || (isContextLevel && (activeTab === 'ESCRITORIO' || !['INICIAL', 'PRIMARIA', 'MEDIA_GENERAL'].includes(activeTab || '')));
-            const data = levelDetails[lvl];
-            return (
-              <button
-                key={lvl}
-                onClick={() => {
-                  setCurrentLevel(lvl);
-                  if (onSelectLevel) {
-                    onSelectLevel(lvl);
-                  }
-                }}
-                className={`flex items-center gap-1.5 px-2 xl:px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 whitespace-nowrap ${
-                  isSelected
-                    ? 'bg-[#2C2E53] text-[#D4AF37] shadow-md border border-[#D4AF37]/50 scale-[1.01]'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-[#1B1C33]'
-                }`}
-                title={`Acceder a ${data.label}`}
-              >
-                <span className="text-sm">{data.icon}</span>
-                <div className="text-left">
-                  <div className="flex items-center gap-1.5">
-                    <span className={isSelected ? 'text-white font-black' : ''}>{lvl.replace('_', ' ')}</span>
-                    {isSelected && (
-                      <span className="hidden 2xl:inline text-[9px] px-1.5 py-0.2 rounded bg-[#D4AF37]/20 text-[#D4AF37] font-extrabold">
-                        {data.badge}
-                      </span>
-                    )}
+        {/* Center: Interactive Level Switcher (Pills) or Portal de Consultas for Representante / Estudiante */}
+        {(currentRole === 'REPRESENTANTE' || currentRole === 'ESTUDIANTE') ? (
+          <div className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#141525] border border-[#D4AF37]/50 shadow-inner">
+            <span className="w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse shrink-0"></span>
+            <span className="text-xs font-black text-[#D4AF37] tracking-wider uppercase">
+              Portal de Consultas • {currentRole === 'REPRESENTANTE' ? 'Padres y Representantes' : 'Estudiantes CBA'}
+            </span>
+          </div>
+        ) : (
+          <div className="hidden lg:flex items-center bg-[#141525] p-1 rounded-2xl border border-[#2C2E53] shadow-inner shrink-0">
+            {(['INICIAL', 'PRIMARIA', 'MEDIA_GENERAL'] as EducationalLevel[]).map((lvl) => {
+              const isCurrentModule = activeTab === lvl;
+              const isContextLevel = currentLevel === lvl;
+              const isSelected = isCurrentModule || (isContextLevel && (activeTab === 'ESCRITORIO' || !['INICIAL', 'PRIMARIA', 'MEDIA_GENERAL'].includes(activeTab || '')));
+              const data = levelDetails[lvl];
+              return (
+                <button
+                  key={lvl}
+                  onClick={() => {
+                    setCurrentLevel(lvl);
+                    if (onSelectLevel) {
+                      onSelectLevel(lvl);
+                    }
+                  }}
+                  className={`flex items-center gap-1.5 px-2 xl:px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 whitespace-nowrap ${
+                    isSelected
+                      ? 'bg-[#2C2E53] text-[#D4AF37] shadow-md border border-[#D4AF37]/50 scale-[1.01]'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-[#1B1C33]'
+                  }`}
+                  title={`Acceder a ${data.label}`}
+                >
+                  <span className="text-sm">{data.icon}</span>
+                  <div className="text-left">
+                    <div className="flex items-center gap-1.5">
+                      <span className={isSelected ? 'text-white font-black' : ''}>{lvl.replace('_', ' ')}</span>
+                      {isSelected && (
+                        <span className="hidden 2xl:inline text-[9px] px-1.5 py-0.2 rounded bg-[#D4AF37]/20 text-[#D4AF37] font-extrabold">
+                          {data.badge}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </button>
-            );
-          })}
-        </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {/* Center Search Trigger (Expanded) */}
         <button
@@ -266,7 +275,7 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
                       Modo de Operación
                     </span>
                   </div>
-                  {(['DOCENTE', 'COORDINADOR', 'DIRECTOR'] as UserRole[]).map((r) => (
+                  {(['ADMINISTRADOR', 'DIRECTOR', 'COORDINADOR', 'DOCENTE', 'REPRESENTANTE', 'ESTUDIANTE'] as UserRole[]).map((r) => (
                     <button
                       key={r}
                       onClick={() => {

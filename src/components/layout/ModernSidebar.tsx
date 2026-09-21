@@ -69,7 +69,7 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
   onCloseMobile,
   onGoHome
 }) => {
-  const { currentLevel, passes, documentRequests } = useApp();
+  const { currentLevel, currentRole, passes, documentRequests } = useApp();
 
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     [activeTab]: true
@@ -225,14 +225,16 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
       shortLabel: 'Consultas',
       icon: BarChart3,
       color: 'text-cyan-400',
-      badge: 'Sábana',
+      badge: currentRole === 'REPRESENTANTE' ? 'Representante' : currentRole === 'ESTUDIANTE' ? 'Alumno' : 'Sábana',
       activeBadgeBg: 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30',
       activeSubTabStyle: 'bg-cyan-500/15 text-cyan-200 border-l-2 border-cyan-400 font-bold shadow-sm',
       subTabActiveIcon: 'text-cyan-300',
       subTabs: [
         { id: 'RENDIMIENTO', label: 'Sábana de Calificaciones', icon: FileSpreadsheet },
+        { id: 'BOLETIN', label: 'Boletín Oficial de Notas', icon: GraduationCap },
+        { id: 'ASISTENCIA', label: 'Asistencia y Pases', icon: Clock },
         { id: 'ESTADISTICAS', label: 'Estadísticas de Rendimiento', icon: BarChart3 },
-        { id: 'NOMINAS', label: 'Nómina y Expedientes', icon: Users }
+        { id: 'NOMINAS', label: 'Expediente Estudiantil', icon: Users }
       ]
     },
     {
@@ -348,28 +350,38 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
 
         {/* Navigation Sections */}
         <div className="flex-1 overflow-y-auto no-scrollbar py-4 px-3 space-y-4">
-          {navigationSections.map((section, index) => {
-            const isSectionActive = activeTab === section.id;
-            const isSectionExpanded = !!expandedSections[section.id];
-            const SectionIcon = section.icon;
+          {(() => {
+            const isConsultasOnly = currentRole === 'REPRESENTANTE' || currentRole === 'ESTUDIANTE';
+            const visibleSections = isConsultasOnly
+              ? navigationSections.filter((s) => s.id === 'CONSULTAS')
+              : navigationSections;
 
-            const isFirstOfGroup =
-              index === 0 ||
-              navigationSections[index - 1].categoryGroup !== section.categoryGroup;
+            return visibleSections.map((section, index) => {
+              const isSectionActive = activeTab === section.id;
+              const isSectionExpanded = isConsultasOnly ? true : !!expandedSections[section.id];
+              const SectionIcon = section.icon;
 
-            return (
-              <div key={section.id} className="space-y-1">
-                {/* Group Separator Label */}
-                {isOpen && isFirstOfGroup && (
-                  <div className="pt-3 pb-1.5 px-2 flex items-center">
-                    <span className="text-[11px] font-extrabold uppercase tracking-wider text-amber-200 flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-300 shrink-0"></span>
-                      {section.categoryGroup === 'PRINCIPAL' && 'CONTROL & GESTIÓN'}
-                      {section.categoryGroup === 'NIVELES' && 'NIVELES PEDAGÓGICOS'}
-                      {section.categoryGroup === 'INSTITUCIONAL' && 'INSTITUCIONAL & SOPORTE'}
-                    </span>
-                  </div>
-                )}
+              const isFirstOfGroup =
+                index === 0 ||
+                visibleSections[index - 1].categoryGroup !== section.categoryGroup;
+
+              return (
+                <div key={section.id} className="space-y-1">
+                  {/* Group Separator Label */}
+                  {isOpen && isFirstOfGroup && (
+                    <div className="pt-3 pb-1.5 px-2 flex items-center">
+                      <span className="text-[11px] font-extrabold uppercase tracking-wider text-amber-200 flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-300 shrink-0"></span>
+                        {isConsultasOnly
+                          ? 'PORTAL DE CONSULTAS CBA'
+                          : section.categoryGroup === 'PRINCIPAL'
+                          ? 'CONTROL & GESTIÓN'
+                          : section.categoryGroup === 'NIVELES'
+                          ? 'NIVELES PEDAGÓGICOS'
+                          : 'INSTITUCIONAL & SOPORTE'}
+                      </span>
+                    </div>
+                  )}
 
                 {/* Section Main Tab Header Row */}
                 <div
@@ -476,7 +488,8 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
                 )}
               </div>
             );
-          })}
+          });
+        })()}
         </div>
 
         {/* Institutional Bottom Badge */}

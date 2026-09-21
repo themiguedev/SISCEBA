@@ -21,7 +21,7 @@ import { GestionModule } from './components/gestion/GestionModule';
 import { PlanningModule } from './components/planning/PlanningModule';
 import { EvaluationModule } from './components/evaluation/EvaluationModule';
 import { CommunicationModule } from './components/communication/CommunicationModule';
-import { ConsultasModule } from './components/consultas/ConsultasModule';
+import { ConsultasModule, ConsultasSubTab } from './components/consultas/ConsultasModule';
 import { ComunidadModule } from './components/comunidad/ComunidadModule';
 import { ConfiguracionModule } from './components/configuracion/ConfiguracionModule';
 import { AyudaModule } from './components/ayuda/AyudaModule';
@@ -45,7 +45,7 @@ const SiscebaMainApp: React.FC = () => {
   // Subtab States for each domain
   const [escritorioSubTab, setEscritorioSubTab] = useState<'DASHBOARD' | 'PERFIL' | 'SUGERENCIAS'>('DASHBOARD');
   const [gestionSubTab, setGestionSubTab] = useState<string>('INSCRIPCIONES');
-  const [consultasSubTab, setConsultasSubTab] = useState<'RENDIMIENTO' | 'ESTADISTICAS' | 'NOMINAS'>('RENDIMIENTO');
+  const [consultasSubTab, setConsultasSubTab] = useState<ConsultasSubTab>('RENDIMIENTO');
   const [comunidadSubTab, setComunidadSubTab] = useState<'NOTICIAS' | 'CUMPLEANOS' | 'COMUNICADOS'>('NOTICIAS');
   const [configuracionSubTab, setConfiguracionSubTab] = useState<'LAPSOS' | 'ESTRUCTURA' | 'DOCENTES' | 'TEMAS'>('LAPSOS');
   const [ayudaSubTab, setAyudaSubTab] = useState<'MANUAL' | 'MAPA_SITIO'>('MANUAL');
@@ -70,16 +70,30 @@ const SiscebaMainApp: React.FC = () => {
 
   const { mode, palette, isDark, toggleMode, setPalette } = useTheme();
 
-  // Keep activeTab in sync when user clicks the level buttons in the top header
+  // Keep activeTab in sync or restrict to CONSULTAS if Representante / Estudiante
   useEffect(() => {
+    if (currentRole === 'REPRESENTANTE' || currentRole === 'ESTUDIANTE') {
+      if (activeTab !== 'CONSULTAS') {
+        setActiveTab('CONSULTAS');
+      }
+      return;
+    }
     if (activeTab === 'INICIAL' || activeTab === 'PRIMARIA' || activeTab === 'MEDIA_GENERAL') {
       if (activeTab !== currentLevel) {
         setActiveTab(currentLevel);
       }
     }
-  }, [currentLevel]);
+  }, [currentLevel, currentRole, activeTab]);
 
   const handleTabChange = (tab: MainNavigationTab) => {
+    if ((currentRole === 'REPRESENTANTE' || currentRole === 'ESTUDIANTE') && tab !== 'CONSULTAS') {
+      showToast(
+        'Acceso Restringido',
+        'Los representantes y alumnos solo tienen disponible el módulo de Consultas.',
+        true
+      );
+      return;
+    }
     setActiveTab(tab);
     if (tab === 'INICIAL' || tab === 'PRIMARIA' || tab === 'MEDIA_GENERAL') {
       setCurrentLevel(tab);
@@ -91,8 +105,8 @@ const SiscebaMainApp: React.FC = () => {
       setEscritorioSubTab(sub as 'DASHBOARD' | 'PERFIL' | 'SUGERENCIAS');
     } else if (['INSCRIPCIONES', 'PASES', 'INASISTENCIAS', 'CONDUCTAS', 'DOCUMENTOS', 'BLOQUEO', 'TITULOS', 'MATRICULA'].includes(sub)) {
       setGestionSubTab(sub);
-    } else if (['RENDIMIENTO', 'ESTADISTICAS', 'NOMINAS'].includes(sub)) {
-      setConsultasSubTab(sub as 'RENDIMIENTO' | 'ESTADISTICAS' | 'NOMINAS');
+    } else if (['RENDIMIENTO', 'BOLETIN', 'ASISTENCIA', 'ESTADISTICAS', 'NOMINAS'].includes(sub)) {
+      setConsultasSubTab(sub as ConsultasSubTab);
     } else if (['NOTICIAS', 'CUMPLEANOS', 'COMUNICADOS'].includes(sub)) {
       setComunidadSubTab(sub as 'NOTICIAS' | 'CUMPLEANOS' | 'COMUNICADOS');
     } else if (['LAPSOS', 'ESTRUCTURA', 'DOCENTES', 'TEMAS'].includes(sub)) {
@@ -146,6 +160,14 @@ const SiscebaMainApp: React.FC = () => {
   };
 
   const handleQuickAction = (tab: any, subTab?: string) => {
+    if ((currentRole === 'REPRESENTANTE' || currentRole === 'ESTUDIANTE') && tab !== 'CONSULTAS') {
+      showToast(
+        'Acceso Restringido',
+        'Los representantes y alumnos solo tienen disponible el módulo de Consultas.',
+        true
+      );
+      return;
+    }
     if (tab === 'ESCRITORIO') {
       handleTabChange('ESCRITORIO');
       if (subTab) setEscritorioSubTab(subTab as 'DASHBOARD' | 'PERFIL' | 'SUGERENCIAS');
@@ -154,7 +176,7 @@ const SiscebaMainApp: React.FC = () => {
       if (subTab) setGestionSubTab(subTab);
     } else if (tab === 'CONSULTAS') {
       handleTabChange('CONSULTAS');
-      if (subTab) setConsultasSubTab(subTab as 'RENDIMIENTO' | 'ESTADISTICAS' | 'NOMINAS');
+      if (subTab) setConsultasSubTab(subTab as ConsultasSubTab);
     } else if (tab === 'COMUNIDAD') {
       handleTabChange('COMUNIDAD');
       if (subTab) setComunidadSubTab(subTab as 'NOTICIAS' | 'CUMPLEANOS' | 'COMUNICADOS');
@@ -305,6 +327,31 @@ const SiscebaMainApp: React.FC = () => {
       showToast(`Navegando a: ${tab}`, undefined, false);
     },
     onNavigateShortcut: (key) => {
+      if (currentRole === 'REPRESENTANTE' || currentRole === 'ESTUDIANTE') {
+        switch (key) {
+          case '1':
+            setConsultasSubTab('RENDIMIENTO');
+            showToast('Sábana de Calificaciones', 'Vista de rendimiento por alumno');
+            break;
+          case '2':
+            setConsultasSubTab('BOLETIN');
+            showToast('Boletín Informativo', 'Boletín oficial de notas');
+            break;
+          case '3':
+            setConsultasSubTab('ASISTENCIA');
+            showToast('Asistencia y Pases', 'Historial de asistencia y pases por retraso');
+            break;
+          case '4':
+            setConsultasSubTab('ESTADISTICAS');
+            showToast('Estadísticas', 'Estadísticas de aprobación y rendimiento');
+            break;
+          case '5':
+            setConsultasSubTab('NOMINAS');
+            showToast('Expediente Familiar', 'Expediente del alumno y representante');
+            break;
+        }
+        return;
+      }
       switch (key) {
         case '1':
           handleQuickAction('ESCRITORIO', 'DASHBOARD');
@@ -356,8 +403,13 @@ const SiscebaMainApp: React.FC = () => {
   });
 
   const handleGoHome = () => {
-    setActiveTab('ESCRITORIO');
-    setEscritorioSubTab('DASHBOARD');
+    if (currentRole === 'REPRESENTANTE' || currentRole === 'ESTUDIANTE') {
+      setActiveTab('CONSULTAS');
+      setConsultasSubTab('RENDIMIENTO');
+    } else {
+      setActiveTab('ESCRITORIO');
+      setEscritorioSubTab('DASHBOARD');
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
