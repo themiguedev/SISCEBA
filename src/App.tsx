@@ -122,7 +122,7 @@ const SiscebaMainApp: React.FC = () => {
       setConfiguracionSubTab(sub as 'LAPSOS' | 'ESTRUCTURA' | 'DOCENTES' | 'TEMAS');
     } else if (['MANUAL', 'MAPA_SITIO'].includes(sub)) {
       setAyudaSubTab(sub as 'MANUAL' | 'MAPA_SITIO');
-    } else if (['DIAGNOSTICA', 'PROCESAL', 'FINAL_LAPSO'].includes(sub)) {
+    } else if (['DIAGNOSTICA', 'PROCESAL', 'FINAL_LAPSO', 'ESTADISTICAS'].includes(sub)) {
       setLevelPillarTab('EVALUACION');
       setEvaluationSubTab(sub);
     } else if (['BOLETIN', 'ACTAS_CONSEJO', 'IA_ACTION_PLANS', 'REMEDIALES', 'REPORTES_INSTITUCIONALES'].includes(sub)) {
