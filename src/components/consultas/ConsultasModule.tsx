@@ -80,6 +80,30 @@ export const ConsultasModule: React.FC<ConsultasModuleProps> = ({
       s.representativeName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const getSubjectScore = (studentId: string, areaCodePrefix: string, fallbackScore: number): number => {
+    const matchedArea = areas.find(a => 
+      a.id.toLowerCase().includes(areaCodePrefix.toLowerCase()) || 
+      a.code.toLowerCase().includes(areaCodePrefix.toLowerCase())
+    );
+    if (!matchedArea) return fallbackScore;
+
+    const recs = evaluations.filter(
+      e => e.studentId === studentId && e.areaId === matchedArea.id && e.lapso === activeLapso
+    );
+    if (recs.length === 0) return fallbackScore;
+
+    const finalRec = recs.find(e => e.moment === 'FINAL_LAPSO');
+    if (finalRec && finalRec.scoreNumeric !== undefined) return finalRec.scoreNumeric;
+
+    const numericScores = recs.filter(e => e.scoreNumeric !== undefined).map(e => e.scoreNumeric as number);
+    if (numericScores.length > 0) {
+      const avgScore = numericScores.reduce((a, b) => a + b, 0) / numericScores.length;
+      return Math.round(avgScore * 10) / 10;
+    }
+
+    return fallbackScore;
+  };
+
   return (
     <div className="space-y-6">
       {/* Role-Specific Consultas Welcome Banner for Representante / Estudiante */}
@@ -292,11 +316,11 @@ export const ConsultasModule: React.FC<ConsultasModuleProps> = ({
                 {filteredStudents.map((stu) => {
                   const isChacin = stu.fullName.includes('Chacín');
                   const isRomero = stu.fullName.includes('Romero');
-                  const mathScore = isChacin ? '12' : isRomero ? '14' : '18';
-                  const castScore = isChacin ? '15' : '17';
-                  const fisScore = isChacin ? '11' : isRomero ? '10' : '19';
-                  const quiScore = isChacin ? '13' : '16';
-                  const avg = isChacin ? '12.75' : isRomero ? '14.25' : '17.50';
+                  const mathScore = getSubjectScore(stu.id, 'mat', isChacin ? 12 : isRomero ? 14 : 17);
+                  const castScore = getSubjectScore(stu.id, 'cas', isChacin ? 15 : 20);
+                  const fisScore = getSubjectScore(stu.id, 'fis', isChacin ? 11 : isRomero ? 10 : 18);
+                  const quiScore = getSubjectScore(stu.id, 'qui', isChacin ? 13 : 17);
+                  const avg = ((mathScore + castScore + fisScore + quiScore) / 4).toFixed(2);
 
                   return (
                     <tr key={stu.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors">

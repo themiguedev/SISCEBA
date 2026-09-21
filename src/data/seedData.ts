@@ -963,18 +963,18 @@ export const INITIAL_STUDENTS: Student[] = [
   },
   {
     id: 'stu-med-2',
-    cedula: 'V-31.450.813',
-    fullName: 'Valeria Nicole Barboza Ferrer',
+    cedula: 'V-32.901.442',
+    fullName: 'Camila Isabella Urdaneta Moreno',
     gender: 'F',
-    birthDate: '2010-08-22',
+    birthDate: '2009-08-11',
     level: 'MEDIA_GENERAL',
     grade: '4to Año',
     section: 'A',
-    representativeName: 'Elena Ferrer',
-    representativeEmail: 'eferrer@hotmail.com',
-    representativePhone: '+58 424-6102938',
+    representativeName: 'Ing. Carlos Urdaneta',
+    representativeEmail: 'curdaneta@oilfield.com',
+    representativePhone: '+58 414-6338901',
     status: 'REGULAR',
-    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
+    avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80'
   },
   {
     id: 'stu-med-3',

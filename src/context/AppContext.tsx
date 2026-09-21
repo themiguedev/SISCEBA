@@ -894,12 +894,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const bulkRecordEvaluations = (records: Omit<EvaluationRecord, 'id' | 'recordedAt'>[]) => {
     const timestamp = new Date().toISOString().split('T')[0];
-    const newRecords: EvaluationRecord[] = records.map((r, i) => ({
-      ...r,
-      id: `eval-${Date.now()}-${i}`,
-      recordedAt: timestamp
-    }));
-    setEvaluations(prev => [...newRecords, ...prev]);
+    const newRecords: EvaluationRecord[] = records.map((r) => {
+      const existing = evaluations.find(
+        e =>
+          e.studentId === r.studentId &&
+          e.areaId === r.areaId &&
+          e.moment === r.moment &&
+          e.lapso === r.lapso &&
+          (e.indicatorId || '') === (r.indicatorId || '')
+      );
+      return {
+        ...r,
+        id: existing ? existing.id : `eval-${r.studentId}-${r.areaId}-${r.indicatorId || 'gen'}-${r.lapso}`,
+        recordedAt: timestamp
+      };
+    });
+
+    setEvaluations(prev => {
+      const keysToReplace = new Set(
+        newRecords.map(nr => `${nr.studentId}|${nr.areaId}|${nr.moment}|${nr.lapso}|${nr.indicatorId || ''}`)
+      );
+      const filtered = prev.filter(
+        e => !keysToReplace.has(`${e.studentId}|${e.areaId}|${e.moment}|${e.lapso}|${e.indicatorId || ''}`)
+      );
+      return [...newRecords, ...filtered];
+    });
+
     supabaseBulkSaveEvaluations(newRecords).catch(err => console.warn('Supabase bulk save eval err:', err));
   };
 

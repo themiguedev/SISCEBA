@@ -21,11 +21,31 @@ export const BoletinInformativoView: React.FC = () => {
     currentLevel,
     activeLapso,
     currentSection,
-    evaluations
+    evaluations,
+    currentRole,
+    currentUser
   } = useApp();
 
-  const [selectedStudentId, setSelectedStudentId] = useState<string>(levelStudents[0]?.id || '');
-  const activeStudent = levelStudents.find(s => s.id === selectedStudentId) || levelStudents[0];
+  const isFamilyOrStudent = currentRole === 'REPRESENTANTE' || currentRole === 'ESTUDIANTE';
+  const displayStudents = isFamilyOrStudent
+    ? levelStudents.filter(s => {
+        if (currentRole === 'ESTUDIANTE') {
+          return (
+            s.fullName.toLowerCase().includes(currentUser?.fullName?.toLowerCase() || '') ||
+            s.cedula.toLowerCase().includes(currentUser?.username.toLowerCase() || '')
+          );
+        }
+        return (
+          s.representativeName.toLowerCase().includes(currentUser?.fullName?.toLowerCase() || '') ||
+          s.fullName.toLowerCase().includes('urdaneta')
+        );
+      })
+    : levelStudents;
+
+  const [selectedStudentId, setSelectedStudentId] = useState<string>(
+    displayStudents[0]?.id || levelStudents[0]?.id || ''
+  );
+  const activeStudent = displayStudents.find(s => s.id === selectedStudentId) || displayStudents[0] || levelStudents[0];
 
   // Helper to fetch student score per area
   const getAreaEvaluation = (areaId: string) => {
@@ -39,20 +59,26 @@ export const BoletinInformativoView: React.FC = () => {
         obs: finalRec.observations || 'Demuestra avance regular en los objetivos pedagógicos.'
       };
     }
-    const procRec = evaluations.find(
+    const procRecs = evaluations.filter(
       e => e.studentId === activeStudent?.id && e.areaId === areaId && e.moment === 'PROCESAL' && e.lapso === activeLapso
     );
-    if (procRec) {
+    if (procRecs.length > 0) {
+      const numScores = procRecs.filter(e => e.scoreNumeric !== undefined).map(e => e.scoreNumeric as number);
+      const avgScore = numScores.length > 0
+        ? Math.round((numScores.reduce((a, b) => a + b, 0) / numScores.length) * 10) / 10
+        : undefined;
+
       return {
-        scoreNumeric: procRec.scoreNumeric,
-        scoreQualitative: procRec.scoreQualitative,
-        obs: procRec.observations || 'Participación activa y cumplimiento de actividades.'
+        scoreNumeric: avgScore ?? procRecs[0].scoreNumeric,
+        scoreQualitative: procRecs[0].scoreQualitative,
+        obs: procRecs[0].observations || 'Participación activa y cumplimiento de actividades.'
       };
     }
     // Mock score
     const isChacin = activeStudent?.id.includes('stu-med-3');
+    const isCamila = activeStudent?.id === 'stu-med-2' || activeStudent?.fullName.toLowerCase().includes('camila');
     return {
-      scoreNumeric: isChacin ? (areaId.includes('mat') ? 8 : 12) : 18,
+      scoreNumeric: isChacin ? (areaId.includes('mat') ? 8 : 12) : isCamila ? 19 : 18,
       scoreQualitative: (isChacin ? 'EP' : 'C') as 'EP' | 'C',
       obs: isChacin
         ? 'En proceso de afianzamiento conceptual. Cuenta con Plan de Acción Pedagógico.'
@@ -94,7 +120,7 @@ export const BoletinInformativoView: React.FC = () => {
             aria-label="Seleccionar estudiante para ver boletín informativo"
             className="px-3 py-2 bg-slate-50 rounded-xl border border-slate-200 text-xs font-black text-[#2C2E53] focus:ring-2 focus:ring-[#2C2E53]"
           >
-            {levelStudents.map(s => (
+            {displayStudents.map(s => (
               <option key={s.id} value={s.id}>{s.fullName} ({s.cedula})</option>
             ))}
           </select>
