@@ -312,50 +312,82 @@ ALTER TABLE community_notices ENABLE ROW LEVEL SECURITY;
 ALTER TABLE system_notifications ENABLE ROW LEVEL SECURITY;
 
 -- 20. POLÍTICAS RLS PERMISIVAS (Lectura y Escritura para intranet escolar con clave anon / auth)
+DROP POLICY IF EXISTS "Permitir lectura general a estudiantes" ON students;
+DROP POLICY IF EXISTS "Permitir escritura general a estudiantes" ON students;
 CREATE POLICY "Permitir lectura general a estudiantes" ON students FOR SELECT USING (true);
 CREATE POLICY "Permitir escritura general a estudiantes" ON students FOR ALL USING (true);
 
+DROP POLICY IF EXISTS "Permitir lectura general a subject_areas" ON subject_areas;
+DROP POLICY IF EXISTS "Permitir escritura general a subject_areas" ON subject_areas;
 CREATE POLICY "Permitir lectura general a subject_areas" ON subject_areas FOR SELECT USING (true);
 CREATE POLICY "Permitir escritura general a subject_areas" ON subject_areas FOR ALL USING (true);
 
+DROP POLICY IF EXISTS "Permitir lectura general a competencies" ON competencies;
+DROP POLICY IF EXISTS "Permitir escritura general a competencies" ON competencies;
 CREATE POLICY "Permitir lectura general a competencies" ON competencies FOR SELECT USING (true);
 CREATE POLICY "Permitir escritura general a competencies" ON competencies FOR ALL USING (true);
 
+DROP POLICY IF EXISTS "Permitir lectura general a indicators" ON indicators;
+DROP POLICY IF EXISTS "Permitir escritura general a indicators" ON indicators;
 CREATE POLICY "Permitir lectura general a indicators" ON indicators FOR SELECT USING (true);
 CREATE POLICY "Permitir escritura general a indicators" ON indicators FOR ALL USING (true);
 
+DROP POLICY IF EXISTS "Permitir lectura general a strategies" ON strategies;
+DROP POLICY IF EXISTS "Permitir escritura general a strategies" ON strategies;
 CREATE POLICY "Permitir lectura general a strategies" ON strategies FOR SELECT USING (true);
 CREATE POLICY "Permitir escritura general a strategies" ON strategies FOR ALL USING (true);
 
+DROP POLICY IF EXISTS "Permitir lectura general a didactic_plans" ON didactic_plans;
+DROP POLICY IF EXISTS "Permitir escritura general a didactic_plans" ON didactic_plans;
 CREATE POLICY "Permitir lectura general a didactic_plans" ON didactic_plans FOR SELECT USING (true);
 CREATE POLICY "Permitir escritura general a didactic_plans" ON didactic_plans FOR ALL USING (true);
 
+DROP POLICY IF EXISTS "Permitir lectura general a plans_lapso" ON plans_lapso;
+DROP POLICY IF EXISTS "Permitir escritura general a plans_lapso" ON plans_lapso;
 CREATE POLICY "Permitir lectura general a plans_lapso" ON plans_lapso FOR SELECT USING (true);
 CREATE POLICY "Permitir escritura general a plans_lapso" ON plans_lapso FOR ALL USING (true);
 
+DROP POLICY IF EXISTS "Permitir lectura general a evaluation_records" ON evaluation_records;
+DROP POLICY IF EXISTS "Permitir escritura general a evaluation_records" ON evaluation_records;
 CREATE POLICY "Permitir lectura general a evaluation_records" ON evaluation_records FOR SELECT USING (true);
 CREATE POLICY "Permitir escritura general a evaluation_records" ON evaluation_records FOR ALL USING (true);
 
+DROP POLICY IF EXISTS "Permitir lectura general a pass_records" ON pass_records;
+DROP POLICY IF EXISTS "Permitir escritura general a pass_records" ON pass_records;
 CREATE POLICY "Permitir lectura general a pass_records" ON pass_records FOR SELECT USING (true);
 CREATE POLICY "Permitir escritura general a pass_records" ON pass_records FOR ALL USING (true);
 
+DROP POLICY IF EXISTS "Permitir lectura general a daily_attendance" ON daily_attendance;
+DROP POLICY IF EXISTS "Permitir escritura general a daily_attendance" ON daily_attendance;
 CREATE POLICY "Permitir lectura general a daily_attendance" ON daily_attendance FOR SELECT USING (true);
 CREATE POLICY "Permitir escritura general a daily_attendance" ON daily_attendance FOR ALL USING (true);
 
+DROP POLICY IF EXISTS "Permitir lectura general a conduct_entries" ON conduct_entries;
+DROP POLICY IF EXISTS "Permitir escritura general a conduct_entries" ON conduct_entries;
 CREATE POLICY "Permitir lectura general a conduct_entries" ON conduct_entries FOR SELECT USING (true);
 CREATE POLICY "Permitir escritura general a conduct_entries" ON conduct_entries FOR ALL USING (true);
 
+DROP POLICY IF EXISTS "Permitir lectura general a document_requests" ON document_requests;
+DROP POLICY IF EXISTS "Permitir escritura general a document_requests" ON document_requests;
 CREATE POLICY "Permitir lectura general a document_requests" ON document_requests FOR SELECT USING (true);
 CREATE POLICY "Permitir escritura general a document_requests" ON document_requests FOR ALL USING (true);
 
+DROP POLICY IF EXISTS "Permitir lectura general a administrative_blocks" ON administrative_blocks;
+DROP POLICY IF EXISTS "Permitir escritura general a administrative_blocks" ON administrative_blocks;
 CREATE POLICY "Permitir lectura general a administrative_blocks" ON administrative_blocks FOR SELECT USING (true);
 CREATE POLICY "Permitir escritura general a administrative_blocks" ON administrative_blocks FOR ALL USING (true);
 
+DROP POLICY IF EXISTS "Permitir lectura general a title_records" ON title_records;
+DROP POLICY IF EXISTS "Permitir escritura general a title_records" ON title_records;
 CREATE POLICY "Permitir lectura general a title_records" ON title_records FOR SELECT USING (true);
 CREATE POLICY "Permitir escritura general a title_records" ON title_records FOR ALL USING (true);
 
+DROP POLICY IF EXISTS "Permitir lectura general a community_notices" ON community_notices;
+DROP POLICY IF EXISTS "Permitir escritura general a community_notices" ON community_notices;
 CREATE POLICY "Permitir lectura general a community_notices" ON community_notices FOR SELECT USING (true);
 CREATE POLICY "Permitir escritura general a community_notices" ON community_notices FOR ALL USING (true);
 
+DROP POLICY IF EXISTS "Permitir lectura general a system_notifications" ON system_notifications;
+DROP POLICY IF EXISTS "Permitir escritura general a system_notifications" ON system_notifications;
 CREATE POLICY "Permitir lectura general a system_notifications" ON system_notifications FOR SELECT USING (true);
 CREATE POLICY "Permitir escritura general a system_notifications" ON system_notifications FOR ALL USING (true);
