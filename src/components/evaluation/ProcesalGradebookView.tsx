@@ -72,13 +72,13 @@ export const ProcesalGradebookView: React.FC<ProcesalGradebookViewProps> = ({ on
           map[stu.id][ind.id] =
             currentLevel === 'MEDIA_GENERAL'
               ? found.scoreNumeric
-              : found.scoreQualitative || 'C';
+              : found.scoreQualitative || 'L';
         } else {
           // Default mock grade based on student id
           if (currentLevel === 'MEDIA_GENERAL') {
             map[stu.id][ind.id] = stu.id.includes('stu-med-3') ? 8 : 17;
           } else {
-            map[stu.id][ind.id] = stu.id.includes('stu-ini-3') ? 'EP' : 'C';
+            map[stu.id][ind.id] = stu.id.includes('stu-ini-3') ? 'EP' : 'L';
           }
         }
       });
@@ -359,12 +359,12 @@ export const ProcesalGradebookView: React.FC<ProcesalGradebookViewProps> = ({ on
                             />
                           ) : (
                             <select
-                              value={val || 'C'}
+                              value={val || 'L'}
                               onChange={(e) => handleCellChange(stu.id, ind.id, e.target.value)}
                               aria-label={`Valoración cualitativa de ${stu.fullName} en ${ind.code}`}
                               className="p-1 text-xs font-black rounded-lg bg-slate-50 border border-slate-200 text-[#2C2E53]"
                             >
-                              <option value="C">C (Consolidado)</option>
+                              <option value="L">L (Logrado)</option>
                               <option value="EP">EP (En Proceso)</option>
                               <option value="I">I (Iniciado)</option>
                             </select>

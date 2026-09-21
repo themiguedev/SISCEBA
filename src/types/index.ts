@@ -149,7 +149,7 @@ export interface Student {
   avatarUrl?: string;
 }
 
-export type QualitativeScore = 'C' | 'EP' | 'I'; // Consolidado, En Proceso, Iniciado (Inicial / Primaria)
+export type QualitativeScore = 'L' | 'C' | 'EP' | 'I'; // Logrado (L), Consolidado (C - compatibilidad), En Proceso (EP), Iniciado (I)
 export type LiteralScore = 'A' | 'B' | 'C' | 'D' | 'E'; // Literales Primaria
 
 export interface EvaluationRecord {

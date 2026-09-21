@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
+import { EducationalLevel, Student } from '../../types';
 import { BoletinInformativoView } from '../communication/BoletinInformativoView';
 import {
   BarChart3,
@@ -80,10 +81,60 @@ export const ConsultasModule: React.FC<ConsultasModuleProps> = ({
       s.representativeName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const getSubjectScore = (studentId: string, areaCodePrefix: string, fallbackScore: number): number => {
+  const [levelFilter, setLevelFilter] = useState<'ALL' | EducationalLevel>(() => {
+    if (isFamilyOrStudent) {
+      return scopedStudents[0]?.level || currentLevel || 'MEDIA_GENERAL';
+    }
+    return currentLevel || 'MEDIA_GENERAL';
+  });
+
+  // Helper para Inicial (Cualitativo: L = Logrado, EP = En Proceso, I = Iniciado)
+  const getInicialScore = (studentId: string, areaCodePrefix: string, defaultScore: 'L' | 'EP' | 'I' = 'L'): { code: 'L' | 'EP' | 'I'; label: string } => {
     const matchedArea = areas.find(a => 
-      a.id.toLowerCase().includes(areaCodePrefix.toLowerCase()) || 
-      a.code.toLowerCase().includes(areaCodePrefix.toLowerCase())
+      a.level === 'INICIAL' && (
+        a.id.toLowerCase().includes(areaCodePrefix.toLowerCase()) || 
+        a.code.toLowerCase().includes(areaCodePrefix.toLowerCase())
+      )
+    );
+    if (!matchedArea) return { code: defaultScore, label: defaultScore === 'L' ? 'Logrado' : defaultScore === 'EP' ? 'En Proceso' : 'Iniciado' };
+
+    const recs = evaluations.filter(
+      e => e.studentId === studentId && e.areaId === matchedArea.id && e.lapso === activeLapso
+    );
+    if (recs.length === 0) return { code: defaultScore, label: defaultScore === 'L' ? 'Logrado' : defaultScore === 'EP' ? 'En Proceso' : 'Iniciado' };
+
+    const qual = recs[0].scoreQualitative;
+    if (qual === 'L' || qual === 'C') return { code: 'L', label: 'Logrado' };
+    if (qual === 'EP') return { code: 'EP', label: 'En Proceso' };
+    if (qual === 'I') return { code: 'I', label: 'Iniciado' };
+    return { code: defaultScore, label: defaultScore === 'L' ? 'Logrado' : defaultScore === 'EP' ? 'En Proceso' : 'Iniciado' };
+  };
+
+  // Helper para Primaria (Literal MPPE: A, B, C, D, E)
+  const getPrimariaScore = (studentId: string, areaCodePrefix: string, defaultScore: 'A' | 'B' | 'C' = 'A'): string => {
+    const matchedArea = areas.find(a => 
+      a.level === 'PRIMARIA' && (
+        a.id.toLowerCase().includes(areaCodePrefix.toLowerCase()) || 
+        a.code.toLowerCase().includes(areaCodePrefix.toLowerCase())
+      )
+    );
+    if (!matchedArea) return defaultScore;
+
+    const recs = evaluations.filter(
+      e => e.studentId === studentId && e.areaId === matchedArea.id && e.lapso === activeLapso
+    );
+    if (recs.length === 0) return defaultScore;
+
+    return recs[0].scoreLiteral || defaultScore;
+  };
+
+  // Helper para Media General (Numérico vigesimal: 01 a 20)
+  const getMediaScore = (studentId: string, areaCodePrefix: string, fallbackScore: number): number => {
+    const matchedArea = areas.find(a => 
+      a.level === 'MEDIA_GENERAL' && (
+        a.id.toLowerCase().includes(areaCodePrefix.toLowerCase()) || 
+        a.code.toLowerCase().includes(areaCodePrefix.toLowerCase())
+      )
     );
     if (!matchedArea) return fallbackScore;
 
@@ -275,77 +326,322 @@ export const ConsultasModule: React.FC<ConsultasModuleProps> = ({
             </div>
           </div>
 
-          <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 no-print">
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-xs text-slate-700 dark:text-slate-300">
-                Consolidado por Alumno: Lapso {activeLapso}
-              </span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#D4AF37]/15 text-[#94721C] dark:text-amber-300">
-                Año Escolar 2026-2027
-              </span>
+          <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-col gap-4 no-print">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-xs text-slate-700 dark:text-slate-300">
+                  Consolidado por Alumno: Lapso {activeLapso}
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#D4AF37]/15 text-[#94721C] dark:text-amber-300">
+                  Año Escolar 2026-2027
+                </span>
+              </div>
+
+              <div className="relative w-full sm:w-64">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                <input
+                  type="text"
+                  placeholder="Buscar estudiante, cédula..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#2C2E53]"
+                />
+              </div>
             </div>
 
-            <div className="relative w-full sm:w-64">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-              <input
-                type="text"
-                placeholder="Buscar estudiante, cédula..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#2C2E53]"
-              />
-            </div>
+            {/* Selector de Nivel Académico para la Sábana de Notas */}
+            {!isFamilyOrStudent && (
+              <div className="flex flex-wrap items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800/70 rounded-xl border border-slate-200 dark:border-slate-700">
+                <button
+                  onClick={() => setLevelFilter('MEDIA_GENERAL')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    levelFilter === 'MEDIA_GENERAL'
+                      ? 'bg-[#1B1C33] text-[#D4AF37] shadow-sm'
+                      : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  Media General (Numérico 01-20)
+                </button>
+                <button
+                  onClick={() => setLevelFilter('PRIMARIA')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    levelFilter === 'PRIMARIA'
+                      ? 'bg-[#1B1C33] text-[#D4AF37] shadow-sm'
+                      : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  Primaria (Literales A-E)
+                </button>
+                <button
+                  onClick={() => setLevelFilter('INICIAL')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    levelFilter === 'INICIAL'
+                      ? 'bg-[#1B1C33] text-[#D4AF37] shadow-sm'
+                      : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  Inicial (Logrado / En Proceso)
+                </button>
+                <button
+                  onClick={() => setLevelFilter('ALL')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    levelFilter === 'ALL'
+                      ? 'bg-[#1B1C33] text-[#D4AF37] shadow-sm'
+                      : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  Todos los Niveles
+                </button>
+              </div>
+            )}
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-[#1B1C33] text-white uppercase text-[10px] tracking-wider font-extrabold">
-                <tr>
-                  <th className="py-3.5 px-4">Cédula</th>
-                  <th className="py-3.5 px-4">Estudiante</th>
-                  <th className="py-3.5 px-4">Grado / Sección</th>
-                  <th className="py-3.5 px-4 text-center">Matemáticas</th>
-                  <th className="py-3.5 px-4 text-center">Castellano</th>
-                  <th className="py-3.5 px-4 text-center">Física</th>
-                  <th className="py-3.5 px-4 text-center">Química</th>
-                  <th className="py-3.5 px-4 text-center">Promedio Lapso</th>
-                  <th className="py-3.5 px-4 text-center">Estatus</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300 font-medium">
-                {filteredStudents.map((stu) => {
-                  const isChacin = stu.fullName.includes('Chacín');
-                  const isRomero = stu.fullName.includes('Romero');
-                  const mathScore = getSubjectScore(stu.id, 'mat', isChacin ? 12 : isRomero ? 14 : 17);
-                  const castScore = getSubjectScore(stu.id, 'cas', isChacin ? 15 : 20);
-                  const fisScore = getSubjectScore(stu.id, 'fis', isChacin ? 11 : isRomero ? 10 : 18);
-                  const quiScore = getSubjectScore(stu.id, 'qui', isChacin ? 13 : 17);
-                  const avg = ((mathScore + castScore + fisScore + quiScore) / 4).toFixed(2);
+          {/* Vistas Dinámicas Adaptadas al Sistema de Evaluación por Nivel */}
+          <div className="divide-y divide-slate-200 dark:divide-slate-800">
+            {/* 1. SECCIÓN INICIAL (CUALITATIVO L / EP / I) */}
+            {(levelFilter === 'INICIAL' || levelFilter === 'ALL') && (
+              <div>
+                {levelFilter === 'ALL' && (
+                  <div className="bg-[#142621]/40 px-4 py-2 border-b border-teal-500/20 flex items-center justify-between">
+                    <span className="text-xs font-black text-teal-300 uppercase tracking-wider">
+                      Educación Inicial (Salas de 3, 4 y 5 Años) • Evaluación Cualitativa Formativa
+                    </span>
+                    <span className="text-[10px] font-bold text-teal-400 bg-teal-950/60 px-2 py-0.5 rounded-full border border-teal-800/40">
+                      Escala Oficial: Logrado (L) • En Proceso (EP) • Iniciado (I)
+                    </span>
+                  </div>
+                )}
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-[#142621] text-teal-300 uppercase text-[10px] tracking-wider font-extrabold border-b border-teal-500/30">
+                      <tr>
+                        <th className="py-3.5 px-4">Cédula Escolar</th>
+                        <th className="py-3.5 px-4">Estudiante</th>
+                        <th className="py-3.5 px-4">Sala / Sección</th>
+                        <th className="py-3.5 px-4 text-center">Formación Personal (INI-FP)</th>
+                        <th className="py-3.5 px-4 text-center">Componentes del Ambiente (INI-CA)</th>
+                        <th className="py-3.5 px-4 text-center">Artes Plásticas (INI-AP)</th>
+                        <th className="py-3.5 px-4 text-center">Psicomotricidad (INI-EF)</th>
+                        <th className="py-3.5 px-4 text-center">Apreciación del Lapso</th>
+                        <th className="py-3.5 px-4 text-center">Estatus</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300 font-medium">
+                      {filteredStudents.filter(s => s.level === 'INICIAL').map((stu) => {
+                        const isLucas = stu.id.includes('stu-ini-3') || stu.fullName.toLowerCase().includes('lucas');
+                        const fpScore = getInicialScore(stu.id, 'fp', isLucas ? 'EP' : 'L');
+                        const caScore = getInicialScore(stu.id, 'ca', 'L');
+                        const apScore = getInicialScore(stu.id, 'ap', 'L');
+                        const efScore = getInicialScore(stu.id, 'ef', isLucas ? 'EP' : 'L');
 
-                  return (
-                    <tr key={stu.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors">
-                      <td className="py-3 px-4 font-mono font-bold text-[#2C2E53] dark:text-amber-300">{stu.cedula}</td>
-                      <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">{stu.fullName}</td>
-                      <td className="py-3 px-4">{stu.grade} {stu.section}</td>
-                      <td className="py-3 px-4 text-center font-mono font-bold">{mathScore}</td>
-                      <td className="py-3 px-4 text-center font-mono font-bold">{castScore}</td>
-                      <td className="py-3 px-4 text-center font-mono font-bold">{fisScore}</td>
-                      <td className="py-3 px-4 text-center font-mono font-bold">{quiScore}</td>
-                      <td className="py-3 px-4 text-center font-mono font-black text-[#2C2E53] dark:text-white">
-                        <span className="px-2 py-0.5 rounded bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200 border border-amber-200 dark:border-amber-800">
-                          {avg}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                          Aprobado
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                        const hasEP = fpScore.code === 'EP' || caScore.code === 'EP' || apScore.code === 'EP' || efScore.code === 'EP';
+
+                        const renderBadge = (score: { code: 'L' | 'EP' | 'I'; label: string }) => {
+                          if (score.code === 'L') {
+                            return (
+                              <span className="px-2.5 py-1 rounded-lg text-xs font-black bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700">
+                                L (Logrado)
+                              </span>
+                            );
+                          }
+                          if (score.code === 'EP') {
+                            return (
+                              <span className="px-2.5 py-1 rounded-lg text-xs font-black bg-amber-50 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700">
+                                EP (En Proceso)
+                              </span>
+                            );
+                          }
+                          return (
+                            <span className="px-2.5 py-1 rounded-lg text-xs font-black bg-blue-50 dark:bg-blue-950/50 text-blue-800 dark:text-blue-300 border border-blue-300 dark:border-blue-700">
+                              I (Iniciado)
+                            </span>
+                          );
+                        };
+
+                        return (
+                          <tr key={stu.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors">
+                            <td className="py-3 px-4 font-mono font-bold text-teal-700 dark:text-teal-300">{stu.cedula}</td>
+                            <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">{stu.fullName}</td>
+                            <td className="py-3 px-4 font-semibold text-slate-600 dark:text-slate-300">{stu.grade} {stu.section}</td>
+                            <td className="py-3 px-4 text-center">{renderBadge(fpScore)}</td>
+                            <td className="py-3 px-4 text-center">{renderBadge(caScore)}</td>
+                            <td className="py-3 px-4 text-center">{renderBadge(apScore)}</td>
+                            <td className="py-3 px-4 text-center">{renderBadge(efScore)}</td>
+                            <td className="py-3 px-4 text-center">
+                              <span className={`px-3 py-1 rounded-full text-xs font-black border ${
+                                hasEP
+                                  ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-700'
+                                  : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-200 border-emerald-300 dark:border-emerald-700'
+                              }`}>
+                                {hasEP ? 'En Proceso (EP)' : 'Logrado (L)'}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4 text-center">
+                              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${
+                                hasEP
+                                  ? 'bg-amber-100/70 dark:bg-amber-950/50 text-amber-900 dark:text-amber-200 border-amber-300 dark:border-amber-700'
+                                  : 'bg-emerald-100/70 dark:bg-emerald-950/50 text-emerald-900 dark:text-emerald-200 border-emerald-300 dark:border-emerald-700'
+                              }`}>
+                                {hasEP ? 'En Proceso' : 'Logrado'}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* 2. SECCIÓN PRIMARIA (LITERALES A - E) */}
+            {(levelFilter === 'PRIMARIA' || levelFilter === 'ALL') && (
+              <div>
+                {levelFilter === 'ALL' && (
+                  <div className="bg-[#14232B]/40 px-4 py-2 border-b border-cyan-500/20 flex items-center justify-between">
+                    <span className="text-xs font-black text-cyan-300 uppercase tracking-wider">
+                      Educación Primaria (1ero a 6to Grado) • Evaluación Cualitativa Literal MPPE
+                    </span>
+                    <span className="text-[10px] font-bold text-cyan-400 bg-cyan-950/60 px-2 py-0.5 rounded-full border border-cyan-800/40">
+                      Escala Oficial: A • B • C • D • E
+                    </span>
+                  </div>
+                )}
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-[#14232B] text-cyan-300 uppercase text-[10px] tracking-wider font-extrabold border-b border-cyan-500/30">
+                      <tr>
+                        <th className="py-3.5 px-4">Cédula Escolar</th>
+                        <th className="py-3.5 px-4">Estudiante</th>
+                        <th className="py-3.5 px-4">Grado / Sección</th>
+                        <th className="py-3.5 px-4 text-center">Lenguaje (PRI-LEN)</th>
+                        <th className="py-3.5 px-4 text-center">Matemáticas (PRI-MAT)</th>
+                        <th className="py-3.5 px-4 text-center">Ciencias Naturales (PRI-CN)</th>
+                        <th className="py-3.5 px-4 text-center">Ciencias Sociales (PRI-CS)</th>
+                        <th className="py-3.5 px-4 text-center">Literal del Lapso</th>
+                        <th className="py-3.5 px-4 text-center">Estatus</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300 font-medium">
+                      {filteredStudents.filter(s => s.level === 'PRIMARIA').map((stu) => {
+                        const isFinol = stu.fullName.toLowerCase().includes('finol');
+                        const lenScore = getPrimariaScore(stu.id, 'len', isFinol ? 'B' : 'A');
+                        const matScore = getPrimariaScore(stu.id, 'mat', isFinol ? 'B' : 'A');
+                        const natScore = getPrimariaScore(stu.id, 'cn', 'A');
+                        const socScore = getPrimariaScore(stu.id, 'cs', 'A');
+
+                        const literalGlobal = isFinol ? 'B' : 'A';
+
+                        const renderLiteral = (lit: string) => (
+                          <span className={`px-2.5 py-1 rounded-lg text-xs font-black border ${
+                            lit === 'A'
+                              ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700'
+                              : lit === 'B'
+                              ? 'bg-teal-50 dark:bg-teal-950/50 text-teal-700 dark:text-teal-300 border-teal-300 dark:border-teal-700'
+                              : 'bg-amber-50 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-700'
+                          }`}>
+                            Literal {lit}
+                          </span>
+                        );
+
+                        return (
+                          <tr key={stu.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors">
+                            <td className="py-3 px-4 font-mono font-bold text-cyan-700 dark:text-cyan-300">{stu.cedula}</td>
+                            <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">{stu.fullName}</td>
+                            <td className="py-3 px-4 font-semibold text-slate-600 dark:text-slate-300">{stu.grade} {stu.section}</td>
+                            <td className="py-3 px-4 text-center">{renderLiteral(lenScore)}</td>
+                            <td className="py-3 px-4 text-center">{renderLiteral(matScore)}</td>
+                            <td className="py-3 px-4 text-center">{renderLiteral(natScore)}</td>
+                            <td className="py-3 px-4 text-center">{renderLiteral(socScore)}</td>
+                            <td className="py-3 px-4 text-center">
+                              <span className="px-3 py-1 rounded-full text-xs font-black bg-[#D4AF37]/15 text-[#94721C] dark:text-amber-300 border border-[#D4AF37]/40">
+                                Literal {literalGlobal}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4 text-center">
+                              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100/70 dark:bg-emerald-950/50 text-emerald-900 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700">
+                                Promovido
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* 3. SECCIÓN MEDIA GENERAL (NUMÉRICO VIGESIMAL 01 - 20) */}
+            {(levelFilter === 'MEDIA_GENERAL' || levelFilter === 'ALL') && (
+              <div>
+                {levelFilter === 'ALL' && (
+                  <div className="bg-[#1A1D36]/40 px-4 py-2 border-b border-indigo-500/20 flex items-center justify-between">
+                    <span className="text-xs font-black text-indigo-300 uppercase tracking-wider">
+                      Educación Media General (1ero a 5to Año) • Escala Cuantitativa Vigesimal
+                    </span>
+                    <span className="text-[10px] font-bold text-indigo-400 bg-indigo-950/60 px-2 py-0.5 rounded-full border border-indigo-800/40">
+                      Escala Oficial: 01 a 20 Puntos (Mínimo Aprobatorio: 10)
+                    </span>
+                  </div>
+                )}
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-[#1B1C33] text-white uppercase text-[10px] tracking-wider font-extrabold">
+                      <tr>
+                        <th className="py-3.5 px-4">Cédula</th>
+                        <th className="py-3.5 px-4">Estudiante</th>
+                        <th className="py-3.5 px-4">Año / Sección</th>
+                        <th className="py-3.5 px-4 text-center">Matemáticas</th>
+                        <th className="py-3.5 px-4 text-center">Castellano</th>
+                        <th className="py-3.5 px-4 text-center">Física</th>
+                        <th className="py-3.5 px-4 text-center">Química</th>
+                        <th className="py-3.5 px-4 text-center">Promedio Lapso</th>
+                        <th className="py-3.5 px-4 text-center">Estatus</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300 font-medium">
+                      {filteredStudents.filter(s => s.level === 'MEDIA_GENERAL').map((stu) => {
+                        const isChacin = stu.fullName.includes('Chacín');
+                        const isRomero = stu.fullName.includes('Romero');
+                        const mathScore = getMediaScore(stu.id, 'mat', isChacin ? 12 : isRomero ? 14 : 17);
+                        const castScore = getMediaScore(stu.id, 'cas', isChacin ? 15 : 20);
+                        const fisScore = getMediaScore(stu.id, 'fis', isChacin ? 11 : isRomero ? 10 : 18);
+                        const quiScore = getMediaScore(stu.id, 'qui', isChacin ? 13 : 17);
+                        const avg = ((mathScore + castScore + fisScore + quiScore) / 4).toFixed(2);
+                        const isPassing = Number(avg) >= 10;
+
+                        return (
+                          <tr key={stu.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors">
+                            <td className="py-3 px-4 font-mono font-bold text-[#2C2E53] dark:text-amber-300">{stu.cedula}</td>
+                            <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">{stu.fullName}</td>
+                            <td className="py-3 px-4 font-semibold text-slate-600 dark:text-slate-300">{stu.grade} {stu.section}</td>
+                            <td className="py-3 px-4 text-center font-mono font-bold">{mathScore}</td>
+                            <td className="py-3 px-4 text-center font-mono font-bold">{castScore}</td>
+                            <td className="py-3 px-4 text-center font-mono font-bold">{fisScore}</td>
+                            <td className="py-3 px-4 text-center font-mono font-bold">{quiScore}</td>
+                            <td className="py-3 px-4 text-center font-mono font-black text-[#2C2E53] dark:text-white">
+                              <span className="px-2 py-0.5 rounded bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200 border border-amber-200 dark:border-amber-800">
+                                {avg}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4 text-center">
+                              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${
+                                isPassing
+                                  ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+                                  : 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800'
+                              }`}>
+                                {isPassing ? 'Aprobado' : 'Materia Pendiente'}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Printable Official Signatures & Footer */}

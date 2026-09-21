@@ -182,14 +182,14 @@ export const InstitutionalReportsView: React.FC = () => {
                   <tr>
                     <td className="py-2.5 px-3 font-bold text-[#2C2E53]">Razonamiento y Lógica Espacial</td>
                     <td className="py-2.5 px-3 text-center">
-                      <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">88% Consolidado</span>
+                      <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">88% Logrado</span>
                     </td>
                     <td className="py-2.5 px-4">Alta receptividad en dinámicas de robótica lúdica y resolución de problemas.</td>
                   </tr>
                   <tr>
                     <td className="py-2.5 px-3 font-bold text-[#2C2E53]">Comprensión y Expresión Lingüística</td>
                     <td className="py-2.5 px-3 text-center">
-                      <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">92% Consolidado</span>
+                      <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">92% Logrado</span>
                     </td>
                     <td className="py-2.5 px-4">Fluidez comunicativa acorde con el perfil de ingreso Bellas Artes.</td>
                   </tr>

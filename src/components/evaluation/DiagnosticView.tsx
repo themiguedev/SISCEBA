@@ -54,7 +54,7 @@ export const DiagnosticView: React.FC = () => {
       if (rec) {
         existing[stu.id] = {
           numeric: rec.scoreNumeric,
-          qualitative: rec.scoreQualitative || 'C',
+          qualitative: rec.scoreQualitative || 'L',
           obs: rec.observations || '',
           robotics: rec.roboticsScore ? {
             logic: rec.roboticsScore.logicSkills,
@@ -65,9 +65,9 @@ export const DiagnosticView: React.FC = () => {
       } else {
         existing[stu.id] = {
           numeric: currentLevel === 'MEDIA_GENERAL' ? 14 : undefined,
-          qualitative: 'C',
+          qualitative: 'L',
           obs: '',
-          robotics: isRoboticsSpecial ? { logic: 'C', construction: 'C', teamwork: 'C' } : undefined
+          robotics: isRoboticsSpecial ? { logic: 'L', construction: 'L', teamwork: 'L' } : undefined
         };
       }
     });
@@ -93,7 +93,7 @@ export const DiagnosticView: React.FC = () => {
         moment: 'DIAGNOSTICA' as const,
         lapso: activeLapso,
         scoreNumeric: currentLevel === 'MEDIA_GENERAL' ? (entry.numeric ?? 12) : undefined,
-        scoreQualitative: currentLevel !== 'MEDIA_GENERAL' ? (entry.qualitative ?? 'C') : undefined,
+        scoreQualitative: currentLevel !== 'MEDIA_GENERAL' ? (entry.qualitative ?? 'L') : undefined,
         roboticsScore: entry.robotics ? {
           logicSkills: entry.robotics.logic,
           constructionSkills: entry.robotics.construction,
@@ -260,11 +260,11 @@ export const DiagnosticView: React.FC = () => {
                       <>
                         <td className="py-3 px-3 text-center">
                           <select
-                            value={rowData.robotics?.logic || 'C'}
+                            value={rowData.robotics?.logic || 'L'}
                             onChange={(e) =>
                               handleScoreChange(stu.id, {
                                 robotics: {
-                                  ...(rowData.robotics || { logic: 'C', construction: 'C', teamwork: 'C' }),
+                                  ...(rowData.robotics || { logic: 'L', construction: 'L', teamwork: 'L' }),
                                   logic: e.target.value as QualitativeScore
                                 }
                               })
@@ -272,7 +272,7 @@ export const DiagnosticView: React.FC = () => {
                             aria-label={`Lógica espacial para ${stu.fullName}`}
                             className="p-1.5 bg-slate-50 rounded border border-slate-200 text-xs font-black text-[#2C2E53]"
                           >
-                            <option value="C">Consolidado (C)</option>
+                            <option value="L">Logrado (L)</option>
                             <option value="EP">En Proceso (EP)</option>
                             <option value="I">Iniciado (I)</option>
                           </select>
@@ -280,11 +280,11 @@ export const DiagnosticView: React.FC = () => {
 
                         <td className="py-3 px-3 text-center">
                           <select
-                            value={rowData.robotics?.construction || 'C'}
+                            value={rowData.robotics?.construction || 'L'}
                             onChange={(e) =>
                               handleScoreChange(stu.id, {
                                 robotics: {
-                                  ...(rowData.robotics || { logic: 'C', construction: 'C', teamwork: 'C' }),
+                                  ...(rowData.robotics || { logic: 'L', construction: 'L', teamwork: 'L' }),
                                   construction: e.target.value as QualitativeScore
                                 }
                               })
@@ -292,7 +292,7 @@ export const DiagnosticView: React.FC = () => {
                             aria-label={`Habilidad de construcción para ${stu.fullName}`}
                             className="p-1.5 bg-slate-50 rounded border border-slate-200 text-xs font-black text-[#2C2E53]"
                           >
-                            <option value="C">Consolidado (C)</option>
+                            <option value="L">Logrado (L)</option>
                             <option value="EP">En Proceso (EP)</option>
                             <option value="I">Iniciado (I)</option>
                           </select>
@@ -300,11 +300,11 @@ export const DiagnosticView: React.FC = () => {
 
                         <td className="py-3 px-3 text-center">
                           <select
-                            value={rowData.robotics?.teamwork || 'C'}
+                            value={rowData.robotics?.teamwork || 'L'}
                             onChange={(e) =>
                               handleScoreChange(stu.id, {
                                 robotics: {
-                                  ...(rowData.robotics || { logic: 'C', construction: 'C', teamwork: 'C' }),
+                                  ...(rowData.robotics || { logic: 'L', construction: 'L', teamwork: 'L' }),
                                   teamwork: e.target.value as QualitativeScore
                                 }
                               })
@@ -312,15 +312,19 @@ export const DiagnosticView: React.FC = () => {
                             aria-label={`Trabajo en equipo para ${stu.fullName}`}
                             className="p-1.5 bg-slate-50 rounded border border-slate-200 text-xs font-black text-[#2C2E53]"
                           >
-                            <option value="C">Consolidado (C)</option>
+                            <option value="L">Logrado (L)</option>
                             <option value="EP">En Proceso (EP)</option>
                             <option value="I">Iniciado (I)</option>
                           </select>
                         </td>
 
                         <td className="py-3 px-3 text-center">
-                          <span className="px-2.5 py-1 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200">
-                            {rowData.qualitative || 'Consolidado'}
+                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-black ${
+                            rowData.qualitative === 'L' || rowData.qualitative === 'C' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                            rowData.qualitative === 'EP' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
+                            'bg-amber-50 text-amber-700 border border-amber-200'
+                          }`}>
+                            {rowData.qualitative === 'L' || rowData.qualitative === 'C' ? 'Logrado' : rowData.qualitative === 'EP' ? 'En Proceso' : rowData.qualitative === 'I' ? 'Iniciado' : (rowData.qualitative || 'Logrado')}
                           </span>
                         </td>
                       </>
@@ -330,14 +334,14 @@ export const DiagnosticView: React.FC = () => {
                     {currentLevel === 'PRIMARIA' && (
                       <td className="py-3 px-3 text-center">
                         <select
-                          value={rowData.qualitative || 'C'}
+                          value={rowData.qualitative || 'L'}
                           onChange={(e) =>
                             handleScoreChange(stu.id, { qualitative: e.target.value as QualitativeScore })
                           }
                           aria-label={`Valoración cualitativa para ${stu.fullName}`}
                           className="p-1.5 bg-slate-50 rounded border border-slate-200 text-xs font-black text-[#2C2E53]"
                         >
-                          <option value="C">Consolidado (C / A)</option>
+                          <option value="L">Logrado (L / A)</option>
                           <option value="EP">En Proceso (EP / B)</option>
                           <option value="I">Iniciado (I / C-D)</option>
                         </select>

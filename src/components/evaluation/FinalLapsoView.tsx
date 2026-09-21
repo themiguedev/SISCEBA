@@ -51,7 +51,7 @@ export const FinalLapsoView: React.FC = () => {
     if (currentLevel === 'MEDIA_GENERAL') {
       return studentId.includes('stu-med-3') ? '08' : studentId.includes('stu-med-4') ? '14' : '18';
     } else {
-      return studentId.includes('stu-ini-3') ? 'EP' : 'C';
+      return studentId.includes('stu-ini-3') ? 'EP' : 'L';
     }
   };
 
@@ -196,8 +196,14 @@ export const FinalLapsoView: React.FC = () => {
                               {sc.padStart(2, '0')}
                             </span>
                           ) : (
-                            <span className="px-2 py-0.5 rounded font-bold text-xs bg-slate-100 text-slate-800">
-                              {sc === 'C' ? 'Consolidado' : sc === 'EP' ? 'En Proceso' : 'Iniciado'}
+                            <span className={`px-2 py-0.5 rounded font-bold text-xs ${
+                              sc === 'L' || sc === 'C' || sc === 'A'
+                                ? 'bg-emerald-50 text-emerald-800'
+                                : sc === 'EP' || sc === 'B'
+                                ? 'bg-blue-50 text-blue-800'
+                                : 'bg-amber-50 text-amber-800'
+                            }`}>
+                              {sc === 'L' || sc === 'C' ? 'Logrado' : sc === 'EP' ? 'En Proceso' : sc === 'I' ? 'Iniciado' : sc}
                             </span>
                           )}
                         </td>

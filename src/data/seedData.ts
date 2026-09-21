@@ -1139,13 +1139,13 @@ export const INITIAL_EVALUATION_RECORDS: EvaluationRecord[] = [
     studentId: 'stu-ini-1',
     areaId: 'ini-fp',
     indicatorId: 'ind-ini-101',
-    moment: 'DIAGNOSTICA',
+    moment: 'PROCESAL',
     lapso: 1,
-    scoreQualitative: 'C',
+    scoreQualitative: 'L',
     roboticsScore: {
-      logicSkills: 'C',
-      constructionSkills: 'C',
-      teamwork: 'C'
+      logicSkills: 'L',
+      constructionSkills: 'L',
+      teamwork: 'L'
     },
     observations: 'Excelente adaptación a la sala. Muestra liderazgo positivo y empatía.',
     recordedAt: '2026-10-05',
@@ -1156,12 +1156,12 @@ export const INITIAL_EVALUATION_RECORDS: EvaluationRecord[] = [
     studentId: 'stu-ini-3',
     areaId: 'ini-fp',
     indicatorId: 'ind-ini-101',
-    moment: 'DIAGNOSTICA',
+    moment: 'PROCESAL',
     lapso: 1,
     scoreQualitative: 'EP',
     roboticsScore: {
       logicSkills: 'EP',
-      constructionSkills: 'C',
+      constructionSkills: 'L',
       teamwork: 'I'
     },
     observations: 'Presenta dificultad para compartir materiales de construcción. Se recomienda estimulación de turnos.',

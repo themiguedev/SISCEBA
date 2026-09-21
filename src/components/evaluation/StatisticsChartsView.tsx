@@ -64,7 +64,7 @@ export const StatisticsChartsView: React.FC = () => {
           { name: 'En Riesgo (01-09)', value: 7, color: RED }
         ]
       : [
-          { name: 'Consolidado (C)', value: 75, color: EMERALD },
+          { name: 'Logrado (L)', value: 75, color: EMERALD },
           { name: 'En Proceso (EP)', value: 20, color: GOLD },
           { name: 'Iniciado (I)', value: 5, color: RED }
         ];

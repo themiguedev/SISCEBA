@@ -226,8 +226,8 @@ export const BoletinInformativoView: React.FC = () => {
                             {(evalData.scoreNumeric || 15).toString().padStart(2, '0')}
                           </span>
                         ) : (
-                          <span className="px-2.5 py-1 rounded-lg font-black text-xs bg-slate-100 text-[#2C2E53]">
-                            {evalData.scoreQualitative === 'C' ? 'Consolidado (C)' : evalData.scoreQualitative === 'EP' ? 'En Proceso (EP)' : 'Iniciado (I)'}
+                          <span className="px-2.5 py-1 rounded-lg font-black text-xs bg-slate-100 dark:bg-slate-800 text-[#2C2E53] dark:text-amber-300">
+                            {evalData.scoreQualitative === 'L' || evalData.scoreQualitative === 'C' ? 'Logrado (L)' : evalData.scoreQualitative === 'EP' ? 'En Proceso (EP)' : 'Iniciado (I)'}
                           </span>
                         )}
                       </td>
