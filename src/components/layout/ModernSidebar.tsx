@@ -29,6 +29,7 @@ import {
   Palette
 } from 'lucide-react';
 import { SeasonalAccessoryIcon } from '../auth/LogoSeasonalAccessory';
+import { hasTabAccess, hasSubTabAccess, ROLE_METADATA } from '../../utils/rbac';
 
 interface ModernSidebarProps {
   isOpen: boolean;
@@ -352,9 +353,12 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
         <div className="flex-1 overflow-y-auto no-scrollbar py-4 px-3 space-y-4">
           {(() => {
             const isConsultasOnly = currentRole === 'REPRESENTANTE' || currentRole === 'ESTUDIANTE';
-            const visibleSections = isConsultasOnly
-              ? navigationSections.filter((s) => s.id === 'CONSULTAS')
-              : navigationSections;
+            const visibleSections = navigationSections
+              .filter((s) => hasTabAccess(currentRole, s.id))
+              .map((section) => ({
+                ...section,
+                subTabs: section.subTabs.filter((sub) => hasSubTabAccess(currentRole, section.id, sub.id))
+              }));
 
             return visibleSections.map((section, index) => {
               const isSectionActive = activeTab === section.id;
@@ -372,8 +376,10 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
                     <div className="pt-3 pb-1.5 px-2 flex items-center">
                       <span className="text-[11px] font-extrabold uppercase tracking-wider text-amber-200 flex items-center gap-1.5">
                         <span className="w-1.5 h-1.5 rounded-full bg-amber-300 shrink-0"></span>
-                        {isConsultasOnly
-                          ? 'PORTAL DE CONSULTAS CBA'
+                        {currentRole === 'REPRESENTANTE'
+                          ? 'PORTAL DE PADRES Y REPRESENTANTES'
+                          : currentRole === 'ESTUDIANTE'
+                          ? 'PORTAL OFICIAL DEL ESTUDIANTE'
                           : section.categoryGroup === 'PRINCIPAL'
                           ? 'CONTROL & GESTIÓN'
                           : section.categoryGroup === 'NIVELES'
@@ -493,14 +499,23 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
         </div>
 
         {/* Institutional Bottom Badge */}
-        <div className="p-3 border-t border-[#2C2E53] bg-[#141525] shrink-0 text-center">
+        <div className="p-2.5 border-t border-[#2C2E53] bg-[#141525] shrink-0 text-center">
           {isOpen ? (
             <div className="text-[10px] text-slate-400 font-medium">
               <span className="text-amber-300 font-extrabold block text-[11px]">SICE-CBA</span>
+              <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-[9px] font-bold border ${ROLE_METADATA[currentRole]?.badgeBg || 'text-slate-300'}`}>
+                {ROLE_METADATA[currentRole]?.badge || currentRole}
+              </span>
+              <span className="block text-[9px] text-slate-500 mt-0.5">
+                {ROLE_METADATA[currentRole]?.department || 'Bellas Artes'}
+              </span>
             </div>
           ) : (
-            <div className="w-8 h-8 rounded-lg bg-white/5 mx-auto flex items-center justify-center text-[10px] font-black text-amber-300">
-              CB
+            <div
+              className="w-8 h-8 rounded-lg bg-white/5 mx-auto flex items-center justify-center text-[10px] font-black text-amber-300 border border-white/10"
+              title={`${ROLE_METADATA[currentRole]?.label || currentRole}`}
+            >
+              {currentRole[0]}
             </div>
           )}
         </div>

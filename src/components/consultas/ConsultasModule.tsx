@@ -20,6 +20,7 @@ import {
   Sparkles,
   Info
 } from 'lucide-react';
+import { hasSubTabAccess, ROLE_METADATA } from '../../utils/rbac';
 
 export type ConsultasSubTab = 'RENDIMIENTO' | 'BOLETIN' | 'ASISTENCIA' | 'ESTADISTICAS' | 'NOMINAS';
 
@@ -32,11 +33,22 @@ export const ConsultasModule: React.FC<ConsultasModuleProps> = ({
   activeSubTab,
   setActiveSubTab
 }) => {
-  const { students, evaluations, areas, currentLevel, activeLapso, currentRole, passes } = useApp();
-  const [internalActiveTab, setInternalActiveTab] = useState<ConsultasSubTab>('RENDIMIENTO');
+  const { students, evaluations, areas, currentLevel, activeLapso, currentRole, passes, currentUser } = useApp();
+  const isFamilyOrStudent = currentRole === 'REPRESENTANTE' || currentRole === 'ESTUDIANTE';
 
-  const activeTab = activeSubTab || internalActiveTab;
+  const allowedTabs = (['RENDIMIENTO', 'BOLETIN', 'ASISTENCIA', 'ESTADISTICAS', 'NOMINAS'] as ConsultasSubTab[]).filter(
+    (t) => hasSubTabAccess(currentRole, 'CONSULTAS', t)
+  );
+
+  const [internalActiveTab, setInternalActiveTab] = useState<ConsultasSubTab>(() => {
+    return allowedTabs[0] || 'RENDIMIENTO';
+  });
+
+  const requestedTab = activeSubTab || internalActiveTab;
+  const activeTab = allowedTabs.includes(requestedTab) ? requestedTab : (allowedTabs[0] || 'RENDIMIENTO');
+
   const setActiveTab = (tab: ConsultasSubTab) => {
+    if (!allowedTabs.includes(tab)) return;
     if (setActiveSubTab) {
       setActiveSubTab(tab);
     }
@@ -44,14 +56,29 @@ export const ConsultasModule: React.FC<ConsultasModuleProps> = ({
   };
   const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredStudents = students.filter(
+  // Estricto aislamiento de privacidad estudiantil para Representante y Estudiante
+  const scopedStudents = isFamilyOrStudent
+    ? students.filter((s) => {
+        if (currentRole === 'ESTUDIANTE') {
+          return (
+            s.fullName.toLowerCase().includes(currentUser?.fullName?.toLowerCase() || '') ||
+            s.cedula.toLowerCase().includes(currentUser?.username.toLowerCase() || '')
+          );
+        }
+        // Representante: solo su representado
+        return (
+          s.representativeName.toLowerCase().includes(currentUser?.fullName?.toLowerCase() || '') ||
+          s.fullName.toLowerCase().includes('urdaneta')
+        );
+      })
+    : students;
+
+  const filteredStudents = scopedStudents.filter(
     (s) =>
       s.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       s.cedula.toLowerCase().includes(searchTerm.toLowerCase()) ||
       s.representativeName.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const isFamilyOrStudent = currentRole === 'REPRESENTANTE' || currentRole === 'ESTUDIANTE';
 
   return (
     <div className="space-y-6">
@@ -121,69 +148,79 @@ export const ConsultasModule: React.FC<ConsultasModuleProps> = ({
       {/* Full-Width Responsive Subtabs Navigation Bar (No text truncation) */}
       <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 p-1.5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
         {/* 1. Sábana de Notas */}
-        <button
-          onClick={() => setActiveTab('RENDIMIENTO')}
-          className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
-            activeTab === 'RENDIMIENTO'
-              ? 'bg-[#14232B] text-cyan-300 shadow-sm border border-cyan-500/40 ring-1 ring-cyan-500/20'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
-          }`}
-        >
-          <FileSpreadsheet className={`w-4 h-4 shrink-0 ${activeTab === 'RENDIMIENTO' ? 'text-cyan-400' : 'text-slate-400'}`} />
-          <span>Sábana de Notas</span>
-        </button>
+        {allowedTabs.includes('RENDIMIENTO') && (
+          <button
+            onClick={() => setActiveTab('RENDIMIENTO')}
+            className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
+              activeTab === 'RENDIMIENTO'
+                ? 'bg-[#14232B] text-cyan-300 shadow-sm border border-cyan-500/40 ring-1 ring-cyan-500/20'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
+            }`}
+          >
+            <FileSpreadsheet className={`w-4 h-4 shrink-0 ${activeTab === 'RENDIMIENTO' ? 'text-cyan-400' : 'text-slate-400'}`} />
+            <span>{isFamilyOrStudent ? 'Mis Calificaciones' : 'Sábana de Notas'}</span>
+          </button>
+        )}
 
         {/* 2. Boletín Informativo */}
-        <button
-          onClick={() => setActiveTab('BOLETIN')}
-          className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
-            activeTab === 'BOLETIN'
-              ? 'bg-[#14232B] text-cyan-300 shadow-sm border border-cyan-500/40 ring-1 ring-cyan-500/20'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
-          }`}
-        >
-          <GraduationCap className={`w-4 h-4 shrink-0 ${activeTab === 'BOLETIN' ? 'text-cyan-400' : 'text-slate-400'}`} />
-          <span>Boletín Oficial</span>
-        </button>
+        {allowedTabs.includes('BOLETIN') && (
+          <button
+            onClick={() => setActiveTab('BOLETIN')}
+            className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
+              activeTab === 'BOLETIN'
+                ? 'bg-[#14232B] text-cyan-300 shadow-sm border border-cyan-500/40 ring-1 ring-cyan-500/20'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
+            }`}
+          >
+            <GraduationCap className={`w-4 h-4 shrink-0 ${activeTab === 'BOLETIN' ? 'text-cyan-400' : 'text-slate-400'}`} />
+            <span>Boletín Oficial</span>
+          </button>
+        )}
 
         {/* 3. Asistencia y Pases */}
-        <button
-          onClick={() => setActiveTab('ASISTENCIA')}
-          className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
-            activeTab === 'ASISTENCIA'
-              ? 'bg-[#14232B] text-cyan-300 shadow-sm border border-cyan-500/40 ring-1 ring-cyan-500/20'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
-          }`}
-        >
-          <Clock className={`w-4 h-4 shrink-0 ${activeTab === 'ASISTENCIA' ? 'text-cyan-400' : 'text-slate-400'}`} />
-          <span>Asistencia & Pases</span>
-        </button>
+        {allowedTabs.includes('ASISTENCIA') && (
+          <button
+            onClick={() => setActiveTab('ASISTENCIA')}
+            className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
+              activeTab === 'ASISTENCIA'
+                ? 'bg-[#14232B] text-cyan-300 shadow-sm border border-cyan-500/40 ring-1 ring-cyan-500/20'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
+            }`}
+          >
+            <Clock className={`w-4 h-4 shrink-0 ${activeTab === 'ASISTENCIA' ? 'text-cyan-400' : 'text-slate-400'}`} />
+            <span>{isFamilyOrStudent ? 'Mi Asistencia y Pases' : 'Asistencia & Pases'}</span>
+          </button>
+        )}
 
         {/* 4. Estadísticas */}
-        <button
-          onClick={() => setActiveTab('ESTADISTICAS')}
-          className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
-            activeTab === 'ESTADISTICAS'
-              ? 'bg-[#14232B] text-cyan-300 shadow-sm border border-cyan-500/40 ring-1 ring-cyan-500/20'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
-          }`}
-        >
-          <BarChart3 className={`w-4 h-4 shrink-0 ${activeTab === 'ESTADISTICAS' ? 'text-cyan-400' : 'text-slate-400'}`} />
-          <span>Estadísticas</span>
-        </button>
+        {allowedTabs.includes('ESTADISTICAS') && (
+          <button
+            onClick={() => setActiveTab('ESTADISTICAS')}
+            className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
+              activeTab === 'ESTADISTICAS'
+                ? 'bg-[#14232B] text-cyan-300 shadow-sm border border-cyan-500/40 ring-1 ring-cyan-500/20'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
+            }`}
+          >
+            <BarChart3 className={`w-4 h-4 shrink-0 ${activeTab === 'ESTADISTICAS' ? 'text-cyan-400' : 'text-slate-400'}`} />
+            <span>Estadísticas</span>
+          </button>
+        )}
 
         {/* 5. Nóminas / Expedientes */}
-        <button
-          onClick={() => setActiveTab('NOMINAS')}
-          className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
-            activeTab === 'NOMINAS'
-              ? 'bg-[#14232B] text-cyan-300 shadow-sm border border-cyan-500/40 ring-1 ring-cyan-500/20'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
-          }`}
-        >
-          <Users className={`w-4 h-4 shrink-0 ${activeTab === 'NOMINAS' ? 'text-cyan-400' : 'text-slate-400'}`} />
-          <span>Expedientes</span>
-        </button>
+        {allowedTabs.includes('NOMINAS') && (
+          <button
+            onClick={() => setActiveTab('NOMINAS')}
+            className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
+              activeTab === 'NOMINAS'
+                ? 'bg-[#14232B] text-cyan-300 shadow-sm border border-cyan-500/40 ring-1 ring-cyan-500/20'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
+            }`}
+          >
+            <Users className={`w-4 h-4 shrink-0 ${activeTab === 'NOMINAS' ? 'text-cyan-400' : 'text-slate-400'}`} />
+            <span>Expedientes</span>
+          </button>
+        )}
       </div>
 
       {/* VIEW 1: RENDIMIENTO ESTUDIANTIL CONSOLIDADO (SÁBANA) */}

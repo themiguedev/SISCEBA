@@ -14,6 +14,7 @@ import { ShortcutToast, ShortcutToastMessage } from './components/common/Shortcu
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { LoginView } from './components/auth/LoginView';
 import { SeasonalAccessoryIcon } from './components/auth/LogoSeasonalAccessory';
+import { hasTabAccess, hasSubTabAccess, getDefaultTabForRole, ROLE_METADATA } from './utils/rbac';
 
 // Modules
 import { EscritorioView } from './components/dashboard/EscritorioView';
@@ -71,12 +72,11 @@ const SiscebaMainApp: React.FC = () => {
 
   const { mode, palette, isDark, toggleMode, setPalette } = useTheme();
 
-  // Keep activeTab in sync or restrict to CONSULTAS if Representante / Estudiante
+  // Keep activeTab synchronized with RBAC hierarchy and educational levels
   useEffect(() => {
-    if (currentRole === 'REPRESENTANTE' || currentRole === 'ESTUDIANTE') {
-      if (activeTab !== 'CONSULTAS') {
-        setActiveTab('CONSULTAS');
-      }
+    if (!hasTabAccess(currentRole, activeTab)) {
+      const defaultTab = getDefaultTabForRole(currentRole);
+      setActiveTab(defaultTab);
       return;
     }
     if (activeTab === 'INICIAL' || activeTab === 'PRIMARIA' || activeTab === 'MEDIA_GENERAL') {
@@ -87,10 +87,10 @@ const SiscebaMainApp: React.FC = () => {
   }, [currentLevel, currentRole, activeTab]);
 
   const handleTabChange = (tab: MainNavigationTab) => {
-    if ((currentRole === 'REPRESENTANTE' || currentRole === 'ESTUDIANTE') && tab !== 'CONSULTAS') {
+    if (!hasTabAccess(currentRole, tab)) {
       showToast(
         'Acceso Restringido',
-        'Los representantes y alumnos solo tienen disponible el módulo de Consultas.',
+        `El rol de ${ROLE_METADATA[currentRole]?.label || currentRole} no tiene permisos para acceder a ${tab}.`,
         true
       );
       return;
@@ -102,6 +102,14 @@ const SiscebaMainApp: React.FC = () => {
   };
 
   const handleSubTabChange = (sub: string) => {
+    if (!hasSubTabAccess(currentRole, activeTab, sub)) {
+      showToast(
+        'Acceso Restringido',
+        `La función seleccionada no está disponible para el rol de ${ROLE_METADATA[currentRole]?.label || currentRole}.`,
+        true
+      );
+      return;
+    }
     if (sub === 'DASHBOARD' || sub === 'PERFIL' || sub === 'SUGERENCIAS') {
       setEscritorioSubTab(sub as 'DASHBOARD' | 'PERFIL' | 'SUGERENCIAS');
     } else if (['INSCRIPCIONES', 'PASES', 'INASISTENCIAS', 'CONDUCTAS', 'DOCUMENTOS', 'BLOQUEO', 'TITULOS', 'MATRICULA'].includes(sub)) {
@@ -123,13 +131,6 @@ const SiscebaMainApp: React.FC = () => {
     } else if (['DISENADOR_OFICIAL', 'AREAS_PERFILES', 'BANCO_COMPETENCIAS', 'BANCO_ESTRATEGIAS', 'PLAN_QUINCENAL', 'PLAN_LAPSO'].includes(sub)) {
       setLevelPillarTab('PLANIFICACION');
       setPlanningSubTab(sub);
-    } else {
-      if (activeTab === 'ESCRITORIO') setEscritorioSubTab(sub as any);
-      else if (activeTab === 'GESTION') setGestionSubTab(sub);
-      else if (activeTab === 'CONSULTAS') setConsultasSubTab(sub as any);
-      else if (activeTab === 'COMUNIDAD') setComunidadSubTab(sub as any);
-      else if (activeTab === 'CONFIGURACION') setConfiguracionSubTab(sub as any);
-      else if (activeTab === 'AYUDA') setAyudaSubTab(sub as any);
     }
   };
 
@@ -161,14 +162,27 @@ const SiscebaMainApp: React.FC = () => {
   };
 
   const handleQuickAction = (tab: any, subTab?: string) => {
-    if ((currentRole === 'REPRESENTANTE' || currentRole === 'ESTUDIANTE') && tab !== 'CONSULTAS') {
+    const targetTab = (tab === 'PLANIFICACION' || tab === 'EVALUACION' || tab === 'COMUNICACION')
+      ? currentLevel
+      : (tab as MainNavigationTab);
+
+    if (!hasTabAccess(currentRole, targetTab)) {
       showToast(
         'Acceso Restringido',
-        'Los representantes y alumnos solo tienen disponible el módulo de Consultas.',
+        `El rol de ${ROLE_METADATA[currentRole]?.label || currentRole} no tiene permisos para acceder a esta sección.`,
         true
       );
       return;
     }
+    if (subTab && !hasSubTabAccess(currentRole, targetTab, subTab)) {
+      showToast(
+        'Acceso Restringido',
+        `Esta sub-sección no está permitida para su rol institucional.`,
+        true
+      );
+      return;
+    }
+
     if (tab === 'ESCRITORIO') {
       handleTabChange('ESCRITORIO');
       if (subTab) setEscritorioSubTab(subTab as 'DASHBOARD' | 'PERFIL' | 'SUGERENCIAS');
@@ -183,7 +197,7 @@ const SiscebaMainApp: React.FC = () => {
       if (subTab) setComunidadSubTab(subTab as 'NOTICIAS' | 'CUMPLEANOS' | 'COMUNICADOS');
     } else if (tab === 'CONFIGURACION') {
       handleTabChange('CONFIGURACION');
-      if (subTab) setConfiguracionSubTab(subTab as 'LAPSOS' | 'ESTRUCTURA' | 'DOCENTES');
+      if (subTab) setConfiguracionSubTab(subTab as 'LAPSOS' | 'ESTRUCTURA' | 'DOCENTES' | 'TEMAS');
     } else if (tab === 'AYUDA') {
       handleTabChange('AYUDA');
       if (subTab) setAyudaSubTab(subTab as 'MANUAL' | 'MAPA_SITIO');
@@ -408,11 +422,11 @@ const SiscebaMainApp: React.FC = () => {
   });
 
   const handleGoHome = () => {
-    if (currentRole === 'REPRESENTANTE' || currentRole === 'ESTUDIANTE') {
-      setActiveTab('CONSULTAS');
+    const defaultTab = getDefaultTabForRole(currentRole);
+    setActiveTab(defaultTab);
+    if (defaultTab === 'CONSULTAS') {
       setConsultasSubTab('RENDIMIENTO');
     } else {
-      setActiveTab('ESCRITORIO');
       setEscritorioSubTab('DASHBOARD');
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });

@@ -16,8 +16,10 @@ import {
   FileText,
   Lock,
   GraduationCap,
-  Users
+  Users,
+  ShieldX
 } from 'lucide-react';
+import { hasSubTabAccess, ROLE_METADATA } from '../../utils/rbac';
 
 interface GestionModuleProps {
   activeSubTab: string;
@@ -28,7 +30,7 @@ export const GestionModule: React.FC<GestionModuleProps> = ({
   activeSubTab,
   setActiveSubTab
 }) => {
-  const { passes, documentRequests, adminBlocks, conducts } = useApp();
+  const { passes, documentRequests, adminBlocks, conducts, currentRole } = useApp();
 
   const pendingDocsCount = documentRequests.filter((d) => d.status === 'PENDIENTE').length;
   const blockedStudentsCount = adminBlocks.filter((b) => b.active).length;
@@ -92,11 +94,14 @@ export const GestionModule: React.FC<GestionModuleProps> = ({
     }
   ];
 
+  const allowedSubTabs = subTabs.filter((tab) => hasSubTabAccess(currentRole, 'GESTION', tab.id));
+  const isCurrentSubTabAllowed = hasSubTabAccess(currentRole, 'GESTION', activeSubTab);
+
   return (
     <div className="space-y-4">
       {/* Ergonomic Subtabs Bar */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl p-1.5 border border-slate-200/90 dark:border-slate-800 shadow-sm flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-        {subTabs.map((tab) => {
+        {allowedSubTabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeSubTab === tab.id;
 
@@ -126,16 +131,42 @@ export const GestionModule: React.FC<GestionModuleProps> = ({
         })}
       </div>
 
-      {/* Subtab Content Area with Smooth Entry */}
+      {/* Subtab Content Area with RBAC Guard */}
       <div className="animate-in fade-in duration-200">
-        {activeSubTab === 'INSCRIPCIONES' && <InscripcionesWizardView />}
-        {activeSubTab === 'PASES' && <PasesRetrasoView />}
-        {activeSubTab === 'INASISTENCIAS' && <InasistenciasGestionView />}
-        {activeSubTab === 'CONDUCTAS' && <ConductasView />}
-        {activeSubTab === 'DOCUMENTOS' && <DocumentosSolicitadosView />}
-        {activeSubTab === 'BLOQUEO' && <BloqueoAdministrativoView />}
-        {activeSubTab === 'TITULOS' && <TitulosBachillerView />}
-        {activeSubTab === 'MATRICULA' && <MatriculaProsecucionView />}
+        {!isCurrentSubTabAllowed ? (
+          <div className="p-8 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 text-center max-w-lg mx-auto shadow-sm my-6 space-y-4">
+            <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center mx-auto">
+              <ShieldX className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">
+                Sección Restringida para su Rol
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                Su rol actual de <strong>{ROLE_METADATA[currentRole]?.label || currentRole}</strong> no posee atribuciones para gestionar esta sub-área. Las funciones de control de matrícula, inscripciones y títulos están reservadas a Dirección y Control de Estudios (UCE).
+              </p>
+            </div>
+            {allowedSubTabs.length > 0 && (
+              <button
+                onClick={() => setActiveSubTab(allowedSubTabs[0].id)}
+                className="px-4 py-2 bg-[#2C2E53] hover:bg-[#1B1C33] text-[#D4AF37] font-bold text-xs rounded-xl shadow-md transition"
+              >
+                Ir a {allowedSubTabs[0].label}
+              </button>
+            )}
+          </div>
+        ) : (
+          <>
+            {activeSubTab === 'INSCRIPCIONES' && <InscripcionesWizardView />}
+            {activeSubTab === 'PASES' && <PasesRetrasoView />}
+            {activeSubTab === 'INASISTENCIAS' && <InasistenciasGestionView />}
+            {activeSubTab === 'CONDUCTAS' && <ConductasView />}
+            {activeSubTab === 'DOCUMENTOS' && <DocumentosSolicitadosView />}
+            {activeSubTab === 'BLOQUEO' && <BloqueoAdministrativoView />}
+            {activeSubTab === 'TITULOS' && <TitulosBachillerView />}
+            {activeSubTab === 'MATRICULA' && <MatriculaProsecucionView />}
+          </>
+        )}
       </div>
     </div>
   );

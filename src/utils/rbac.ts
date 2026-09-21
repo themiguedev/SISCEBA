@@ -1,0 +1,333 @@
+import { UserRole, MainNavigationTab } from '../types';
+
+/**
+ * Escala jerárquica numérica de roles institucionales SICE-CBA
+ * Mayor puntuación implica mayor nivel de privilegio y autoridad.
+ */
+export const ROLE_HIERARCHY: Record<UserRole, number> = {
+  ADMINISTRADOR: 100,
+  DIRECTOR: 80,
+  COORDINACION: 60,
+  COORDINADOR: 60, // Alias de compatibilidad
+  DOCENTE: 40,
+  REPRESENTANTE: 20,
+  ESTUDIANTE: 10
+};
+
+/**
+ * Metadatos descriptivos institucionales de cada rol
+ */
+export interface RoleMetadata {
+  id: UserRole;
+  label: string;
+  badge: string;
+  badgeBg: string;
+  description: string;
+  department: string;
+  scope: string;
+}
+
+export const ROLE_METADATA: Record<UserRole, RoleMetadata> = {
+  ADMINISTRADOR: {
+    id: 'ADMINISTRADOR',
+    label: 'Administrador de Sistemas',
+    badge: '👑 Admin TI',
+    badgeBg: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
+    description: 'Control y configuración global de base de datos, seguridad, usuarios y auditoría técnica.',
+    department: 'Dirección de Tecnología / TI',
+    scope: 'Acceso Total al Sistema'
+  },
+  DIRECTOR: {
+    id: 'DIRECTOR',
+    label: 'Director General CBA',
+    badge: '🏛️ Dirección',
+    badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+    description: 'Máxima autoridad académica y directiva. Firma de títulos, aprobación de boletines y circulares.',
+    department: 'Dirección General',
+    scope: 'Supervisión Institucional y Firma'
+  },
+  COORDINACION: {
+    id: 'COORDINACION',
+    label: 'Coordinación Pedagógica / UCE',
+    badge: '📋 Coordinación',
+    badgeBg: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+    description: 'Control de Estudios y Evaluación. Aprobación de planes didácticos, pases, notas y matrículas.',
+    department: 'Unidad de Control de Estudios (UCE)',
+    scope: 'Gestión Pedagógica y Operativa'
+  },
+  COORDINADOR: {
+    id: 'COORDINADOR',
+    label: 'Coordinador Pedagógico',
+    badge: '📋 Coordinación',
+    badgeBg: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+    description: 'Control de Estudios y Evaluación.',
+    department: 'Unidad de Control de Estudios (UCE)',
+    scope: 'Gestión Pedagógica y Operativa'
+  },
+  DOCENTE: {
+    id: 'DOCENTE',
+    label: 'Docente de Aula / Especialista',
+    badge: '🔬 Docente',
+    badgeBg: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+    description: 'Planificación didáctica oficial, asentamiento de notas procesales y asistencia diaria de clase.',
+    department: 'Cuerpo Docente CBA',
+    scope: 'Planificación, Evaluación y Asistencia de Aula'
+  },
+  REPRESENTANTE: {
+    id: 'REPRESENTANTE',
+    label: 'Padre o Representante Legal',
+    badge: '👨‍👩‍👦 Representante',
+    badgeBg: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
+    description: 'Portal de consulta familiar: boletines de notas, récord de asistencias y avisos de su representado.',
+    department: 'Comunidad de Padres y Representantes',
+    scope: 'Solo Consultas de su Representado'
+  },
+  ESTUDIANTE: {
+    id: 'ESTUDIANTE',
+    label: 'Estudiante CBA',
+    badge: '🎒 Alumno',
+    badgeBg: 'bg-teal-500/20 text-teal-300 border-teal-500/30',
+    description: 'Portal del alumno: consulta de calificaciones personales, boletín por lapso y cartelera escolar.',
+    department: 'Cuerpo Estudiantil CBA',
+    scope: 'Solo Consulta Personal'
+  }
+};
+
+/**
+ * Matriz de acceso a pestañas principales (MainNavigationTab) por rol
+ */
+export const ROLE_TAB_PERMISSIONS: Record<UserRole, MainNavigationTab[]> = {
+  ADMINISTRADOR: [
+    'ESCRITORIO',
+    'GESTION',
+    'INICIAL',
+    'PRIMARIA',
+    'MEDIA_GENERAL',
+    'CONSULTAS',
+    'COMUNIDAD',
+    'CONFIGURACION',
+    'AYUDA'
+  ],
+  DIRECTOR: [
+    'ESCRITORIO',
+    'GESTION',
+    'INICIAL',
+    'PRIMARIA',
+    'MEDIA_GENERAL',
+    'CONSULTAS',
+    'COMUNIDAD',
+    'CONFIGURACION',
+    'AYUDA'
+  ],
+  COORDINACION: [
+    'ESCRITORIO',
+    'GESTION',
+    'INICIAL',
+    'PRIMARIA',
+    'MEDIA_GENERAL',
+    'CONSULTAS',
+    'COMUNIDAD',
+    'CONFIGURACION',
+    'AYUDA'
+  ],
+  COORDINADOR: [
+    'ESCRITORIO',
+    'GESTION',
+    'INICIAL',
+    'PRIMARIA',
+    'MEDIA_GENERAL',
+    'CONSULTAS',
+    'COMUNIDAD',
+    'CONFIGURACION',
+    'AYUDA'
+  ],
+  DOCENTE: [
+    'ESCRITORIO',
+    'GESTION',
+    'INICIAL',
+    'PRIMARIA',
+    'MEDIA_GENERAL',
+    'CONSULTAS',
+    'COMUNIDAD',
+    'CONFIGURACION',
+    'AYUDA'
+  ],
+  REPRESENTANTE: [
+    'CONSULTAS',
+    'COMUNIDAD',
+    'AYUDA'
+  ],
+  ESTUDIANTE: [
+    'CONSULTAS',
+    'COMUNIDAD',
+    'AYUDA'
+  ]
+};
+
+/**
+ * Matriz de acceso granular a subpestañas por módulo
+ */
+export const ROLE_SUBTAB_PERMISSIONS: Record<UserRole, Partial<Record<MainNavigationTab, string[]>>> = {
+  ADMINISTRADOR: {
+    ESCRITORIO: ['DASHBOARD', 'PERFIL', 'SUGERENCIAS'],
+    GESTION: ['INSCRIPCIONES', 'PASES', 'INASISTENCIAS', 'CONDUCTAS', 'DOCUMENTOS', 'BLOQUEO', 'TITULOS', 'MATRICULA'],
+    INICIAL: ['AREAS_PERFILES', 'BANCO_COMPETENCIAS', 'PLAN_QUINCENAL', 'PLAN_LAPSO', 'DIAGNOSTICA', 'PROCESAL', 'BOLETIN'],
+    PRIMARIA: ['AREAS_PERFILES', 'DISENADOR_OFICIAL', 'BANCO_COMPETENCIAS', 'BANCO_ESTRATEGIAS', 'PLAN_QUINCENAL', 'PROCESAL', 'FINAL_LAPSO', 'BOLETIN'],
+    MEDIA_GENERAL: ['AREAS_PERFILES', 'DISENADOR_OFICIAL', 'BANCO_ESTRATEGIAS', 'PLAN_QUINCENAL', 'PLAN_LAPSO', 'PROCESAL', 'ACTAS_CONSEJO', 'IA_ACTION_PLANS', 'REMEDIALES', 'BOLETIN'],
+    CONSULTAS: ['RENDIMIENTO', 'BOLETIN', 'ASISTENCIA', 'ESTADISTICAS', 'NOMINAS'],
+    COMUNIDAD: ['NOTICIAS', 'CUMPLEANOS', 'COMUNICADOS'],
+    CONFIGURACION: ['LAPSOS', 'ESTRUCTURA', 'DOCENTES', 'TEMAS'],
+    AYUDA: ['MANUAL', 'MAPA_SITIO']
+  },
+  DIRECTOR: {
+    ESCRITORIO: ['DASHBOARD', 'PERFIL', 'SUGERENCIAS'],
+    GESTION: ['INSCRIPCIONES', 'PASES', 'INASISTENCIAS', 'CONDUCTAS', 'DOCUMENTOS', 'BLOQUEO', 'TITULOS', 'MATRICULA'],
+    INICIAL: ['AREAS_PERFILES', 'BANCO_COMPETENCIAS', 'PLAN_QUINCENAL', 'PLAN_LAPSO', 'DIAGNOSTICA', 'PROCESAL', 'BOLETIN'],
+    PRIMARIA: ['AREAS_PERFILES', 'DISENADOR_OFICIAL', 'BANCO_COMPETENCIAS', 'BANCO_ESTRATEGIAS', 'PLAN_QUINCENAL', 'PROCESAL', 'FINAL_LAPSO', 'BOLETIN'],
+    MEDIA_GENERAL: ['AREAS_PERFILES', 'DISENADOR_OFICIAL', 'BANCO_ESTRATEGIAS', 'PLAN_QUINCENAL', 'PLAN_LAPSO', 'PROCESAL', 'ACTAS_CONSEJO', 'IA_ACTION_PLANS', 'REMEDIALES', 'BOLETIN'],
+    CONSULTAS: ['RENDIMIENTO', 'BOLETIN', 'ASISTENCIA', 'ESTADISTICAS', 'NOMINAS'],
+    COMUNIDAD: ['NOTICIAS', 'CUMPLEANOS', 'COMUNICADOS'],
+    CONFIGURACION: ['LAPSOS', 'ESTRUCTURA', 'DOCENTES', 'TEMAS'],
+    AYUDA: ['MANUAL', 'MAPA_SITIO']
+  },
+  COORDINACION: {
+    ESCRITORIO: ['DASHBOARD', 'PERFIL', 'SUGERENCIAS'],
+    GESTION: ['INSCRIPCIONES', 'PASES', 'INASISTENCIAS', 'CONDUCTAS', 'DOCUMENTOS', 'TITULOS', 'MATRICULA'], // Bloqueo reservado a Director/Admin
+    INICIAL: ['AREAS_PERFILES', 'BANCO_COMPETENCIAS', 'PLAN_QUINCENAL', 'PLAN_LAPSO', 'DIAGNOSTICA', 'PROCESAL', 'BOLETIN'],
+    PRIMARIA: ['AREAS_PERFILES', 'DISENADOR_OFICIAL', 'BANCO_COMPETENCIAS', 'BANCO_ESTRATEGIAS', 'PLAN_QUINCENAL', 'PROCESAL', 'FINAL_LAPSO', 'BOLETIN'],
+    MEDIA_GENERAL: ['AREAS_PERFILES', 'DISENADOR_OFICIAL', 'BANCO_ESTRATEGIAS', 'PLAN_QUINCENAL', 'PLAN_LAPSO', 'PROCESAL', 'ACTAS_CONSEJO', 'IA_ACTION_PLANS', 'REMEDIALES', 'BOLETIN'],
+    CONSULTAS: ['RENDIMIENTO', 'BOLETIN', 'ASISTENCIA', 'ESTADISTICAS', 'NOMINAS'],
+    COMUNIDAD: ['NOTICIAS', 'CUMPLEANOS', 'COMUNICADOS'],
+    CONFIGURACION: ['LAPSOS', 'ESTRUCTURA', 'DOCENTES', 'TEMAS'],
+    AYUDA: ['MANUAL', 'MAPA_SITIO']
+  },
+  COORDINADOR: {
+    ESCRITORIO: ['DASHBOARD', 'PERFIL', 'SUGERENCIAS'],
+    GESTION: ['INSCRIPCIONES', 'PASES', 'INASISTENCIAS', 'CONDUCTAS', 'DOCUMENTOS', 'TITULOS', 'MATRICULA'],
+    INICIAL: ['AREAS_PERFILES', 'BANCO_COMPETENCIAS', 'PLAN_QUINCENAL', 'PLAN_LAPSO', 'DIAGNOSTICA', 'PROCESAL', 'BOLETIN'],
+    PRIMARIA: ['AREAS_PERFILES', 'DISENADOR_OFICIAL', 'BANCO_COMPETENCIAS', 'BANCO_ESTRATEGIAS', 'PLAN_QUINCENAL', 'PROCESAL', 'FINAL_LAPSO', 'BOLETIN'],
+    MEDIA_GENERAL: ['AREAS_PERFILES', 'DISENADOR_OFICIAL', 'BANCO_ESTRATEGIAS', 'PLAN_QUINCENAL', 'PLAN_LAPSO', 'PROCESAL', 'ACTAS_CONSEJO', 'IA_ACTION_PLANS', 'REMEDIALES', 'BOLETIN'],
+    CONSULTAS: ['RENDIMIENTO', 'BOLETIN', 'ASISTENCIA', 'ESTADISTICAS', 'NOMINAS'],
+    COMUNIDAD: ['NOTICIAS', 'CUMPLEANOS', 'COMUNICADOS'],
+    CONFIGURACION: ['LAPSOS', 'ESTRUCTURA', 'DOCENTES', 'TEMAS'],
+    AYUDA: ['MANUAL', 'MAPA_SITIO']
+  },
+  DOCENTE: {
+    ESCRITORIO: ['DASHBOARD', 'PERFIL', 'SUGERENCIAS'],
+    GESTION: ['PASES', 'INASISTENCIAS', 'CONDUCTAS'], // Asistencia diaria y pases de su aula
+    INICIAL: ['AREAS_PERFILES', 'BANCO_COMPETENCIAS', 'PLAN_QUINCENAL', 'PLAN_LAPSO', 'DIAGNOSTICA', 'PROCESAL', 'BOLETIN'],
+    PRIMARIA: ['AREAS_PERFILES', 'DISENADOR_OFICIAL', 'BANCO_COMPETENCIAS', 'BANCO_ESTRATEGIAS', 'PLAN_QUINCENAL', 'PROCESAL', 'FINAL_LAPSO', 'BOLETIN'],
+    MEDIA_GENERAL: ['AREAS_PERFILES', 'DISENADOR_OFICIAL', 'BANCO_ESTRATEGIAS', 'PLAN_QUINCENAL', 'PLAN_LAPSO', 'PROCESAL', 'ACTAS_CONSEJO', 'IA_ACTION_PLANS', 'REMEDIALES', 'BOLETIN'],
+    CONSULTAS: ['RENDIMIENTO', 'BOLETIN', 'ASISTENCIA', 'NOMINAS'], // Rendimiento de sus materias
+    COMUNIDAD: ['NOTICIAS', 'CUMPLEANOS', 'COMUNICADOS'],
+    CONFIGURACION: ['TEMAS'], // Solo personalización de tema
+    AYUDA: ['MANUAL', 'MAPA_SITIO']
+  },
+  REPRESENTANTE: {
+    CONSULTAS: ['RENDIMIENTO', 'BOLETIN', 'ASISTENCIA'], // Solo calificaciones, boletín y asistencia de su representado
+    COMUNIDAD: ['NOTICIAS', 'COMUNICADOS'],
+    AYUDA: ['MANUAL', 'MAPA_SITIO']
+  },
+  ESTUDIANTE: {
+    CONSULTAS: ['RENDIMIENTO', 'BOLETIN', 'ASISTENCIA'], // Solo mis notas y mi asistencia
+    COMUNIDAD: ['NOTICIAS', 'COMUNICADOS'],
+    AYUDA: ['MANUAL', 'MAPA_SITIO']
+  }
+};
+
+/**
+ * Valida si un rol tiene acceso a una pestaña principal
+ */
+export const hasTabAccess = (role: UserRole, tab: MainNavigationTab): boolean => {
+  const allowed = ROLE_TAB_PERMISSIONS[role] || [];
+  return allowed.includes(tab);
+};
+
+/**
+ * Valida si un rol tiene acceso a una subpestaña específica dentro de un módulo
+ */
+export const hasSubTabAccess = (
+  role: UserRole,
+  tab: MainNavigationTab,
+  subTabId?: string
+): boolean => {
+  if (!hasTabAccess(role, tab)) return false;
+  if (!subTabId) return true;
+
+  const roleSubs = ROLE_SUBTAB_PERMISSIONS[role];
+  if (!roleSubs) return false;
+
+  const allowedSubs = roleSubs[tab];
+  if (!allowedSubs) return false;
+
+  return allowedSubs.includes(subTabId);
+};
+
+/**
+ * Retorna la pestaña predeterminada a la que debe redirigirse un rol al ingresar
+ */
+export const getDefaultTabForRole = (role: UserRole): MainNavigationTab => {
+  if (role === 'REPRESENTANTE' || role === 'ESTUDIANTE') {
+    return 'CONSULTAS';
+  }
+  return 'ESCRITORIO';
+};
+
+/**
+ * Verifica si el rol tiene privilegios de aprobación y supervisión de planificaciones didácticas
+ */
+export const canApprovePlans = (role: UserRole): boolean => {
+  return role === 'ADMINISTRADOR' || role === 'DIRECTOR' || role === 'COORDINACION' || role === 'COORDINADOR';
+};
+
+/**
+ * Verifica si el rol tiene permisos para asentar o modificar calificaciones procesales
+ */
+export const canEditGrades = (role: UserRole): boolean => {
+  return (
+    role === 'ADMINISTRADOR' ||
+    role === 'COORDINACION' ||
+    role === 'COORDINADOR' ||
+    role === 'DOCENTE'
+  );
+};
+
+/**
+ * Verifica si el rol puede aplicar o levantar bloqueos administrativos financieros
+ */
+export const canManageBlocks = (role: UserRole): boolean => {
+  return role === 'ADMINISTRADOR' || role === 'DIRECTOR';
+};
+
+/**
+ * Verifica si el rol puede validar, firmar o emitir Títulos de Bachiller oficiales MPPE
+ */
+export const canIssueTitles = (role: UserRole): boolean => {
+  return role === 'ADMINISTRADOR' || role === 'DIRECTOR' || role === 'COORDINACION' || role === 'COORDINADOR';
+};
+
+/**
+ * Verifica si el rol puede configurar la estructura institucional y apertura de lapsos
+ */
+export const canConfigureSchool = (role: UserRole): boolean => {
+  return role === 'ADMINISTRADOR' || role === 'DIRECTOR';
+};
+
+/**
+ * Verifica si el rol puede publicar o difundir comunicados oficiales en la cartelera
+ */
+export const canPublishCommunity = (role: UserRole): boolean => {
+  return (
+    role === 'ADMINISTRADOR' ||
+    role === 'DIRECTOR' ||
+    role === 'COORDINACION' ||
+    role === 'COORDINADOR'
+  );
+};
+
+/**
+ * Determina si el rol tiene restricciones de confidencialidad familiar/estudiantil (solo consultas)
+ */
+export const isConsultasOnlyRole = (role: UserRole): boolean => {
+  return role === 'REPRESENTANTE' || role === 'ESTUDIANTE';
+};

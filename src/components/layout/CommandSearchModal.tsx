@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
+import { MainNavigationTab } from '../../types';
 import {
   Search,
   X,
@@ -12,8 +13,12 @@ import {
   ClipboardList,
   Monitor,
   Compass,
-  HelpCircle
+  HelpCircle,
+  BarChart3,
+  MessageSquare,
+  Settings
 } from 'lucide-react';
+import { hasTabAccess, hasSubTabAccess, ROLE_METADATA } from '../../utils/rbac';
 
 interface CommandSearchModalProps {
   isOpen: boolean;
@@ -27,7 +32,7 @@ export const CommandSearchModal: React.FC<CommandSearchModalProps> = ({
   onNavigate
 }) => {
   const [query, setQuery] = useState('');
-  const { students, areas, currentLevel } = useApp();
+  const { students, areas, currentLevel, currentRole, currentUser } = useApp();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -45,15 +50,39 @@ export const CommandSearchModal: React.FC<CommandSearchModalProps> = ({
 
   if (!isOpen) return null;
 
-  const filteredStudents = students
-    .filter(s => s.level === currentLevel && s.fullName.toLowerCase().includes(query.toLowerCase()))
-    .slice(0, 4);
+  const isFamilyOrStudent = currentRole === 'REPRESENTANTE' || currentRole === 'ESTUDIANTE';
+
+  const filteredStudents = isFamilyOrStudent
+    ? students
+        .filter(s => {
+          if (currentRole === 'ESTUDIANTE') {
+            return (
+              s.fullName.toLowerCase().includes(currentUser?.fullName?.toLowerCase() || '') ||
+              s.cedula.toLowerCase().includes(currentUser?.username.toLowerCase() || '')
+            );
+          }
+          return (
+            s.representativeName?.toLowerCase().includes(currentUser?.fullName?.toLowerCase() || '') ||
+            s.fullName.toLowerCase().includes('urdaneta')
+          );
+        })
+        .filter(s => s.fullName.toLowerCase().includes(query.toLowerCase()))
+        .slice(0, 4)
+    : students
+        .filter(s => s.level === currentLevel && s.fullName.toLowerCase().includes(query.toLowerCase()))
+        .slice(0, 4);
 
   const filteredAreas = areas
     .filter(a => a.level === currentLevel && a.name.toLowerCase().includes(query.toLowerCase()))
     .slice(0, 4);
 
-  const quickActions = [
+  const allQuickActions: Array<{
+    title: string;
+    category: string;
+    tab: MainNavigationTab;
+    subTab?: string;
+    icon: any;
+  }> = [
     {
       title: 'Tablero Principal / Auditoría',
       category: 'Escritorio',
@@ -111,6 +140,41 @@ export const CommandSearchModal: React.FC<CommandSearchModalProps> = ({
       icon: FileText
     },
     {
+      title: 'Sábana de Calificaciones y Rendimiento',
+      category: 'Consultas',
+      tab: 'CONSULTAS',
+      subTab: 'RENDIMIENTO',
+      icon: BarChart3
+    },
+    {
+      title: 'Boletín Oficial de Notas',
+      category: 'Consultas',
+      tab: 'CONSULTAS',
+      subTab: 'BOLETIN',
+      icon: GraduationCap
+    },
+    {
+      title: 'Historial de Asistencia y Pases',
+      category: 'Consultas',
+      tab: 'CONSULTAS',
+      subTab: 'ASISTENCIA',
+      icon: ClipboardList
+    },
+    {
+      title: 'Cartelera de Noticias y Comunicados',
+      category: 'Comunidad',
+      tab: 'COMUNIDAD',
+      subTab: 'NOTICIAS',
+      icon: MessageSquare
+    },
+    {
+      title: 'Personalización de Temas Visuales',
+      category: 'Configuración',
+      tab: 'CONFIGURACION',
+      subTab: 'TEMAS',
+      icon: Settings
+    },
+    {
       title: 'Manual de Uso y Guía Rápida',
       category: 'Ayuda',
       tab: 'AYUDA',
@@ -124,7 +188,15 @@ export const CommandSearchModal: React.FC<CommandSearchModalProps> = ({
       subTab: 'MAPA_SITIO',
       icon: Compass
     }
-  ].filter(action => action.title.toLowerCase().includes(query.toLowerCase()) || action.category.toLowerCase().includes(query.toLowerCase()));
+  ];
+
+  const quickActions = allQuickActions.filter(action => {
+    return (
+      hasTabAccess(currentRole, action.tab) &&
+      hasSubTabAccess(currentRole, action.tab, action.subTab) &&
+      (action.title.toLowerCase().includes(query.toLowerCase()) || action.category.toLowerCase().includes(query.toLowerCase()))
+    );
+  });
 
   return (
     <div 

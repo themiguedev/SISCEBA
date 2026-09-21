@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+import { useApp } from '../../context/AppContext';
 import { MainNavigationTab } from '../../types';
+import { hasTabAccess, hasSubTabAccess } from '../../utils/rbac';
 import {
   Zap,
   Clock,
@@ -22,12 +24,27 @@ export const QuickActionDock: React.FC<QuickActionDockProps> = ({
   onOpenSearch
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const { currentRole } = useApp();
 
-  const actions = [
+  // Hide quick action dock completely for students and parents
+  if (currentRole === 'REPRESENTANTE' || currentRole === 'ESTUDIANTE') {
+    return null;
+  }
+
+  const allActions: Array<{
+    label: string;
+    icon: any;
+    color: string;
+    tab?: MainNavigationTab;
+    subTab?: string;
+    onClick: () => void;
+  }> = [
     {
       label: 'Nuevo Pase de Retraso',
       icon: Clock,
       color: 'bg-amber-500 hover:bg-amber-600 text-white',
+      tab: 'GESTION',
+      subTab: 'PASES',
       onClick: () => {
         onNavigate('GESTION', 'PASES');
         setIsOpen(false);
@@ -37,6 +54,8 @@ export const QuickActionDock: React.FC<QuickActionDockProps> = ({
       label: 'Asistencia Diaria',
       icon: CalendarCheck,
       color: 'bg-emerald-600 hover:bg-emerald-700 text-white',
+      tab: 'GESTION',
+      subTab: 'INASISTENCIAS',
       onClick: () => {
         onNavigate('GESTION', 'INASISTENCIAS');
         setIsOpen(false);
@@ -46,6 +65,8 @@ export const QuickActionDock: React.FC<QuickActionDockProps> = ({
       label: 'Documentos Solicitados',
       icon: FileText,
       color: 'bg-blue-600 hover:bg-blue-700 text-white',
+      tab: 'GESTION',
+      subTab: 'DOCUMENTOS',
       onClick: () => {
         onNavigate('GESTION', 'DOCUMENTOS');
         setIsOpen(false);
@@ -55,6 +76,8 @@ export const QuickActionDock: React.FC<QuickActionDockProps> = ({
       label: 'Sábana de Notas',
       icon: FileSpreadsheet,
       color: 'bg-indigo-600 hover:bg-indigo-700 text-white',
+      tab: 'CONSULTAS',
+      subTab: 'RENDIMIENTO',
       onClick: () => {
         onNavigate('CONSULTAS', 'RENDIMIENTO');
         setIsOpen(false);
@@ -70,6 +93,13 @@ export const QuickActionDock: React.FC<QuickActionDockProps> = ({
       }
     }
   ];
+
+  const actions = allActions.filter((act) => {
+    if (act.tab && act.subTab) {
+      return hasTabAccess(currentRole, act.tab) && hasSubTabAccess(currentRole, act.tab, act.subTab);
+    }
+    return true;
+  });
 
   return (
     <aside aria-label="Acciones rápidas flotantes" className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-2 no-print">
