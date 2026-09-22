@@ -10,6 +10,7 @@ export const ROLE_HIERARCHY: Record<UserRole, number> = {
   COORDINACION: 60,
   COORDINADOR: 60, // Alias de compatibilidad
   DOCENTE: 40,
+  ASISTENTE: 30,
   REPRESENTANTE: 20,
   ESTUDIANTE: 10
 };
@@ -72,6 +73,15 @@ export const ROLE_METADATA: Record<UserRole, RoleMetadata> = {
     description: 'Planificación didáctica oficial, asentamiento de notas procesales y asistencia diaria de clase.',
     department: 'Cuerpo Docente CBA',
     scope: 'Planificación, Evaluación y Asistencia de Aula'
+  },
+  ASISTENTE: {
+    id: 'ASISTENTE',
+    label: 'Asistente de Aula y Disciplina',
+    badge: '🤝 Asistente',
+    badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+    description: 'Registro operativo de asistencia diaria de estudiantes, control de pases por retraso e historial de conducta y disciplina.',
+    department: 'Coordinación de Asistencia y Disciplina',
+    scope: 'Registro de Asistencia, Pases y Conducta Estudiantil'
   },
   REPRESENTANTE: {
     id: 'REPRESENTANTE',
@@ -150,6 +160,13 @@ export const ROLE_TAB_PERMISSIONS: Record<UserRole, MainNavigationTab[]> = {
     'CONSULTAS',
     'COMUNIDAD',
     'CONFIGURACION',
+    'AYUDA'
+  ],
+  ASISTENTE: [
+    'ESCRITORIO',
+    'GESTION',
+    'CONSULTAS',
+    'COMUNIDAD',
     'AYUDA'
   ],
   REPRESENTANTE: [
@@ -245,6 +262,13 @@ export const ROLE_SUBTAB_PERMISSIONS: Record<UserRole, Partial<Record<MainNaviga
     CONSULTAS: ['RENDIMIENTO', 'BOLETIN', 'ASISTENCIA', 'NOMINAS'], // Rendimiento de sus materias
     COMUNIDAD: ['NOTICIAS', 'CUMPLEANOS', 'COMUNICADOS'],
     CONFIGURACION: ['TEMAS'], // Solo personalización de tema
+    AYUDA: ['MANUAL', 'MAPA_SITIO']
+  },
+  ASISTENTE: {
+    ESCRITORIO: ['DASHBOARD', 'PERFIL', 'SUGERENCIAS'],
+    GESTION: ['PASES', 'INASISTENCIAS', 'CONDUCTAS'], // Enfoque principal: Asistencia, Pases y Registro de Conductas
+    CONSULTAS: ['ASISTENCIA', 'NOMINAS'],
+    COMUNIDAD: ['NOTICIAS', 'CUMPLEANOS', 'COMUNICADOS'],
     AYUDA: ['MANUAL', 'MAPA_SITIO']
   },
   REPRESENTANTE: {

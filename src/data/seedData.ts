@@ -1925,6 +1925,17 @@ export const INITIAL_USERS: AppUser[] = [
     defaultLevel: 'MEDIA_GENERAL',
     active: true,
     avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150'
+  },
+  {
+    id: 'usr-asistente',
+    username: 'asistente',
+    password: 'cba2026*asistente',
+    fullName: 'Lic. Asistente de Asistencia y Disciplina',
+    email: 'asistente@bellasartes.edu.ve',
+    role: 'ASISTENTE',
+    defaultLevel: 'MEDIA_GENERAL',
+    active: true,
+    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'
   }
 ];
 

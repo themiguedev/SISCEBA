@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useTheme, THEMES_CATALOG, ThemePalette } from '../../context/ThemeContext';
+import { UserRole, EducationalLevel } from '../../types';
 import {
   Settings,
   Calendar,
@@ -11,6 +12,10 @@ import {
   School,
   Clock,
   UserCheck,
+  UserPlus,
+  User,
+  Mail,
+  ShieldCheck,
   Layers,
   Save,
   Palette,
@@ -33,8 +38,42 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
   activeSubTab,
   setActiveSubTab
 }) => {
-  const { schoolYearConfig, toggleLapsoGrading, isLapsoOpenForGrading, activeLapso, currentRole } = useApp();
+  const { schoolYearConfig, toggleLapsoGrading, isLapsoOpenForGrading, activeLapso, currentRole, users, addUser } = useApp();
   const { mode, setMode, palette, setPalette, isDark, themesCatalog } = useTheme();
+
+  // Estados para el formulario de nuevo usuario / docente
+  const [showRegisterForm, setShowRegisterForm] = useState(false);
+  const [newFullName, setNewFullName] = useState('');
+  const [newUsername, setNewUsername] = useState('');
+  const [newEmail, setNewEmail] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [newRole, setNewRole] = useState<UserRole>('DOCENTE');
+  const [newDefaultLevel, setNewDefaultLevel] = useState<EducationalLevel>('MEDIA_GENERAL');
+
+  const handleRegisterUser = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newFullName.trim() || !newUsername.trim() || !newEmail.trim() || !newPassword.trim()) {
+      return;
+    }
+
+    addUser({
+      fullName: newFullName.trim(),
+      username: newUsername.trim().toLowerCase(),
+      email: newEmail.trim().toLowerCase(),
+      password: newPassword,
+      role: newRole,
+      defaultLevel: newDefaultLevel,
+      active: true,
+      avatarUrl: `https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150`
+    });
+
+    setNewFullName('');
+    setNewUsername('');
+    setNewEmail('');
+    setNewPassword('');
+    setShowRegisterForm(false);
+    handleSaveSettings();
+  };
   
   const allowedTabs = (['LAPSOS', 'ESTRUCTURA', 'DOCENTES', 'TEMAS'] as const).filter(
     (t) => hasSubTabAccess(currentRole, 'CONFIGURACION', t)
@@ -299,46 +338,177 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
         </div>
       )}
 
-      {/* VIEW 3: DOCENTES */}
+      {/* VIEW 3: DOCENTES Y REGISTRO DE PERSONAL */}
       {activeTab === 'DOCENTES' && (
-        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-cba-card space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-            <h3 className="font-extrabold text-sm text-[#2C2E53] flex items-center gap-2">
-              <UserCheck className="w-4 h-4 text-[#D4AF37]" />
-              Plantilla y Asignación de Docentes Guías
-            </h3>
-            <span className="text-xs text-slate-400">Año Escolar 2026-2027</span>
-          </div>
-
-          <div className="space-y-2 text-xs">
-            <div className="p-3 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div className="space-y-6">
+          {/* Header y Formulario de Registro de Nuevos Docentes / Usuarios */}
+          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-cba-card space-y-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-100 pb-4 gap-3">
               <div>
-                <p className="font-bold text-slate-900">Prof. Alejandro Rivas</p>
-                <p className="text-slate-500 text-[11px]">Matemáticas • 22h semanales</p>
+                <h3 className="font-extrabold text-base text-[#2C2E53] flex items-center gap-2">
+                  <UserPlus className="w-5 h-5 text-[#D4AF37]" />
+                  Registro Institucional de Nuevos Docentes y Personal
+                </h3>
+                <p className="text-xs text-slate-500 mt-1">
+                  Módulo administrativo para dar de alta cuentas docentes, asignación de rol, correo institucional y credenciales de acceso.
+                </p>
               </div>
-              <span className="px-2.5 py-1 rounded-lg bg-slate-100 font-bold text-slate-700 self-start sm:self-center">
-                Docente Guía: 4to Año A
-              </span>
+
+              {canConfigureSchool(currentRole) && (
+                <button
+                  onClick={() => setShowRegisterForm(!showRegisterForm)}
+                  className="px-4 py-2 bg-[#2C2E53] hover:bg-[#1B1C33] text-[#D4AF37] font-bold text-xs rounded-xl shadow-md transition flex items-center gap-2 shrink-0"
+                >
+                  <UserPlus className="w-4 h-4" />
+                  {showRegisterForm ? 'Ocultar Formulario' : '+ Registrar Nuevo Usuario / Docente'}
+                </button>
+              )}
             </div>
 
-            <div className="p-3 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div>
-                <p className="font-bold text-slate-900">Prof. Elena Barrios</p>
-                <p className="text-slate-500 text-[11px]">Castellano y Creación Literaria • 20h semanales</p>
-              </div>
-              <span className="px-2.5 py-1 rounded-lg bg-slate-100 font-bold text-slate-700 self-start sm:self-center">
-                Docente Guía: 4to Año B
-              </span>
-            </div>
+            {/* Formulario Desplegable de Registro */}
+            {showRegisterForm && canConfigureSchool(currentRole) && (
+              <form onSubmit={handleRegisterUser} className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4 animate-in fade-in duration-200">
+                <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                  <span className="text-xs font-black uppercase tracking-wider text-slate-700">
+                    Datos de la Nueva Cuenta Institucional
+                  </span>
+                </div>
 
-            <div className="p-3 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div>
-                <p className="font-bold text-slate-900">Prof. Marcos Andrade</p>
-                <p className="text-slate-500 text-[11px]">Física y Laboratorio • 18h semanales</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-xs">
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Nombre Completo *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Ej: Prof. Roberto Carlos Mendoza"
+                      value={newFullName}
+                      onChange={(e) => setNewFullName(e.target.value)}
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#2C2E53] focus:border-transparent outline-none font-medium"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Nombre de Usuario *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Ej: rmendoza"
+                      value={newUsername}
+                      onChange={(e) => setNewUsername(e.target.value)}
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#2C2E53] focus:border-transparent outline-none font-medium"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Correo Institucional *</label>
+                    <input
+                      type="email"
+                      required
+                      placeholder="Ej: rmendoza@bellasartes.edu.ve"
+                      value={newEmail}
+                      onChange={(e) => setNewEmail(e.target.value)}
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#2C2E53] focus:border-transparent outline-none font-medium"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Contraseña Inicial *</label>
+                    <input
+                      type="password"
+                      required
+                      placeholder="Contraseña segura"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#2C2E53] focus:border-transparent outline-none font-medium"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Rol Asignado *</label>
+                    <select
+                      value={newRole}
+                      onChange={(e) => setNewRole(e.target.value as UserRole)}
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#2C2E53] focus:border-transparent outline-none font-bold"
+                    >
+                      <option value="DOCENTE">DOCENTE (Profesor Titular / Guía)</option>
+                      <option value="ASISTENTE">ASISTENTE (Asistencia y Disciplina)</option>
+                      <option value="COORDINACION">COORDINACION (Control de Estudios)</option>
+                      <option value="DIRECTOR">DIRECTOR (Dirección General)</option>
+                      <option value="ADMINISTRADOR">ADMINISTRADOR (Admin TI)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Nivel Educativo Principal</label>
+                    <select
+                      value={newDefaultLevel}
+                      onChange={(e) => setNewDefaultLevel(e.target.value as EducationalLevel)}
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#2C2E53] focus:border-transparent outline-none font-bold"
+                    >
+                      <option value="MEDIA_GENERAL">Media General (01-20 pts)</option>
+                      <option value="PRIMARIA">Educación Primaria (L/P/EP/I)</option>
+                      <option value="INICIAL">Educación Inicial (Literales A-E)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowRegisterForm(false)}
+                    className="px-4 py-2 text-slate-600 hover:text-slate-900 font-bold"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-5 py-2 bg-[#2C2E53] hover:bg-[#1B1C33] text-[#D4AF37] font-black rounded-xl shadow-md transition flex items-center gap-2"
+                  >
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    Registrar Cuenta en Sistema
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* Listado de Cuentas Registradas */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-xs border-b border-slate-100 pb-2">
+                <span className="font-extrabold text-slate-700 uppercase tracking-wider">
+                  Cuentas Institucionales Activas en la Base de Datos ({users.length})
+                </span>
+                <span className="text-slate-400">Año Escolar 2026-2027</span>
               </div>
-              <span className="px-2.5 py-1 rounded-lg bg-slate-100 font-bold text-slate-700 self-start sm:self-center">
-                Docente Guía: 3er Año A
-              </span>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                {users.map((u) => {
+                  const roleMeta = ROLE_METADATA[u.role];
+                  return (
+                    <div key={u.id} className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-white transition-colors flex items-start justify-between gap-3 shadow-xs">
+                      <div className="flex items-start gap-3">
+                        <img
+                          src={u.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}
+                          alt={u.fullName}
+                          className="w-10 h-10 rounded-full object-cover border border-slate-300 shrink-0"
+                        />
+                        <div className="space-y-1">
+                          <p className="font-bold text-slate-900 leading-tight">{u.fullName}</p>
+                          <div className="flex items-center gap-2 text-[11px] text-slate-500 font-mono">
+                            <span className="flex items-center gap-1"><User className="w-3 h-3 text-slate-400" />{u.username}</span>
+                            <span>•</span>
+                            <span className="flex items-center gap-1"><Mail className="w-3 h-3 text-slate-400" />{u.email}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider shrink-0 border ${roleMeta?.badgeBg || 'bg-slate-200 text-slate-800'}`}>
+                        {roleMeta?.badge || u.role}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>

@@ -150,7 +150,8 @@ VALUES
 ('usr-coordinador', 'coordinador', 'cba2026*coordinador', 'Lic. Coordinación Control de Estudios (UCE)', 'coordinacion@bellasartes.edu.ve', 'COORDINACION', 'MEDIA_GENERAL', true, 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150'),
 ('usr-docente', 'docente', 'cba2026*docente', 'Prof. Docente Titular CBA', 'docente@bellasartes.edu.ve', 'DOCENTE', 'MEDIA_GENERAL', true, 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150'),
 ('usr-representante', 'representante', 'cba2026*representante', 'Padre y Representante Legal CBA', 'representante@bellasartes.edu.ve', 'REPRESENTANTE', 'MEDIA_GENERAL', true, 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150'),
-('usr-estudiante', 'estudiante', 'cba2026*estudiante', 'Camila Isabella Urdaneta Moreno', 'estudiante@bellasartes.edu.ve', 'ESTUDIANTE', 'MEDIA_GENERAL', true, 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150')
+('usr-estudiante', 'estudiante', 'cba2026*estudiante', 'Camila Isabella Urdaneta Moreno', 'estudiante@bellasartes.edu.ve', 'ESTUDIANTE', 'MEDIA_GENERAL', true, 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150'),
+('usr-asistente', 'asistente', 'cba2026*asistente', 'Lic. Asistente de Asistencia y Disciplina', 'asistente@bellasartes.edu.ve', 'ASISTENTE', 'MEDIA_GENERAL', true, 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150')
 ON CONFLICT (id) DO UPDATE SET
   username = EXCLUDED.username,
   password = EXCLUDED.password,

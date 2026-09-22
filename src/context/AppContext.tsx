@@ -92,6 +92,7 @@ interface AppContextType {
   isAuthenticated: boolean;
   currentUser: AppUser | null;
   users: AppUser[];
+  addUser: (user: Omit<AppUser, 'id'>) => AppUser;
   login: (username: string, password?: string) => Promise<{ success: boolean; message?: string }>;
   logout: () => void;
   currentLevel: EducationalLevel;
@@ -319,6 +320,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     localStorage.setItem('sisceba_users_v3', JSON.stringify(users));
   }, [users]);
+
+  const addUser = (userData: Omit<AppUser, 'id'>): AppUser => {
+    const newUser: AppUser = {
+      ...userData,
+      id: `usr-${Date.now()}`
+    };
+    setUsers(prev => [newUser, ...prev]);
+    supabaseSaveUser(newUser).catch(err => console.warn('Supabase save user err:', err));
+    return newUser;
+  };
 
   useEffect(() => {
     if (currentUser) {
@@ -1264,6 +1275,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     <AppContext.Provider
       value={{
         isAuthenticated,
+        currentUser,
+        users,
+        addUser,
         login,
         logout,
         currentLevel,
@@ -1339,9 +1353,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         resetToSeedData,
         isSupabaseActive,
         supabaseStatusText,
-        refreshFromSupabase,
-        currentUser,
-        users
+        refreshFromSupabase
       }}
     >
       {children}
