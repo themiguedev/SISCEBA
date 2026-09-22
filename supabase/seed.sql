@@ -5,25 +5,8 @@
 -- ==============================================================================
 
 -- 1. ESTUDIANTES INICIALES
-INSERT INTO students (id, cedula, full_name, gender, birth_date, level, grade, section, representative_name, representative_email, representative_phone, status, pending_subjects, avatar_url)
-VALUES
--- Educación Inicial (Sala de 5 Años "A")
-('stu-ini-1', 'V-36.120.401', 'Sofía Valentina Morales Rincón', 'F', '2021-04-12', 'INICIAL', 'Sala de 5 Años', 'A', 'Mariana Rincón de Morales', 'mariana.rincon@gmail.com', '+58 414-6123456', 'REGULAR', '{}', 'https://images.unsplash.com/photo-1595454223600-91fbdd77e16b?w=150'),
-('stu-ini-2', 'V-36.120.402', 'Santiago Andrés Padrón Castillo', 'M', '2021-06-25', 'INICIAL', 'Sala de 5 Años', 'A', 'Carlos Padrón', 'cpadron@bellasartes.edu.ve', '+58 424-7654321', 'REGULAR', '{}', 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=150'),
-('stu-ini-3', 'V-36.120.403', 'Lucas Daniel Villalobos Nava', 'M', '2021-01-18', 'INICIAL', 'Sala de 5 Años', 'A', 'Daniel Villalobos', 'dvillalobos@gmail.com', '+58 412-9871234', 'EN_REVISION', '{}', 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150'),
-
--- Educación Primaria (5to Grado "A")
-('stu-pri-1', 'V-34.981.201', 'Camila Victoria Hernández Ochoa', 'F', '2015-08-14', 'PRIMARIA', '5to Grado', 'A', 'Patricia Ochoa', 'pochoa@gmail.com', '+58 414-7221133', 'REGULAR', '{}', 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150'),
-('stu-pri-2', 'V-34.981.202', 'Alejandro José Urdaneta Silva', 'M', '2015-11-03', 'PRIMARIA', '5to Grado', 'A', 'Roberto Urdaneta', 'rurdaneta@gmail.com', '+58 416-5544332', 'REGULAR', '{}', 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150'),
-('stu-pri-3', 'V-34.981.203', 'Isabella Cristina Finol Boscán', 'F', '2015-03-29', 'PRIMARIA', '5to Grado', 'A', 'Gabriela Boscán', 'gboscan@gmail.com', '+58 424-6332211', 'EN_REVISION', '{}', 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150'),
-
--- Media General (4to Año "A")
-('stu-med-1', 'V-31.450.812', 'Andrés Eduardo Silva Bermúdez', 'M', '2009-05-20', 'MEDIA_GENERAL', '4to Año', 'A', 'Dra. María Bermúdez', 'mbermudez@clinicafalcon.com', '+58 414-6339900', 'REGULAR', '{}', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150'),
-('stu-med-2', 'V-32.901.442', 'Camila Isabella Urdaneta Moreno', 'F', '2009-08-11', 'MEDIA_GENERAL', '4to Año', 'A', 'Ing. Carlos Urdaneta', 'curdaneta@oilfield.com', '+58 414-6338901', 'REGULAR', '{}', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150'),
-('stu-med-3', 'V-32.880.114', 'Mateo Sebastián Chacín Portillo', 'M', '2009-02-14', 'MEDIA_GENERAL', '4to Año', 'A', 'Lic. Patricia Portillo', 'pportillo@banco.com.ve', '+58 424-6112233', 'EN_REVISION', ARRAY['Física'], 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150'),
-('stu-med-4', 'V-31.990.231', 'Sofía Valentina Morales Rincón', 'F', '2009-11-30', 'MEDIA_GENERAL', '4to Año', 'A', 'Sr. Roberto Morales', 'rmorales@moralescorp.com', '+58 412-5556677', 'REGULAR', '{}', 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150'),
-('stu-med-5', 'V-32.741.009', 'Sebastián Alejandro Romero Parra', 'M', '2009-07-09', 'MEDIA_GENERAL', '4to Año', 'A', 'Dra. Elena Parra de Romero', 'eparra@unizulia.edu.ve', '+58 414-7890123', 'MATERIA_PENDIENTE', ARRAY['Física (3er Año)'], 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150')
-ON CONFLICT (id) DO NOTHING;
+-- (Base de datos limpia, listos para inscripción)
+DELETE FROM students;
 
 -- 2. ASIGNATURAS Y MALLA CURRICULAR
 INSERT INTO subject_areas (id, code, name, level, type, weekly_hours, area_profile, teacher_profile, icon_name)
@@ -148,9 +131,6 @@ VALUES
 ('usr-admin', 'admin', 'cba2026*admin', 'Administrador General de Sistemas', 'admin@bellasartes.edu.ve', 'ADMINISTRADOR', 'MEDIA_GENERAL', true, 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150'),
 ('usr-director', 'director', 'cba2026*director', 'Prof. Director General CBA', 'director@bellasartes.edu.ve', 'DIRECTOR', 'MEDIA_GENERAL', true, 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150'),
 ('usr-coordinador', 'coordinador', 'cba2026*coordinador', 'Lic. Coordinación Control de Estudios (UCE)', 'coordinacion@bellasartes.edu.ve', 'COORDINACION', 'MEDIA_GENERAL', true, 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150'),
-('usr-docente', 'docente', 'cba2026*docente', 'Prof. Docente Titular CBA', 'docente@bellasartes.edu.ve', 'DOCENTE', 'MEDIA_GENERAL', true, 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150'),
-('usr-representante', 'representante', 'cba2026*representante', 'Padre y Representante Legal CBA', 'representante@bellasartes.edu.ve', 'REPRESENTANTE', 'MEDIA_GENERAL', true, 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150'),
-('usr-estudiante', 'estudiante', 'cba2026*estudiante', 'Camila Isabella Urdaneta Moreno', 'estudiante@bellasartes.edu.ve', 'ESTUDIANTE', 'MEDIA_GENERAL', true, 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150'),
 ('usr-asistente', 'asistente', 'cba2026*asistente', 'Lic. Asistente de Asistencia y Disciplina', 'asistente@bellasartes.edu.ve', 'ASISTENTE', 'MEDIA_GENERAL', true, 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150')
 ON CONFLICT (id) DO UPDATE SET
   username = EXCLUDED.username,
