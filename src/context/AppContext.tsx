@@ -492,18 +492,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         supabaseFetchUsers()
       ]);
 
-      if (remoteStudents && remoteStudents.length > 0) setStudents(remoteStudents);
+      if (remoteStudents !== null) setStudents(remoteStudents);
       if (remoteAreas && remoteAreas.length > 0) setAreas(remoteAreas);
       if (remoteCompetencies && remoteCompetencies.length > 0) setCompetencies(remoteCompetencies);
       if (remoteIndicators && remoteIndicators.length > 0) setIndicators(remoteIndicators);
-      if (remoteEvaluations && remoteEvaluations.length > 0) setEvaluations(remoteEvaluations);
+      if (remoteEvaluations !== null) setEvaluations(remoteEvaluations);
       if (remotePlans && remotePlans.length > 0) setPlansQuincenal(remotePlans);
-      if (remotePasses && remotePasses.length > 0) setPasses(remotePasses);
-      if (remoteAttendance && remoteAttendance.length > 0) setDailyAttendance(remoteAttendance);
-      if (remoteConducts && remoteConducts.length > 0) setConducts(remoteConducts);
-      if (remoteDocs && remoteDocs.length > 0) setDocumentRequests(remoteDocs);
-      if (remoteBlocks && remoteBlocks.length > 0) setAdminBlocks(remoteBlocks);
-      if (remoteTitles && remoteTitles.length > 0) setTitles(remoteTitles);
+      if (remotePasses !== null) setPasses(remotePasses);
+      if (remoteAttendance !== null) setDailyAttendance(remoteAttendance);
+      if (remoteConducts !== null) setConducts(remoteConducts);
+      if (remoteDocs !== null) setDocumentRequests(remoteDocs);
+      if (remoteBlocks !== null) setAdminBlocks(remoteBlocks);
+      if (remoteTitles !== null) setTitles(remoteTitles);
       if (remoteNotices && remoteNotices.length > 0) setCommunityNotices(remoteNotices);
       if (remoteNotifications && remoteNotifications.length > 0) setNotifications(remoteNotifications);
       if (remoteUsers && remoteUsers.length > 0) {

@@ -427,7 +427,14 @@ export const ConsultasModule: React.FC<ConsultasModuleProps> = ({
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300 font-medium">
-                      {filteredStudents.filter(s => s.level === 'INICIAL').map((stu) => {
+                      {filteredStudents.filter(s => s.level === 'INICIAL').length === 0 ? (
+                        <tr>
+                          <td colSpan={9} className="py-8 text-center text-slate-400 font-medium italic">
+                            No hay estudiantes de Educación Inicial registrados en la base de datos.
+                          </td>
+                        </tr>
+                      ) : (
+                        filteredStudents.filter(s => s.level === 'INICIAL').map((stu) => {
                         const isLucas = stu.id.includes('stu-ini-3') || stu.fullName.toLowerCase().includes('lucas');
                         const fpScore = getInicialScore(stu.id, 'fp', isLucas ? 'EP' : 'L');
                         const caScore = getInicialScore(stu.id, 'ca', 'L');
@@ -487,7 +494,7 @@ export const ConsultasModule: React.FC<ConsultasModuleProps> = ({
                             </td>
                           </tr>
                         );
-                      })}
+                      }))}
                     </tbody>
                   </table>
                 </div>
@@ -523,7 +530,14 @@ export const ConsultasModule: React.FC<ConsultasModuleProps> = ({
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300 font-medium">
-                      {filteredStudents.filter(s => s.level === 'PRIMARIA').map((stu) => {
+                      {filteredStudents.filter(s => s.level === 'PRIMARIA').length === 0 ? (
+                        <tr>
+                          <td colSpan={9} className="py-8 text-center text-slate-400 font-medium italic">
+                            No hay estudiantes de Educación Primaria registrados en la base de datos.
+                          </td>
+                        </tr>
+                      ) : (
+                        filteredStudents.filter(s => s.level === 'PRIMARIA').map((stu) => {
                         const isFinol = stu.fullName.toLowerCase().includes('finol');
                         const lenScore = getPrimariaScore(stu.id, 'len', isFinol ? 'B' : 'A');
                         const matScore = getPrimariaScore(stu.id, 'mat', isFinol ? 'B' : 'A');
@@ -565,7 +579,7 @@ export const ConsultasModule: React.FC<ConsultasModuleProps> = ({
                             </td>
                           </tr>
                         );
-                      })}
+                      }))}
                     </tbody>
                   </table>
                 </div>
@@ -601,7 +615,14 @@ export const ConsultasModule: React.FC<ConsultasModuleProps> = ({
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300 font-medium">
-                      {filteredStudents.filter(s => s.level === 'MEDIA_GENERAL').map((stu) => {
+                      {filteredStudents.filter(s => s.level === 'MEDIA_GENERAL').length === 0 ? (
+                        <tr>
+                          <td colSpan={9} className="py-8 text-center text-slate-400 font-medium italic">
+                            No hay estudiantes de Educación Media General registrados en la base de datos.
+                          </td>
+                        </tr>
+                      ) : (
+                        filteredStudents.filter(s => s.level === 'MEDIA_GENERAL').map((stu) => {
                         const isChacin = stu.fullName.includes('Chacín');
                         const isRomero = stu.fullName.includes('Romero');
                         const mathScore = getMediaScore(stu.id, 'mat', isChacin ? 12 : isRomero ? 14 : 17);
@@ -636,7 +657,7 @@ export const ConsultasModule: React.FC<ConsultasModuleProps> = ({
                             </td>
                           </tr>
                         );
-                      })}
+                      }))}
                     </tbody>
                   </table>
                 </div>
@@ -800,23 +821,29 @@ export const ConsultasModule: React.FC<ConsultasModuleProps> = ({
             </div>
           </div>
           <div className="space-y-2">
-            {filteredStudents.map((stu) => (
-              <div
-                key={stu.id}
-                className="p-3.5 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2"
-              >
-                <div>
-                  <p className="font-bold text-xs text-slate-900 dark:text-white">{stu.fullName} ({stu.cedula})</p>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                    {stu.grade} {stu.section} • Representante: <strong className="text-slate-700 dark:text-slate-200">{stu.representativeName}</strong>
-                  </p>
-                </div>
-                <div className="text-right text-[11px] text-slate-500 dark:text-slate-400">
-                  <p className="font-mono">{stu.representativePhone}</p>
-                  <p>{stu.representativeEmail}</p>
-                </div>
+            {filteredStudents.length === 0 ? (
+              <div className="p-8 text-center text-slate-400 font-medium italic bg-slate-50 dark:bg-slate-800/20 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+                No hay expedientes de estudiantes ni representantes registrados en el plantel.
               </div>
-            ))}
+            ) : (
+              filteredStudents.map((stu) => (
+                <div
+                  key={stu.id}
+                  className="p-3.5 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2"
+                >
+                  <div>
+                    <p className="font-bold text-xs text-slate-900 dark:text-white">{stu.fullName} ({stu.cedula})</p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                      {stu.grade} {stu.section} • Representante: <strong className="text-slate-700 dark:text-slate-200">{stu.representativeName}</strong>
+                    </p>
+                  </div>
+                  <div className="text-right text-[11px] text-slate-500 dark:text-slate-400">
+                    <p className="font-mono">{stu.representativePhone}</p>
+                    <p>{stu.representativeEmail}</p>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       )}

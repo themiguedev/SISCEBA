@@ -179,7 +179,14 @@ export const MatriculaProsecucionView: React.FC = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">
-            {students.map((stu) => {
+            {students.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="py-8 text-center text-slate-400 font-medium italic">
+                  No hay estudiantes registrados en la matrícula institucional.
+                </td>
+              </tr>
+            ) : (
+              students.map((stu) => {
               const isSelected = selectedStudentIds.includes(stu.id);
               return (
                 <tr
@@ -217,7 +224,7 @@ export const MatriculaProsecucionView: React.FC = () => {
                   </td>
                 </tr>
               );
-            })}
+            }))}
           </tbody>
         </table>
       </div>
