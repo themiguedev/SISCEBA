@@ -141,14 +141,23 @@ VALUES
 ON CONFLICT (id) DO NOTHING;
 
 -- 11. USUARIOS Y CUENTAS DE PRUEBA (POR MODO DE OPERACIÓN)
+DELETE FROM app_users;
+
 INSERT INTO app_users (id, username, password, full_name, email, role, default_level, active, avatar_url)
 VALUES
-('usr-admin-1', 'admin', 'cba2026*admin', 'Ing. Administrador General', 'admin@bellasartes.edu.ve', 'ADMINISTRADOR', 'MEDIA_GENERAL', true, 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150'),
-('usr-director-1', 'director', 'cba2026*director', 'Prof. Director General CBA', 'direccion@bellasartes.edu.ve', 'DIRECTOR', 'MEDIA_GENERAL', true, 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150'),
-('usr-coord-1', 'coordinacion', 'cba2026*coord', 'Lic. Lissette Chacín', 'coordinacion@bellasartes.edu.ve', 'COORDINACION', 'MEDIA_GENERAL', true, 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150'),
-('usr-docente-1', 'docente', 'cba2026*docente', 'Prof. Marcos Andrade', 'mandrade@bellasartes.edu.ve', 'DOCENTE', 'MEDIA_GENERAL', true, 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150'),
-('usr-docente-pri', 'docente_primaria', 'cba2026*primaria', 'Prof. Elena Barrios', 'ebarrios@bellasartes.edu.ve', 'DOCENTE', 'PRIMARIA', true, 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150'),
-('usr-rep-1', 'representante', 'cba2026*padre', 'Ing. Carlos Urdaneta', 'curdaneta@oilfield.com', 'REPRESENTANTE', 'MEDIA_GENERAL', true, 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150'),
-('usr-est-1', 'estudiante', 'cba2026*alumno', 'Camila Isabella Urdaneta Moreno', 'camila.urdaneta@bellasartes.edu.ve', 'ESTUDIANTE', 'MEDIA_GENERAL', true, 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150')
-ON CONFLICT (id) DO NOTHING;
+('usr-admin', 'admin', 'cba2026*admin', 'Administrador General de Sistemas', 'admin@bellasartes.edu.ve', 'ADMINISTRADOR', 'MEDIA_GENERAL', true, 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150'),
+('usr-director', 'director', 'cba2026*director', 'Prof. Director General CBA', 'director@bellasartes.edu.ve', 'DIRECTOR', 'MEDIA_GENERAL', true, 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150'),
+('usr-coordinador', 'coordinador', 'cba2026*coordinador', 'Lic. Coordinación Control de Estudios (UCE)', 'coordinacion@bellasartes.edu.ve', 'COORDINACION', 'MEDIA_GENERAL', true, 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150'),
+('usr-docente', 'docente', 'cba2026*docente', 'Prof. Docente Titular CBA', 'docente@bellasartes.edu.ve', 'DOCENTE', 'MEDIA_GENERAL', true, 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150'),
+('usr-representante', 'representante', 'cba2026*representante', 'Padre y Representante Legal CBA', 'representante@bellasartes.edu.ve', 'REPRESENTANTE', 'MEDIA_GENERAL', true, 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150'),
+('usr-estudiante', 'estudiante', 'cba2026*estudiante', 'Camila Isabella Urdaneta Moreno', 'estudiante@bellasartes.edu.ve', 'ESTUDIANTE', 'MEDIA_GENERAL', true, 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150')
+ON CONFLICT (id) DO UPDATE SET
+  username = EXCLUDED.username,
+  password = EXCLUDED.password,
+  full_name = EXCLUDED.full_name,
+  email = EXCLUDED.email,
+  role = EXCLUDED.role,
+  default_level = EXCLUDED.default_level,
+  active = EXCLUDED.active,
+  avatar_url = EXCLUDED.avatar_url;
 

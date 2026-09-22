@@ -262,7 +262,7 @@ export const INITIAL_SYSTEM_NOTIFICATIONS: SystemNotification[] = [
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // User & Accounts Store
   const [users, setUsers] = useState<AppUser[]>(() => {
-    const saved = localStorage.getItem('sisceba_users');
+    const saved = localStorage.getItem('sisceba_users_v3');
     return saved ? JSON.parse(saved) : INITIAL_USERS;
   });
 
@@ -313,7 +313,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   useEffect(() => {
-    localStorage.setItem('sisceba_users', JSON.stringify(users));
+    localStorage.setItem('sisceba_users_v3', JSON.stringify(users));
   }, [users]);
 
   useEffect(() => {
@@ -324,9 +324,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [currentUser]);
 
-  const login = async (username: string, password?: string): Promise<{ success: boolean; message?: string }> => {
-    const trimmedUser = username.trim().toLowerCase();
-    let matched = users.find(u => u.username.toLowerCase() === trimmedUser);
+  const login = async (userInput: string, password?: string): Promise<{ success: boolean; message?: string }> => {
+    const trimmedInput = userInput.trim().toLowerCase();
+    let matched = users.find(
+      u => u.username.toLowerCase() === trimmedInput || u.email.toLowerCase() === trimmedInput
+    );
 
     // Si Supabase está configurado, validamos directamente contra la tabla app_users en tiempo real
     if (isSupabaseConfigured()) {
@@ -334,7 +336,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const { data, error } = await supabase
           .from('app_users')
           .select('*')
-          .ilike('username', trimmedUser)
+          .or(`username.ilike.${trimmedInput},email.ilike.${trimmedInput}`)
           .limit(1);
 
         if (!error && data && data.length > 0) {
@@ -352,7 +354,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           };
           // Actualizar en el estado local de usuarios
           setUsers(prev => {
-            const idx = prev.findIndex(u => u.id === matched!.id || u.username.toLowerCase() === trimmedUser);
+            const idx = prev.findIndex(
+              u =>
+                u.id === matched!.id ||
+                u.username.toLowerCase() === row.username.toLowerCase() ||
+                u.email.toLowerCase() === row.email.toLowerCase()
+            );
             if (idx >= 0) {
               const copy = [...prev];
               copy[idx] = matched!;
@@ -373,7 +380,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!matched) {
       return {
         success: false,
-        message: 'Usuario no registrado en la base de datos institucional de SICE-CBA.'
+        message: 'Usuario o correo no registrado en la base de datos institucional de SICE-CBA.'
       };
     }
 

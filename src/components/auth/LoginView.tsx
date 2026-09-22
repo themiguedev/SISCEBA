@@ -21,7 +21,7 @@ interface LoginViewProps {
 export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
   const { login, users } = useApp();
 
-  const [username, setUsername] = useState(() => {
+  const [userInput, setUserInput] = useState(() => {
     return localStorage.getItem('sisceba_remembered_user') || 'admin';
   });
   const [password, setPassword] = useState('cba2026*admin');
@@ -36,8 +36,8 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username.trim()) {
-      setErrorMsg('Por favor ingrese su usuario institucional.');
+    if (!userInput.trim()) {
+      setErrorMsg('Por favor ingrese su usuario o correo institucional.');
       return;
     }
     if (!password.trim()) {
@@ -49,7 +49,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
     setErrorMsg('');
 
     try {
-      const res = await login(username, password);
+      const res = await login(userInput, password);
       if (!res.success) {
         setLoginState('IDLE');
         setErrorMsg(res.message || 'Credenciales inválidas. Acceso restringido a cuentas registradas en la base de datos.');
@@ -57,7 +57,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
       }
 
       if (rememberMe) {
-        localStorage.setItem('sisceba_remembered_user', username);
+        localStorage.setItem('sisceba_remembered_user', userInput);
       } else {
         localStorage.removeItem('sisceba_remembered_user');
       }
@@ -155,13 +155,13 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
               type="text"
               required
               autoFocus
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={userInput}
+              onChange={(e) => setUserInput(e.target.value)}
               onFocus={() => setUserFocused(true)}
               onBlur={() => setUserFocused(false)}
-              placeholder="Usuario"
+              placeholder="Usuario o correo institucional"
               className="w-full px-3 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none bg-transparent"
-              autoComplete="username"
+              autoComplete="username email"
             />
           </div>
 
@@ -270,31 +270,33 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
           {/* Cuentas de Prueba por Modo de Operación */}
           <div className="pt-3 mt-3 border-t border-slate-100">
             <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2 text-center">
-              Cuentas de Prueba por Modo de Operación
+              Acceso Rápido por Rol Institucional
             </p>
             <div className="flex flex-wrap gap-1.5 justify-center">
               {users.map((u) => {
-                const isSelected = username.toLowerCase() === u.username.toLowerCase();
+                const isSelected =
+                  userInput.toLowerCase() === u.username.toLowerCase() ||
+                  userInput.toLowerCase() === u.email.toLowerCase();
                 return (
                   <button
                     key={u.id}
                     type="button"
                     onClick={() => {
-                      setUsername(u.username);
+                      setUserInput(u.username);
                       setPassword(u.password || '');
                       setErrorMsg('');
                     }}
-                    className={`px-2 py-1 rounded text-[10px] font-bold transition border cursor-pointer ${
+                    className={`px-2.5 py-1 rounded text-[10px] font-bold transition border cursor-pointer ${
                       isSelected
                         ? 'bg-[#2C2E53] text-[#D4AF37] border-[#D4AF37] shadow-sm scale-105'
                         : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
                     }`}
-                    title={`Usuario: ${u.username} • Rol: ${u.role}`}
+                    title={`Usuario: ${u.username} • Correo: ${u.email} • Rol: ${u.role}`}
                   >
-                    {u.role === 'ADMINISTRADOR' && '👑 Admin'}
+                    {u.role === 'ADMINISTRADOR' && '👑 Admin TI'}
                     {u.role === 'DIRECTOR' && '🏛️ Director'}
-                    {u.role === 'COORDINACION' && '📋 Coord.'}
-                    {u.role === 'DOCENTE' && (u.defaultLevel === 'PRIMARIA' ? '🎨 Doc. Primaria' : '🔬 Doc. Media')}
+                    {u.role === 'COORDINACION' && '📋 Coordinación'}
+                    {u.role === 'DOCENTE' && '🔬 Docente'}
                     {u.role === 'REPRESENTANTE' && '👨‍👩‍👦 Representante'}
                     {u.role === 'ESTUDIANTE' && '🎒 Estudiante'}
                   </button>
@@ -302,7 +304,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
               })}
             </div>
             <p className="text-[9px] text-slate-400 text-center mt-2 italic">
-              Haz clic en cualquiera para autocompletar sus credenciales oficiales.
+              Puede ingresar escribiendo su <strong>nombre de usuario</strong> o su <strong>correo institucional</strong>.
             </p>
           </div>
         </form>
