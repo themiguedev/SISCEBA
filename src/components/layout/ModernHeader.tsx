@@ -308,7 +308,7 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
                           Simular Rol (Modo Admin)
                         </span>
                       </div>
-                      {(['ADMINISTRADOR', 'DIRECTOR', 'COORDINACION', 'DOCENTE', 'REPRESENTANTE', 'ESTUDIANTE'] as UserRole[]).map((r) => (
+                      {(['ADMINISTRADOR', 'DIRECTOR', 'COORDINACION', 'DOCENTE', 'ASISTENTE', 'REPRESENTANTE', 'ESTUDIANTE'] as UserRole[]).map((r) => (
                         <button
                           key={r}
                           onClick={() => {
