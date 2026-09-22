@@ -400,10 +400,10 @@ export const ProcesalGradebookView: React.FC<ProcesalGradebookViewProps> = ({ on
                             if (onNavigateToAI) onNavigateToAI();
                           }}
                           className="flex items-center justify-center gap-1 w-full px-2.5 py-1 text-[11px] font-extrabold bg-gradient-to-r from-red-600 to-amber-600 text-white rounded-lg shadow-sm hover:opacity-95 transition-all"
-                          title="Generar plan de refuerzo remedial con Inteligencia Artificial"
+                          title="Generar plan de refuerzo remedial personalizado"
                         >
                           <Bot className="w-3.5 h-3.5" />
-                          Plan IA
+                          Plan Acción
                         </button>
                       ) : (
                         <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">

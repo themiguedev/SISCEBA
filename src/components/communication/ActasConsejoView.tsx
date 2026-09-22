@@ -37,7 +37,7 @@ export const ActasConsejoView: React.FC = () => {
   const [adjOldScore, setAdjOldScore] = useState('08');
   const [adjNewScore, setAdjNewScore] = useState('12');
   const [adjJustification, setAdjJustification] = useState(
-    'Superación demostrada mediante Plan de Acción Personalizado con IA y prueba formativa.'
+    'Superación demostrada mediante Plan de Acción Personalizado y prueba formativa.'
   );
 
   const handleAdjustSubmit = (e: React.FormEvent) => {

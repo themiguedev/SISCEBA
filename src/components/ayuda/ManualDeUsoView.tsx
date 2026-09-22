@@ -258,7 +258,7 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
     },
     {
       id: 'guia-6',
-      title: 'Planes de Acción Personalizados con IA',
+      title: 'Planes de Acción Personalizados',
       category: 'Institucional',
       roleRequired: 'DOC',
       summary: 'Generación asistida de actividades de nivelación, refuerzo cognitivo y adaptaciones curriculares para alumnos en riesgo.',
@@ -266,13 +266,13 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
       targetSubTab: 'IA_ACTION_PLANS',
       icon: Sparkles,
       color: 'from-cyan-500 to-blue-600',
-      badge: 'Inteligencia Artificial CBA',
+      badge: 'Acompañamiento Pedagógico CBA',
       institutionalRule: 'Los planes de acción deben ser validados por el docente de área y archivados en el expediente del estudiante.',
       steps: [
         {
           number: 1,
           title: 'Identificar al Alumno en Seguimiento',
-          description: 'Acceda a "Planes de Acción con IA" dentro del bloque de comunicación o desde la alerta de notas inferiores a 12 puntos.',
+          description: 'Acceda a "Planes de Acción Personalizados" dentro del bloque de comunicación o desde la alerta de notas inferiores a 12 puntos.',
         },
         {
           number: 2,
@@ -281,7 +281,7 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
         },
         {
           number: 3,
-          title: 'Generar Propuesta Pedagógica con IA',
+          title: 'Generar Propuesta Pedagógica',
           description: 'El modelo pedagógico de SICE-CBA analiza las calificaciones históricas y redacta una secuencia de ejercicios remediales.',
           tip: 'Puede editar y personalizar cualquier recomendación generada por el asistente antes de guardarla.'
         },
@@ -650,7 +650,7 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
                 3. Comunicación y Acreditación
               </h3>
               <p className="text-xs text-slate-500 leading-relaxed mb-4">
-                Emisión automatizada de boletines informativos, actas de consejo de curso, planes de acción asistidos por IA para alumnos con bajo rendimiento y sábanas estadísticas para dirección.
+                Emisión automatizada de boletines informativos, actas de consejo de curso, planes de acción para alumnos con bajo rendimiento y sábanas estadísticas para dirección.
               </p>
               <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
                 <span className="text-slate-400 font-medium">Destinatarios:</span>
