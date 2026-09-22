@@ -14,7 +14,7 @@ import {
 
 export const TitulosBachillerView: React.FC = () => {
   const { titles, saveTitleRecord } = useApp();
-  const [selectedTitle, setSelectedTitle] = useState<TitleRecord>(titles[0]);
+  const [selectedTitle, setSelectedTitle] = useState<TitleRecord | undefined>(titles[0]);
   const [saveBanner, setSaveBanner] = useState(false);
 
   // Calibration Margins State (in mm)
@@ -22,8 +22,28 @@ export const TitulosBachillerView: React.FC = () => {
   const [marginLeft, setMarginLeft] = useState(30);
   const [fontScale, setFontScale] = useState(100);
 
+  const activeTitle = selectedTitle || titles[0];
+
+  if (!titles || titles.length === 0 || !activeTitle) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-cba-card">
+          <h2 className="text-xl font-extrabold text-[#2C2E53]">Títulos de Bachiller y Calibración</h2>
+          <p className="text-xs text-slate-500 mt-1">Secretaría de Grado y Egresos SICE-CBA</p>
+        </div>
+        <div className="bg-white rounded-2xl p-12 text-center border border-slate-200 shadow-sm max-w-xl mx-auto">
+          <GraduationCap className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+          <h3 className="text-base font-black text-[#2C2E53]">No hay títulos de bachiller registrados</h3>
+          <p className="text-xs text-slate-500 mt-1">
+            No existen folios ni seriales de título cargados actualmente en la base de datos.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   const handleSave = () => {
-    saveTitleRecord(selectedTitle);
+    saveTitleRecord(activeTitle);
     setSaveBanner(true);
     setTimeout(() => setSaveBanner(false), 3000);
   };
@@ -72,7 +92,7 @@ export const TitulosBachillerView: React.FC = () => {
                   key={tit.id}
                   onClick={() => setSelectedTitle(tit)}
                   className={`p-3 rounded-xl border cursor-pointer transition ${
-                    selectedTitle.id === tit.id
+                    activeTitle.id === tit.id
                       ? 'bg-[#2C2E53] text-white border-[#2C2E53] shadow-md'
                       : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700'
                   }`}
@@ -98,7 +118,7 @@ export const TitulosBachillerView: React.FC = () => {
                 Ficha Ministerial del Título de Bachiller
               </h3>
               <span className="text-xs font-mono font-bold text-slate-400">
-                Año Escolar: {selectedTitle.schoolYear}
+                Año Escolar: {activeTitle.schoolYear}
               </span>
             </div>
 
@@ -107,8 +127,8 @@ export const TitulosBachillerView: React.FC = () => {
                 <label className="block text-xs font-bold text-slate-700 mb-1">Serial de Papel de Seguridad:</label>
                 <input
                   type="text"
-                  value={selectedTitle.serialNumber}
-                  onChange={(e) => setSelectedTitle({ ...selectedTitle, serialNumber: e.target.value })}
+                  value={activeTitle.serialNumber}
+                  onChange={(e) => setSelectedTitle({ ...activeTitle, serialNumber: e.target.value })}
                   className="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono text-xs font-bold text-slate-800"
                 />
               </div>
@@ -116,8 +136,8 @@ export const TitulosBachillerView: React.FC = () => {
                 <label className="block text-xs font-bold text-slate-700 mb-1">Tomo Registrado:</label>
                 <input
                   type="text"
-                  value={selectedTitle.tomo}
-                  onChange={(e) => setSelectedTitle({ ...selectedTitle, tomo: e.target.value })}
+                  value={activeTitle.tomo}
+                  onChange={(e) => setSelectedTitle({ ...activeTitle, tomo: e.target.value })}
                   className="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono text-xs font-bold text-slate-800"
                 />
               </div>
@@ -125,8 +145,8 @@ export const TitulosBachillerView: React.FC = () => {
                 <label className="block text-xs font-bold text-slate-700 mb-1">Folio Registrado:</label>
                 <input
                   type="text"
-                  value={selectedTitle.folio}
-                  onChange={(e) => setSelectedTitle({ ...selectedTitle, folio: e.target.value })}
+                  value={activeTitle.folio}
+                  onChange={(e) => setSelectedTitle({ ...activeTitle, folio: e.target.value })}
                   className="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono text-xs font-bold text-slate-800"
                 />
               </div>
@@ -137,8 +157,8 @@ export const TitulosBachillerView: React.FC = () => {
                 <label className="block text-xs font-bold text-slate-700 mb-1">Código Único de Registro:</label>
                 <input
                   type="text"
-                  value={selectedTitle.registeredCode}
-                  onChange={(e) => setSelectedTitle({ ...selectedTitle, registeredCode: e.target.value })}
+                  value={activeTitle.registeredCode}
+                  onChange={(e) => setSelectedTitle({ ...activeTitle, registeredCode: e.target.value })}
                   className="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono text-xs font-bold text-slate-800"
                 />
               </div>
@@ -146,8 +166,8 @@ export const TitulosBachillerView: React.FC = () => {
                 <label className="block text-xs font-bold text-slate-700 mb-1">Año de Graduación / Promoción:</label>
                 <input
                   type="text"
-                  value={selectedTitle.graduationYear}
-                  onChange={(e) => setSelectedTitle({ ...selectedTitle, graduationYear: e.target.value })}
+                  value={activeTitle.graduationYear}
+                  onChange={(e) => setSelectedTitle({ ...activeTitle, graduationYear: e.target.value })}
                   className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-bold text-slate-800"
                 />
               </div>

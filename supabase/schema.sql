@@ -139,7 +139,7 @@ CREATE TABLE IF NOT EXISTS evaluation_records (
     moment VARCHAR(20) NOT NULL CHECK (moment IN ('DIAGNOSTICA', 'PROCESAL', 'FINAL_LAPSO')),
     lapso INT NOT NULL CHECK (lapso IN (1, 2, 3)),
     score_numeric NUMERIC(4,2),
-    score_qualitative CHAR(2) CHECK (score_qualitative IN ('C', 'EP', 'I')),
+    score_qualitative VARCHAR(2) CHECK (score_qualitative IN ('L', 'P', 'EP', 'I', 'C')),
     score_literal CHAR(1) CHECK (score_literal IN ('A', 'B', 'C', 'D', 'E')),
     robotics_score JSONB,
     observations TEXT,

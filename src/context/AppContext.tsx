@@ -15,6 +15,7 @@ import {
   CouncilMeetingMinute,
   PlanStatus,
   QualitativeScore,
+  LiteralScore,
   PassRecord,
   DailyAttendanceRecord,
   SubjectAttendanceAccumulated,
@@ -70,6 +71,7 @@ import {
   supabaseFetchCommunityNotices,
   supabaseFetchNotifications,
   supabaseFetchUsers,
+  supabaseSaveStudent,
   supabaseSaveEvaluation,
   supabaseBulkSaveEvaluations,
   supabaseSaveDidacticPlan,
@@ -126,6 +128,8 @@ interface AppContextType {
   // Students & Evaluations
   students: Student[];
   levelStudents: Student[];
+  addStudent: (student: Omit<Student, 'id'>) => Student;
+  saveStudent: (student: Student) => void;
   evaluations: EvaluationRecord[];
   recordEvaluation: (record: Omit<EvaluationRecord, 'id' | 'recordedAt'>) => void;
   bulkRecordEvaluations: (records: Omit<EvaluationRecord, 'id' | 'recordedAt'>[]) => void;
@@ -394,7 +398,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // Validación estricta de contraseña
     if (matched.password) {
-      if (!password || (password !== matched.password && password !== '••••••••')) {
+      if (!password || password !== matched.password) {
         return {
           success: false,
           message: 'Contraseña incorrecta. Por favor verifique sus credenciales.'
@@ -493,19 +497,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ]);
 
       if (remoteStudents !== null) setStudents(remoteStudents);
-      if (remoteAreas && remoteAreas.length > 0) setAreas(remoteAreas);
-      if (remoteCompetencies && remoteCompetencies.length > 0) setCompetencies(remoteCompetencies);
-      if (remoteIndicators && remoteIndicators.length > 0) setIndicators(remoteIndicators);
+      if (remoteAreas !== null) setAreas(remoteAreas);
+      if (remoteCompetencies !== null) setCompetencies(remoteCompetencies);
+      if (remoteIndicators !== null) setIndicators(remoteIndicators);
       if (remoteEvaluations !== null) setEvaluations(remoteEvaluations);
-      if (remotePlans && remotePlans.length > 0) setPlansQuincenal(remotePlans);
+      if (remotePlans !== null) setPlansQuincenal(remotePlans);
       if (remotePasses !== null) setPasses(remotePasses);
       if (remoteAttendance !== null) setDailyAttendance(remoteAttendance);
       if (remoteConducts !== null) setConducts(remoteConducts);
       if (remoteDocs !== null) setDocumentRequests(remoteDocs);
       if (remoteBlocks !== null) setAdminBlocks(remoteBlocks);
       if (remoteTitles !== null) setTitles(remoteTitles);
-      if (remoteNotices && remoteNotices.length > 0) setCommunityNotices(remoteNotices);
-      if (remoteNotifications && remoteNotifications.length > 0) setNotifications(remoteNotifications);
+      if (remoteNotices !== null) setCommunityNotices(remoteNotices);
+      if (remoteNotifications !== null) setNotifications(remoteNotifications);
       if (remoteUsers && remoteUsers.length > 0) {
         setUsers(remoteUsers);
         // Validar que la sesión activa corresponda a un usuario existente y activo en la base de datos
@@ -514,7 +518,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           try {
             const savedUser = JSON.parse(savedUserStr);
             const verified = remoteUsers.find(
-              u => u.username.toLowerCase() === savedUser.username?.toLowerCase() && u.active
+              u =>
+                (u.id === savedUser.id ||
+                 u.username.toLowerCase() === savedUser.username?.toLowerCase() ||
+                 u.email.toLowerCase() === savedUser.email?.toLowerCase()) &&
+                u.active
             );
             if (!verified) {
               console.warn('Usuario de sesión no encontrado o inactivo en la base de datos. Cerrando sesión.');
@@ -876,6 +884,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
   };
 
+  // Student Actions
+  const addStudent = (stu: Omit<Student, 'id'>): Student => {
+    const newStudent: Student = {
+      ...stu,
+      id: `stu-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`
+    };
+    setStudents(prev => [newStudent, ...prev]);
+    supabaseSaveStudent(newStudent).catch(err => console.warn('Supabase save student err:', err));
+    return newStudent;
+  };
+
+  const saveStudent = (student: Student) => {
+    setStudents(prev => {
+      const idx = prev.findIndex(s => s.id === student.id);
+      if (idx >= 0) {
+        const copy = [...prev];
+        copy[idx] = student;
+        return copy;
+      }
+      return [student, ...prev];
+    });
+    supabaseSaveStudent(student).catch(err => console.warn('Supabase save student err:', err));
+  };
+
   // Evaluation Actions
   const recordEvaluation = (record: Omit<EvaluationRecord, 'id' | 'recordedAt'>) => {
     const newRecord: EvaluationRecord = {
@@ -942,21 +974,41 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!student || !area) return;
 
     // Update or add the evaluation record
-    const numericScore = parseFloat(newScore);
+    const isInicial = student.level === 'INICIAL';
+    const isPrimaria = student.level === 'PRIMARIA';
+    const isMedia = student.level === 'MEDIA_GENERAL';
+
+    const cleanScore = newScore.trim();
+    const upperScore = cleanScore.toUpperCase();
+
+    const scoreLiteral = isInicial
+      ? ((['A', 'B', 'C', 'D', 'E'].includes(upperScore) ? upperScore : undefined) as LiteralScore | undefined)
+      : undefined;
+
+    const scoreQualitative = isPrimaria
+      ? ((['L', 'P', 'EP', 'I'].includes(upperScore) ? upperScore : undefined) as QualitativeScore | undefined)
+      : undefined;
+
+    const scoreNumeric = isMedia && !isNaN(Number(cleanScore))
+      ? Number(cleanScore)
+      : undefined;
+
     const newRecord: EvaluationRecord = {
       id: `eval-adjust-${Date.now()}`,
       studentId,
       areaId,
       moment: 'FINAL_LAPSO',
       lapso: activeLapso,
-      scoreNumeric: isNaN(numericScore) ? undefined : numericScore,
-      scoreQualitative: (['C', 'EP', 'I'].includes(newScore) ? newScore : undefined) as QualitativeScore,
+      scoreNumeric,
+      scoreLiteral,
+      scoreQualitative,
       observations: `Ajuste oficial aprobado en Consejo: ${justification} (Antes: ${oldScore})`,
       recordedAt: new Date().toISOString().split('T')[0],
       teacherId: 'coordinacion-pedagogica'
     };
 
     setEvaluations(prev => [newRecord, ...prev]);
+    supabaseSaveEvaluation(newRecord).catch(err => console.warn('Supabase save eval adjust err:', err));
 
     // Append to council minute if available
     setCouncilMinutes(prev => {
@@ -1241,6 +1293,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateLapsoPlanStatus,
         students,
         levelStudents,
+        addStudent,
+        saveStudent,
         evaluations,
         recordEvaluation,
         bulkRecordEvaluations,

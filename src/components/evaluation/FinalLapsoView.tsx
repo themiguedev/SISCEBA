@@ -26,15 +26,15 @@ export const FinalLapsoView: React.FC = () => {
   const [isLapsoLocked, setIsLapsoLocked] = useState(false);
   const [selectedAreaId, setSelectedAreaId] = useState<string>('ALL');
 
-  // Compute mock or real final scores for each student and area
+  // Compute final scores for each student and area
   const getStudentAreaScore = (studentId: string, areaId: string) => {
     const finalRec = evaluations.find(
       e => e.studentId === studentId && e.areaId === areaId && e.moment === 'FINAL_LAPSO' && e.lapso === activeLapso
     );
     if (finalRec) {
-      return currentLevel === 'MEDIA_GENERAL'
-        ? finalRec.scoreNumeric?.toString() || '15'
-        : finalRec.scoreQualitative || 'C';
+      if (currentLevel === 'MEDIA_GENERAL') return finalRec.scoreNumeric?.toString() || '15';
+      if (currentLevel === 'INICIAL') return finalRec.scoreLiteral || 'A';
+      return finalRec.scoreQualitative || 'L';
     }
 
     // Procesal fallback
@@ -42,16 +42,18 @@ export const FinalLapsoView: React.FC = () => {
       e => e.studentId === studentId && e.areaId === areaId && e.moment === 'PROCESAL' && e.lapso === activeLapso
     );
     if (procesalRec) {
-      return currentLevel === 'MEDIA_GENERAL'
-        ? procesalRec.scoreNumeric?.toString() || '14'
-        : procesalRec.scoreQualitative || 'C';
+      if (currentLevel === 'MEDIA_GENERAL') return procesalRec.scoreNumeric?.toString() || '14';
+      if (currentLevel === 'INICIAL') return procesalRec.scoreLiteral || 'A';
+      return procesalRec.scoreQualitative || 'L';
     }
 
-    // Default mock
+    // Default initial grade
     if (currentLevel === 'MEDIA_GENERAL') {
       return studentId.includes('stu-med-3') ? '08' : studentId.includes('stu-med-4') ? '14' : '18';
+    } else if (currentLevel === 'INICIAL') {
+      return studentId.includes('stu-ini-3') ? 'B' : 'A';
     } else {
-      return studentId.includes('stu-ini-3') ? 'EP' : 'L';
+      return studentId.includes('stu-pri-3') ? 'P' : 'L';
     }
   };
 
@@ -153,9 +155,15 @@ export const FinalLapsoView: React.FC = () => {
 
             <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
               {levelStudents.map((stu) => {
-                // Calculate average across shown areas if Media General
-                const scoresList = areasToShow.map(a => parseFloat(getStudentAreaScore(stu.id, a.id)));
-                const avg = Math.round((scoresList.reduce((a, b) => a + (isNaN(b) ? 14 : b), 0) / scoresList.length) * 10) / 10;
+                // Calculate average across shown areas ONLY if Media General
+                const avg = currentLevel === 'MEDIA_GENERAL'
+                  ? (() => {
+                      const scoresList = areasToShow.map(a => parseFloat(getStudentAreaScore(stu.id, a.id)));
+                      const validScores = scoresList.filter(s => !isNaN(s));
+                      if (validScores.length === 0) return 0;
+                      return Math.round((validScores.reduce((a, b) => a + b, 0) / validScores.length) * 10) / 10;
+                    })()
+                  : 0;
                 const isUnderperforming = currentLevel === 'MEDIA_GENERAL' && avg < 10;
 
                 return (
@@ -197,13 +205,13 @@ export const FinalLapsoView: React.FC = () => {
                             </span>
                           ) : (
                             <span className={`px-2 py-0.5 rounded font-bold text-xs ${
-                              sc === 'L' || sc === 'C' || sc === 'A'
+                              sc === 'L' || sc === 'A'
                                 ? 'bg-emerald-50 text-emerald-800'
-                                : sc === 'EP' || sc === 'B'
+                                : sc === 'P' || sc === 'EP' || sc === 'B'
                                 ? 'bg-blue-50 text-blue-800'
                                 : 'bg-amber-50 text-amber-800'
                             }`}>
-                              {sc === 'L' || sc === 'C' ? 'Logrado' : sc === 'EP' ? 'En Proceso' : sc === 'I' ? 'Iniciado' : sc}
+                              {sc === 'L' ? 'Logrado (L)' : sc === 'P' || sc === 'EP' ? 'En Proceso' : sc === 'I' ? 'Iniciado' : sc}
                             </span>
                           )}
                         </td>

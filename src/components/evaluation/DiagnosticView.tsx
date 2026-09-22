@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { QualitativeScore } from '../../types';
+import { QualitativeScore, LiteralScore } from '../../types';
 import {
   Cpu,
   CheckCircle2,
@@ -37,6 +37,7 @@ export const DiagnosticView: React.FC = () => {
   // Local form state for inline entry
   const [scores, setScores] = useState<Record<string, {
     numeric?: number;
+    literal?: LiteralScore;
     qualitative?: QualitativeScore;
     obs?: string;
     robotics?: { logic: QualitativeScore; construction: QualitativeScore; teamwork: QualitativeScore };
@@ -54,6 +55,7 @@ export const DiagnosticView: React.FC = () => {
       if (rec) {
         existing[stu.id] = {
           numeric: rec.scoreNumeric,
+          literal: rec.scoreLiteral || 'A',
           qualitative: rec.scoreQualitative || 'L',
           obs: rec.observations || '',
           robotics: rec.roboticsScore ? {
@@ -65,6 +67,7 @@ export const DiagnosticView: React.FC = () => {
       } else {
         existing[stu.id] = {
           numeric: currentLevel === 'MEDIA_GENERAL' ? 14 : undefined,
+          literal: 'A',
           qualitative: 'L',
           obs: '',
           robotics: isRoboticsSpecial ? { logic: 'L', construction: 'L', teamwork: 'L' } : undefined
@@ -93,7 +96,8 @@ export const DiagnosticView: React.FC = () => {
         moment: 'DIAGNOSTICA' as const,
         lapso: activeLapso,
         scoreNumeric: currentLevel === 'MEDIA_GENERAL' ? (entry.numeric ?? 12) : undefined,
-        scoreQualitative: currentLevel !== 'MEDIA_GENERAL' ? (entry.qualitative ?? 'L') : undefined,
+        scoreLiteral: currentLevel === 'INICIAL' ? (entry.literal ?? 'A') : undefined,
+        scoreQualitative: currentLevel === 'PRIMARIA' ? (entry.qualitative ?? 'L') : undefined,
         roboticsScore: entry.robotics ? {
           logicSkills: entry.robotics.logic,
           constructionSkills: entry.robotics.construction,
@@ -319,13 +323,20 @@ export const DiagnosticView: React.FC = () => {
                         </td>
 
                         <td className="py-3 px-3 text-center">
-                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-black ${
-                            rowData.qualitative === 'L' || rowData.qualitative === 'C' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
-                            rowData.qualitative === 'EP' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
-                            'bg-amber-50 text-amber-700 border border-amber-200'
-                          }`}>
-                            {rowData.qualitative === 'L' || rowData.qualitative === 'C' ? 'Logrado' : rowData.qualitative === 'EP' ? 'En Proceso' : rowData.qualitative === 'I' ? 'Iniciado' : (rowData.qualitative || 'Logrado')}
-                          </span>
+                          <select
+                            value={rowData.literal || 'A'}
+                            onChange={(e) =>
+                              handleScoreChange(stu.id, { literal: e.target.value as LiteralScore })
+                            }
+                            aria-label={`Valoración literal para ${stu.fullName}`}
+                            className="p-1.5 bg-slate-50 rounded border border-slate-200 text-xs font-black text-[#2C2E53]"
+                          >
+                            <option value="A">A (Excelente)</option>
+                            <option value="B">B (Bueno)</option>
+                            <option value="C">C (Aceptable)</option>
+                            <option value="D">D (Requiere Acompañamiento)</option>
+                            <option value="E">E (No Consolidado)</option>
+                          </select>
                         </td>
                       </>
                     )}
@@ -341,9 +352,10 @@ export const DiagnosticView: React.FC = () => {
                           aria-label={`Valoración cualitativa para ${stu.fullName}`}
                           className="p-1.5 bg-slate-50 rounded border border-slate-200 text-xs font-black text-[#2C2E53]"
                         >
-                          <option value="L">Logrado (L / A)</option>
-                          <option value="EP">En Proceso (EP / B)</option>
-                          <option value="I">Iniciado (I / C-D)</option>
+                          <option value="L">Logrado (L)</option>
+                          <option value="P">En Proceso (P)</option>
+                          <option value="EP">En Proceso (EP)</option>
+                          <option value="I">Iniciado (I)</option>
                         </select>
                       </td>
                     )}

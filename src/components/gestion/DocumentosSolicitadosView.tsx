@@ -16,14 +16,14 @@ import {
 } from 'lucide-react';
 
 export const DocumentosSolicitadosView: React.FC = () => {
-  const { documentRequests, updateDocumentStatus, addDocumentRequest, students } = useApp();
+  const { documentRequests, updateDocumentStatus, addDocumentRequest, students, currentUser } = useApp();
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   // Form State
   const [selectedStudentId, setSelectedStudentId] = useState(students[0]?.id || '');
-  const [repName, setRepName] = useState('Ing. Carlos Urdaneta');
+  const [repName, setRepName] = useState(students[0]?.representativeName || currentUser?.fullName || 'Representante CBA');
   const [docType, setDocType] = useState<DocumentRequest['documentType']>('Constancia de Estudio');
   const [department, setDepartment] = useState<DocumentRequest['department']>('Control de Estudios');
   const [notes, setNotes] = useState('');

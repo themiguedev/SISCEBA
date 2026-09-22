@@ -128,10 +128,10 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
           </div>
           <div className="flex items-baseline gap-2">
             <span className="text-2xl font-black text-slate-900">
-              {currentLevel === 'MEDIA_GENERAL' ? '18.4' : '96%'}
+              {currentLevel === 'MEDIA_GENERAL' ? '18.4' : currentLevel === 'INICIAL' ? 'A' : '96%'}
             </span>
             <span className="text-[11px] text-emerald-600 font-bold">
-              {currentLevel === 'MEDIA_GENERAL' ? '/ 20 Promedio' : 'Consolidación'}
+              {currentLevel === 'MEDIA_GENERAL' ? '/ 20 Promedio' : currentLevel === 'INICIAL' ? 'Escala Literal (A-E)' : 'Logrado (L)'}
             </span>
           </div>
           <p className="text-[11px] text-slate-400 mt-1 truncate">{currentInfo.scale}</p>

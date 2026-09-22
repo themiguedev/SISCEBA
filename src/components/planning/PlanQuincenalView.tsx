@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { PlanQuincenal, PlanStatus } from '../../types';
+import { canApprovePlans } from '../../utils/rbac';
 import {
   Calendar,
   CheckCircle2,
@@ -280,8 +281,8 @@ export const PlanQuincenalView: React.FC<PlanQuincenalViewProps> = ({
                     </button>
                   )}
 
-                  {/* Coordinator Actions */}
-                  {activePlan.status === 'A_REVISION' && (currentRole === 'COORDINACION' || currentRole === 'DOCENTE') && (
+                  {/* Supervisory / Coordination Approval Actions */}
+                  {activePlan.status === 'A_REVISION' && canApprovePlans(currentRole) && (
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => {

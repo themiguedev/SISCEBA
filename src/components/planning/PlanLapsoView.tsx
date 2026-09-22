@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { PlanLapso, LapsoEvaluationItem, PlanStatus } from '../../types';
+import { canApprovePlans } from '../../utils/rbac';
 import {
   CalendarDays,
   Scale,
@@ -239,7 +240,7 @@ export const PlanLapsoView: React.FC = () => {
                   </button>
                 )}
 
-                {activePlan?.status === 'A_REVISION' && (currentRole === 'COORDINACION' || currentRole === 'DOCENTE') && (
+                {activePlan?.status === 'A_REVISION' && canApprovePlans(currentRole) && (
                   <button
                     onClick={() => updateLapsoPlanStatus(activePlan.id, 'DEFINITIVO')}
                     className="flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white font-black rounded-xl text-xs shadow-md transition-all"

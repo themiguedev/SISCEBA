@@ -628,6 +628,24 @@ export const INITIAL_COMPETENCIES: Competency[] = [
     level: 'PRIMARIA',
     lapso: 1
   },
+  {
+    id: 'comp-pri-4',
+    areaId: 'pri-cn',
+    code: 'CP-PRI-04',
+    title: 'Indagación Científica y Biodiversidad Regional',
+    description: 'Explora procesos biológicos y ecológicos de la región zuliana mediante el método científico experimental.',
+    level: 'PRIMARIA',
+    lapso: 1
+  },
+  {
+    id: 'comp-pri-5',
+    areaId: 'pri-cs',
+    code: 'CP-PRI-05',
+    title: 'Identidad Histórica y Participación Ciudadana',
+    description: 'Analiza hechos históricos de Venezuela, valores cívicos republicanos y la evolución social y cultural de la comunidad.',
+    level: 'PRIMARIA',
+    lapso: 1
+  },
   // Media General
   {
     id: 'comp-med-1',
@@ -739,6 +757,26 @@ export const INITIAL_INDICATORS: Indicator[] = [
     level: 'PRIMARIA',
     lapso: 1,
     evaluationInstrument: 'Demostración de Proyecto'
+  },
+  {
+    id: 'ind-pri-401',
+    competencyId: 'comp-pri-4',
+    areaId: 'pri-cn',
+    code: 'IND-PRI-4.1',
+    description: 'Identifica y clasifica especies de flora y fauna de la región zuliana documentando sus adaptaciones al medio ambiente.',
+    level: 'PRIMARIA',
+    lapso: 1,
+    evaluationInstrument: 'Informe de Laboratorio Escolar'
+  },
+  {
+    id: 'ind-pri-501',
+    competencyId: 'comp-pri-5',
+    areaId: 'pri-cs',
+    code: 'IND-PRI-5.1',
+    description: 'Explica los acontecimientos históricos relevantes y la importancia de la convivencia ciudadana y el respeto a las instituciones.',
+    level: 'PRIMARIA',
+    lapso: 1,
+    evaluationInstrument: 'Exposición y Línea de Tiempo'
   },
   // Media General
   {
@@ -1133,7 +1171,7 @@ export const INITIAL_PLANS_LAPSO: PlanLapso[] = [
 ];
 
 export const INITIAL_EVALUATION_RECORDS: EvaluationRecord[] = [
-  // Inicial
+  // Inicial (1er Lapso - Escala Literal MPPE A, B, C, D, E)
   {
     id: 'eval-ini-1',
     studentId: 'stu-ini-1',
@@ -1141,7 +1179,7 @@ export const INITIAL_EVALUATION_RECORDS: EvaluationRecord[] = [
     indicatorId: 'ind-ini-101',
     moment: 'PROCESAL',
     lapso: 1,
-    scoreQualitative: 'L',
+    scoreLiteral: 'A',
     roboticsScore: {
       logicSkills: 'L',
       constructionSkills: 'L',
@@ -1158,15 +1196,166 @@ export const INITIAL_EVALUATION_RECORDS: EvaluationRecord[] = [
     indicatorId: 'ind-ini-101',
     moment: 'PROCESAL',
     lapso: 1,
-    scoreQualitative: 'EP',
+    scoreLiteral: 'B',
     roboticsScore: {
-      logicSkills: 'EP',
+      logicSkills: 'P',
       constructionSkills: 'L',
       teamwork: 'I'
     },
     observations: 'Presenta dificultad para compartir materiales de construcción. Se recomienda estimulación de turnos.',
     recordedAt: '2026-10-05',
     teacherId: 'doc-inicial-1'
+  },
+
+  // Primaria (1er Lapso - Escala Formativa / Cualitativa L, P, I)
+  // Estudiante 1: Camila Victoria Hernández Ochoa (stu-pri-1)
+  {
+    id: 'eval-pri-1',
+    studentId: 'stu-pri-1',
+    areaId: 'pri-len',
+    indicatorId: 'ind-pri-101',
+    moment: 'PROCESAL',
+    lapso: 1,
+    scoreQualitative: 'L',
+    observations: 'Lectura fluida y redacción creativa con excelente ortografía.',
+    recordedAt: '2026-10-14',
+    teacherId: 'doc-pri-1'
+  },
+  {
+    id: 'eval-pri-2',
+    studentId: 'stu-pri-1',
+    areaId: 'pri-mat',
+    indicatorId: 'ind-pri-201',
+    moment: 'PROCESAL',
+    lapso: 1,
+    scoreQualitative: 'L',
+    observations: 'Comprensión sobresaliente de operaciones con fracciones y cálculo mental.',
+    recordedAt: '2026-10-14',
+    teacherId: 'doc-pri-1'
+  },
+  {
+    id: 'eval-pri-3',
+    studentId: 'stu-pri-1',
+    areaId: 'pri-cn',
+    indicatorId: 'ind-pri-401',
+    moment: 'PROCESAL',
+    lapso: 1,
+    scoreQualitative: 'P',
+    observations: 'Participación activa y buena metodología en proyectos de ciencias naturales.',
+    recordedAt: '2026-10-14',
+    teacherId: 'doc-pri-1'
+  },
+  {
+    id: 'eval-pri-4',
+    studentId: 'stu-pri-1',
+    areaId: 'pri-cs',
+    indicatorId: 'ind-pri-501',
+    moment: 'PROCESAL',
+    lapso: 1,
+    scoreQualitative: 'L',
+    observations: 'Excelente desenvolvimiento en temas de identidad histórica y cívica.',
+    recordedAt: '2026-10-14',
+    teacherId: 'doc-pri-1'
+  },
+
+  // Estudiante 2: Alejandro José Urdaneta Silva (stu-pri-2)
+  {
+    id: 'eval-pri-5',
+    studentId: 'stu-pri-2',
+    areaId: 'pri-len',
+    indicatorId: 'ind-pri-101',
+    moment: 'PROCESAL',
+    lapso: 1,
+    scoreQualitative: 'P',
+    observations: 'Buen progreso en redacción de textos narrativos y ortografía.',
+    recordedAt: '2026-10-14',
+    teacherId: 'doc-pri-1'
+  },
+  {
+    id: 'eval-pri-6',
+    studentId: 'stu-pri-2',
+    areaId: 'pri-mat',
+    indicatorId: 'ind-pri-201',
+    moment: 'PROCESAL',
+    lapso: 1,
+    scoreQualitative: 'L',
+    observations: 'Habilidad destacada en razonamiento lógico-matemático y fracciones.',
+    recordedAt: '2026-10-14',
+    teacherId: 'doc-pri-1'
+  },
+  {
+    id: 'eval-pri-7',
+    studentId: 'stu-pri-2',
+    areaId: 'pri-cn',
+    indicatorId: 'ind-pri-401',
+    moment: 'PROCESAL',
+    lapso: 1,
+    scoreQualitative: 'L',
+    observations: 'Curiosidad investigativa e informes de laboratorio escolar ordenados.',
+    recordedAt: '2026-10-14',
+    teacherId: 'doc-pri-1'
+  },
+  {
+    id: 'eval-pri-8',
+    studentId: 'stu-pri-2',
+    areaId: 'pri-cs',
+    indicatorId: 'ind-pri-501',
+    moment: 'PROCESAL',
+    lapso: 1,
+    scoreQualitative: 'P',
+    observations: 'Comprende los procesos históricos y participa reflexivamente en clase.',
+    recordedAt: '2026-10-14',
+    teacherId: 'doc-pri-1'
+  },
+
+  // Estudiante 3: Isabella Cristina Finol Boscán (stu-pri-3)
+  {
+    id: 'eval-pri-9',
+    studentId: 'stu-pri-3',
+    areaId: 'pri-len',
+    indicatorId: 'ind-pri-101',
+    moment: 'PROCESAL',
+    lapso: 1,
+    scoreQualitative: 'P',
+    observations: 'Buena comprensión lectora y cumplimiento constante de asignaciones.',
+    recordedAt: '2026-10-14',
+    teacherId: 'doc-pri-1'
+  },
+  {
+    id: 'eval-pri-10',
+    studentId: 'stu-pri-3',
+    areaId: 'pri-mat',
+    indicatorId: 'ind-pri-201',
+    moment: 'PROCESAL',
+    lapso: 1,
+    scoreQualitative: 'P',
+    observations: 'Resuelve problemas con fracciones demostrando dedicación y orden.',
+    recordedAt: '2026-10-14',
+    teacherId: 'doc-pri-1'
+  },
+  {
+    id: 'eval-pri-11',
+    studentId: 'stu-pri-3',
+    areaId: 'pri-cn',
+    indicatorId: 'ind-pri-401',
+    moment: 'PROCESAL',
+    lapso: 1,
+    scoreQualitative: 'P',
+    observations: 'Muestra interés por el conocimiento de la biodiversidad regional y el ambiente.',
+    recordedAt: '2026-10-14',
+    teacherId: 'doc-pri-1'
+  },
+  {
+    id: 'eval-pri-12',
+    studentId: 'stu-pri-3',
+    areaId: 'pri-cs',
+    indicatorId: 'ind-pri-501',
+    moment: 'PROCESAL',
+    lapso: 1,
+    scoreQualitative: 'L',
+    observations: 'Gran capacidad de expresión oral en exposiciones cívicas e históricas.',
+    recordedAt: '2026-10-14',
+    teacherId: 'doc-pri-1'
   },
 
   // Media General - Matemáticas

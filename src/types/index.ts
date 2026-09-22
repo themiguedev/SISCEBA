@@ -149,8 +149,29 @@ export interface Student {
   avatarUrl?: string;
 }
 
-export type QualitativeScore = 'L' | 'C' | 'EP' | 'I'; // Logrado (L), Consolidado (C - compatibilidad), En Proceso (EP), Iniciado (I)
-export type LiteralScore = 'A' | 'B' | 'C' | 'D' | 'E'; // Literales Primaria
+export type QualitativeScore = 'L' | 'P' | 'EP' | 'I'; // Primaria: Logrado (L), Proceso (P / EP), Inicio (I)
+export type LiteralScore = 'A' | 'B' | 'C' | 'D' | 'E'; // Inicial: Literales (A, B, C, D, E)
+
+export const LITERAL_DESCRIPTIONS: Record<LiteralScore, { title: string; desc: string }> = {
+  A: { title: 'Excelente', desc: 'Alcanzó todas las competencias y superó las expectativas del nivel.' },
+  B: { title: 'Bueno', desc: 'Alcanzó todas las competencias previstas para el nivel.' },
+  C: { title: 'Aceptable', desc: 'Alcanzó la mayoría de las competencias previstas para el nivel.' },
+  D: { title: 'Requiere Acompañamiento', desc: 'Alcanzó algunas competencias y requiere refuerzo pedagógico.' },
+  E: { title: 'No Consolidado', desc: 'No logró adquirir las competencias mínimas requeridas.' }
+};
+
+export const QUALITATIVE_DESCRIPTIONS: Record<QualitativeScore, { title: string; desc: string }> = {
+  L: { title: 'Logrado', desc: 'El estudiante evidencia la adquisición y dominio autónomo de la competencia.' },
+  P: { title: 'En Proceso', desc: 'El estudiante muestra avances significativos pero aún requiere consolidar la competencia.' },
+  EP: { title: 'En Proceso', desc: 'El estudiante muestra avances significativos pero aún requiere consolidar la competencia.' },
+  I: { title: 'Iniciado', desc: 'El estudiante se encuentra en fase inicial de exploración o requiere acompañamiento continuo.' }
+};
+
+export interface RoboticsSpecialEvaluation {
+  logicSkills: QualitativeScore;
+  constructionSkills: QualitativeScore;
+  teamwork: QualitativeScore;
+}
 
 export interface EvaluationRecord {
   id: string;
@@ -159,14 +180,10 @@ export interface EvaluationRecord {
   indicatorId?: string;
   moment: 'DIAGNOSTICA' | 'PROCESAL' | 'FINAL_LAPSO';
   lapso: 1 | 2 | 3;
-  scoreNumeric?: number; // 01 - 20 (Media General)
-  scoreQualitative?: QualitativeScore; // C, EP, I
-  scoreLiteral?: LiteralScore;
-  roboticsScore?: {
-    logicSkills: QualitativeScore;
-    constructionSkills: QualitativeScore;
-    teamwork: QualitativeScore;
-  };
+  scoreNumeric?: number; // Exclusively for MEDIA_GENERAL (1..20)
+  scoreLiteral?: LiteralScore; // Exclusively for INICIAL (A, B, C, D, E)
+  scoreQualitative?: QualitativeScore; // Exclusively for PRIMARIA (L, P/EP, I)
+  roboticsScore?: RoboticsSpecialEvaluation;
   observations?: string;
   recordedAt: string;
   teacherId: string;

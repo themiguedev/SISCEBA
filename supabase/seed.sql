@@ -78,9 +78,9 @@ VALUES
 ('eval-07', 'stu-med-3', 'med-fis', 'PROCESAL', 1, 09.00, NULL, NULL, 'En revisión. Requiere refuerzo inmediato en trigonometría aplicada y descomposición vectorial.', '2026-09-17', 'prof-docente-1'),
 ('eval-08', 'stu-med-4', 'med-qui', 'PROCESAL', 1, 16.00, NULL, NULL, 'Recuperó satisfactoriamente los contenidos tras justificar reposo médico.', '2026-09-17', 'prof-docente-1'),
 ('eval-09', 'stu-med-5', 'med-fis', 'PROCESAL', 1, 08.00, NULL, NULL, 'Alerta de materia pendiente. Se citó al representante para firma de acta de compromiso.', '2026-09-17', 'prof-docente-1'),
-('eval-10', 'stu-pri-1', 'pri-len', 'PROCESAL', 1, NULL, NULL, 'A', 'Lectura comprensiva de alta fluidez y redacción creativa de textos narrativos.', '2026-09-17', 'prof-pri-1'),
-('eval-11', 'stu-pri-1', 'pri-rob', 'PROCESAL', 1, NULL, NULL, 'A', 'Lógica de bucles y condicionales en bloques desarrollada con total exactitud.', '2026-09-17', 'prof-pri-1'),
-('eval-12', 'stu-ini-1', 'ini-inf', 'DIAGNOSTICA', 1, NULL, 'C', NULL, 'Reconoce comandos espaciales, trabajo colaborativo consolidado.', '2026-09-17', 'prof-ini-1')
+('eval-10', 'stu-pri-1', 'pri-len', 'PROCESAL', 1, NULL, 'L', NULL, 'Lectura comprensiva de alta fluidez y redacción creativa de textos narrativos.', '2026-09-17', 'prof-pri-1'),
+('eval-11', 'stu-pri-1', 'pri-rob', 'PROCESAL', 1, NULL, 'L', NULL, 'Lógica de bucles y condicionales en bloques desarrollada con total exactitud.', '2026-09-17', 'prof-pri-1'),
+('eval-12', 'stu-ini-1', 'ini-inf', 'DIAGNOSTICA', 1, NULL, NULL, 'A', 'Reconoce comandos espaciales, trabajo colaborativo consolidado.', '2026-09-17', 'prof-ini-1')
 ON CONFLICT (id) DO NOTHING;
 
 -- 4. PASES DE RETRASO Y PORTERÍA

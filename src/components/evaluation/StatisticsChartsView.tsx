@@ -54,7 +54,7 @@ export const StatisticsChartsView: React.FC = () => {
     };
   });
 
-  // Distribution Data
+  // Distribution Data per subsystem
   const distributionData =
     currentLevel === 'MEDIA_GENERAL'
       ? [
@@ -63,9 +63,16 @@ export const StatisticsChartsView: React.FC = () => {
           { name: 'Aprobado (10-14)', value: 18, color: EMERALD },
           { name: 'En Riesgo (01-09)', value: 7, color: RED }
         ]
+      : currentLevel === 'INICIAL'
+      ? [
+          { name: 'Literal A (Excelente)', value: 45, color: EMERALD },
+          { name: 'Literal B (Bueno)', value: 35, color: GOLD },
+          { name: 'Literal C (Aceptable)', value: 12, color: NAVY },
+          { name: 'Literal D/E (Acompañamiento)', value: 8, color: RED }
+        ]
       : [
           { name: 'Logrado (L)', value: 75, color: EMERALD },
-          { name: 'En Proceso (EP)', value: 20, color: GOLD },
+          { name: 'En Proceso (P / EP)', value: 20, color: GOLD },
           { name: 'Iniciado (I)', value: 5, color: RED }
         ];
 

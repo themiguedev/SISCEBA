@@ -453,15 +453,22 @@ export const InstitutionalReportsView: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">
-                  {levelAreas.slice(0, 8).map(area => (
-                    <tr key={area.id}>
-                      <td className="py-2 px-3 font-bold text-[#2C2E53]">{area.name}</td>
-                      <td className="py-2 px-3 text-center">{levelStudents.length}</td>
-                      <td className="py-2 px-3 text-center text-emerald-700 font-black">{levelStudents.length - 1}</td>
-                      <td className="py-2 px-3 text-center font-bold text-emerald-700">96.5%</td>
-                      <td className="py-2 px-3 text-center text-amber-700 font-bold">1</td>
-                    </tr>
-                  ))}
+                  {levelAreas.slice(0, 8).map(area => {
+                    const totalCount = levelStudents.length;
+                    const revisionCount = levelStudents.filter(s => s.status === 'EN_REVISION').length;
+                    const approvedCount = Math.max(0, totalCount - revisionCount);
+                    const rate = totalCount > 0 ? Math.round((approvedCount / totalCount) * 100) : 0;
+
+                    return (
+                      <tr key={area.id}>
+                        <td className="py-2 px-3 font-bold text-[#2C2E53]">{area.name}</td>
+                        <td className="py-2 px-3 text-center">{totalCount}</td>
+                        <td className="py-2 px-3 text-center text-emerald-700 font-black">{approvedCount}</td>
+                        <td className="py-2 px-3 text-center font-bold text-emerald-700">{rate}%</td>
+                        <td className="py-2 px-3 text-center text-amber-700 font-bold">{revisionCount}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

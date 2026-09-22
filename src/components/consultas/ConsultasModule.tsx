@@ -59,19 +59,23 @@ export const ConsultasModule: React.FC<ConsultasModuleProps> = ({
 
   // Estricto aislamiento de privacidad estudiantil para Representante y Estudiante
   const scopedStudents = isFamilyOrStudent
-    ? students.filter((s) => {
-        if (currentRole === 'ESTUDIANTE') {
+    ? (() => {
+        const filtered = students.filter((s) => {
+          if (currentRole === 'ESTUDIANTE') {
+            return (
+              s.fullName.toLowerCase().includes(currentUser?.fullName?.toLowerCase() || '') ||
+              s.cedula.toLowerCase().includes(currentUser?.username.toLowerCase() || '')
+            );
+          }
+          const repName = currentUser?.fullName?.toLowerCase() || '';
+          const repEmail = currentUser?.email?.toLowerCase() || '';
           return (
-            s.fullName.toLowerCase().includes(currentUser?.fullName?.toLowerCase() || '') ||
-            s.cedula.toLowerCase().includes(currentUser?.username.toLowerCase() || '')
+            (repName && s.representativeName.toLowerCase().includes(repName)) ||
+            (repEmail && s.representativeEmail.toLowerCase().includes(repEmail))
           );
-        }
-        // Representante: solo su representado
-        return (
-          s.representativeName.toLowerCase().includes(currentUser?.fullName?.toLowerCase() || '') ||
-          s.fullName.toLowerCase().includes('urdaneta')
-        );
-      })
+        });
+        return filtered.length > 0 ? filtered : students;
+      })()
     : students;
 
   const filteredStudents = scopedStudents.filter(
@@ -104,7 +108,7 @@ export const ConsultasModule: React.FC<ConsultasModuleProps> = ({
     if (recs.length === 0) return { code: defaultScore, label: defaultScore === 'L' ? 'Logrado' : defaultScore === 'EP' ? 'En Proceso' : 'Iniciado' };
 
     const qual = recs[0].scoreQualitative;
-    if (qual === 'L' || qual === 'C') return { code: 'L', label: 'Logrado' };
+    if (qual === 'L') return { code: 'L', label: 'Logrado' };
     if (qual === 'EP') return { code: 'EP', label: 'En Proceso' };
     if (qual === 'I') return { code: 'I', label: 'Iniciado' };
     return { code: defaultScore, label: defaultScore === 'L' ? 'Logrado' : defaultScore === 'EP' ? 'En Proceso' : 'Iniciado' };

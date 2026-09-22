@@ -347,7 +347,8 @@ export const canPublishCommunity = (role: UserRole): boolean => {
     role === 'ADMINISTRADOR' ||
     role === 'DIRECTOR' ||
     role === 'COORDINACION' ||
-    role === 'COORDINADOR'
+    role === 'COORDINADOR' ||
+    role === 'DOCENTE'
   );
 };
 

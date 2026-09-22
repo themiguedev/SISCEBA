@@ -76,10 +76,11 @@ export const checkSupabaseConnection = async (): Promise<{ connected: boolean; m
       connected: true,
       message: 'Conexión exitosa con la base de datos de Supabase.'
     };
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : typeof err === 'string' ? err : 'Error de red';
     return {
       connected: false,
-      message: `No se pudo alcanzar el servidor Supabase: ${err?.message || 'Error de red'}`
+      message: `No se pudo alcanzar el servidor Supabase: ${errorMsg}`
     };
   }
 };

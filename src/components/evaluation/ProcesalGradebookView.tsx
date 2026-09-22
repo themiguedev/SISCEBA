@@ -72,13 +72,17 @@ export const ProcesalGradebookView: React.FC<ProcesalGradebookViewProps> = ({ on
           map[stu.id][ind.id] =
             currentLevel === 'MEDIA_GENERAL'
               ? found.scoreNumeric
+              : currentLevel === 'INICIAL'
+              ? found.scoreLiteral || 'A'
               : found.scoreQualitative || 'L';
         } else {
-          // Default mock grade based on student id
+          // Default initial grade based on subsystem
           if (currentLevel === 'MEDIA_GENERAL') {
             map[stu.id][ind.id] = stu.id.includes('stu-med-3') ? 8 : 17;
+          } else if (currentLevel === 'INICIAL') {
+            map[stu.id][ind.id] = stu.id.includes('stu-ini-3') ? 'B' : 'A';
           } else {
-            map[stu.id][ind.id] = stu.id.includes('stu-ini-3') ? 'EP' : 'L';
+            map[stu.id][ind.id] = stu.id.includes('stu-pri-3') ? 'P' : 'L';
           }
         }
       });
@@ -111,7 +115,8 @@ export const ProcesalGradebookView: React.FC<ProcesalGradebookViewProps> = ({ on
             moment: 'PROCESAL',
             lapso: activeLapso,
             scoreNumeric: currentLevel === 'MEDIA_GENERAL' ? Number(val) : undefined,
-            scoreQualitative: currentLevel !== 'MEDIA_GENERAL' ? (val as QualitativeScore) : undefined,
+            scoreLiteral: currentLevel === 'INICIAL' ? (val as LiteralScore) : undefined,
+            scoreQualitative: currentLevel === 'PRIMARIA' ? (val as QualitativeScore) : undefined,
             observations: `Registro procesal continuo - Lapso ${activeLapso}`,
             teacherId: 'docente-titular'
           });
@@ -357,6 +362,19 @@ export const ProcesalGradebookView: React.FC<ProcesalGradebookViewProps> = ({ on
                                   : 'bg-red-50 text-red-800 border-red-300 font-black'
                               }`}
                             />
+                          ) : currentLevel === 'INICIAL' ? (
+                            <select
+                              value={val || 'A'}
+                              onChange={(e) => handleCellChange(stu.id, ind.id, e.target.value)}
+                              aria-label={`Valoración literal de ${stu.fullName} en ${ind.code}`}
+                              className="p-1 text-xs font-black rounded-lg bg-slate-50 border border-slate-200 text-[#2C2E53]"
+                            >
+                              <option value="A">A (Excelente)</option>
+                              <option value="B">B (Bueno)</option>
+                              <option value="C">C (Aceptable)</option>
+                              <option value="D">D (Requiere Acompañamiento)</option>
+                              <option value="E">E (No Consolidado)</option>
+                            </select>
                           ) : (
                             <select
                               value={val || 'L'}
@@ -365,6 +383,7 @@ export const ProcesalGradebookView: React.FC<ProcesalGradebookViewProps> = ({ on
                               className="p-1 text-xs font-black rounded-lg bg-slate-50 border border-slate-200 text-[#2C2E53]"
                             >
                               <option value="L">L (Logrado)</option>
+                              <option value="P">P (En Proceso)</option>
                               <option value="EP">EP (En Proceso)</option>
                               <option value="I">I (Iniciado)</option>
                             </select>

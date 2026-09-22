@@ -5,6 +5,8 @@ import {
   Competency,
   Indicator,
   EvaluationRecord,
+  QualitativeScore,
+  LiteralScore,
   PlanQuincenal,
   PassRecord,
   DailyAttendanceRecord,
@@ -98,7 +100,10 @@ export const supabaseFetchSubjectAreas = async (): Promise<SubjectArea[] | null>
   if (!isSupabaseConfigured()) return null;
   try {
     const { data, error } = await supabase.from('subject_areas').select('*');
-    if (error || !data || data.length === 0) return null;
+    if (error || !data) {
+      console.warn('Supabase fetch subject_areas aviso:', error?.message);
+      return null;
+    }
 
     return data.map(row => ({
       id: row.id,
@@ -124,7 +129,10 @@ export const supabaseFetchCompetencies = async (): Promise<Competency[] | null> 
   if (!isSupabaseConfigured()) return null;
   try {
     const { data, error } = await supabase.from('competencies').select('*');
-    if (error || !data || data.length === 0) return null;
+    if (error || !data) {
+      console.warn('Supabase fetch competencies aviso:', error?.message);
+      return null;
+    }
 
     return data.map(row => ({
       id: row.id,
@@ -163,7 +171,10 @@ export const supabaseFetchIndicators = async (): Promise<Indicator[] | null> => 
   if (!isSupabaseConfigured()) return null;
   try {
     const { data, error } = await supabase.from('indicators').select('*');
-    if (error || !data || data.length === 0) return null;
+    if (error || !data) {
+      console.warn('Supabase fetch indicators aviso:', error?.message);
+      return null;
+    }
 
     return data.map(row => ({
       id: row.id,
@@ -209,7 +220,10 @@ export const supabaseFetchEvaluations = async (): Promise<EvaluationRecord[] | n
   if (!isSupabaseConfigured()) return null;
   try {
     const { data, error } = await supabase.from('evaluation_records').select('*');
-    if (error || !data || data.length === 0) return null;
+    if (error || !data) {
+      console.warn('Supabase fetch evaluation_records aviso:', error?.message);
+      return null;
+    }
 
     return data.map(row => ({
       id: row.id,
@@ -219,8 +233,11 @@ export const supabaseFetchEvaluations = async (): Promise<EvaluationRecord[] | n
       moment: row.moment,
       lapso: row.lapso,
       scoreNumeric: row.score_numeric !== null ? Number(row.score_numeric) : undefined,
-      scoreQualitative: row.score_qualitative,
-      scoreLiteral: row.score_literal,
+      scoreQualitative: (() => {
+        const raw = typeof row.score_qualitative === 'string' ? row.score_qualitative.trim() : undefined;
+        return raw === 'C' ? 'L' : (raw as QualitativeScore | undefined);
+      })(),
+      scoreLiteral: typeof row.score_literal === 'string' ? (row.score_literal.trim() as LiteralScore) : undefined,
       roboticsScore: row.robotics_score,
       observations: row.observations,
       recordedAt: row.recorded_at,
@@ -290,7 +307,10 @@ export const supabaseFetchDidacticPlans = async (): Promise<PlanQuincenal[] | nu
   if (!isSupabaseConfigured()) return null;
   try {
     const { data, error } = await supabase.from('didactic_plans').select('*');
-    if (error || !data || data.length === 0) return null;
+    if (error || !data) {
+      console.warn('Supabase fetch didactic_plans aviso:', error?.message);
+      return null;
+    }
 
     return data.map(row => ({
       id: row.id,
@@ -383,7 +403,10 @@ export const supabaseFetchPasses = async (): Promise<PassRecord[] | null> => {
       .from('pass_records')
       .select('*')
       .order('date', { ascending: false });
-    if (error || !data || data.length === 0) return null;
+    if (error || !data) {
+      console.warn('Supabase fetch pass_records aviso:', error?.message);
+      return null;
+    }
 
     return data.map(row => ({
       id: row.id,
@@ -441,7 +464,10 @@ export const supabaseFetchDailyAttendance = async (): Promise<DailyAttendanceRec
   if (!isSupabaseConfigured()) return null;
   try {
     const { data, error } = await supabase.from('daily_attendance').select('*');
-    if (error || !data || data.length === 0) return null;
+    if (error || !data) {
+      console.warn('Supabase fetch daily_attendance aviso:', error?.message);
+      return null;
+    }
 
     return data.map(row => ({
       id: row.id,
@@ -485,7 +511,10 @@ export const supabaseFetchConducts = async (): Promise<ConductEntry[] | null> =>
   if (!isSupabaseConfigured()) return null;
   try {
     const { data, error } = await supabase.from('conduct_entries').select('*');
-    if (error || !data || data.length === 0) return null;
+    if (error || !data) {
+      console.warn('Supabase fetch conduct_entries aviso:', error?.message);
+      return null;
+    }
 
     return data.map(row => ({
       id: row.id,
@@ -499,7 +528,8 @@ export const supabaseFetchConducts = async (): Promise<ConductEntry[] | null> =>
       agreements: row.agreements || '',
       reportedBy: row.reported_by
     }));
-  } catch {
+  } catch (e) {
+    console.error('Error en supabaseFetchConducts:', e);
     return null;
   }
 };
@@ -532,7 +562,10 @@ export const supabaseFetchDocumentRequests = async (): Promise<DocumentRequest[]
   if (!isSupabaseConfigured()) return null;
   try {
     const { data, error } = await supabase.from('document_requests').select('*');
-    if (error || !data || data.length === 0) return null;
+    if (error || !data) {
+      console.warn('Supabase fetch document_requests aviso:', error?.message);
+      return null;
+    }
 
     return data.map(row => ({
       id: row.id,
@@ -547,7 +580,8 @@ export const supabaseFetchDocumentRequests = async (): Promise<DocumentRequest[]
       status: row.status,
       notes: row.notes || undefined
     }));
-  } catch {
+  } catch (e) {
+    console.error('Error en supabaseFetchDocumentRequests:', e);
     return null;
   }
 };
@@ -581,7 +615,10 @@ export const supabaseFetchAdminBlocks = async (): Promise<AdministrativeBlockEnt
   if (!isSupabaseConfigured()) return null;
   try {
     const { data, error } = await supabase.from('administrative_blocks').select('*');
-    if (error || !data || data.length === 0) return null;
+    if (error || !data) {
+      console.warn('Supabase fetch administrative_blocks aviso:', error?.message);
+      return null;
+    }
 
     return data.map(row => ({
       id: row.id,
@@ -595,7 +632,8 @@ export const supabaseFetchAdminBlocks = async (): Promise<AdministrativeBlockEnt
       active: row.active ?? true,
       debtAmount: row.debt_amount
     }));
-  } catch {
+  } catch (e) {
+    console.error('Error en supabaseFetchAdminBlocks:', e);
     return null;
   }
 };
@@ -628,7 +666,10 @@ export const supabaseFetchTitleRecords = async (): Promise<TitleRecord[] | null>
   if (!isSupabaseConfigured()) return null;
   try {
     const { data, error } = await supabase.from('title_records').select('*');
-    if (error || !data || data.length === 0) return null;
+    if (error || !data) {
+      console.warn('Supabase fetch title_records aviso:', error?.message);
+      return null;
+    }
 
     return data.map(row => ({
       id: row.id,
@@ -643,7 +684,8 @@ export const supabaseFetchTitleRecords = async (): Promise<TitleRecord[] | null>
       registeredCode: row.registered_code,
       calibrated: row.calibrated ?? true
     }));
-  } catch {
+  } catch (e) {
+    console.error('Error en supabaseFetchTitleRecords:', e);
     return null;
   }
 };
@@ -677,7 +719,10 @@ export const supabaseFetchCommunityNotices = async (): Promise<CommunityNotice[]
   if (!isSupabaseConfigured()) return null;
   try {
     const { data, error } = await supabase.from('community_notices').select('*');
-    if (error || !data || data.length === 0) return null;
+    if (error || !data) {
+      console.warn('Supabase fetch community_notices aviso:', error?.message);
+      return null;
+    }
 
     return data.map(row => ({
       id: row.id,
@@ -689,7 +734,8 @@ export const supabaseFetchCommunityNotices = async (): Promise<CommunityNotice[]
       author: row.author,
       pinned: row.pinned ?? false
     }));
-  } catch {
+  } catch (e) {
+    console.error('Error en supabaseFetchCommunityNotices:', e);
     return null;
   }
 };
@@ -723,7 +769,10 @@ export const supabaseFetchNotifications = async (): Promise<SystemNotification[]
       .from('system_notifications')
       .select('*')
       .order('created_at', { ascending: false });
-    if (error || !data || data.length === 0) return null;
+    if (error || !data) {
+      console.warn('Supabase fetch system_notifications aviso:', error?.message);
+      return null;
+    }
 
     return data.map(row => ({
       id: row.id,
@@ -740,7 +789,8 @@ export const supabaseFetchNotifications = async (): Promise<SystemNotification[]
       actionSubTab: row.action_sub_tab,
       deliveryChannels: row.delivery_channels || ['PORTAL']
     }));
-  } catch {
+  } catch (e) {
+    console.error('Error en supabaseFetchNotifications:', e);
     return null;
   }
 };
@@ -776,7 +826,10 @@ export const supabaseFetchUsers = async (): Promise<AppUser[] | null> => {
   if (!isSupabaseConfigured()) return null;
   try {
     const { data, error } = await supabase.from('app_users').select('*');
-    if (error || !data || data.length === 0) return null;
+    if (error || !data) {
+      console.warn('Supabase fetch app_users aviso:', error?.message);
+      return null;
+    }
 
     return data.map(row => ({
       id: row.id,
@@ -789,7 +842,8 @@ export const supabaseFetchUsers = async (): Promise<AppUser[] | null> => {
       active: row.active ?? true,
       avatarUrl: row.avatar_url
     }));
-  } catch {
+  } catch (e) {
+    console.error('Error en supabaseFetchUsers:', e);
     return null;
   }
 };

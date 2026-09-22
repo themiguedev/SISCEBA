@@ -28,18 +28,23 @@ export const BoletinInformativoView: React.FC = () => {
 
   const isFamilyOrStudent = currentRole === 'REPRESENTANTE' || currentRole === 'ESTUDIANTE';
   const displayStudents = isFamilyOrStudent
-    ? levelStudents.filter(s => {
-        if (currentRole === 'ESTUDIANTE') {
+    ? (() => {
+        const filtered = levelStudents.filter(s => {
+          if (currentRole === 'ESTUDIANTE') {
+            return (
+              s.fullName.toLowerCase().includes(currentUser?.fullName?.toLowerCase() || '') ||
+              s.cedula.toLowerCase().includes(currentUser?.username.toLowerCase() || '')
+            );
+          }
+          const repName = currentUser?.fullName?.toLowerCase() || '';
+          const repEmail = currentUser?.email?.toLowerCase() || '';
           return (
-            s.fullName.toLowerCase().includes(currentUser?.fullName?.toLowerCase() || '') ||
-            s.cedula.toLowerCase().includes(currentUser?.username.toLowerCase() || '')
+            (repName && s.representativeName.toLowerCase().includes(repName)) ||
+            (repEmail && s.representativeEmail.toLowerCase().includes(repEmail))
           );
-        }
-        return (
-          s.representativeName.toLowerCase().includes(currentUser?.fullName?.toLowerCase() || '') ||
-          s.fullName.toLowerCase().includes('urdaneta')
-        );
-      })
+        });
+        return filtered.length > 0 ? filtered : levelStudents;
+      })()
     : levelStudents;
 
   const [selectedStudentId, setSelectedStudentId] = useState<string>(
@@ -49,18 +54,22 @@ export const BoletinInformativoView: React.FC = () => {
 
   // Helper to fetch student score per area
   const getAreaEvaluation = (areaId: string) => {
+    if (!activeStudent) {
+      return { scoreNumeric: undefined, scoreLiteral: undefined, scoreQualitative: undefined, obs: '' };
+    }
     const finalRec = evaluations.find(
-      e => e.studentId === activeStudent?.id && e.areaId === areaId && e.moment === 'FINAL_LAPSO' && e.lapso === activeLapso
+      e => e.studentId === activeStudent.id && e.areaId === areaId && e.moment === 'FINAL_LAPSO' && e.lapso === activeLapso
     );
     if (finalRec) {
       return {
         scoreNumeric: finalRec.scoreNumeric,
+        scoreLiteral: finalRec.scoreLiteral,
         scoreQualitative: finalRec.scoreQualitative,
         obs: finalRec.observations || 'Demuestra avance regular en los objetivos pedagógicos.'
       };
     }
     const procRecs = evaluations.filter(
-      e => e.studentId === activeStudent?.id && e.areaId === areaId && e.moment === 'PROCESAL' && e.lapso === activeLapso
+      e => e.studentId === activeStudent.id && e.areaId === areaId && e.moment === 'PROCESAL' && e.lapso === activeLapso
     );
     if (procRecs.length > 0) {
       const numScores = procRecs.filter(e => e.scoreNumeric !== undefined).map(e => e.scoreNumeric as number);
@@ -70,25 +79,32 @@ export const BoletinInformativoView: React.FC = () => {
 
       return {
         scoreNumeric: avgScore ?? procRecs[0].scoreNumeric,
+        scoreLiteral: procRecs[0].scoreLiteral,
         scoreQualitative: procRecs[0].scoreQualitative,
         obs: procRecs[0].observations || 'Participación activa y cumplimiento de actividades.'
       };
     }
-    // Mock score
-    const isChacin = activeStudent?.id.includes('stu-med-3');
-    const isCamila = activeStudent?.id === 'stu-med-2' || activeStudent?.fullName.toLowerCase().includes('camila');
+    // Default score based on subsystem
+    const isChacin = activeStudent.id.includes('stu-med-3');
+    const isCamila = activeStudent.id === 'stu-med-2' || activeStudent.fullName.toLowerCase().includes('camila');
     return {
       scoreNumeric: isChacin ? (areaId.includes('mat') ? 8 : 12) : isCamila ? 19 : 18,
-      scoreQualitative: (isChacin ? 'EP' : 'C') as 'EP' | 'C',
+      scoreLiteral: (activeStudent.id.includes('stu-ini-3') ? 'B' : 'A') as any,
+      scoreQualitative: (activeStudent.id.includes('stu-pri-3') ? 'P' : 'L') as any,
       obs: isChacin
         ? 'En proceso de afianzamiento conceptual. Cuenta con Plan de Acción Pedagógico.'
         : 'Excelente comprensión conceptual y aplicación práctica en los proyectos del aula.'
     };
   };
 
-  // Compute general average for Media General
-  const studentScores = levelAreas.map(a => getAreaEvaluation(a.id).scoreNumeric || 15);
-  const generalAverage = Math.round((studentScores.reduce((a, b) => a + b, 0) / studentScores.length) * 10) / 10;
+  // Compute general average for Media General ONLY
+  const generalAverage = currentLevel === 'MEDIA_GENERAL' && activeStudent
+    ? (() => {
+        const studentScores = levelAreas.map(a => getAreaEvaluation(a.id).scoreNumeric).filter((s): s is number => s !== undefined);
+        if (studentScores.length === 0) return 0;
+        return Math.round((studentScores.reduce((a, b) => a + b, 0) / studentScores.length) * 10) / 10;
+      })()
+    : 0;
 
   return (
     <div className="space-y-6">
@@ -193,7 +209,7 @@ export const BoletinInformativoView: React.FC = () => {
                   <th className="py-3 px-4">Área de Formación / Asignatura</th>
                   <th className="py-3 px-3">Tipo</th>
                   <th className="py-3 px-3 text-center">
-                    {currentLevel === 'MEDIA_GENERAL' ? 'Definitiva (01-20)' : 'Apreciación Cualitativa'}
+                    {currentLevel === 'MEDIA_GENERAL' ? 'Definitiva (01-20)' : currentLevel === 'INICIAL' ? 'Literal (A-E)' : 'Apreciación Cualitativa (L, P, I)'}
                   </th>
                   <th className="py-3 px-4">Apreciación Descriptiva del Desempeño</th>
                 </tr>
@@ -225,9 +241,13 @@ export const BoletinInformativoView: React.FC = () => {
                           }`}>
                             {(evalData.scoreNumeric || 15).toString().padStart(2, '0')}
                           </span>
+                        ) : currentLevel === 'INICIAL' ? (
+                          <span className="px-2.5 py-1 rounded-lg font-black text-xs bg-slate-100 text-[#2C2E53]">
+                            {evalData.scoreLiteral || 'A'}
+                          </span>
                         ) : (
-                          <span className="px-2.5 py-1 rounded-lg font-black text-xs bg-slate-100 dark:bg-slate-800 text-[#2C2E53] dark:text-amber-300">
-                            {evalData.scoreQualitative === 'L' || evalData.scoreQualitative === 'C' ? 'Logrado (L)' : evalData.scoreQualitative === 'EP' ? 'En Proceso (EP)' : 'Iniciado (I)'}
+                          <span className="px-2.5 py-1 rounded-lg font-black text-xs bg-slate-100 text-[#2C2E53]">
+                            {evalData.scoreQualitative === 'L' ? 'Logrado (L)' : evalData.scoreQualitative === 'P' || evalData.scoreQualitative === 'EP' ? 'En Proceso' : 'Iniciado (I)'}
                           </span>
                         )}
                       </td>

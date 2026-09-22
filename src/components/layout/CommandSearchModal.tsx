@@ -53,21 +53,24 @@ export const CommandSearchModal: React.FC<CommandSearchModalProps> = ({
   const isFamilyOrStudent = currentRole === 'REPRESENTANTE' || currentRole === 'ESTUDIANTE';
 
   const filteredStudents = isFamilyOrStudent
-    ? students
-        .filter(s => {
+    ? (() => {
+        const filtered = students.filter(s => {
           if (currentRole === 'ESTUDIANTE') {
             return (
               s.fullName.toLowerCase().includes(currentUser?.fullName?.toLowerCase() || '') ||
               s.cedula.toLowerCase().includes(currentUser?.username.toLowerCase() || '')
             );
           }
+          const repName = currentUser?.fullName?.toLowerCase() || '';
+          const repEmail = currentUser?.email?.toLowerCase() || '';
           return (
-            s.representativeName?.toLowerCase().includes(currentUser?.fullName?.toLowerCase() || '') ||
-            s.fullName.toLowerCase().includes('urdaneta')
+            (repName && s.representativeName?.toLowerCase().includes(repName)) ||
+            (repEmail && s.representativeEmail?.toLowerCase().includes(repEmail))
           );
-        })
-        .filter(s => s.fullName.toLowerCase().includes(query.toLowerCase()))
-        .slice(0, 4)
+        });
+        const pool = filtered.length > 0 ? filtered : students;
+        return pool.filter(s => s.fullName.toLowerCase().includes(query.toLowerCase())).slice(0, 4);
+      })()
     : students
         .filter(s => s.level === currentLevel && s.fullName.toLowerCase().includes(query.toLowerCase()))
         .slice(0, 4);
