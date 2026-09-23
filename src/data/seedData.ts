@@ -1021,361 +1021,29 @@ export const INITIAL_PLANS_LAPSO: PlanLapso[] = [
 
 export const INITIAL_EVALUATION_RECORDS: EvaluationRecord[] = [];
 
-export const INITIAL_AI_ACTION_PLANS: AIActionPlan[] = [
-  {
-    id: 'ai-plan-1',
-    studentId: 'stu-med-3',
-    areaId: 'med-mat',
-    lapso: 1,
-    diagnosticSummary: 'Riesgo académico detectado en la competencia CP-MED-01. El estudiante presenta un rendimiento de 08/20 en el primer corte procesal de funciones cuadráticas.',
-    identifiedGaps: [
-      'Inversión recurrente de signos al aplicar la fórmula cuadrática general.',
-      'Dificultad de abstracción para determinar las coordenadas del vértice (h, k).',
-      'Ansiedad ante evaluaciones cronometradas con cálculo algebraico complejo.'
-    ],
-    recommendedPedagogicalActions: [
-      'Fase 1 (Nivelación básica): 3 sesiones de refuerzo con hojas de trabajo estructuradas paso a paso con código de color (a=rojo, b=azul, c=verde).',
-      'Fase 2 (Visualización): Utilizar la herramienta digital interactiva GeoGebra para enlazar el valor algebraico con la apertura y desplazamiento de la curva.',
-      'Fase 3 (Andamiaje): Prueba formativa corta sin valor sumativo antes de la reevaluación procesal.',
-      'Fase 4 (Acompañamiento): Tutoría con estudiante monitor de excelencia (Gabriel Montiel).'
-    ],
-    suggestedResources: [
-      'Cuadernillo de Álgebra Asistida SICE-CBA Bellas Artes.',
-      'Applet de GeoGebra: "Parábola y sus coeficientes".',
-      'Video-cápsulas explicativas del Prof. Alejandro Rivas.'
-    ],
-    teacherNotes: 'El representante fue notificado en entrevista virtual. El estudiante manifiesta motivación por mejorar.',
-    status: 'EN_APLICACION',
-    createdAt: '2026-10-23',
-    aiConfidenceScore: 94
-  }
-];
+export const INITIAL_AI_ACTION_PLANS: AIActionPlan[] = [];
 
-export const INITIAL_REMEDIAL_PLANS: RemedialActionPlan[] = [
-  {
-    id: 'rem-plan-1',
-    studentId: 'stu-med-4',
-    subjectName: 'Física (3er Año - Pendiente)',
-    schoolYear: '2026-2027',
-    teacherTutor: 'Prof. Marcos Andrade',
-    topicsToOvercome: [
-      'Movimiento Rectilíneo Uniformemente Variado (MRUV)',
-      'Leyes de Newton y Diagramas de Cuerpo Libre',
-      'Trabajo mecánico y conservación de la energía'
-    ],
-    diagnosticScore: 9,
-    expectedActivities: [
-      'Elaboración de portafolio de 25 problemas resueltos con justificación física.',
-      '2 prácticas presenciales en el laboratorio de física del colegio.',
-      'Tutoría semanal obligatoria los días jueves de 2:00 pm a 3:30 pm.'
-    ],
-    evaluationSchedule: 'Octubre a Diciembre de 2026',
-    remedialExamDate: '2026-12-12',
-    status: 'PENDIENTE'
-  }
-];
+export const INITIAL_REMEDIAL_PLANS: RemedialActionPlan[] = [];
 
-export const INITIAL_COUNCIL_MINUTES: CouncilMeetingMinute[] = [
-  {
-    id: 'acta-med-4a-1',
-    level: 'MEDIA_GENERAL',
-    gradeSection: '4to Año A',
-    lapso: 1,
-    meetingDate: '2026-11-30',
-    coordinador: 'Prof. Lissette Chacín (Coordinadora Pedagógica Media General)',
-    attendees: [
-      'Prof. Alejandro Rivas (Matemáticas)',
-      'Prof. Elena Barrios (Castellano)',
-      'Prof. Marcos Andrade (Física)',
-      'Lic. Mariana Duque (Psicología Escolar)'
-    ],
-    agendaSummary: 'Análisis de rendimiento académico del 1er Lapso, seguimiento de planes de acción personalizados y aprobación de reevaluaciones remediales.',
-    adjustedScores: [
-      {
-        studentId: 'stu-med-3',
-        studentName: 'Mateo Sebastián Chacín Portillo',
-        areaName: 'Matemáticas',
-        previousScore: '08',
-        newScore: '12',
-        justification: 'Superación satisfactoria del Plan de Acción Personalizado y reevaluación demostrada en taller de recuperación.'
-      }
-    ],
-    criticalCases: [
-      'Mateo Chacín: En proceso de consolidación, se mantiene seguimiento en Física.',
-      'Sebastián Romero: Cumpliendo cronograma de materia pendiente de 3er año satisfactoriamente.'
-    ],
-    resolutions: [
-      'Se aprueba por unanimidad el ajuste de calificación procesal para Mateo Chacín a 12 puntos.',
-      'Se fija la fecha definitiva de boletines del 1er Lapso para el 15 de diciembre de 2026.',
-      'Se felicita al equipo docente por el 89% de aprobación general en Media General.'
-    ],
-    signed: true
-  }
-];
+export const INITIAL_COUNCIL_MINUTES: CouncilMeetingMinute[] = [];
 
 // ==========================================
 // --- GESTIÓN INSTITUCIONAL SICE-CBA ---
 // ==========================================
 
-export const INITIAL_PASSES: PassRecord[] = [
-  {
-    id: 'pass-001',
-    ticketNumber: 'RET-2026-0842',
-    studentId: 'stu-med-3',
-    studentName: 'Mateo Sebastián Chacín Portillo',
-    gradeSection: '4to Año A',
-    date: '2026-09-17',
-    time: '07:22 AM',
-    reason: 'Inconveniente de transporte vehicular en Av. Bella Vista',
-    authorizedBy: 'Portería Principal / Prof. Marcos Andrade',
-    printed: true
-  },
-  {
-    id: 'pass-002',
-    ticketNumber: 'RET-2026-0843',
-    studentId: 'stu-pri-2',
-    studentName: 'Diego Alejandro Mendoza Silva',
-    gradeSection: '3er Grado A',
-    date: '2026-09-17',
-    time: '07:35 AM',
-    reason: 'Cita médica odontológica matutina con justificativo anexo',
-    authorizedBy: 'Portería Principal / Coordinación Primaria',
-    printed: false
-  },
-  {
-    id: 'pass-003',
-    ticketNumber: 'RET-2026-0844',
-    studentId: 'stu-med-1',
-    studentName: 'Andrés Eduardo Silva Bermúdez',
-    gradeSection: '4to Año A',
-    date: '2026-09-16',
-    time: '07:18 AM',
-    reason: 'Retraso de transporte escolar colectivo',
-    authorizedBy: 'Portería Principal',
-    printed: true
-  }
-];
+export const INITIAL_PASSES: PassRecord[] = [];
 
-export const INITIAL_DAILY_ATTENDANCE: DailyAttendanceRecord[] = [
-  {
-    id: 'att-d-1',
-    studentId: 'stu-med-1',
-    studentName: 'Andrés Eduardo Silva Bermúdez',
-    gradeSection: '4to Año A',
-    date: '2026-09-17',
-    status: 'PRESENTE',
-    lapso: 1
-  },
-  {
-    id: 'att-d-2',
-    studentId: 'stu-med-2',
-    studentName: 'Camila Isabella Urdaneta Moreno',
-    gradeSection: '4to Año A',
-    date: '2026-09-17',
-    status: 'PRESENTE',
-    lapso: 1
-  },
-  {
-    id: 'att-d-3',
-    studentId: 'stu-med-3',
-    studentName: 'Mateo Sebastián Chacín Portillo',
-    gradeSection: '4to Año A',
-    date: '2026-09-17',
-    status: 'RETRASO',
-    justification: 'Pase por retraso RET-2026-0842',
-    lapso: 1
-  },
-  {
-    id: 'att-d-4',
-    studentId: 'stu-med-4',
-    studentName: 'Sofía Valentina Morales Rincón',
-    gradeSection: '4to Año A',
-    date: '2026-09-17',
-    status: 'INASISTENCIA_JUSTIFICADA',
-    justification: 'Reposo médico pediátrico por afección respiratoria',
-    lapso: 1
-  },
-  {
-    id: 'att-d-5',
-    studentId: 'stu-med-5',
-    studentName: 'Sebastián Alejandro Romero Parra',
-    gradeSection: '4to Año A',
-    date: '2026-09-17',
-    status: 'PRESENTE',
-    lapso: 1
-  }
-];
+export const INITIAL_DAILY_ATTENDANCE: DailyAttendanceRecord[] = [];
 
-export const INITIAL_ACCUMULATED_ATTENDANCE: SubjectAttendanceAccumulated[] = [
-  {
-    id: 'att-acc-1',
-    studentId: 'stu-med-3',
-    studentName: 'Mateo Sebastián Chacín Portillo',
-    areaId: 'med-mat',
-    areaName: 'Matemáticas',
-    gradeSection: '4to Año A',
-    lapso: 1,
-    totalClasses: 32,
-    unjustifiedAbsences: 6,
-    justifiedAbsences: 2,
-    absencePercentage: 18.75,
-    exceedsLimit: false
-  },
-  {
-    id: 'att-acc-2',
-    studentId: 'stu-med-4',
-    studentName: 'Sofía Valentina Morales Rincón',
-    areaId: 'med-qui',
-    areaName: 'Química',
-    gradeSection: '4to Año A',
-    lapso: 1,
-    totalClasses: 28,
-    unjustifiedAbsences: 2,
-    justifiedAbsences: 4,
-    absencePercentage: 7.14,
-    exceedsLimit: false
-  },
-  {
-    id: 'att-acc-3',
-    studentId: 'stu-med-5',
-    studentName: 'Sebastián Alejandro Romero Parra',
-    areaId: 'med-fis',
-    areaName: 'Física',
-    gradeSection: '4to Año A',
-    lapso: 1,
-    totalClasses: 26,
-    unjustifiedAbsences: 7,
-    justifiedAbsences: 1,
-    absencePercentage: 26.92,
-    exceedsLimit: true
-  }
-];
+export const INITIAL_ACCUMULATED_ATTENDANCE: SubjectAttendanceAccumulated[] = [];
 
-export const INITIAL_CONDUCTS: ConductEntry[] = [
-  {
-    id: 'cond-01',
-    studentId: 'stu-med-3',
-    studentName: 'Mateo Sebastián Chacín Portillo',
-    gradeSection: '4to Año A',
-    date: '2026-09-15',
-    lapso: 1,
-    type: 'LEVE',
-    description: 'Uso de teléfono celular en horario no autorizado durante clase de Química.',
-    agreements: 'Entrega del dispositivo a coordinación hasta culminar la jornada y compromiso escrito.',
-    reportedBy: 'Prof. Químico / Coordinación de Convivencia'
-  },
-  {
-    id: 'cond-02',
-    studentId: 'stu-med-2',
-    studentName: 'Camila Isabella Urdaneta Moreno',
-    gradeSection: '4to Año A',
-    date: '2026-09-12',
-    lapso: 1,
-    type: 'POSITIVA',
-    description: 'Liderazgo exemplar y apoyo voluntario en tutoría de pares para compañeros de 1er año.',
-    agreements: 'Felicitación asentada en el expediente académico del Colegio Bellas Artes.',
-    reportedBy: 'Prof. Elena Barrios'
-  }
-];
+export const INITIAL_CONDUCTS: ConductEntry[] = [];
 
-export const INITIAL_DOCUMENT_REQUESTS: DocumentRequest[] = [
-  {
-    id: 'doc-req-101',
-    trackingCode: 'SOL-CBA-2026-019',
-    representativeName: 'Ing. Carlos Urdaneta',
-    studentName: 'Camila Isabella Urdaneta Moreno',
-    gradeSection: '4to Año A',
-    documentType: 'Constancia de Estudio',
-    department: 'Control de Estudios',
-    requestDate: '2026-09-14',
-    elapsedDays: 3,
-    status: 'LISTO_ENTREGA',
-    notes: 'Requiere sello húmedo y firma del director para trámite de visa.'
-  },
-  {
-    id: 'doc-req-102',
-    trackingCode: 'SOL-CBA-2026-020',
-    representativeName: 'Dra. María Bermúdez',
-    studentName: 'Andrés Eduardo Silva Bermúdez',
-    gradeSection: '4to Año A',
-    documentType: 'Notas Certificadas',
-    department: 'Control de Estudios',
-    requestDate: '2026-09-10',
-    elapsedDays: 7,
-    status: 'EN_TRAMITE',
-    notes: 'Certificación de 1° a 3° año en formato oficial ministerial.'
-  },
-  {
-    id: 'doc-req-103',
-    trackingCode: 'SOL-CBA-2026-021',
-    representativeName: 'Sr. Roberto Morales',
-    studentName: 'Sofía Valentina Morales Rincón',
-    gradeSection: '4to Año A',
-    documentType: 'Solvencia Administrativa',
-    department: 'Administración',
-    requestDate: '2026-09-16',
-    elapsedDays: 1,
-    status: 'LISTO_ENTREGA',
-    notes: 'Solvencia de matrícula para seguro escolar.'
-  },
-  {
-    id: 'doc-req-104',
-    trackingCode: 'SOL-CBA-2026-022',
-    representativeName: 'Lic. Patricia Portillo',
-    studentName: 'Mateo Sebastián Chacín Portillo',
-    gradeSection: '4to Año A',
-    documentType: 'Carta de Buena Conducta',
-    department: 'Dirección',
-    requestDate: '2026-09-15',
-    elapsedDays: 2,
-    status: 'PENDIENTE',
-    notes: 'Para postulación deportiva en club de natación intercolegial.'
-  }
-];
+export const INITIAL_DOCUMENT_REQUESTS: DocumentRequest[] = [];
 
-export const INITIAL_ADMIN_BLOCKS: AdministrativeBlockEntry[] = [
-  {
-    id: 'block-01',
-    representativeId: 'rep-mor-01',
-    representativeName: 'Sr. David Colina Villalobos',
-    studentId: 'stu-block-99',
-    studentName: 'Franco David Colina Rivas',
-    gradeSection: '2do Año B',
-    reason: 'Mora administrativa en mensualidades escolares acumuladas (Mayo - Julio 2026).',
-    blockDate: '2026-09-01',
-    active: true,
-    debtAmount: '$180.00'
-  }
-];
+export const INITIAL_ADMIN_BLOCKS: AdministrativeBlockEntry[] = [];
 
-export const INITIAL_TITLES: TitleRecord[] = [
-  {
-    id: 'tit-01',
-    studentId: 'stu-med-1',
-    studentName: 'Andrés Eduardo Silva Bermúdez',
-    cedula: 'V-32.890.112',
-    schoolYear: '2026-2027',
-    graduationYear: '2027',
-    serialNumber: 'MIN-MPPE-2027-09412',
-    tomo: 'LVII',
-    folio: '084',
-    registeredCode: 'CBA-TIT-482',
-    calibrated: true
-  },
-  {
-    id: 'tit-02',
-    studentId: 'stu-med-2',
-    studentName: 'Camila Isabella Urdaneta Moreno',
-    cedula: 'V-32.954.887',
-    schoolYear: '2026-2027',
-    graduationYear: '2027',
-    serialNumber: 'MIN-MPPE-2027-09413',
-    tomo: 'LVII',
-    folio: '085',
-    registeredCode: 'CBA-TIT-483',
-    calibrated: true
-  }
-];
+export const INITIAL_TITLES: TitleRecord[] = [];
 
 export const INITIAL_SCHOOL_YEAR_CONFIG: SchoolYearConfig = {
   year: '2026-2027',
@@ -1446,27 +1114,11 @@ export const INITIAL_BIRTHDAYS: BirthdayPerson[] = [
     isToday: true
   },
   {
-    id: 'b-02',
-    fullName: 'Diego Alejandro Mendoza Silva',
-    role: 'Estudiante',
-    gradeOrArea: '3er Grado A (Primaria)',
-    birthDate: '17 de Septiembre',
-    isToday: true
-  },
-  {
     id: 'b-03',
     fullName: 'Lic. Lissette Chacín',
     role: 'Personal',
     gradeOrArea: 'Coordinación Pedagógica',
     birthDate: '20 de Septiembre',
-    isToday: false
-  },
-  {
-    id: 'b-04',
-    fullName: 'Sofía Valentina Morales Rincón',
-    role: 'Estudiante',
-    gradeOrArea: '4to Año A',
-    birthDate: '22 de Septiembre',
     isToday: false
   }
 ];
