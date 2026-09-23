@@ -142,51 +142,53 @@ export const NotificationCenterPopover: React.FC<NotificationCenterPopoverProps>
           </div>
 
           {/* Categories Pill Filters */}
-          <div className="flex items-center gap-1 p-2 bg-slate-50 dark:bg-[#141525] border-b border-slate-200 dark:border-[#2C2E53] overflow-x-auto no-scrollbar text-[11px]">
-            <button
-              type="button"
-              onClick={() => setSelectedCategory('ALL')}
-              className={`px-2.5 py-1 rounded-lg font-bold transition shrink-0 ${
-                selectedCategory === 'ALL'
-                  ? 'bg-[#2C2E53] text-[#D4AF37] shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-white/5'
-              }`}
-            >
-              Todas ({notifications.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setSelectedCategory('CALIFICACIONES')}
-              className={`px-2.5 py-1 rounded-lg font-bold transition shrink-0 ${
-                selectedCategory === 'CALIFICACIONES'
-                  ? 'bg-[#2C2E53] text-[#D4AF37] shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-white/5'
-              }`}
-            >
-              Calificaciones
-            </button>
-            <button
-              type="button"
-              onClick={() => setSelectedCategory('ASISTENCIA')}
-              className={`px-2.5 py-1 rounded-lg font-bold transition shrink-0 ${
-                selectedCategory === 'ASISTENCIA'
-                  ? 'bg-[#2C2E53] text-[#D4AF37] shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-white/5'
-              }`}
-            >
-              Pases & Asistencias
-            </button>
-            <button
-              type="button"
-              onClick={() => setSelectedCategory('DOCUMENTOS')}
-              className={`px-2.5 py-1 rounded-lg font-bold transition shrink-0 ${
-                selectedCategory === 'DOCUMENTOS'
-                  ? 'bg-[#2C2E53] text-[#D4AF37] shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-white/5'
-              }`}
-            >
-              Documentos
-            </button>
+          <div className="p-2 bg-slate-100/80 dark:bg-[#121324] border-b border-slate-200 dark:border-[#2C2E53]">
+            <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5 text-[11px]">
+              <button
+                type="button"
+                onClick={() => setSelectedCategory('ALL')}
+                className={`px-3 py-1.5 rounded-xl font-bold transition-all shrink-0 cursor-pointer ${
+                  selectedCategory === 'ALL'
+                    ? 'bg-gradient-to-r from-[#1E2038] to-[#2C2E53] text-[#D4AF37] border border-[#D4AF37]/40 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-white/80 dark:hover:bg-white/5 border border-transparent'
+                }`}
+              >
+                Todas ({notifications.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedCategory('CALIFICACIONES')}
+                className={`px-3 py-1.5 rounded-xl font-bold transition-all shrink-0 cursor-pointer ${
+                  selectedCategory === 'CALIFICACIONES'
+                    ? 'bg-gradient-to-r from-[#1E2038] to-[#2C2E53] text-[#D4AF37] border border-[#D4AF37]/40 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-white/80 dark:hover:bg-white/5 border border-transparent'
+                }`}
+              >
+                Calificaciones
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedCategory('ASISTENCIA')}
+                className={`px-3 py-1.5 rounded-xl font-bold transition-all shrink-0 cursor-pointer ${
+                  selectedCategory === 'ASISTENCIA'
+                    ? 'bg-gradient-to-r from-[#1E2038] to-[#2C2E53] text-[#D4AF37] border border-[#D4AF37]/40 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-white/80 dark:hover:bg-white/5 border border-transparent'
+                }`}
+              >
+                Pases & Asistencias
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedCategory('DOCUMENTOS')}
+                className={`px-3 py-1.5 rounded-xl font-bold transition-all shrink-0 cursor-pointer ${
+                  selectedCategory === 'DOCUMENTOS'
+                    ? 'bg-gradient-to-r from-[#1E2038] to-[#2C2E53] text-[#D4AF37] border border-[#D4AF37]/40 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-white/80 dark:hover:bg-white/5 border border-transparent'
+                }`}
+              >
+                Documentos
+              </button>
+            </div>
           </div>
 
           {/* Notifications List */}
