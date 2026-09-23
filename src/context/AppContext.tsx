@@ -226,63 +226,7 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-export const INITIAL_SYSTEM_NOTIFICATIONS: SystemNotification[] = [
-  {
-    id: 'notif-1',
-    title: 'Notas Publicadas • Castellano y Literatura',
-    message: 'El Prof. Docente ha cargado las calificaciones procesales del Lapso 1. Notificación enviada a 4 representantes y alumnos.',
-    timestamp: 'Hace 10 min',
-    read: false,
-    category: 'CALIFICACIONES',
-    priority: 'ALTA',
-    recipientRole: 'TODOS',
-    studentName: 'Sofía Chacín y grupo',
-    actionTab: 'MEDIA_GENERAL',
-    actionSubTab: 'BOLETIN',
-    deliveryChannels: ['PORTAL', 'EMAIL', 'SMS_WHATSAPP']
-  },
-  {
-    id: 'notif-2',
-    title: 'Aviso de Portería • Pase de Retraso Emitido',
-    message: 'Se registró el ingreso con retraso (07:28 AM) para Sofía Chacín. Notificado al representante vía SMS institucional.',
-    timestamp: 'Hace 45 min',
-    read: false,
-    category: 'ASISTENCIA',
-    priority: 'MEDIA',
-    recipientRole: 'REPRESENTANTE',
-    studentName: 'Sofía Chacín',
-    actionTab: 'GESTION',
-    actionSubTab: 'PASES',
-    deliveryChannels: ['PORTAL', 'SMS_WHATSAPP']
-  },
-  {
-    id: 'notif-3',
-    title: 'Constancia de Estudio Lista',
-    message: 'La solicitud de Constancia de Estudio (CBA-DOC-2026-081) ha sido firmada y sellada en Control de Estudios.',
-    timestamp: 'Hace 2 horas',
-    read: true,
-    category: 'DOCUMENTOS',
-    priority: 'MEDIA',
-    recipientRole: 'REPRESENTANTE',
-    studentName: 'Diego Alejandro Silva',
-    actionTab: 'GESTION',
-    actionSubTab: 'DOCUMENTOS',
-    deliveryChannels: ['PORTAL', 'EMAIL']
-  },
-  {
-    id: 'notif-4',
-    title: 'Apertura de Lapso 1 • Carga de Evaluaciones',
-    message: 'Dirección y Control de Estudios han habilitado el Lapso 1 para el registro formal de planes e indicadores.',
-    timestamp: 'Ayer',
-    read: true,
-    category: 'INSTITUCIONAL',
-    priority: 'BAJA',
-    recipientRole: 'DOCENTE',
-    actionTab: 'CONFIGURACION',
-    actionSubTab: 'LAPSOS',
-    deliveryChannels: ['PORTAL']
-  }
-];
+export const INITIAL_SYSTEM_NOTIFICATIONS: SystemNotification[] = [];
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // User & Accounts Store
@@ -917,7 +861,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Interactive Notifications State
   const [notifications, setNotifications] = useState<SystemNotification[]>(() => {
     const saved = localStorage.getItem('sisceba_system_notifications');
-    return saved ? JSON.parse(saved) : INITIAL_SYSTEM_NOTIFICATIONS;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          // Filtrar notificaciones semilla/ficticias previas
+          return parsed.filter((n: SystemNotification) => !n.id.startsWith('notif-1') && !n.id.startsWith('notif-2') && !n.id.startsWith('notif-3') && !n.id.startsWith('notif-4') && n.studentName !== 'Sofía Chacín' && n.studentName !== 'Sofía Chacín y grupo' && n.studentName !== 'Diego Alejandro Silva');
+        }
+      } catch { /* ignore */ }
+    }
+    return INITIAL_SYSTEM_NOTIFICATIONS;
   });
 
   const unreadNotificationsCount = notifications.filter(n => !n.read).length;
