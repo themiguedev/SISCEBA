@@ -114,14 +114,8 @@ VALUES
 ('not-03', 'Reunión General de Padres: Inducción a la Plataforma CBA', 'Convocatoria para representantes de nuevo ingreso en el Auditorio Principal el viernes 25 de septiembre a las 8:00 AM.', '2026-09-15', 'EVENTO', 'REPRESENTANTES', 'Departamento de Orientación', false)
 ON CONFLICT (id) DO NOTHING;
 
--- 10. NOTIFICACIONES DEL SISTEMA
-INSERT INTO system_notifications (id, title, message, timestamp, read, category, priority, recipient_role, student_name, action_tab, action_sub_tab, delivery_channels)
-VALUES
-('notif-1', 'Notas Publicadas • Castellano y Literatura', 'El Prof. Docente ha cargado las calificaciones procesales del Lapso 1. Notificación enviada a 4 representantes y alumnos.', 'Hace 10 min', false, 'CALIFICACIONES', 'ALTA', 'TODOS', 'Sofía Chacín y grupo', 'MEDIA_GENERAL', 'BOLETIN', ARRAY['PORTAL', 'EMAIL', 'SMS_WHATSAPP']),
-('notif-2', 'Aviso de Portería • Pase de Retraso Emitido', 'Se registró el ingreso con retraso (07:28 AM) para Sofía Chacín. Notificado al representante vía SMS institucional.', 'Hace 45 min', false, 'ASISTENCIA', 'MEDIA', 'REPRESENTANTE', 'Sofía Chacín', 'GESTION', 'PASES', ARRAY['PORTAL', 'SMS_WHATSAPP']),
-('notif-3', 'Constancia de Estudio Lista', 'La solicitud de Constancia de Estudio (CBA-DOC-2026-081) ha sido firmada y sellada en Control de Estudios.', 'Hace 2 horas', true, 'DOCUMENTOS', 'MEDIA', 'REPRESENTANTE', 'Diego Alejandro Silva', 'GESTION', 'DOCUMENTOS', ARRAY['PORTAL', 'EMAIL']),
-('notif-4', 'Apertura de Lapso 1 • Carga de Evaluaciones', 'Dirección y Control de Estudios han habilitado el Lapso 1 para el registro formal de planes e indicadores.', 'Ayer', true, 'INSTITUCIONAL', 'BAJA', 'DOCENTE', NULL, 'CONFIGURACION', 'LAPSOS', ARRAY['PORTAL'])
-ON CONFLICT (id) DO NOTHING;
+-- 10. NOTIFICACIONES DEL SISTEMA (Inicia limpio en producción)
+DELETE FROM system_notifications;
 
 -- 11. USUARIOS Y CUENTAS DE PRUEBA (POR MODO DE OPERACIÓN)
 DELETE FROM app_users;
