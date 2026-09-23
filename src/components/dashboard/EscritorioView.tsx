@@ -284,7 +284,7 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                 <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
                   <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Última Visita</span>
                   <p className="text-xs font-extrabold text-slate-800 mt-1">Hoy</p>
@@ -302,11 +302,6 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
                   <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Año Escolar</span>
                   <p className="text-xs font-black text-[#2C2E53] mt-1">2026 - 2027</p>
                   <p className="text-[10px] text-slate-400 font-medium">Ciclo Oficial</p>
-                </div>
-                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Entorno de Red</span>
-                  <p className="text-xs font-mono font-extrabold text-slate-800 mt-1">Local / Nube</p>
-                  <p className="text-[10px] text-slate-400">Sincronizado Supabase</p>
                 </div>
               </div>
 
