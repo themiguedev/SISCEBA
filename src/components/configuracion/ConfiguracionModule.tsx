@@ -687,33 +687,41 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
             </div>
 
             {/* Panel de Códigos de Autorización para Auto-Registro de Docentes / Asistentes / Secretarias */}
-            <div className="pt-6 border-t border-slate-200 space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-amber-500/10 border border-amber-400/40 p-4 rounded-2xl">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#2C2E53] text-[#D4AF37] flex items-center justify-center font-bold shrink-0 shadow-sm">
-                    <Key className="w-5 h-5" />
+            <div className="pt-6 border-t border-slate-200 dark:border-slate-800 space-y-4">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent dark:from-amber-500/15 dark:via-amber-500/10 dark:to-slate-900 border border-amber-400/30 dark:border-amber-500/30 p-4 sm:p-5 rounded-2xl shadow-xs">
+                <div className="flex items-start sm:items-center gap-3.5">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1E2038] to-[#2C2E53] border border-[#D4AF37]/30 text-[#D4AF37] flex items-center justify-center font-bold shrink-0 shadow-sm">
+                    <Key className="w-5 h-5 text-[#D4AF37]" />
                   </div>
                   <div>
-                    <h4 className="font-extrabold text-sm text-[#2C2E53]">
+                    <h4 className="font-extrabold text-sm text-[#2C2E53] dark:text-amber-300">
                       Códigos de Autorización para Auto-Registro (Uso Único)
                     </h4>
-                    <p className="text-xs text-slate-600">
+                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5 max-w-xl">
                       Entregue un código a un nuevo docente, asistente o secretaria. Cada código tiene un solo uso y se eliminará de inmediato una vez registrado el usuario.
                     </p>
                   </div>
                 </div>
 
                 {canConfigureSchool(currentRole) && (
-                  <div className="flex items-center gap-2 self-start sm:self-center">
-                    <select
-                      value={selectedRoleForCode}
-                      onChange={(e) => setSelectedRoleForCode(e.target.value as 'DOCENTE' | 'ASISTENTE' | 'SECRETARIA')}
-                      className="px-2.5 py-1.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-[#2C2E53]"
-                    >
-                      <option value="DOCENTE">Rol: DOCENTE</option>
-                      <option value="ASISTENTE">Rol: ASISTENTE</option>
-                      <option value="SECRETARIA">Rol: SECRETARIA</option>
-                    </select>
+                  <div className="flex flex-wrap items-center gap-2.5 self-stretch sm:self-center shrink-0">
+                    <div className="relative">
+                      <select
+                        value={selectedRoleForCode}
+                        onChange={(e) => setSelectedRoleForCode(e.target.value as 'DOCENTE' | 'ASISTENTE' | 'SECRETARIA')}
+                        className="appearance-none pl-3.5 pr-8 py-2 bg-white dark:bg-slate-900 border border-amber-300/80 dark:border-amber-500/40 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-100 shadow-xs outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-[#D4AF37] transition cursor-pointer"
+                      >
+                        <option value="DOCENTE">Rol: DOCENTE</option>
+                        <option value="ASISTENTE">Rol: ASISTENTE</option>
+                        <option value="SECRETARIA">Rol: SECRETARIA</option>
+                      </select>
+                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400 dark:text-slate-400">
+                        <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    </div>
+
                     <button
                       type="button"
                       onClick={() => {
@@ -722,9 +730,9 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
                         navigator.clipboard.writeText(newC.code).catch(() => {});
                         setTimeout(() => setCopiedCodeId(null), 3000);
                       }}
-                      className="px-3.5 py-1.5 bg-[#2C2E53] hover:bg-[#1B1C33] text-[#D4AF37] text-xs font-bold rounded-xl shadow-sm transition flex items-center gap-1.5 shrink-0 cursor-pointer"
+                      className="px-4 py-2 bg-gradient-to-r from-[#1E2038] to-[#2C2E53] hover:from-[#151627] hover:to-[#222442] text-[#D4AF37] border border-[#D4AF37]/40 text-xs font-black rounded-xl shadow-md hover:shadow-lg active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer shrink-0"
                     >
-                      <Sparkles className="w-3.5 h-3.5" />
+                      <Sparkles className="w-4 h-4 text-[#D4AF37] animate-pulse" />
                       <span>Generar Código</span>
                     </button>
                   </div>
@@ -733,8 +741,8 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
 
               {/* Lista de códigos generados */}
               {registrationCodes.length === 0 ? (
-                <div className="p-6 bg-slate-50 border border-dashed border-slate-200 rounded-xl text-center">
-                  <p className="text-xs text-slate-500 font-medium">
+                <div className="p-6 bg-slate-50 dark:bg-slate-900/60 border border-dashed border-slate-200 dark:border-slate-800 rounded-xl text-center">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
                     No hay códigos de autorización activos pendientes por uso. Genere un nuevo código cuando requiera autorizar a un nuevo docente o miembro del personal.
                   </p>
                 </div>
@@ -745,24 +753,24 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
                     return (
                       <div
                         key={code.id}
-                        className="p-3 rounded-xl border bg-white border-amber-200/80 shadow-xs hover:border-[#D4AF37] transition-all flex items-center justify-between gap-2"
+                        className="p-3 rounded-xl border bg-white dark:bg-slate-900 border-amber-200/80 dark:border-amber-500/25 shadow-xs hover:border-[#D4AF37] dark:hover:border-[#D4AF37] transition-all flex items-center justify-between gap-2"
                       >
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5">
-                            <code className="font-mono font-black text-xs text-[#2C2E53] tracking-wider">
+                            <code className="font-mono font-black text-xs text-[#2C2E53] dark:text-amber-300 tracking-wider">
                               {code.code}
                             </code>
                             <span className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded ${
                               code.allowedRole === 'SECRETARIA'
-                                ? 'bg-indigo-100 text-indigo-800'
+                                ? 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-800 dark:text-indigo-300'
                                 : code.allowedRole === 'ASISTENTE'
-                                ? 'bg-amber-100 text-amber-800'
-                                : 'bg-emerald-100 text-emerald-800'
+                                ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300'
+                                : 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300'
                             }`}>
                               {code.allowedRole || 'TODOS'}
                             </span>
                           </div>
-                          <p className="text-[10px] text-slate-500 mt-0.5 truncate flex items-center gap-1">
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 truncate flex items-center gap-1">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
                             <span>Uso único disponible</span>
                           </p>
@@ -779,7 +787,7 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
                             className={`p-1.5 rounded-lg border text-xs font-bold transition shrink-0 cursor-pointer ${
                               isCopied
                                 ? 'bg-emerald-600 text-white border-emerald-600'
-                                : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
+                                : 'bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
                             }`}
                             title="Copiar código al portapapeles"
                           >
@@ -789,7 +797,7 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
                             <button
                               type="button"
                               onClick={() => deleteRegistrationCode(code.id)}
-                              className="p-1.5 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold transition shrink-0 cursor-pointer"
+                              className="p-1.5 rounded-lg border border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-950/30 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 text-xs font-bold transition shrink-0 cursor-pointer"
                               title="Revocar / Eliminar código de autorización"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
