@@ -393,14 +393,14 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
       {activeTab === 'DOCENTES' && (
         <div className="space-y-6">
           {/* Header y Formulario de Registro de Nuevos Docentes / Usuarios */}
-          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-cba-card space-y-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-100 pb-4 gap-3">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-cba-card space-y-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4 gap-3">
               <div>
-                <h3 className="font-extrabold text-base text-[#2C2E53] flex items-center gap-2">
+                <h3 className="font-extrabold text-base text-[#2C2E53] dark:text-white flex items-center gap-2">
                   <UserPlus className="w-5 h-5 text-[#D4AF37]" />
                   Registro Institucional de Nuevos Docentes y Personal
                 </h3>
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                   Módulo administrativo para dar de alta cuentas docentes, asignación de rol, correo institucional y credenciales de acceso.
                 </p>
               </div>
@@ -630,30 +630,41 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
 
             {/* Listado de Cuentas Registradas */}
             <div className="space-y-3">
-              <div className="flex items-center justify-between text-xs border-b border-slate-100 pb-2">
-                <span className="font-extrabold text-slate-700 uppercase tracking-wider">
+              <div className="flex items-center justify-between text-xs border-b border-slate-100 dark:border-slate-800 pb-2">
+                <span className="font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                   Cuentas Institucionales Activas en la Base de Datos ({users.length})
                 </span>
-                <span className="text-slate-400">Año Escolar 2026-2027</span>
+                <span className="text-slate-400 dark:text-slate-500">Año Escolar 2026-2027</span>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                 {users.map((u) => {
                   const roleMeta = ROLE_METADATA[u.role];
                   return (
-                    <div key={u.id} className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-white transition-colors flex items-start justify-between gap-3 shadow-xs">
-                      <div className="flex items-start gap-3">
+                    <div
+                      key={u.id}
+                      className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/60 hover:bg-white dark:hover:bg-slate-900 transition-colors flex items-start justify-between gap-3 shadow-xs"
+                    >
+                      <div className="flex items-start gap-3 min-w-0">
                         <img
                           src={u.avatarUrl || getDefaultAvatarForUser(u)}
                           alt={u.fullName}
-                          className="w-10 h-10 rounded-full object-contain border border-slate-300 shrink-0 bg-white"
+                          className="w-10 h-10 rounded-full object-contain border border-slate-300 dark:border-slate-700 shrink-0 bg-white dark:bg-slate-800"
                         />
-                        <div className="space-y-1">
-                          <p className="font-bold text-slate-900 leading-tight">{u.fullName}</p>
-                          <div className="flex items-center gap-2 text-[11px] text-slate-500 font-mono">
-                            <span className="flex items-center gap-1"><User className="w-3 h-3 text-slate-400" />{u.username}</span>
+                        <div className="space-y-1 min-w-0">
+                          <p className="font-bold text-slate-900 dark:text-slate-100 leading-tight truncate">
+                            {u.fullName}
+                          </p>
+                          <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 font-mono flex-wrap">
+                            <span className="flex items-center gap-1">
+                              <User className="w-3 h-3 text-slate-400 dark:text-slate-500" />
+                              {u.username}
+                            </span>
                             <span>•</span>
-                            <span className="flex items-center gap-1"><Mail className="w-3 h-3 text-slate-400" />{u.email}</span>
+                            <span className="flex items-center gap-1 truncate max-w-[190px] sm:max-w-[260px]">
+                              <Mail className="w-3 h-3 text-slate-400 dark:text-slate-500 shrink-0" />
+                              <span className="truncate">{u.email}</span>
+                            </span>
                           </div>
                           {/* Niveles Asignados */}
                           {u.allowedLevels && u.allowedLevels.length > 0 && (
@@ -663,8 +674,8 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
                                   key={lvl}
                                   className={`text-[9px] font-extrabold px-1.5 py-0.2 rounded border ${
                                     lvl === u.defaultLevel
-                                      ? 'bg-amber-100 text-amber-900 border-amber-300'
-                                      : 'bg-slate-100 text-slate-700 border-slate-200'
+                                      ? 'bg-amber-100 dark:bg-amber-950/40 text-amber-900 dark:text-amber-300 border-amber-300 dark:border-amber-700/60'
+                                      : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
                                   }`}
                                   title={lvl === u.defaultLevel ? 'Nivel Principal' : 'Nivel Habilitado'}
                                 >
@@ -677,7 +688,11 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
                         </div>
                       </div>
 
-                      <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider shrink-0 border ${roleMeta?.badgeBg || 'bg-slate-200 text-slate-800'}`}>
+                      <span
+                        className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider shrink-0 border whitespace-nowrap ${
+                          roleMeta?.badgeBg || 'bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border-slate-300 dark:border-slate-700'
+                        }`}
+                      >
                         {roleMeta?.badge || u.role}
                       </span>
                     </div>
