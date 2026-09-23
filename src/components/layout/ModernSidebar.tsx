@@ -512,9 +512,6 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
               <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-[9px] font-bold border ${ROLE_METADATA[currentRole]?.badgeBg || 'text-slate-300'}`}>
                 {ROLE_METADATA[currentRole]?.badge || currentRole}
               </span>
-              <span className="block text-[9px] text-slate-500 mt-0.5">
-                {ROLE_METADATA[currentRole]?.department || 'Bellas Artes'}
-              </span>
             </div>
           ) : (
             <div
