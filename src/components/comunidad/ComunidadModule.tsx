@@ -212,30 +212,38 @@ export const ComunidadModule: React.FC<ComunidadModuleProps> = ({
             <span className="text-xs text-slate-400">Personal Docente, Administrativo y Estudiantes</span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            {birthdays.map((b) => (
-              <div
-                key={b.id}
-                className={`p-4 rounded-xl border text-center space-y-1.5 transition ${
-                  b.isToday
-                    ? 'bg-gradient-to-b from-amber-50 to-amber-100/40 dark:from-amber-950/40 dark:to-amber-900/20 border-amber-300 dark:border-amber-500/40 ring-2 ring-amber-300/50 dark:ring-amber-500/20 shadow-md'
-                    : 'bg-slate-50 dark:bg-white/[0.03] border-slate-200 dark:border-white/10'
-                }`}
-              >
-                <div className="w-12 h-12 rounded-full mx-auto bg-[#2C2E53] dark:bg-amber-950/60 dark:border dark:border-amber-500/30 text-[#D4AF37] flex items-center justify-center font-black text-lg shadow-sm">
-                  {b.fullName.charAt(0)}
+          {birthdays.length === 0 ? (
+            <div className="p-8 text-center bg-slate-50 dark:bg-white/[0.02] rounded-2xl border border-slate-200 dark:border-white/10 text-slate-400">
+              <Cake className="w-8 h-8 mx-auto mb-2 text-[#D4AF37]/60" />
+              <p className="text-xs font-bold text-slate-600 dark:text-slate-300">No hay cumpleaños registrados actualmente</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">Las fechas especiales de la comunidad escolar aparecerán en este calendario.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+              {birthdays.map((b) => (
+                <div
+                  key={b.id}
+                  className={`p-4 rounded-xl border text-center space-y-1.5 transition ${
+                    b.isToday
+                      ? 'bg-gradient-to-b from-amber-50 to-amber-100/40 dark:from-amber-950/40 dark:to-amber-900/20 border-amber-300 dark:border-amber-500/40 ring-2 ring-amber-300/50 dark:ring-amber-500/20 shadow-md'
+                      : 'bg-slate-50 dark:bg-white/[0.03] border-slate-200 dark:border-white/10'
+                  }`}
+                >
+                  <div className="w-12 h-12 rounded-full mx-auto bg-[#2C2E53] dark:bg-amber-950/60 dark:border dark:border-amber-500/30 text-[#D4AF37] flex items-center justify-center font-black text-lg shadow-sm">
+                    {b.fullName.charAt(0)}
+                  </div>
+                  {b.isToday && (
+                    <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500 text-white dark:bg-amber-500/20 dark:text-amber-300 dark:border dark:border-amber-500/40 inline-block shadow-xs">
+                      ¡Cumpleaños Hoy!
+                    </span>
+                  )}
+                  <h4 className="font-bold text-xs text-slate-900 dark:text-[#F8FAFC] leading-snug">{b.fullName}</h4>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-300">{b.gradeOrArea}</p>
+                  <p className="text-[11px] font-extrabold text-[#2C2E53] dark:text-amber-300 pt-1">{b.birthDate}</p>
                 </div>
-                {b.isToday && (
-                  <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500 text-white dark:bg-amber-500/20 dark:text-amber-300 dark:border dark:border-amber-500/40 inline-block shadow-xs">
-                    ¡Cumpleaños Hoy!
-                  </span>
-                )}
-                <h4 className="font-bold text-xs text-slate-900 dark:text-[#F8FAFC] leading-snug">{b.fullName}</h4>
-                <p className="text-[11px] text-slate-500 dark:text-slate-300">{b.gradeOrArea}</p>
-                <p className="text-[11px] font-extrabold text-[#2C2E53] dark:text-amber-300 pt-1">{b.birthDate}</p>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

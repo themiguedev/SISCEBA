@@ -451,30 +451,36 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
               </div>
 
               <div className="space-y-3">
-                {birthdays.map((b) => (
-                  <div
-                    key={b.id}
-                    className={`p-3 rounded-xl border transition-all ${
-                      b.isToday
-                        ? 'bg-gradient-to-r from-amber-500/10 to-amber-100/50 dark:from-amber-950/40 dark:to-amber-900/20 border-amber-300 dark:border-amber-500/40'
-                        : 'bg-slate-50 dark:bg-white/[0.03] border-slate-100 dark:border-white/10'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <p className="font-bold text-xs text-slate-800 dark:text-[#F8FAFC]">{b.fullName}</p>
-                      {b.isToday && (
-                        <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded bg-amber-500 text-white dark:bg-amber-500/20 dark:text-amber-300 dark:border dark:border-amber-500/40 animate-pulse">
-                          ¡HOY!
-                        </span>
-                      )}
+                {birthdays.length === 0 ? (
+                  <p className="text-xs text-slate-400 dark:text-slate-500 text-center py-4 italic">
+                    No hay cumpleaños registrados para esta fecha.
+                  </p>
+                ) : (
+                  birthdays.map((b) => (
+                    <div
+                      key={b.id}
+                      className={`p-3 rounded-xl border transition-all ${
+                        b.isToday
+                          ? 'bg-gradient-to-r from-amber-500/10 to-amber-100/50 dark:from-amber-950/40 dark:to-amber-900/20 border-amber-300 dark:border-amber-500/40'
+                          : 'bg-slate-50 dark:bg-white/[0.03] border-slate-100 dark:border-white/10'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <p className="font-bold text-xs text-slate-800 dark:text-[#F8FAFC]">{b.fullName}</p>
+                        {b.isToday && (
+                          <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded bg-amber-500 text-white dark:bg-amber-500/20 dark:text-amber-300 dark:border dark:border-amber-500/40 animate-pulse">
+                            ¡HOY!
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-300 mt-0.5">{b.gradeOrArea}</p>
+                      <p className="text-[10px] text-slate-400 dark:text-slate-400 mt-1 flex items-center gap-1 font-medium">
+                        <Calendar className="w-3 h-3 text-[#D4AF37]" />
+                        {b.birthDate}
+                      </p>
                     </div>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-300 mt-0.5">{b.gradeOrArea}</p>
-                    <p className="text-[10px] text-slate-400 dark:text-slate-400 mt-1 flex items-center gap-1 font-medium">
-                      <Calendar className="w-3 h-3 text-[#D4AF37]" />
-                      {b.birthDate}
-                    </p>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
 

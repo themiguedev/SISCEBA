@@ -1104,24 +1104,7 @@ export const INITIAL_COMMUNITY_NOTICES: CommunityNotice[] = [
   }
 ];
 
-export const INITIAL_BIRTHDAYS: BirthdayPerson[] = [
-  {
-    id: 'b-01',
-    fullName: 'Prof. Elena Barrios',
-    role: 'Docente',
-    gradeOrArea: 'Castellano y Literatura (Media General)',
-    birthDate: '17 de Septiembre',
-    isToday: true
-  },
-  {
-    id: 'b-03',
-    fullName: 'Lic. Lissette Chacín',
-    role: 'Personal',
-    gradeOrArea: 'Coordinación Pedagógica',
-    birthDate: '20 de Septiembre',
-    isToday: false
-  }
-];
+export const INITIAL_BIRTHDAYS: BirthdayPerson[] = [];
 
 export const INITIAL_USERS: AppUser[] = [
   {
