@@ -721,7 +721,7 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
             }`}
           >
             <Compass className="w-4 h-4" />
-            <span>Guía de Mi Rol ({currentRoleGuide.badgeEmoji} {ROLE_METADATA[selectedRole]?.badge || selectedRole})</span>
+            <span>Guía de Mi Rol ({ROLE_METADATA[selectedRole]?.badge || selectedRole})</span>
           </button>
           <button
             onClick={() => setActiveSection('GUIAS_PASO_A_PASO')}
