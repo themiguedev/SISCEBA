@@ -107,6 +107,7 @@ interface AppContextType {
   updateUser: (userId: string, updates: Partial<AppUser>) => Promise<boolean>;
   registrationCodes: RegistrationCode[];
   createRegistrationCode: (allowedRole?: 'DOCENTE' | 'ASISTENTE' | 'SECRETARIA') => RegistrationCode;
+  deleteRegistrationCode: (codeId: string) => void;
   validateAndUseRegistrationCode: (code: string, role: UserRole, username: string) => Promise<{ valid: boolean; message?: string }>;
   login: (
     username: string,
@@ -493,6 +494,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return newCode;
   };
 
+  const deleteRegistrationCode = (codeId: string) => {
+    setRegistrationCodes(prev => prev.filter(c => c.id !== codeId));
+  };
+
   const validateAndUseRegistrationCode = async (
     code: string,
     role: UserRole,
@@ -512,14 +517,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!matched) {
       return {
         valid: false,
-        message: 'El código de autorización ingresado no es válido. Solicite un código oficial al Administrador del sistema.'
+        message: 'El código de autorización ingresado no es válido o ya fue utilizado.'
       };
     }
 
     if (matched.used) {
+      // Si ya estaba marcado como usado, se remueve inmediatamente para evitar reuso
+      setRegistrationCodes(prev => prev.filter(c => c.id !== matched.id));
       return {
         valid: false,
-        message: `Este código de autorización ya fue utilizado previamente por @${matched.usedBy || 'otro usuario'}.`
+        message: `Este código de autorización ya fue utilizado previamente y ha sido revocado.`
       };
     }
 
@@ -530,15 +537,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       };
     }
 
-    // Marcar código como usado
-    const timestamp = new Date().toISOString();
-    setRegistrationCodes(prev =>
-      prev.map(c =>
-        c.id === matched.id
-          ? { ...c, used: true, usedBy: username, usedAt: timestamp }
-          : c
-      )
-    );
+    // Código de un solo uso: Al ser detectado y validado satisfactoriamente, se elimina de inmediato
+    setRegistrationCodes(prev => prev.filter(c => c.id !== matched.id));
 
     return { valid: true };
   };
@@ -1611,6 +1611,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         refreshFromSupabase,
         registrationCodes,
         createRegistrationCode,
+        deleteRegistrationCode,
         validateAndUseRegistrationCode
       }}
     >

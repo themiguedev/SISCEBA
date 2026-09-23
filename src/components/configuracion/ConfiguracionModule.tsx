@@ -29,7 +29,8 @@ import {
   RotateCcw,
   ShieldX,
   Key,
-  Copy
+  Copy,
+  Trash2
 } from 'lucide-react';
 import { hasSubTabAccess, canConfigureSchool, ROLE_METADATA } from '../../utils/rbac';
 import { getDefaultAvatarForUser } from '../../utils/avatarCatalog';
@@ -53,7 +54,8 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
     users,
     addUser,
     registrationCodes,
-    createRegistrationCode
+    createRegistrationCode,
+    deleteRegistrationCode
   } = useApp();
   const { mode, setMode, palette, setPalette, isDark, themesCatalog } = useTheme();
 
@@ -693,10 +695,10 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
                   </div>
                   <div>
                     <h4 className="font-extrabold text-sm text-[#2C2E53]">
-                      Códigos de Autorización para Auto-Registro
+                      Códigos de Autorización para Auto-Registro (Uso Único)
                     </h4>
                     <p className="text-xs text-slate-600">
-                      Entregue uno de estos códigos a los docentes, asistentes o secretarias para que puedan registrar su cuenta desde la pantalla de inicio de sesión.
+                      Entregue un código a un nuevo docente, asistente o secretaria. Cada código tiene un solo uso y se eliminará de inmediato una vez registrado el usuario.
                     </p>
                   </div>
                 </div>
@@ -730,60 +732,75 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
               </div>
 
               {/* Lista de códigos generados */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                {registrationCodes.map((code) => {
-                  const isCopied = copiedCodeId === code.id;
-                  return (
-                    <div
-                      key={code.id}
-                      className={`p-3 rounded-xl border transition-all flex items-center justify-between gap-2 ${
-                        code.used
-                          ? 'bg-slate-100 border-slate-200 opacity-60'
-                          : 'bg-white border-amber-200/80 shadow-xs hover:border-[#D4AF37]'
-                      }`}
-                    >
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <code className="font-mono font-black text-xs text-[#2C2E53] tracking-wider">
-                            {code.code}
-                          </code>
-                          <span className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded ${
-                            code.allowedRole === 'SECRETARIA'
-                              ? 'bg-indigo-100 text-indigo-800'
-                              : code.allowedRole === 'ASISTENTE'
-                              ? 'bg-amber-100 text-amber-800'
-                              : 'bg-emerald-100 text-emerald-800'
-                          }`}>
-                            {code.allowedRole || 'TODOS'}
-                          </span>
-                        </div>
-                        <p className="text-[10px] text-slate-500 mt-0.5 truncate">
-                          {code.used
-                            ? `Usado por: @${code.usedBy || 'usuario'}`
-                            : 'Disponible para registro'}
-                        </p>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          navigator.clipboard.writeText(code.code).catch(() => {});
-                          setCopiedCodeId(code.id);
-                          setTimeout(() => setCopiedCodeId(null), 2500);
-                        }}
-                        className={`p-1.5 rounded-lg border text-xs font-bold transition shrink-0 ${
-                          isCopied
-                            ? 'bg-emerald-600 text-white border-emerald-600'
-                            : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
-                        }`}
-                        title="Copiar código al portapapeles"
+              {registrationCodes.length === 0 ? (
+                <div className="p-6 bg-slate-50 border border-dashed border-slate-200 rounded-xl text-center">
+                  <p className="text-xs text-slate-500 font-medium">
+                    No hay códigos de autorización activos pendientes por uso. Genere un nuevo código cuando requiera autorizar a un nuevo docente o miembro del personal.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                  {registrationCodes.map((code) => {
+                    const isCopied = copiedCodeId === code.id;
+                    return (
+                      <div
+                        key={code.id}
+                        className="p-3 rounded-xl border bg-white border-amber-200/80 shadow-xs hover:border-[#D4AF37] transition-all flex items-center justify-between gap-2"
                       >
-                        {isCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <code className="font-mono font-black text-xs text-[#2C2E53] tracking-wider">
+                              {code.code}
+                            </code>
+                            <span className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded ${
+                              code.allowedRole === 'SECRETARIA'
+                                ? 'bg-indigo-100 text-indigo-800'
+                                : code.allowedRole === 'ASISTENTE'
+                                ? 'bg-amber-100 text-amber-800'
+                                : 'bg-emerald-100 text-emerald-800'
+                            }`}>
+                              {code.allowedRole || 'TODOS'}
+                            </span>
+                          </div>
+                          <p className="text-[10px] text-slate-500 mt-0.5 truncate flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
+                            <span>Uso único disponible</span>
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText(code.code).catch(() => {});
+                              setCopiedCodeId(code.id);
+                              setTimeout(() => setCopiedCodeId(null), 2500);
+                            }}
+                            className={`p-1.5 rounded-lg border text-xs font-bold transition shrink-0 cursor-pointer ${
+                              isCopied
+                                ? 'bg-emerald-600 text-white border-emerald-600'
+                                : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
+                            }`}
+                            title="Copiar código al portapapeles"
+                          >
+                            {isCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                          </button>
+                          {canConfigureSchool(currentRole) && (
+                            <button
+                              type="button"
+                              onClick={() => deleteRegistrationCode(code.id)}
+                              className="p-1.5 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold transition shrink-0 cursor-pointer"
+                              title="Revocar / Eliminar código de autorización"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         </div>

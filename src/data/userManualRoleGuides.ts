@@ -474,7 +474,7 @@ export const ROLE_SPECIFIC_MANUALS: Record<UserRole, DetailedRoleGuide> = {
         recommendedSteps: [
           'Ingresa a Configuración → Personal Docente y Administrativo.',
           'Registra un nuevo usuario con su correo institucional, contraseña inicial y rol asignado.',
-          'Alternativamente, genera un "Código de Autorización" para que el docente se auto-registre desde la pantalla de bienvenida.'
+          'Alternativamente, genera un "Código de Autorización" de uso único para que el docente se auto-registre (se destruye de inmediato tras su uso).'
         ]
       },
       {

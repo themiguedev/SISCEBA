@@ -421,8 +421,8 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
         },
         {
           number: 3,
-          title: 'Generar Código de Autorización (Alternativo)',
-          description: 'Si el personal se registrará a sí mismo, genera un código alfanumérico temporal y facilítaselo.'
+          title: 'Generar Código de Autorización (Uso Único)',
+          description: 'Si el personal se registrará a sí mismo, genera un código institucional. Cada código tiene un solo uso y se elimina de inmediato una vez consumido.'
         },
         {
           number: 4,
