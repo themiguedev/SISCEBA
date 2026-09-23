@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   BookOpen,
   Search,
@@ -26,23 +26,31 @@ import {
   Info,
   Laptop,
   Filter,
-  Keyboard
+  Users,
+  BarChart3,
+  MessageSquare,
+  ShieldCheck,
+  Check,
+  RotateCcw
 } from 'lucide-react';
+import { useApp } from '../../context/AppContext';
+import { UserRole, MainNavigationTab } from '../../types';
+import { ROLE_METADATA } from '../../utils/rbac';
+import { ROLE_SPECIFIC_MANUALS, RoleQuickMission } from '../../data/userManualRoleGuides';
 
 interface ManualDeUsoViewProps {
   onNavigate?: (tab: any, subTab?: string) => void;
 }
 
-type ManualSection = 'INICIO_RAPIDO' | 'GUIAS_PASO_A_PASO' | 'FAQ' | 'ATAJOS';
-type RoleFilter = 'TODOS' | 'DOC' | 'UCE' | 'ADM';
+type ManualSection = 'MI_ROL' | 'GUIAS_PASO_A_PASO' | 'FAQ' | 'ATAJOS';
 
 interface WorkflowGuide {
   id: string;
   title: string;
   category: 'Planificación' | 'Evaluación' | 'Gestión' | 'Institucional';
-  roleRequired: 'DOC' | 'UCE' | 'ADM' | 'TODOS';
+  roleRequired: UserRole | 'TODOS';
   summary: string;
-  targetTab: string;
+  targetTab: MainNavigationTab;
   targetSubTab?: string;
   icon: React.ComponentType<{ className?: string }>;
   color: string;
@@ -60,27 +68,53 @@ interface FaqItem {
   id: string;
   question: string;
   category: string;
-  role: 'DOC' | 'UCE' | 'ADM' | 'TODOS';
+  role: UserRole | 'TODOS';
   answer: string;
   highlight?: string;
 }
 
 export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) => {
-  const [activeSection, setActiveSection] = useState<ManualSection>('INICIO_RAPIDO');
-  const [roleFilter, setRoleFilter] = useState<RoleFilter>('TODOS');
+  const { currentRole } = useApp();
+
+  // Estados interactivos
+  const [activeSection, setActiveSection] = useState<ManualSection>('MI_ROL');
+  const [selectedRole, setSelectedRole] = useState<UserRole>(currentRole || 'ADMINISTRADOR');
   const [searchQuery, setSearchQuery] = useState('');
-  const [openFaqId, setOpenFaqId] = useState<string | null>('faq-1');
+  const [openFaqId, setOpenFaqId] = useState<string | null>('faq-role-1');
   const [selectedGuideId, setSelectedGuideId] = useState<string | null>('guia-1');
+  const [completedSteps, setCompletedSteps] = useState<Record<string, number[]>>({});
+
+  // Sincronizar el rol seleccionado cuando cambia el currentRole de la sesión
+  useEffect(() => {
+    if (currentRole) {
+      setSelectedRole(currentRole);
+    }
+  }, [currentRole]);
+
+  // Manejo interactivo de checklist de pasos en guías
+  const toggleStepCompletion = (guideId: string, stepNumber: number) => {
+    setCompletedSteps((prev) => {
+      const currentList = prev[guideId] || [];
+      const updated = currentList.includes(stepNumber)
+        ? currentList.filter((n) => n !== stepNumber)
+        : [...currentList, stepNumber];
+      return { ...prev, [guideId]: updated };
+    });
+  };
+
+  const resetGuideChecklist = (guideId: string) => {
+    setCompletedSteps((prev) => ({ ...prev, [guideId]: [] }));
+  };
 
   // --- Catálogo de Guías Paso a Paso ---
-  const workflowGuides: WorkflowGuide[] = [
+  const workflowGuides: WorkflowGuide[] = useMemo(() => [
     {
       id: 'guia-1',
       title: 'Elaboración del Plan Quincenal de Clases',
       category: 'Planificación',
-      roleRequired: 'DOC',
+      roleRequired: 'DOCENTE',
       summary: 'Estructure sus unidades didácticas quincenales asociando competencias, indicadores de logro y estrategias pedagógicas.',
-      targetTab: 'PLANIFICACION',
+      targetTab: 'MEDIA_GENERAL',
       targetSubTab: 'PLAN_QUINCENAL',
       icon: BookOpen,
       color: 'from-amber-500 to-amber-600',
@@ -116,9 +150,9 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
       id: 'guia-2',
       title: 'Carga de Calificaciones y Seguimiento Procesal',
       category: 'Evaluación',
-      roleRequired: 'DOC',
+      roleRequired: 'DOCENTE',
       summary: 'Registro continuo de desempeños por estudiante según la escala oficial: cualitativa, literales A-E o numérica 01-20.',
-      targetTab: 'EVALUACION',
+      targetTab: 'MEDIA_GENERAL',
       targetSubTab: 'PROCESAL',
       icon: FileSpreadsheet,
       color: 'from-emerald-500 to-teal-600',
@@ -134,7 +168,7 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
         {
           number: 2,
           title: 'Elegir Sección y Asignatura',
-          description: 'Filtre la lista de estudiantes por grado y sección para cargar la matriz de seguimiento.',
+          description: 'Filtre la lista de estudiantes por grado y sección para cargar la matriz de seguimiento.'
         },
         {
           number: 3,
@@ -153,9 +187,9 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
       id: 'guia-3',
       title: 'Emisión y Consulta de Boletines Informativos',
       category: 'Evaluación',
-      roleRequired: 'UCE',
+      roleRequired: 'COORDINACION',
       summary: 'Generación de la boleta de calificaciones con observaciones pedagógicas, membrete oficial y formato imprimible.',
-      targetTab: 'COMUNICACION',
+      targetTab: 'CONSULTAS',
       targetSubTab: 'BOLETIN',
       icon: GraduationCap,
       color: 'from-blue-500 to-indigo-600',
@@ -165,7 +199,7 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
         {
           number: 1,
           title: 'Ingresar a Comunicación y Boletín',
-          description: 'Seleccione la sección "Boletín Informativo" dentro del módulo pedagógico de su nivel.',
+          description: 'Seleccione la sección "Boletín Informativo" dentro del módulo de Consultas o desde el nivel correspondiente.'
         },
         {
           number: 2,
@@ -176,7 +210,7 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
         {
           number: 3,
           title: 'Redactar Observaciones de Conducta y Rendimiento',
-          description: 'Añada las notas cualitativas del docente guía sobre el desempeño integral, asistencia y convivencia.',
+          description: 'Añada las notas cualitativas del docente guía sobre el desempeño integral, asistencia y convivencia.'
         },
         {
           number: 4,
@@ -189,7 +223,7 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
       id: 'guia-4',
       title: 'Asistente de Inscripciones en 3 Pasos',
       category: 'Gestión',
-      roleRequired: 'ADM',
+      roleRequired: 'SECRETARIA',
       summary: 'Registro formal de alumnos regulares y nuevos ingresos vinculando datos familiares, académicos y de salud.',
       targetTab: 'GESTION',
       targetSubTab: 'INSCRIPCIONES',
@@ -207,12 +241,12 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
         {
           number: 2,
           title: 'Paso 2: Expediente del Alumno',
-          description: 'Cargue nombres completos, fecha de nacimiento, tipo de sangre, alergias o consideraciones médicas especiales.',
+          description: 'Cargue nombres completos, fecha de nacimiento, tipo de sangre, alergias o consideraciones médicas especiales.'
         },
         {
           number: 3,
           title: 'Paso 3: Asignación de Nivel y Sección',
-          description: 'Seleccione el grado/año a cursar, el turno correspondiente y verifique el cupo disponible en la sección.',
+          description: 'Seleccione el grado/año a cursar, el turno correspondiente y verifique el cupo disponible en la sección.'
         },
         {
           number: 4,
@@ -225,7 +259,7 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
       id: 'guia-5',
       title: 'Pases por Retraso y Control de Portería',
       category: 'Gestión',
-      roleRequired: 'ADM',
+      roleRequired: 'ASISTENTE',
       summary: 'Emisión de boletas de retraso con ticket térmico o PDF para el control de puntualidad a primera hora.',
       targetTab: 'GESTION',
       targetSubTab: 'PASES',
@@ -237,17 +271,17 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
         {
           number: 1,
           title: 'Ingresar a Portería y Pases',
-          description: 'Diríjase a "Gestión Escolar" → "Pases por Retraso". La hora del sistema se fija automáticamente.',
+          description: 'Diríjase a "Gestión Escolar" → "Pases por Retraso". La hora del sistema se fija automáticamente.'
         },
         {
           number: 2,
           title: 'Buscar al Estudiante',
-          description: 'Escriba el nombre, apellido o cédula del alumno en el buscador rápido.',
+          description: 'Escriba el nombre, apellido o cédula del alumno en el buscador rápido.'
         },
         {
           number: 3,
           title: 'Especificar Motivo del Retraso',
-          description: 'Seleccione si es justificado (médico, transporte escolar) o injustificado, e introduzca el motivo.',
+          description: 'Seleccione si es justificado (médico, transporte escolar) o injustificado, e introduzca el motivo.'
         },
         {
           number: 4,
@@ -258,37 +292,36 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
     },
     {
       id: 'guia-6',
-      title: 'Planes de Acción Personalizados',
-      category: 'Institucional',
-      roleRequired: 'DOC',
-      summary: 'Generación asistida de actividades de nivelación, refuerzo cognitivo y adaptaciones curriculares para alumnos en riesgo.',
-      targetTab: 'MEDIA_GENERAL',
-      targetSubTab: 'IA_ACTION_PLANS',
-      icon: Sparkles,
-      color: 'from-cyan-500 to-blue-600',
-      badge: 'Acompañamiento Pedagógico CBA',
-      institutionalRule: 'Los planes de acción deben ser validados por el docente de área y archivados en el expediente del estudiante.',
+      title: 'Registro de Incidencias de Conducta y Disciplina',
+      category: 'Gestión',
+      roleRequired: 'ASISTENTE',
+      summary: 'Asentamiento formal de llamados de atención, compromisos de convivencia o reconocimientos positivos.',
+      targetTab: 'GESTION',
+      targetSubTab: 'CONDUCTAS',
+      icon: ShieldAlert,
+      color: 'from-red-500 to-rose-600',
+      badge: 'Convivencia',
+      institutionalRule: 'Las observaciones de conducta deben ser objetivas, formativas y sin juicios subjetivos.',
       steps: [
         {
           number: 1,
-          title: 'Identificar al Alumno en Seguimiento',
-          description: 'Acceda a "Planes de Acción Personalizados" dentro del bloque de comunicación o desde la alerta de notas inferiores a 12 puntos.',
+          title: 'Abrir Historial de Conductas',
+          description: 'Navegue a Gestión Escolar → Registro de Conductas.'
         },
         {
           number: 2,
-          title: 'Seleccionar Necesidades de Aprendizaje',
-          description: 'Indique el área de mejora: comprensión lectora, lógica matemática, hábitos de estudio o atención sostenida.',
+          title: 'Identificar al Alumno',
+          description: 'Busque al estudiante por nombre o cédula escolar.'
         },
         {
           number: 3,
-          title: 'Generar Propuesta Pedagógica',
-          description: 'El modelo pedagógico de SICE-CBA analiza las calificaciones históricas y redacta una secuencia de ejercicios remediales.',
-          tip: 'Puede editar y personalizar cualquier recomendación generada por el asistente antes de guardarla.'
+          title: 'Categorizar la Incidencia',
+          description: 'Escoja el tipo de registro: Falta Leve, Moderada, Falta Grave o Mérito Positivo.'
         },
         {
           number: 4,
-          title: 'Asignar Cronograma de Entrega',
-          description: 'Establezca la fecha de entrega del trabajo remedial y comparta el documento con el representante y el estudiante.'
+          title: 'Guardar y Notificar',
+          description: 'Guarde el reporte. El registro queda anexado a la ficha del estudiante y visible para Coordinación.'
         }
       ]
     },
@@ -296,7 +329,7 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
       id: 'guia-7',
       title: 'Sábana Central de Calificaciones y Estadísticas',
       category: 'Institucional',
-      roleRequired: 'UCE',
+      roleRequired: 'COORDINACION',
       summary: 'Auditoría integral de notas por sección con índices de aprobación, promedios grupales y exportación a Excel.',
       targetTab: 'CONSULTAS',
       targetSubTab: 'RENDIMIENTO',
@@ -308,12 +341,12 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
         {
           number: 1,
           title: 'Abrir Módulo de Consultas',
-          description: 'Navegue a "Consultas y Reportes" → "Sábana de Calificaciones".',
+          description: 'Navegue a "Consultas y Reportes" → "Sábana de Calificaciones".'
         },
         {
           number: 2,
           title: 'Seleccionar Lapso y Sección',
-          description: 'Elija el lapso académico (1, 2 o 3) y el curso deseado para desplegar la matriz completa.',
+          description: 'Elija el lapso académico (1, 2 o 3) y el curso deseado para desplegar la matriz completa.'
         },
         {
           number: 3,
@@ -332,7 +365,7 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
       id: 'guia-8',
       title: 'Apertura y Cierre de Ventanas de Evaluación',
       category: 'Gestión',
-      roleRequired: 'ADM',
+      roleRequired: 'DIRECTOR',
       summary: 'Regulación del calendario académico para permitir o bloquear la carga de notas a los docentes de cada lapso.',
       targetTab: 'CONFIGURACION',
       targetSubTab: 'LAPSOS',
@@ -344,17 +377,17 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
         {
           number: 1,
           title: 'Ingresar a Configuración del Plantel',
-          description: 'Acceda con credenciales de Administrador (ADM) al menú "Configuración" → "Años Escolares y Lapsos".',
+          description: 'Acceda al menú "Configuración" → "Años Escolares y Lapsos".'
         },
         {
           number: 2,
           title: 'Localizar el Lapso en Curso',
-          description: 'Revise el estado actual del 1er, 2do o 3er Lapso (Abierto / Cerrado).',
+          description: 'Revise el estado actual del 1er, 2do o 3er Lapso (Abierto / Cerrado).'
         },
         {
           number: 3,
           title: 'Alternar Interruptor de Carga',
-          description: 'Haga clic en "Abrir Ventana de Carga" para permitir a los docentes registrar notas, o "Bloquear" para sellar el lapso.',
+          description: 'Haga clic en "Abrir Ventana de Carga" para permitir a los docentes registrar notas, o "Bloquear" para sellar el lapso.'
         },
         {
           number: 4,
@@ -362,83 +395,184 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
           description: 'El sistema registra la fecha, hora y usuario que autorizó la apertura o cierre del período evaluativo.'
         }
       ]
+    },
+    {
+      id: 'guia-9',
+      title: 'Creación de Personal y Códigos de Auto-Registro',
+      category: 'Institucional',
+      roleRequired: 'ADMINISTRADOR',
+      summary: 'Alta de docentes, asistentes y personal con credenciales seguras o emisión de códigos de verificación.',
+      targetTab: 'CONFIGURACION',
+      targetSubTab: 'DOCENTES',
+      icon: Users,
+      color: 'from-purple-600 to-indigo-700',
+      badge: 'Seguridad TI',
+      institutionalRule: 'Toda cuenta de personal debe asignarse bajo el principio de menor privilegio con su rol exacto.',
+      steps: [
+        {
+          number: 1,
+          title: 'Acceder a Personal Institucional',
+          description: 'Ve a Configuración → Personal Docente y Administrativo.'
+        },
+        {
+          number: 2,
+          title: 'Registrar Nuevo Miembro',
+          description: 'Pulsa "+ Nuevo Personal", escribe el correo institucional, contraseña inicial y rol exacto.'
+        },
+        {
+          number: 3,
+          title: 'Generar Código de Autorización (Alternativo)',
+          description: 'Si el personal se registrará a sí mismo, genera un código alfanumérico temporal y facilítaselo.'
+        },
+        {
+          number: 4,
+          title: 'Verificar Activación',
+          description: 'Comprueba que el usuario figure como Activo en la lista central con sus credenciales operativas.'
+        }
+      ]
+    },
+    {
+      id: 'guia-10',
+      title: 'Consulta del Boletín y Asistencias para Familias',
+      category: 'Evaluación',
+      roleRequired: 'REPRESENTANTE',
+      summary: 'Cómo verificar las notas del lapso y el récord de asistencias de su hijo(a) desde casa o el móvil.',
+      targetTab: 'CONSULTAS',
+      targetSubTab: 'BOLETIN',
+      icon: GraduationCap,
+      color: 'from-cyan-500 to-blue-600',
+      badge: 'Padres y Representantes',
+      institutionalRule: 'Las dudas sobre calificaciones deben canalizarse con el docente guía en su horario de atención.',
+      steps: [
+        {
+          number: 1,
+          title: 'Abrir Consultas y Reportes',
+          description: 'En el menú lateral, pulsa sobre "Consultas y Reportes".'
+        },
+        {
+          number: 2,
+          title: 'Ver Boletín Informativo',
+          description: 'Haz clic en "Boletín Informativo" para revisar cada materia y las observaciones del profesor.'
+        },
+        {
+          number: 3,
+          title: 'Consultar Récord de Asistencias',
+          description: 'Pasa a la pestaña "Asistencia" para verificar que los días asistidos y justificados estén en orden.'
+        }
+      ]
     }
-  ];
+  ], []);
 
   // --- Catálogo de Preguntas Frecuentes (FAQ) ---
-  const faqItems: FaqItem[] = [
+  const faqItems: FaqItem[] = useMemo(() => [
     {
-      id: 'faq-1',
+      id: 'faq-role-1',
+      question: '¿Qué funciones y pantallas corresponden exactamente a mi rol en el sistema?',
+      category: 'Permisos & Perfil',
+      role: 'TODOS',
+      answer: 'SICE-CBA aplica un control de accesos estricto (RBAC). En la sección "Mi Rol en el Sistema" de este manual encontrarás tu guía de bienvenida personalizada, con las misiones operativas que te corresponden y la lista de módulos que puedes utilizar.',
+      highlight: 'Si necesitas realizar una acción que no aparece en tus menús, consulta con la Dirección o Administración TI.'
+    },
+    {
+      id: 'faq-role-2',
+      question: '¿Cuáles son las escalas de calificación según el nivel educativo?',
+      category: 'Evaluación Oficial',
+      role: 'DOCENTE',
+      answer: 'SICE-CBA implementa tres escalas pedagógicas oficiales: 1) Educación Inicial: exclusivamente evaluación cualitativa/formativa en escala oficial (Logrado, En Proceso, Iniciado); 2) Educación Primaria: escala literal oficial MPPE (A, B, C, D, E); 3) Educación Media General: escala cuantitativa vigesimal entera (01 a 20 puntos).',
+      highlight: 'El sistema valida automáticamente las notas para evitar que se introduzcan números en Inicial o Primaria.'
+    },
+    {
+      id: 'faq-role-3',
+      question: '¿Qué responsabilidades tiene el rol de Asistente?',
+      category: 'Operatividad',
+      role: 'ASISTENTE',
+      answer: 'El rol de Asistente está enfocado en la vida operativa y disciplina diaria: emisión de Pases por Retraso en portería, toma y seguimiento de Asistencias de aula y registro en el Historial de Conductas. No posee permisos de carga de calificaciones académicas.',
+      highlight: 'Permite agilizar el ingreso a clases por la mañana y resguardar la puntualidad.'
+    },
+    {
+      id: 'faq-role-4',
+      question: '¿Qué responsabilidades tiene el rol de Secretaría?',
+      category: 'Secretaría & Matrícula',
+      role: 'SECRETARIA',
+      answer: 'El rol de Secretaría se encarga de las admisiones e inscripciones de estudiantes, custodia del padrón y expedientes de matrícula, solicitud y emisión de constancias de estudio o notas certificadas, y consulta de sábanas y nóminas oficiales.',
+      highlight: 'Toda emisión de constancia valida antes que el estudiante no cuente con bloqueo administrativo.'
+    },
+    {
+      id: 'faq-role-5',
       question: '¿Cómo cambio de nivel educativo (Inicial, Primaria, Media General)?',
       category: 'Navegación General',
       role: 'TODOS',
-      answer: 'En la parte superior de la cabecera encontrará tres botones con los nombres de cada nivel (Educación Inicial, Educación Primaria y Media General). Al hacer clic en cualquiera de ellos, todo el sistema ajusta dinámicamente sus asignaturas, estudiantes y escalas evaluativas.',
-      highlight: 'También puede usar el atajo de teclado Ctrl + K y escribir el nombre del nivel para saltar de inmediato.'
+      answer: 'En la parte superior de la cabecera encontrarás los botones con los nombres de cada nivel (Educación Inicial, Educación Primaria y Media General). Al hacer clic en cualquiera de ellos, todo el sistema ajusta dinámicamente sus asignaturas, estudiantes y escalas evaluativas.',
+      highlight: 'También puedes pulsar Ctrl + K para abrir el buscador rápido y saltar al nivel deseado.'
     },
     {
-      id: 'faq-2',
+      id: 'faq-role-6',
       question: '¿Qué significa el límite de inasistencias del 25% y cómo se calcula?',
       category: 'Control Escolar',
-      role: 'DOC',
-      answer: 'Según la normativa ministerial y el reglamento del CBA, los estudiantes que superen el 25% de inasistencias no justificadas en una asignatura pierden el derecho a la evaluación procesal ordinaria. El sistema marca automáticamente la fila del alumno con una alerta amarilla o roja cuando se aproxima a dicho porcentaje.',
-      highlight: 'Envíe un reporte a la Coordinación UCE desde la pestaña de Conductas cuando un alumno alcance el 20% de faltas.'
+      role: 'DOCENTE',
+      answer: 'Según la normativa ministerial y el reglamento del CBA, los estudiantes que superen el 25% de inasistencias no justificadas en una asignatura pierden el derecho a la evaluación ordinaria. El sistema resalta automáticamente las alertas amarillas y rojas preventivas.',
+      highlight: 'Notifica a la Coordinación UCE desde Conductas cuando un alumno supere el 20% de inasistencias.'
     },
     {
-      id: 'faq-3',
-      question: '¿Cómo puedo imprimir un boletín o reporte en tamaño limpio sin menús?',
+      id: 'faq-role-7',
+      question: '¿Cómo puedo imprimir un boletín o constancia en formato oficial limpio?',
       category: 'Impresión y Documentos',
       role: 'TODOS',
-      answer: 'Todas las vistas del sistema están adaptadas con hojas de estilo para impresión (@media print). Al pulsar el botón "Imprimir" dentro de cualquier módulo (o presionar Ctrl + P), el sistema oculta automáticamente la barra lateral, cabeceras y botones, mostrando únicamente el documento oficial con membrete y casillas de firma.',
-      highlight: 'Asegúrese de seleccionar la opción "Gráficos de fondo" en la ventana de impresión de su navegador para mantener los colores oficiales.'
+      answer: 'Todas las vistas oficiales cuentan con hojas de estilo para impresión (@media print). Al pulsar el botón "Imprimir" dentro de cualquier módulo (o presionar Ctrl + P), el sistema oculta menús, botones y barras laterales, generando el formato institucional con membrete, firmas y sellos.',
+      highlight: 'Asegúrate de marcar "Gráficos de fondo" en la ventana de impresión de tu navegador.'
     },
     {
-      id: 'faq-4',
-      question: '¿Qué función cumple el Buscador Rápido (Spotlight Search)?',
-      category: 'Productividad',
-      role: 'TODOS',
-      answer: 'El buscador Spotlight se activa presionando las teclas Ctrl + K (o Cmd + K en Mac) o haciendo clic en el icono de lupa en la barra superior. Le permite localizar en milisegundos a cualquier alumno, asignatura, trámite pendiente o pantalla del sistema sin necesidad de navegar manualmente por los menús.',
-      highlight: 'Escriba las primeras letras del nombre de un alumno para ver su nivel y abrir su ficha directamente.'
-    },
-    {
-      id: 'faq-5',
-      question: '¿Cómo funciona el Bloqueo Administrativo y qué efectos produce?',
+      id: 'faq-role-8',
+      question: '¿Cómo funciona el Bloqueo Administrativo?',
       category: 'Administración',
-      role: 'ADM',
-      answer: 'El bloqueo administrativo restringe la emisión de constancias de estudio, notas certificadas y boletines oficiales para estudiantes con compromisos financieros o documentales pendientes. Los docentes pueden seguir cargando sus calificaciones con normalidad, pero el portal retiene la entrega del documento formal hasta que Administración desactive la restricción.',
-      highlight: 'El bloqueo se gestiona desde el menú "Gestión Escolar" → "Bloqueo Administrativo".'
-    },
-    {
-      id: 'faq-6',
-      question: '¿Por qué aparece el accesorio festivo en el logo del colegio?',
-      category: 'Identidad Visual',
-      role: 'TODOS',
-      answer: 'El sistema incorpora un motor inteligente de efemérides automáticas que adorna el logotipo del Colegio Bellas Artes según la fecha del calendario (birrete académico en septiembre, gorro navideño en diciembre, corazones en febrero, elementos culturales en el día de la zulianidad, etc.). Es puramente decorativo y celebra la vida institucional del colegio.',
-      highlight: 'No requiere ninguna configuración manual: se actualiza por sí mismo el primer día de cada mes festivo.'
+      role: 'ADMINISTRADOR',
+      answer: 'El bloqueo administrativo retiene la entrega de constancias de estudio, notas certificadas y boletines oficiales para estudiantes con compromisos administrativos pendientes. Los docentes pueden seguir cargando sus notas con total normalidad.',
+      highlight: 'Se administra desde Gestión Escolar → Bloqueo Administrativo.'
     }
-  ];
+  ], []);
 
-  // --- Filtros combinados ---
+  // Guía específica del rol actualmente seleccionado
+  const currentRoleGuide = useMemo(() => {
+    return ROLE_SPECIFIC_MANUALS[selectedRole] || ROLE_SPECIFIC_MANUALS.DOCENTE;
+  }, [selectedRole]);
+
+  // Filtros combinados de Guías Paso a Paso
   const filteredGuides = useMemo(() => {
     return workflowGuides.filter((guide) => {
-      const matchRole = roleFilter === 'TODOS' || guide.roleRequired === roleFilter || guide.roleRequired === 'TODOS';
+      const matchRole =
+        selectedRole === 'ADMINISTRADOR' ||
+        selectedRole === 'DIRECTOR' ||
+        guide.roleRequired === 'TODOS' ||
+        guide.roleRequired === selectedRole;
+
       const matchSearch =
+        searchQuery === '' ||
         guide.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         guide.summary.toLowerCase().includes(searchQuery.toLowerCase()) ||
         guide.category.toLowerCase().includes(searchQuery.toLowerCase());
+
       return matchRole && matchSearch;
     });
-  }, [workflowGuides, roleFilter, searchQuery]);
+  }, [workflowGuides, selectedRole, searchQuery]);
 
+  // Filtros combinados de FAQs
   const filteredFaqs = useMemo(() => {
     return faqItems.filter((faq) => {
-      const matchRole = roleFilter === 'TODOS' || faq.role === roleFilter || faq.role === 'TODOS';
+      const matchRole =
+        selectedRole === 'ADMINISTRADOR' ||
+        selectedRole === 'DIRECTOR' ||
+        faq.role === 'TODOS' ||
+        faq.role === selectedRole;
+
       const matchSearch =
+        searchQuery === '' ||
         faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
         faq.answer.toLowerCase().includes(searchQuery.toLowerCase()) ||
         faq.category.toLowerCase().includes(searchQuery.toLowerCase());
+
       return matchRole && matchSearch;
     });
-  }, [faqItems, roleFilter, searchQuery]);
+  }, [faqItems, selectedRole, searchQuery]);
 
   const currentSelectedGuide = useMemo(() => {
     return workflowGuides.find((g) => g.id === selectedGuideId) || workflowGuides[0];
@@ -446,6 +580,25 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const getMissionIcon = (iconName: string) => {
+    switch (iconName) {
+      case 'BookOpen': return BookOpen;
+      case 'FileSpreadsheet': return FileSpreadsheet;
+      case 'CheckCircle2': return CheckCircle2;
+      case 'GraduationCap': return GraduationCap;
+      case 'UserCheck': return UserCheck;
+      case 'Users': return Users;
+      case 'FileText': return FileText;
+      case 'Clock': return Clock;
+      case 'ShieldAlert': return ShieldAlert;
+      case 'BarChart3': return BarChart3;
+      case 'Sliders': return Sliders;
+      case 'MessageSquare': return MessageSquare;
+      case 'Sparkles': return Sparkles;
+      default: return Layers;
+    }
   };
 
   return (
@@ -464,7 +617,11 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
                 Guía Oficial del Usuario
               </span>
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold text-slate-300 bg-white/10">
-                Versión 2026 - 2027
+                Adaptada al Rol Activo
+              </span>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold text-amber-300 bg-amber-400/20 border border-amber-400/30 flex items-center gap-1">
+                <span>{currentRoleGuide.badgeEmoji}</span>
+                <span>{ROLE_METADATA[currentRole]?.label || currentRole}</span>
               </span>
             </div>
 
@@ -472,7 +629,7 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
               Manual Interactivo del Sistema SICE-CBA
             </h1>
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Consulte procedimientos paso a paso, normativas institucionales de evaluación y atajos de productividad para docentes, coordinadores y personal administrativo del Colegio Bellas Artes.
+              Instrucciones claras y paso a paso diseñadas específicamente para tus tareas institucionales en el Colegio Bellas Artes. Navega directamente a las funciones o explora guías paso a paso.
             </p>
           </div>
 
@@ -489,40 +646,46 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
             <button
               onClick={() => {
                 setActiveSection('GUIAS_PASO_A_PASO');
-                setSelectedGuideId('guia-1');
+                setSelectedGuideId(filteredGuides[0]?.id || 'guia-1');
               }}
               className="px-4 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#c49f2f] text-slate-950 font-black text-xs shadow-lg transition flex items-center gap-2"
             >
               <Sparkles className="w-4 h-4" />
-              <span>Ver Guías Rápidas</span>
+              <span>Ver Guías Paso a Paso</span>
             </button>
           </div>
         </div>
 
-        {/* Barra de Filtros y Búsqueda Interactiva */}
+        {/* Barra de Selector de Rol y Búsqueda */}
         <div className="mt-6 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
-          {/* Selector de Roles */}
+          {/* Selector de Roles Interactivo */}
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar w-full sm:w-auto py-1">
             <span className="text-[11px] font-bold text-slate-400 mr-1 shrink-0 flex items-center gap-1">
               <Filter className="w-3 h-3" />
-              Filtrar por rol:
+              Vista de rol:
             </span>
-            {(['TODOS', 'DOC', 'UCE', 'ADM'] as RoleFilter[]).map((role) => (
-              <button
-                key={role}
-                onClick={() => setRoleFilter(role)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
-                  roleFilter === role
-                    ? 'bg-[#D4AF37] text-slate-950 shadow-md ring-2 ring-[#D4AF37]/40'
-                    : 'bg-white/10 hover:bg-white/15 text-slate-300'
-                }`}
-              >
-                {role === 'TODOS' && 'Todos los Roles'}
-                {role === 'DOC' && '👨‍🏫 Docentes'}
-                {role === 'UCE' && '🏛️ Control de Estudios (UCE)'}
-                {role === 'ADM' && '📋 Administración'}
-              </button>
-            ))}
+            {(['DOCENTE', 'SECRETARIA', 'ASISTENTE', 'COORDINACION', 'DIRECTOR', 'ADMINISTRADOR', 'REPRESENTANTE', 'ESTUDIANTE'] as UserRole[]).map((r) => {
+              const isSelected = selectedRole === r;
+              const isSessionRole = currentRole === r;
+              return (
+                <button
+                  key={r}
+                  onClick={() => setSelectedRole(r)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 ${
+                    isSelected
+                      ? 'bg-[#D4AF37] text-slate-950 shadow-md ring-2 ring-[#D4AF37]/40'
+                      : 'bg-white/10 hover:bg-white/15 text-slate-300'
+                  }`}
+                  title={isSessionRole ? 'Este es el rol de tu sesión activa' : `Ver guía del rol ${r}`}
+                >
+                  <span>{ROLE_SPECIFIC_MANUALS[r]?.badgeEmoji || '👤'}</span>
+                  <span>{ROLE_METADATA[r]?.badge || r}</span>
+                  {isSessionRole && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 ml-0.5" title="Tu rol actual" />
+                  )}
+                </button>
+              );
+            })}
           </div>
 
           {/* Campo de Búsqueda */}
@@ -530,7 +693,7 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-2.5" />
             <input
               type="text"
-              placeholder="Buscar tema, proceso, 'boletín'..."
+              placeholder="Buscar tema, 'boletín', 'asistencia'..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-3.5 py-2 rounded-xl bg-white/10 border border-white/15 text-xs text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:bg-white/15 transition"
@@ -551,176 +714,234 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
       <div className="bg-white dark:bg-slate-900 rounded-2xl p-2 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between gap-2 overflow-x-auto no-scrollbar no-print">
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setActiveSection('INICIO_RAPIDO')}
+            onClick={() => setActiveSection('MI_ROL')}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-              activeSection === 'INICIO_RAPIDO'
+              activeSection === 'MI_ROL'
                 ? 'bg-[#2C2E53] text-[#D4AF37] shadow-sm'
-                : 'text-slate-600 hover:bg-slate-100'
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
           >
             <Compass className="w-4 h-4" />
-            Inicio Rápido & Conceptos
+            <span>Guía de Mi Rol ({currentRoleGuide.badgeEmoji} {ROLE_METADATA[selectedRole]?.badge || selectedRole})</span>
           </button>
           <button
             onClick={() => setActiveSection('GUIAS_PASO_A_PASO')}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
               activeSection === 'GUIAS_PASO_A_PASO'
                 ? 'bg-[#2C2E53] text-[#D4AF37] shadow-sm'
-                : 'text-slate-600 hover:bg-slate-100'
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
           >
             <Layers className="w-4 h-4" />
-            Guías Paso a Paso ({filteredGuides.length})
+            <span>Guías Paso a Paso ({filteredGuides.length})</span>
           </button>
           <button
             onClick={() => setActiveSection('FAQ')}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
               activeSection === 'FAQ'
                 ? 'bg-[#2C2E53] text-[#D4AF37] shadow-sm'
-                : 'text-slate-600 hover:bg-slate-100'
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
           >
             <HelpCircle className="w-4 h-4" />
-            Preguntas Frecuentes ({filteredFaqs.length})
+            <span>Preguntas Frecuentes ({filteredFaqs.length})</span>
           </button>
           <button
             onClick={() => setActiveSection('ATAJOS')}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
               activeSection === 'ATAJOS'
                 ? 'bg-[#2C2E53] text-[#D4AF37] shadow-sm'
-                : 'text-slate-600 hover:bg-slate-100'
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
           >
             <Laptop className="w-4 h-4" />
-            Atajos de Teclado & Productividad
+            <span>Atajos de Teclado</span>
           </button>
         </div>
 
         <div className="hidden md:flex items-center gap-2 text-xs font-semibold text-slate-500 pr-2">
           <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-          Sistema SICE-CBA Online
+          Rol activo: <strong className="text-slate-700 dark:text-slate-300">{ROLE_METADATA[currentRole]?.label || currentRole}</strong>
         </div>
       </div>
 
-      {/* 3. CONTENIDO: SECCIÓN 1 - INICIO RÁPIDO */}
-      {activeSection === 'INICIO_RAPIDO' && (
+      {/* 3. SECCIÓN 1: GUÍA DEDICADA DEL ROL (Fácil de entender e interactiva) */}
+      {activeSection === 'MI_ROL' && (
         <div className="space-y-6">
-          {/* 3 Pilares del Sistema */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {/* Pilar 1 */}
-            <div className="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-cba-card hover:shadow-md transition">
-              <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center mb-4">
-                <BookOpen className="w-6 h-6" />
+          {/* Tarjeta de Presentación del Rol */}
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+              <div className="flex items-start gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-3xl shrink-0 shadow-sm">
+                  {currentRoleGuide.badgeEmoji}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap mb-1">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                      Perfil Institucional
+                    </span>
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${currentRoleGuide.badgeColor}`}>
+                      {ROLE_METADATA[selectedRole]?.badge || selectedRole}
+                    </span>
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                      {currentRoleGuide.department}
+                    </span>
+                  </div>
+                  <h2 className="text-xl sm:text-2xl font-black text-[#2C2E53] dark:text-white">
+                    {currentRoleGuide.roleGreeting}
+                  </h2>
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1 max-w-3xl leading-relaxed">
+                    {currentRoleGuide.roleOverview}
+                  </p>
+                </div>
               </div>
-              <h3 className="font-extrabold text-[#2C2E53] text-base mb-1.5">
-                1. Planificación Pedagógica
-              </h3>
-              <p className="text-xs text-slate-500 leading-relaxed mb-4">
-                Diseño curricular quincenal y por lapso. Permite estructurar competencias, dimensiones formativas, estrategias didácticas y recursos pedagógicos en armonía con el proyecto escolar.
-              </p>
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                <span className="text-slate-400 font-medium">Responsables:</span>
-                <span className="font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md">Docentes / UCE</span>
-              </div>
-            </div>
 
-            {/* Pilar 2 */}
-            <div className="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-cba-card hover:shadow-md transition">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center mb-4">
-                <FileSpreadsheet className="w-6 h-6" />
-              </div>
-              <h3 className="font-extrabold text-[#2C2E53] text-base mb-1.5">
-                2. Evaluación Procesal Continua
-              </h3>
-              <p className="text-xs text-slate-500 leading-relaxed mb-4">
-                Carga periódica de indicadores según la escala de cada nivel: cualitativa en Inicial, literales (A a E) en Primaria y escala vigesimal (01 a 20) con ponderaciones porcentuales en Media.
-              </p>
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                <span className="text-slate-400 font-medium">Cierre de Notas:</span>
-                <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">Fin de Lapso</span>
-              </div>
-            </div>
-
-            {/* Pilar 3 */}
-            <div className="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-cba-card hover:shadow-md transition">
-              <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 border border-blue-200 flex items-center justify-center mb-4">
-                <GraduationCap className="w-6 h-6" />
-              </div>
-              <h3 className="font-extrabold text-[#2C2E53] text-base mb-1.5">
-                3. Comunicación y Acreditación
-              </h3>
-              <p className="text-xs text-slate-500 leading-relaxed mb-4">
-                Emisión automatizada de boletines informativos, actas de consejo de curso, planes de acción para alumnos con bajo rendimiento y sábanas estadísticas para dirección.
-              </p>
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                <span className="text-slate-400 font-medium">Destinatarios:</span>
-                <span className="font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md">Familias / Plantel</span>
-              </div>
+              {selectedRole !== currentRole && (
+                <div className="shrink-0 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 p-3 rounded-2xl flex items-center gap-3 text-xs">
+                  <Info className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                  <div className="text-[11px]">
+                    <span className="font-bold text-amber-900 dark:text-amber-200 block">Modo Exploración:</span>
+                    <span className="text-amber-800 dark:text-amber-300">Estás viendo la guía de <strong>{ROLE_METADATA[selectedRole]?.label}</strong>.</span>
+                  </div>
+                  <button
+                    onClick={() => setSelectedRole(currentRole)}
+                    className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 text-slate-800 dark:text-white font-bold text-[10px] border shadow-sm hover:bg-slate-50 ml-2"
+                  >
+                    Volver a mi rol
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Guía de Anatomía de la Interfaz */}
-          <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-cba-card">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-[#2C2E53] text-[#D4AF37] flex items-center justify-center">
-                <Compass className="w-5 h-5" />
-              </div>
+          {/* Misiones Clave del Rol (Interactivas con enlace directo a la función) */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-black text-lg text-[#2C2E53]">
-                  Anatomía de la Interfaz y Controles Principales
+                <h3 className="text-base sm:text-lg font-black text-[#2C2E53] dark:text-white flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-[#D4AF37]" />
+                  Tus Tareas Principales Paso a Paso
                 </h3>
-                <p className="text-xs text-slate-500">
-                  Conozca los 4 bloques principales que componen el entorno de trabajo del SICE-CBA
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Haz clic en cualquier misión para ver el procedimiento rápido o pulsa "Ir a la función" para abrir la pantalla correspondiente en el sistema.
                 </p>
               </div>
+              <span className="text-xs font-bold text-slate-400">
+                {currentRoleGuide.missions.length} Tareas clave
+              </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
-                <span className="font-black text-[#2C2E53] flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-[#D4AF37]"></span>
-                  1. Selector de Nivel
-                </span>
-                <p className="text-slate-600 leading-relaxed">
-                  Ubicado en la barra superior. Conmuta al instante entre <strong>Inicial</strong>, <strong>Primaria</strong> y <strong>Media General</strong> adaptando toda la plataforma al régimen seleccionado.
-                </p>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {currentRoleGuide.missions.map((mission: RoleQuickMission, index: number) => {
+                const MissionIcon = getMissionIcon(mission.iconName);
+                return (
+                  <div
+                    key={mission.id}
+                    className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group"
+                  >
+                    <div className="space-y-4">
+                      {/* Cabecera de la Misión */}
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-11 h-11 rounded-2xl bg-[#1B1C33] text-[#D4AF37] flex items-center justify-center font-black text-sm shrink-0 shadow-sm group-hover:scale-105 transition-transform">
+                            <MissionIcon className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <span className="px-2 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                              {mission.badge}
+                            </span>
+                            <h4 className="text-sm font-extrabold text-[#2C2E53] dark:text-white leading-snug mt-0.5">
+                              {mission.title}
+                            </h4>
+                          </div>
+                        </div>
 
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
-                <span className="font-black text-[#2C2E53] flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                  2. Menú Lateral (Sidebar)
-                </span>
-                <p className="text-slate-600 leading-relaxed">
-                  Agrupa las opciones en <strong>Control y Gestión</strong>, <strong>Niveles Pedagógicos</strong> e <strong>Institucional</strong>. Al hacer clic en cualquier sub-opción, navega de inmediato a esa sección.
-                </p>
-              </div>
+                        <span className="text-xs font-black text-slate-300 dark:text-slate-700">
+                          #{index + 1}
+                        </span>
+                      </div>
 
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
-                <span className="font-black text-[#2C2E53] flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                  3. Barra de Navegación Compacta
-                </span>
-                <p className="text-slate-600 leading-relaxed">
-                  Muestra la ruta actual (Breadcrumb) y el botón de inicio con el monograma institucional. Permite situarse rápidamente en la jerarquía del sistema.
-                </p>
-              </div>
+                      <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                        {mission.summary}
+                      </p>
 
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
-                <span className="font-black text-[#2C2E53] flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-purple-500"></span>
-                  4. Buscador Spotlight (Ctrl+K)
-                </span>
-                <p className="text-slate-600 leading-relaxed">
-                  Presione <kbd className="px-1.5 py-0.5 rounded bg-slate-200 font-mono font-bold text-slate-700">Ctrl+K</kbd> desde cualquier pantalla para buscar estudiantes, materias o saltar a trámites en un segundo.
-                </p>
+                      {/* Pasos rápidos recomendados */}
+                      <div className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl p-3.5 border border-slate-100 dark:border-slate-800 space-y-2">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
+                          ¿Cómo realizarlo?:
+                        </span>
+                        <ul className="space-y-1.5 text-[11px] text-slate-600 dark:text-slate-300">
+                          {mission.recommendedSteps.map((step, sIdx) => (
+                            <li key={sIdx} className="flex items-start gap-2">
+                              <span className="w-4 h-4 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-[9px] flex items-center justify-center shrink-0 mt-0.5">
+                                {sIdx + 1}
+                              </span>
+                              <span className="leading-snug">{step}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+
+                    {/* Botón de Acción Directa a la Función */}
+                    <div className="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                      <span className="text-[10px] text-slate-400 font-medium">
+                        Destino: {mission.targetTab} {mission.targetSubTab ? `→ ${mission.targetSubTab}` : ''}
+                      </span>
+                      {onNavigate ? (
+                        <button
+                          onClick={() => onNavigate(mission.targetTab, mission.targetSubTab)}
+                          className="px-3.5 py-1.5 rounded-xl bg-[#2C2E53] hover:bg-[#1B1C33] text-[#D4AF37] font-black text-xs shadow-sm hover:shadow transition flex items-center gap-1.5 focus:outline-none"
+                        >
+                          <span>Ir a la función</span>
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </button>
+                      ) : null}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Buenas Prácticas y Puntos de Atención (Dos and Don'ts) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {/* Buenas Prácticas (Qué SÍ hacer) */}
+            <div className="bg-emerald-50/70 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/40 rounded-3xl p-6 space-y-3">
+              <div className="flex items-center gap-2.5 text-emerald-800 dark:text-emerald-300">
+                <CheckCircle2 className="w-5 h-5" />
+                <h4 className="font-black text-sm">Buenas Prácticas Recomendadas</h4>
               </div>
+              <ul className="space-y-2 text-xs text-emerald-900 dark:text-emerald-200">
+                {currentRoleGuide.dosAndDonts.dos.map((item, idx) => (
+                  <li key={idx} className="flex items-start gap-2">
+                    <span className="text-emerald-600 dark:text-emerald-400 font-bold shrink-0">✓</span>
+                    <span className="leading-relaxed">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Puntos de Atención (Qué NO hacer) */}
+            <div className="bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 rounded-3xl p-6 space-y-3">
+              <div className="flex items-center gap-2.5 text-amber-800 dark:text-amber-300">
+                <AlertTriangle className="w-5 h-5" />
+                <h4 className="font-black text-sm">Puntos de Atención y Restricciones</h4>
+              </div>
+              <ul className="space-y-2 text-xs text-amber-900 dark:text-amber-200">
+                {currentRoleGuide.dosAndDonts.donts.map((item, idx) => (
+                  <li key={idx} className="flex items-start gap-2">
+                    <span className="text-amber-600 dark:text-amber-400 font-bold shrink-0">✕</span>
+                    <span className="leading-relaxed">{item}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </div>
       )}
 
-      {/* 4. CONTENIDO: SECCIÓN 2 - GUÍAS PASO A PASO */}
+      {/* 4. SECCIÓN 2: GUÍAS PASO A PASO INTERACTIVAS (Con Checklist y Simulación) */}
       {activeSection === 'GUIAS_PASO_A_PASO' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Lista Lateral de Guías Disponibles */}
@@ -729,13 +950,16 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
               <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
                 Guías Disponibles ({filteredGuides.length})
               </span>
-              <span className="text-[10px] text-slate-400">Seleccione para ver pasos</span>
+              <span className="text-[10px] text-slate-400">Selecciona para ver pasos</span>
             </div>
 
-            <div className="space-y-2 max-h-[620px] overflow-y-auto pr-1">
+            <div className="space-y-2 max-h-[640px] overflow-y-auto pr-1">
               {filteredGuides.map((guide) => {
                 const isSelected = guide.id === selectedGuideId;
                 const GuideIcon = guide.icon;
+                const checkedCount = (completedSteps[guide.id] || []).length;
+                const totalSteps = guide.steps.length;
+
                 return (
                   <button
                     key={guide.id}
@@ -743,14 +967,14 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
                     className={`w-full text-left p-4 rounded-2xl border transition-all duration-200 flex items-start gap-3.5 ${
                       isSelected
                         ? 'bg-[#2C2E53] text-white border-[#2C2E53] shadow-lg scale-[1.01]'
-                        : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-800'
+                        : 'bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100'
                     }`}
                   >
                     <div
                       className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition ${
                         isSelected
                           ? 'bg-[#D4AF37] text-slate-950 font-black'
-                          : 'bg-slate-100 text-slate-600'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
                       }`}
                     >
                       <GuideIcon className="w-5 h-5" />
@@ -759,16 +983,16 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5 mb-1 flex-wrap">
                         <span
-                          className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider ${
+                          className={`px-2 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider ${
                             isSelected
                               ? 'bg-white/20 text-white'
-                              : 'bg-slate-100 text-slate-600'
+                              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
                           }`}
                         >
                           {guide.category}
                         </span>
                         <span
-                          className={`text-[10px] font-bold ${
+                          className={`text-[9px] font-bold ${
                             isSelected ? 'text-[#D4AF37]' : 'text-slate-400'
                           }`}
                         >
@@ -777,18 +1001,25 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
                       </div>
                       <h4
                         className={`text-xs font-black tracking-tight leading-snug truncate ${
-                          isSelected ? 'text-white' : 'text-[#2C2E53]'
+                          isSelected ? 'text-white' : 'text-[#2C2E53] dark:text-white'
                         }`}
                       >
                         {guide.title}
                       </h4>
                       <p
                         className={`text-[11px] line-clamp-2 mt-1 leading-relaxed ${
-                          isSelected ? 'text-slate-300' : 'text-slate-500'
+                          isSelected ? 'text-slate-300' : 'text-slate-500 dark:text-slate-400'
                         }`}
                       >
                         {guide.summary}
                       </p>
+
+                      {checkedCount > 0 && (
+                        <div className="mt-2 flex items-center gap-1.5 text-[10px] font-bold text-emerald-400">
+                          <Check className="w-3 h-3" />
+                          <span>{checkedCount}/{totalSteps} pasos completados</span>
+                        </div>
+                      )}
                     </div>
 
                     <ChevronRight
@@ -801,11 +1032,11 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
               })}
 
               {filteredGuides.length === 0 && (
-                <div className="p-8 text-center bg-white rounded-2xl border border-slate-200 text-slate-500">
+                <div className="p-8 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 text-slate-500">
                   <Info className="w-8 h-8 text-slate-400 mx-auto mb-2" />
                   <p className="text-xs font-bold">No se encontraron guías</p>
                   <p className="text-[11px] text-slate-400 mt-0.5">
-                    Pruebe cambiando el filtro de rol o el término de búsqueda.
+                    Prueba cambiando el rol seleccionado o el término de búsqueda.
                   </p>
                 </div>
               )}
@@ -813,40 +1044,53 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
           </div>
 
           {/* Detalle Ampliado de la Guía Seleccionada */}
-          <div className="lg:col-span-8 bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-cba-card space-y-6">
+          <div className="lg:col-span-8 bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-cba-card space-y-6">
             {/* Cabecera de la Guía */}
-            <div className="border-b border-slate-100 pb-5">
+            <div className="border-b border-slate-100 dark:border-slate-800 pb-5">
               <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
                 <div className="flex items-center gap-2">
                   <span className="px-2.5 py-1 rounded-lg text-xs font-black bg-[#2C2E53] text-[#D4AF37]">
                     {currentSelectedGuide.category}
                   </span>
-                  <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 text-slate-700">
+                  <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
                     Rol: {currentSelectedGuide.roleRequired}
                   </span>
                 </div>
 
-                {onNavigate && (
-                  <button
-                    onClick={() =>
-                      onNavigate(
-                        currentSelectedGuide.targetTab,
-                        currentSelectedGuide.targetSubTab
-                      )
-                    }
-                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#2C2E53] to-[#1B1C33] text-[#D4AF37] hover:scale-105 font-bold text-xs shadow-md transition flex items-center gap-1.5 focus:outline-none"
-                    title="Ir a esta pantalla en el sistema"
-                  >
-                    <span>Ir a la función</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </button>
-                )}
+                <div className="flex items-center gap-2">
+                  {(completedSteps[currentSelectedGuide.id] || []).length > 0 && (
+                    <button
+                      onClick={() => resetGuideChecklist(currentSelectedGuide.id)}
+                      className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-slate-800 dark:hover:text-white text-xs font-bold flex items-center gap-1.5 transition"
+                      title="Reiniciar checklist de pasos"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      <span>Reiniciar</span>
+                    </button>
+                  )}
+
+                  {onNavigate && (
+                    <button
+                      onClick={() =>
+                        onNavigate(
+                          currentSelectedGuide.targetTab,
+                          currentSelectedGuide.targetSubTab
+                        )
+                      }
+                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#2C2E53] to-[#1B1C33] text-[#D4AF37] hover:scale-105 font-bold text-xs shadow-md transition flex items-center gap-1.5 focus:outline-none"
+                      title="Ir a esta pantalla en el sistema"
+                    >
+                      <span>Ir a la función</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
               </div>
 
-              <h2 className="text-xl sm:text-2xl font-black text-[#2C2E53] mt-1">
+              <h2 className="text-xl sm:text-2xl font-black text-[#2C2E53] dark:text-white mt-1">
                 {currentSelectedGuide.title}
               </h2>
-              <p className="text-xs sm:text-sm text-slate-600 mt-1.5 leading-relaxed">
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1.5 leading-relaxed">
                 {currentSelectedGuide.summary}
               </p>
 
@@ -866,49 +1110,74 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
               )}
             </div>
 
-            {/* Secuencia de Pasos Numerados */}
+            {/* Secuencia de Pasos Numerados (Checklist Interactivo) */}
             <div className="space-y-4">
-              <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-400">
-                Procedimiento Secuencial:
-              </h3>
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-400">
+                  Procedimiento Secuencial (Haz clic para marcar como completado):
+                </h3>
+                <span className="text-[11px] text-slate-400">
+                  {(completedSteps[currentSelectedGuide.id] || []).length} de {currentSelectedGuide.steps.length} completados
+                </span>
+              </div>
 
               <div className="space-y-3.5">
-                {currentSelectedGuide.steps.map((step) => (
-                  <div
-                    key={step.number}
-                    className="p-4 rounded-2xl bg-slate-50 border border-slate-200/90 hover:border-slate-300 transition flex items-start gap-4"
-                  >
-                    <div className="w-8 h-8 rounded-xl bg-[#1B1C33] text-[#D4AF37] font-black text-sm flex items-center justify-center shrink-0 shadow-sm border border-[#2C2E53]">
-                      {step.number}
-                    </div>
+                {currentSelectedGuide.steps.map((step) => {
+                  const isChecked = (completedSteps[currentSelectedGuide.id] || []).includes(step.number);
+                  return (
+                    <div
+                      key={step.number}
+                      onClick={() => toggleStepCompletion(currentSelectedGuide.id, step.number)}
+                      className={`p-4 rounded-2xl border transition-all flex items-start gap-4 cursor-pointer select-none ${
+                        isChecked
+                          ? 'bg-emerald-50/60 dark:bg-emerald-950/20 border-emerald-300 dark:border-emerald-800'
+                          : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200/90 dark:border-slate-800 hover:border-slate-300'
+                      }`}
+                    >
+                      <button
+                        type="button"
+                        className={`w-8 h-8 rounded-xl font-black text-sm flex items-center justify-center shrink-0 shadow-sm border transition-colors ${
+                          isChecked
+                            ? 'bg-emerald-500 text-white border-emerald-600'
+                            : 'bg-[#1B1C33] text-[#D4AF37] border-[#2C2E53]'
+                        }`}
+                      >
+                        {isChecked ? <Check className="w-4 h-4 stroke-[3]" /> : step.number}
+                      </button>
 
-                    <div className="space-y-1 flex-1">
-                      <h4 className="text-xs font-black text-[#2C2E53]">
-                        {step.title}
-                      </h4>
-                      <p className="text-xs text-slate-600 leading-relaxed">
-                        {step.description}
-                      </p>
-
-                      {step.tip && (
-                        <div className="pt-2 flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
-                          <Lightbulb className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                          <span>
-                            <strong className="text-slate-700">Consejo CBA:</strong> {step.tip}
+                      <div className="space-y-1 flex-1">
+                        <div className="flex items-center justify-between">
+                          <h4 className={`text-xs font-black ${isChecked ? 'text-emerald-900 dark:text-emerald-200 line-through' : 'text-[#2C2E53] dark:text-white'}`}>
+                            {step.title}
+                          </h4>
+                          <span className="text-[10px] font-bold text-slate-400">
+                            {isChecked ? 'Completado' : 'Pendiente'}
                           </span>
                         </div>
-                      )}
+                        <p className={`text-xs leading-relaxed ${isChecked ? 'text-emerald-800/80 dark:text-emerald-300/80' : 'text-slate-600 dark:text-slate-300'}`}>
+                          {step.description}
+                        </p>
+
+                        {step.tip && (
+                          <div className="pt-2 flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                            <Lightbulb className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                            <span>
+                              <strong className="text-slate-700 dark:text-slate-200">Consejo CBA:</strong> {step.tip}
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
             {/* Pie de Ficha con Atajo */}
-            <div className="p-4 rounded-2xl bg-[#F8FAFC] border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-              <div className="flex items-center gap-2 text-slate-600">
+            <div className="p-4 rounded-2xl bg-[#F8FAFC] dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>¿Completó este procedimiento con éxito en el sistema?</span>
+                <span>¿Deseas probar este procedimiento en el sistema ahora mismo?</span>
               </div>
               {onNavigate && (
                 <button
@@ -918,7 +1187,7 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
                       currentSelectedGuide.targetSubTab
                     )
                   }
-                  className="px-3.5 py-1.5 rounded-lg bg-white border border-slate-300 text-slate-700 font-bold hover:bg-slate-50 transition flex items-center gap-1 text-[11px]"
+                  className="px-3.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition flex items-center gap-1 text-[11px]"
                 >
                   Abrir pantalla ahora <ArrowRight className="w-3 h-3" />
                 </button>
@@ -928,19 +1197,19 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
         </div>
       )}
 
-      {/* 5. CONTENIDO: SECCIÓN 3 - PREGUNTAS FRECUENTES (FAQ) */}
+      {/* 5. SECCIÓN 3: PREGUNTAS FRECUENTES (FAQ) */}
       {activeSection === 'FAQ' && (
         <div className="max-w-4xl mx-auto space-y-5">
-          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex items-center justify-between gap-4">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between gap-4">
             <div>
-              <h3 className="font-black text-lg text-[#2C2E53]">
+              <h3 className="font-black text-lg text-[#2C2E53] dark:text-white">
                 Preguntas Frecuentes y Soporte Técnico
               </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Respuestas inmediatas a las dudas operativas más comunes del personal docente y administrativo.
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Respuestas inmediatas a las dudas operativas más comunes según tu perfil de usuario.
               </p>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
               <HelpCircle className="w-5 h-5" />
             </div>
           </div>
@@ -951,21 +1220,21 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
               return (
                 <div
                   key={faq.id}
-                  className="bg-white dark:bg-[var(--theme-card-dark)] rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden transition-all duration-200"
+                  className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden transition-all duration-200"
                 >
                   <button
                     onClick={() => setOpenFaqId(isOpen ? null : faq.id)}
-                    className="w-full text-left p-5 flex items-center justify-between gap-4 hover:bg-slate-50/80 dark:hover:bg-white/5 transition focus:outline-none"
+                    className="w-full text-left p-5 flex items-center justify-between gap-4 hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition focus:outline-none"
                   >
                     <div className="flex items-center gap-3">
-                      <span className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-200 font-bold text-xs flex items-center justify-center shrink-0">
+                      <span className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs flex items-center justify-center shrink-0">
                         ?
                       </span>
                       <div>
-                        <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider block">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
                           {faq.category}
                         </span>
-                        <h4 className="text-xs sm:text-sm font-extrabold text-[#2C2E53] dark:text-[#F8FAFC]">
+                        <h4 className="text-xs sm:text-sm font-extrabold text-[#2C2E53] dark:text-white">
                           {faq.question}
                         </h4>
                       </div>
@@ -979,7 +1248,7 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
                   </button>
 
                   {isOpen && (
-                    <div className="px-5 pb-5 pt-2 text-xs text-slate-600 dark:text-slate-300 border-t border-slate-100 dark:border-white/10 bg-slate-50/50 dark:bg-black/20 space-y-2.5 animate-in fade-in duration-200">
+                    <div className="px-5 pb-5 pt-2 text-xs text-slate-600 dark:text-slate-300 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 space-y-2.5 animate-in fade-in duration-200">
                       <p className="leading-relaxed">{faq.answer}</p>
                       {faq.highlight && (
                         <div className="p-3 rounded-xl bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/60 text-blue-900 dark:text-blue-200 text-[11px] font-medium flex items-center gap-2">
@@ -994,14 +1263,14 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
             })}
 
             {filteredFaqs.length === 0 && (
-              <div className="p-8 text-center bg-white rounded-2xl border border-slate-200 text-slate-500">
+              <div className="p-8 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 text-slate-500">
                 <p className="text-xs font-bold">No se encontraron preguntas para este criterio.</p>
                 <button
                   onClick={() => {
                     setSearchQuery('');
-                    setRoleFilter('TODOS');
+                    setSelectedRole('ADMINISTRADOR');
                   }}
-                  className="mt-2 text-xs text-[#2C2E53] underline font-bold"
+                  className="mt-2 text-xs text-[#2C2E53] dark:text-amber-300 underline font-bold"
                 >
                   Restablecer filtros
                 </button>
@@ -1011,25 +1280,25 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
         </div>
       )}
 
-      {/* 6. CONTENIDO: SECCIÓN 4 - ATAJOS & PRODUCTIVIDAD */}
+      {/* 6. SECCIÓN 4: ATAJOS DE TECLADO & PRODUCTIVIDAD */}
       {activeSection === 'ATAJOS' && (
         <div className="max-w-4xl mx-auto space-y-6">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-cba-card space-y-6">
-            <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-cba-card space-y-6">
+            <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
               <div className="w-10 h-10 rounded-xl bg-[#2C2E53] text-[#D4AF37] flex items-center justify-center">
                 <Laptop className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-black text-lg text-[#2C2E53]">
+                <h3 className="font-black text-lg text-[#2C2E53] dark:text-white">
                   Atajos de Teclado y Consejos de Rapidez
                 </h3>
-                <p className="text-xs text-slate-500">
-                  Acelere sus tareas diarias en el sistema utilizando las siguientes combinaciones de teclas
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Acelera tus tareas diarias en el sistema utilizando las siguientes combinaciones de teclas
                 </p>
               </div>
             </div>
 
-            {/* Tabla Principal y Oficial de Atajos Solicitados */}
+            {/* Tabla Principal de Atajos */}
             <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/40 shadow-sm">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
@@ -1152,54 +1421,6 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
                     <tr className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition">
                       <td className="py-3 px-4 whitespace-nowrap">
                         <div className="flex items-center gap-1 font-mono font-bold">
-                          <kbd className="px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 shadow-sm">Alt</kbd>
-                          <span className="text-slate-400">+</span>
-                          <kbd className="px-2 py-1 rounded-md bg-[#2C2E53] text-[#D4AF37] dark:text-amber-300 shadow-sm">6</kbd>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 font-bold text-[#2C2E53] dark:text-[#F8FAFC]">
-                        Configuración
-                      </td>
-                      <td className="py-3 px-4 text-slate-600 dark:text-slate-300">
-                        Acceso a parámetros (según rol).
-                      </td>
-                    </tr>
-
-                    <tr className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition">
-                      <td className="py-3 px-4 whitespace-nowrap">
-                        <div className="flex items-center gap-1 font-mono font-bold">
-                          <kbd className="px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 shadow-sm">Alt</kbd>
-                          <span className="text-slate-400">+</span>
-                          <kbd className="px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-amber-300 shadow-sm">D</kbd>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 font-bold text-[#2C2E53] dark:text-[#F8FAFC]">
-                        Modo Oscuro / Claro
-                      </td>
-                      <td className="py-3 px-4 text-slate-600 dark:text-slate-300">
-                        Alterna el tema visual al instante.
-                      </td>
-                    </tr>
-
-                    <tr className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition">
-                      <td className="py-3 px-4 whitespace-nowrap">
-                        <div className="flex items-center gap-1 font-mono font-bold">
-                          <kbd className="px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 shadow-sm">Alt</kbd>
-                          <span className="text-slate-400">+</span>
-                          <kbd className="px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-amber-300 shadow-sm">B</kbd>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 font-bold text-[#2C2E53] dark:text-[#F8FAFC]">
-                        Colapsar Barra Lateral
-                      </td>
-                      <td className="py-3 px-4 text-slate-600 dark:text-slate-300">
-                        Oculta/muestra el menú lateral para mayor amplitud en pantalla.
-                      </td>
-                    </tr>
-
-                    <tr className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition">
-                      <td className="py-3 px-4 whitespace-nowrap">
-                        <div className="flex items-center gap-1 font-mono font-bold">
                           <kbd className="px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 shadow-sm">Ctrl</kbd>
                           <span className="text-slate-400">+</span>
                           <kbd className="px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-amber-300 shadow-sm">P</kbd>
@@ -1210,18 +1431,6 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
                       </td>
                       <td className="py-3 px-4 text-slate-600 dark:text-slate-300">
                         Prepara actas, boletines o la vista actual para impresión.
-                      </td>
-                    </tr>
-
-                    <tr className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition">
-                      <td className="py-3 px-4 whitespace-nowrap">
-                        <kbd className="px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-amber-300 font-mono font-bold shadow-sm">Escape</kbd>
-                      </td>
-                      <td className="py-3 px-4 font-bold text-[#2C2E53] dark:text-[#F8FAFC]">
-                        Cerrar Diálogos
-                      </td>
-                      <td className="py-3 px-4 text-slate-600 dark:text-slate-300">
-                        Cierra cualquier modal o panel flotante abierto.
                       </td>
                     </tr>
                   </tbody>
@@ -1235,7 +1444,7 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
               <div className="text-xs text-amber-900 dark:text-amber-200">
                 <p className="font-bold">Protección inteligente durante la escritura</p>
                 <p className="mt-0.5 text-amber-800/90 dark:text-amber-300/80 text-[11px]">
-                  Los atajos de una sola tecla (como <kbd className="font-mono bg-white/70 dark:bg-slate-900/60 px-1 py-0.5 rounded border border-amber-300 dark:border-amber-700">?</kbd> o <kbd className="font-mono bg-white/70 dark:bg-slate-900/60 px-1 py-0.5 rounded border border-amber-300 dark:border-amber-700">/</kbd>) quedan automáticamente inactivos mientras escribe dentro de campos de búsqueda, formularios o notas pedagógicas, protegiendo su flujo de trabajo.
+                  Los atajos de una sola tecla quedan automáticamente inactivos mientras escribes dentro de campos de búsqueda, formularios o notas pedagógicas, protegiendo tu flujo de trabajo.
                 </p>
               </div>
             </div>
@@ -1246,9 +1455,9 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
                 <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#D4AF37]">
                   Mesa de Ayuda CBA
                 </span>
-                <h4 className="text-sm font-bold">¿Requiere asistencia personalizada o reportar una incidencia?</h4>
+                <h4 className="text-sm font-bold">¿Requieres asistencia personalizada o reportar una incidencia?</h4>
                 <p className="text-xs text-slate-300">
-                  Puede utilizar el apartado de "Ideas y Sugerencias" en el Escritorio o acudir a la Coordinación de Telemática.
+                  Puedes utilizar el apartado de "Ideas y Sugerencias" en el Escritorio o acudir a la Coordinación de Telemática.
                 </p>
               </div>
 
