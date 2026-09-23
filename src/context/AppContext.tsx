@@ -31,6 +31,15 @@ import {
   AppUser
 } from '../types';
 import {
+  hashPassword,
+  verifyPassword,
+  checkRateLimit,
+  recordFailedAttempt,
+  resetLoginAttempts,
+  is2FARequiredForRole,
+  verifyTOTPCode
+} from '../utils/security';
+import {
   INITIAL_AREAS,
   INITIAL_COMPETENCIES,
   INITIAL_INDICATORS,
@@ -92,8 +101,12 @@ interface AppContextType {
   isAuthenticated: boolean;
   currentUser: AppUser | null;
   users: AppUser[];
-  addUser: (user: Omit<AppUser, 'id'>) => AppUser;
-  login: (username: string, password?: string) => Promise<{ success: boolean; message?: string }>;
+  addUser: (user: Omit<AppUser, 'id'>) => Promise<AppUser>;
+  login: (
+    username: string,
+    password?: string,
+    totpCode?: string
+  ) => Promise<{ success: boolean; message?: string; requires2FA?: boolean; userRole?: UserRole }>;
   logout: () => void;
   currentLevel: EducationalLevel;
   setCurrentLevel: (level: EducationalLevel) => void;
@@ -321,9 +334,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('sisceba_users_v3', JSON.stringify(users));
   }, [users]);
 
-  const addUser = (userData: Omit<AppUser, 'id'>): AppUser => {
+  const addUser = async (userData: Omit<AppUser, 'id'>): Promise<AppUser> => {
+    // Si la contraseña fue provista en texto plano, hashearla criptográficamente
+    let securePassword = userData.password;
+    if (securePassword && !securePassword.startsWith('$pbkdf2$')) {
+      securePassword = await hashPassword(securePassword);
+    }
+
     const newUser: AppUser = {
       ...userData,
+      password: securePassword,
+      passwordLastChanged: new Date().toISOString(),
+      twoFactorEnabled: is2FARequiredForRole(userData.role),
+      twoFactorSecret: is2FARequiredForRole(userData.role) ? 'CBA-SECURE-2FA-SEED' : undefined,
       id: `usr-${Date.now()}`
     };
     setUsers(prev => [newUser, ...prev]);
@@ -339,8 +362,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [currentUser]);
 
-  const login = async (userInput: string, password?: string): Promise<{ success: boolean; message?: string }> => {
+  const login = async (
+    userInput: string,
+    password?: string,
+    totpCode?: string
+  ): Promise<{ success: boolean; message?: string; requires2FA?: boolean; userRole?: UserRole }> => {
     const trimmedInput = userInput.trim().toLowerCase();
+
+    // 1. Defensa contra fuerza bruta (Rate Limiting)
+    const rateCheck = checkRateLimit(trimmedInput);
+    if (!rateCheck.allowed) {
+      return {
+        success: false,
+        message: `Cuenta bloqueada temporalmente por múltiples intentos fallidos. Intente nuevamente en ${rateCheck.remainingSeconds} segundos.`
+      };
+    }
+
     let matched = users.find(
       u => u.username.toLowerCase() === trimmedInput || u.email.toLowerCase() === trimmedInput
     );
@@ -365,7 +402,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             role: row.role,
             defaultLevel: row.default_level || 'MEDIA_GENERAL',
             active: row.active ?? true,
-            avatarUrl: row.avatar_url
+            avatarUrl: row.avatar_url,
+            twoFactorEnabled: row.two_factor_enabled ?? is2FARequiredForRole(row.role),
+            twoFactorSecret: row.two_factor_secret,
+            passwordLastChanged: row.password_last_changed
           };
           // Actualizar en el estado local de usuarios
           setUsers(prev => {
@@ -393,6 +433,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // Regla estricta: Solo cuentas registradas en la base de datos
     if (!matched) {
+      recordFailedAttempt(trimmedInput);
       return {
         success: false,
         message: 'Usuario o correo no registrado en la base de datos institucional de SICE-CBA.'
@@ -407,16 +448,74 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       };
     }
 
-    // Validación estricta de contraseña
+    // 2. Validación de contraseña con Hashing Criptográfico y Auto-migración
     if (matched.password) {
-      if (!password || password !== matched.password) {
+      if (!password) {
+        recordFailedAttempt(trimmedInput);
         return {
           success: false,
-          message: 'Contraseña incorrecta. Por favor verifique sus credenciales.'
+          message: 'Por favor ingrese su contraseña.'
+        };
+      }
+
+      const verifyResult = await verifyPassword(password, matched.password);
+      if (!verifyResult.valid) {
+        const attempt = recordFailedAttempt(trimmedInput);
+        if (attempt.isBlocked) {
+          return {
+            success: false,
+            message: `Demasiados intentos fallidos. Su acceso ha sido bloqueado preventivamente durante 15 minutos.`
+          };
+        }
+        return {
+          success: false,
+          message: `Contraseña incorrecta. Le quedan ${attempt.remainingAttempts} intento(s) antes del bloqueo temporal.`
+        };
+      }
+
+      // Si la contraseña estaba en texto plano, migrarla de inmediato a hash seguro
+      if (verifyResult.needsMigration) {
+        try {
+          const newHashed = await hashPassword(password);
+          matched.password = newHashed;
+          matched.passwordLastChanged = new Date().toISOString();
+          setUsers(prev => prev.map(u => (u.id === matched!.id ? { ...matched! } : u)));
+          supabaseSaveUser(matched).catch(err => console.warn('Auto-migración hash en Supabase err:', err));
+          console.info(`[DevSecOps] Contraseña de usuario ${matched.username} migrada transparentemente a PBKDF2/SHA-256.`);
+        } catch (e) {
+          console.warn('Fallo en rutina de auto-migración de contraseña:', e);
+        }
+      }
+    }
+
+    // 3. Segundo Factor de Autenticación (2FA / TOTP)
+    const requires2FA = is2FARequiredForRole(matched.role) || !!matched.twoFactorEnabled;
+    if (requires2FA) {
+      if (!totpCode) {
+        // Solicitud de segundo factor al frontend
+        return {
+          success: false,
+          requires2FA: true,
+          userRole: matched.role,
+          message: `El rol ${matched.role} requiere verificación de Segundo Factor de Autenticación (2FA / TOTP).`
+        };
+      }
+
+      const secret = matched.twoFactorSecret || 'CBA-SECURE-2FA-SEED';
+      const isTotpValid = await verifyTOTPCode(totpCode, secret);
+      if (!isTotpValid) {
+        const attempt = recordFailedAttempt(trimmedInput);
+        return {
+          success: false,
+          requires2FA: true,
+          userRole: matched.role,
+          message: `Código de seguridad 2FA inválido o expirado. Intentos restantes: ${attempt.remainingAttempts}.`
         };
       }
     }
 
+    // Éxito: Resetear intentos fallidos y establecer sesión
+    resetLoginAttempts(trimmedInput);
     setCurrentUser(matched);
     setCurrentRole(matched.role);
     setCurrentLevel(matched.defaultLevel);

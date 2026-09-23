@@ -12,6 +12,9 @@ export interface AppUser {
   defaultLevel: EducationalLevel;
   active: boolean;
   avatarUrl?: string;
+  twoFactorEnabled?: boolean;
+  twoFactorSecret?: string;
+  passwordLastChanged?: string;
 }
 
 export type SubjectType = 'REGULAR' | 'INTEGRADA' | 'ESPECIALIZADA';

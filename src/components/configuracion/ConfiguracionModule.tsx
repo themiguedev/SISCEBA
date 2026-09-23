@@ -50,13 +50,13 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
   const [newRole, setNewRole] = useState<UserRole>('DOCENTE');
   const [newDefaultLevel, setNewDefaultLevel] = useState<EducationalLevel>('MEDIA_GENERAL');
 
-  const handleRegisterUser = (e: React.FormEvent) => {
+  const handleRegisterUser = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newFullName.trim() || !newUsername.trim() || !newEmail.trim() || !newPassword.trim()) {
       return;
     }
 
-    addUser({
+    await addUser({
       fullName: newFullName.trim(),
       username: newUsername.trim().toLowerCase(),
       email: newEmail.trim().toLowerCase(),
