@@ -904,40 +904,7 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
             </div>
           </div>
 
-          {/* Buenas Prácticas y Puntos de Atención (Dos and Don'ts) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {/* Buenas Prácticas (Qué SÍ hacer) */}
-            <div className="bg-emerald-50/70 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/40 rounded-3xl p-6 space-y-3">
-              <div className="flex items-center gap-2.5 text-emerald-800 dark:text-emerald-300">
-                <CheckCircle2 className="w-5 h-5" />
-                <h4 className="font-black text-sm">Buenas Prácticas Recomendadas</h4>
-              </div>
-              <ul className="space-y-2 text-xs text-emerald-900 dark:text-emerald-200">
-                {currentRoleGuide.dosAndDonts.dos.map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-2">
-                    <span className="text-emerald-600 dark:text-emerald-400 font-bold shrink-0">✓</span>
-                    <span className="leading-relaxed">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
 
-            {/* Puntos de Atención (Qué NO hacer) */}
-            <div className="bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 rounded-3xl p-6 space-y-3">
-              <div className="flex items-center gap-2.5 text-amber-800 dark:text-amber-300">
-                <AlertTriangle className="w-5 h-5" />
-                <h4 className="font-black text-sm">Puntos de Atención y Restricciones</h4>
-              </div>
-              <ul className="space-y-2 text-xs text-amber-900 dark:text-amber-200">
-                {currentRoleGuide.dosAndDonts.donts.map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-2">
-                    <span className="text-amber-600 dark:text-amber-400 font-bold shrink-0">✕</span>
-                    <span className="leading-relaxed">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
         </div>
       )}
 
