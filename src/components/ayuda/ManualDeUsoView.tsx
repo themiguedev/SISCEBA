@@ -657,9 +657,9 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
         </div>
 
         {/* Barra de Selector de Rol y Búsqueda */}
-        <div className="mt-6 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="mt-6 pt-6 border-t border-white/10 flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4">
           {/* Selector de Roles Interactivo */}
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar w-full sm:w-auto py-1">
+          <div className="flex items-center gap-1.5 flex-wrap w-full xl:w-auto py-1">
             <span className="text-[11px] font-bold text-slate-400 mr-1 shrink-0 flex items-center gap-1">
               <Filter className="w-3 h-3" />
               Vista de rol:
@@ -678,7 +678,6 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
                   }`}
                   title={isSessionRole ? 'Este es el rol de tu sesión activa' : `Ver guía del rol ${r}`}
                 >
-                  <span>{ROLE_SPECIFIC_MANUALS[r]?.badgeEmoji || '👤'}</span>
                   <span>{ROLE_METADATA[r]?.badge || r}</span>
                   {isSessionRole && (
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 ml-0.5" title="Tu rol actual" />
@@ -689,7 +688,7 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
           </div>
 
           {/* Campo de Búsqueda */}
-          <div className="relative w-full sm:w-80">
+          <div className="relative w-full xl:w-80 shrink-0">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-2.5" />
             <input
               type="text"
