@@ -287,23 +287,26 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
                 <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
                   <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Última Visita</span>
-                  <p className="text-xs font-extrabold text-slate-800 mt-1">16-09-2026</p>
-                  <p className="text-[10px] text-slate-500">10:42 AM</p>
+                  <p className="text-xs font-extrabold text-slate-800 mt-1">Hoy</p>
+                  <p className="text-[10px] text-slate-500">{new Date().toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' })}</p>
                 </div>
                 <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Visitas Hoy</span>
-                  <p className="text-xl font-black text-[#2C2E53] mt-0.5">14</p>
-                  <p className="text-[10px] text-emerald-600 font-semibold">Sesión activa</p>
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Sesión Actual</span>
+                  <p className="text-sm font-black text-emerald-600 mt-1 flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Activa
+                  </p>
+                  <p className="text-[10px] text-slate-500">En línea</p>
                 </div>
                 <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Visitas Totales</span>
-                  <p className="text-xl font-black text-[#2C2E53] mt-0.5">1,289</p>
-                  <p className="text-[10px] text-slate-400 font-medium">Histórico anual</p>
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Año Escolar</span>
+                  <p className="text-xs font-black text-[#2C2E53] mt-1">2026 - 2027</p>
+                  <p className="text-[10px] text-slate-400 font-medium">Ciclo Oficial</p>
                 </div>
                 <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Dirección IP</span>
-                  <p className="text-xs font-mono font-extrabold text-slate-800 mt-1">172.16.7.76</p>
-                  <p className="text-[10px] text-slate-400">Red Interna CBA</p>
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Entorno de Red</span>
+                  <p className="text-xs font-mono font-extrabold text-slate-800 mt-1">Local / Nube</p>
+                  <p className="text-[10px] text-slate-400">Sincronizado Supabase</p>
                 </div>
               </div>
 

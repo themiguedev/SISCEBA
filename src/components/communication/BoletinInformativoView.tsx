@@ -84,16 +84,12 @@ export const BoletinInformativoView: React.FC = () => {
         obs: procRecs[0].observations || 'Participación activa y cumplimiento de actividades.'
       };
     }
-    // Default score based on subsystem
-    const isChacin = activeStudent.id.includes('stu-med-3');
-    const isCamila = activeStudent.id === 'stu-med-2' || activeStudent.fullName.toLowerCase().includes('camila');
+    // Default score based on real records
     return {
-      scoreNumeric: isChacin ? (areaId.includes('mat') ? 8 : 12) : isCamila ? 19 : 18,
-      scoreLiteral: (activeStudent.id.includes('stu-ini-3') ? 'B' : 'A') as any,
-      scoreQualitative: (activeStudent.id.includes('stu-pri-3') ? 'P' : 'L') as any,
-      obs: isChacin
-        ? 'En proceso de afianzamiento conceptual. Cuenta con Plan de Acción Pedagógico.'
-        : 'Excelente comprensión conceptual y aplicación práctica en los proyectos del aula.'
+      scoreNumeric: undefined,
+      scoreLiteral: undefined,
+      scoreQualitative: undefined,
+      obs: 'Sin evaluaciones procesales asentadas en este lapso.'
     };
   };
 
@@ -152,7 +148,7 @@ export const BoletinInformativoView: React.FC = () => {
       </div>
 
       {/* Official Bellas Artes Document Layout */}
-      {activeStudent && (
+      {activeStudent ? (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-xl p-8 max-w-4xl mx-auto space-y-6 print:shadow-none print:border-none print:p-2">
           {/* Institutional Header with Logo and Titles */}
           <div className="flex items-center justify-between border-b-2 border-[#2C2E53] pb-4">
@@ -334,6 +330,16 @@ export const BoletinInformativoView: React.FC = () => {
               </div>
             </div>
           </div>
+        </div>
+      ) : (
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-12 text-center max-w-xl mx-auto space-y-3">
+          <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 mx-auto flex items-center justify-center">
+            <User className="w-6 h-6" />
+          </div>
+          <h3 className="font-extrabold text-slate-800 dark:text-white text-sm">No hay estudiantes registrados</h3>
+          <p className="text-xs text-slate-500 leading-relaxed">
+            Una vez inscritos los alumnos en el sistema y asentadas sus calificaciones continuas, aquí podrá visualizar e imprimir sus boletines oficiales con formato institucional.
+          </p>
         </div>
       )}
     </div>

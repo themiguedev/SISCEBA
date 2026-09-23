@@ -114,8 +114,8 @@ export const ConsultasModule: React.FC<ConsultasModuleProps> = ({
     return { code: defaultScore, label: defaultScore === 'L' ? 'Logrado' : defaultScore === 'EP' ? 'En Proceso' : 'Iniciado' };
   };
 
-  // Helper para Primaria (Literal MPPE: A, B, C, D, E)
-  const getPrimariaScore = (studentId: string, areaCodePrefix: string, defaultScore: 'A' | 'B' | 'C' = 'A'): string => {
+  // Helper para Primaria (Literal MPPE: A, B, C, D, E o '-')
+  const getPrimariaScore = (studentId: string, areaCodePrefix: string, defaultScore: string = '-'): string => {
     const matchedArea = areas.find(a => 
       a.level === 'PRIMARIA' && (
         a.id.toLowerCase().includes(areaCodePrefix.toLowerCase()) || 
@@ -439,15 +439,16 @@ export const ConsultasModule: React.FC<ConsultasModuleProps> = ({
                         </tr>
                       ) : (
                         filteredStudents.filter(s => s.level === 'INICIAL').map((stu) => {
-                        const isLucas = stu.id.includes('stu-ini-3') || stu.fullName.toLowerCase().includes('lucas');
-                        const fpScore = getInicialScore(stu.id, 'fp', isLucas ? 'EP' : 'L');
+                        const fpScore = getInicialScore(stu.id, 'fp', 'L');
                         const caScore = getInicialScore(stu.id, 'ca', 'L');
                         const apScore = getInicialScore(stu.id, 'ap', 'L');
-                        const efScore = getInicialScore(stu.id, 'ef', isLucas ? 'EP' : 'L');
+                        const efScore = getInicialScore(stu.id, 'ef', 'L');
 
+                        const hasEvaluations = evaluations.some(e => e.studentId === stu.id && e.lapso === activeLapso);
                         const hasEP = fpScore.code === 'EP' || caScore.code === 'EP' || apScore.code === 'EP' || efScore.code === 'EP';
 
                         const renderBadge = (score: { code: 'L' | 'EP' | 'I'; label: string }) => {
+                          if (!hasEvaluations) return <span className="text-slate-400 font-mono">-</span>;
                           if (score.code === 'L') {
                             return (
                               <span className="px-2.5 py-1 rounded-lg text-xs font-black bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700">
@@ -479,22 +480,30 @@ export const ConsultasModule: React.FC<ConsultasModuleProps> = ({
                             <td className="py-3 px-4 text-center">{renderBadge(apScore)}</td>
                             <td className="py-3 px-4 text-center">{renderBadge(efScore)}</td>
                             <td className="py-3 px-4 text-center">
-                              <span className={`px-3 py-1 rounded-full text-xs font-black border ${
-                                hasEP
-                                  ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-700'
-                                  : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-200 border-emerald-300 dark:border-emerald-700'
-                              }`}>
-                                {hasEP ? 'En Proceso (EP)' : 'Logrado (L)'}
-                              </span>
+                              {!hasEvaluations ? (
+                                <span className="text-[10px] text-slate-400 font-semibold italic">Sin evaluar</span>
+                              ) : (
+                                <span className={`px-3 py-1 rounded-full text-xs font-black border ${
+                                  hasEP
+                                    ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-700'
+                                    : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-200 border-emerald-300 dark:border-emerald-700'
+                                }`}>
+                                  {hasEP ? 'En Proceso (EP)' : 'Logrado (L)'}
+                                </span>
+                              )}
                             </td>
                             <td className="py-3 px-4 text-center">
-                              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${
-                                hasEP
-                                  ? 'bg-amber-100/70 dark:bg-amber-950/50 text-amber-900 dark:text-amber-200 border-amber-300 dark:border-amber-700'
-                                  : 'bg-emerald-100/70 dark:bg-emerald-950/50 text-emerald-900 dark:text-emerald-200 border-emerald-300 dark:border-emerald-700'
-                              }`}>
-                                {hasEP ? 'En Proceso' : 'Logrado'}
-                              </span>
+                              {!hasEvaluations ? (
+                                <span className="text-[10px] text-slate-400 font-semibold italic">En curso</span>
+                              ) : (
+                                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${
+                                  hasEP
+                                    ? 'bg-amber-100/70 dark:bg-amber-950/50 text-amber-900 dark:text-amber-200 border-amber-300 dark:border-amber-700'
+                                    : 'bg-emerald-100/70 dark:bg-emerald-950/50 text-emerald-900 dark:text-emerald-200 border-emerald-300 dark:border-emerald-700'
+                                }`}>
+                                  {hasEP ? 'En Proceso' : 'Logrado'}
+                                </span>
+                              )}
                             </td>
                           </tr>
                         );
@@ -542,25 +551,28 @@ export const ConsultasModule: React.FC<ConsultasModuleProps> = ({
                         </tr>
                       ) : (
                         filteredStudents.filter(s => s.level === 'PRIMARIA').map((stu) => {
-                        const isFinol = stu.fullName.toLowerCase().includes('finol');
-                        const lenScore = getPrimariaScore(stu.id, 'len', isFinol ? 'B' : 'A');
-                        const matScore = getPrimariaScore(stu.id, 'mat', isFinol ? 'B' : 'A');
-                        const natScore = getPrimariaScore(stu.id, 'cn', 'A');
-                        const socScore = getPrimariaScore(stu.id, 'cs', 'A');
+                        const lenScore = getPrimariaScore(stu.id, 'len', '-');
+                        const matScore = getPrimariaScore(stu.id, 'mat', '-');
+                        const natScore = getPrimariaScore(stu.id, 'cn', '-');
+                        const socScore = getPrimariaScore(stu.id, 'cs', '-');
 
-                        const literalGlobal = isFinol ? 'B' : 'A';
+                        const validLiterals = [lenScore, matScore, natScore, socScore].filter(l => l !== '-');
+                        const literalGlobal = validLiterals.length > 0 ? validLiterals[0] : '-';
 
-                        const renderLiteral = (lit: string) => (
-                          <span className={`px-2.5 py-1 rounded-lg text-xs font-black border ${
-                            lit === 'A'
-                              ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700'
-                              : lit === 'B'
-                              ? 'bg-teal-50 dark:bg-teal-950/50 text-teal-700 dark:text-teal-300 border-teal-300 dark:border-teal-700'
-                              : 'bg-amber-50 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-700'
-                          }`}>
-                            Literal {lit}
-                          </span>
-                        );
+                        const renderLiteral = (lit: string) => {
+                          if (lit === '-') return <span className="text-slate-400 font-mono">-</span>;
+                          return (
+                            <span className={`px-2.5 py-1 rounded-lg text-xs font-black border ${
+                              lit === 'A'
+                                ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700'
+                                : lit === 'B'
+                                ? 'bg-teal-50 dark:bg-teal-950/50 text-teal-700 dark:text-teal-300 border-teal-300 dark:border-teal-700'
+                                : 'bg-amber-50 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-700'
+                            }`}>
+                              Literal {lit}
+                            </span>
+                          );
+                        };
 
                         return (
                           <tr key={stu.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors">
@@ -572,14 +584,22 @@ export const ConsultasModule: React.FC<ConsultasModuleProps> = ({
                             <td className="py-3 px-4 text-center">{renderLiteral(natScore)}</td>
                             <td className="py-3 px-4 text-center">{renderLiteral(socScore)}</td>
                             <td className="py-3 px-4 text-center">
-                              <span className="px-3 py-1 rounded-full text-xs font-black bg-[#D4AF37]/15 text-[#94721C] dark:text-amber-300 border border-[#D4AF37]/40">
-                                Literal {literalGlobal}
-                              </span>
+                              {literalGlobal === '-' ? (
+                                <span className="text-[10px] text-slate-400 font-semibold italic">Sin evaluar</span>
+                              ) : (
+                                <span className="px-3 py-1 rounded-full text-xs font-black bg-[#D4AF37]/15 text-[#94721C] dark:text-amber-300 border border-[#D4AF37]/40">
+                                  Literal {literalGlobal}
+                                </span>
+                              )}
                             </td>
                             <td className="py-3 px-4 text-center">
-                              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100/70 dark:bg-emerald-950/50 text-emerald-900 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700">
-                                Promovido
-                              </span>
+                              {literalGlobal === '-' ? (
+                                <span className="text-[10px] text-slate-400 font-semibold italic">En curso</span>
+                              ) : (
+                                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100/70 dark:bg-emerald-950/50 text-emerald-900 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700">
+                                  Promovido
+                                </span>
+                              )}
                             </td>
                           </tr>
                         );
@@ -627,37 +647,40 @@ export const ConsultasModule: React.FC<ConsultasModuleProps> = ({
                         </tr>
                       ) : (
                         filteredStudents.filter(s => s.level === 'MEDIA_GENERAL').map((stu) => {
-                        const isChacin = stu.fullName.includes('Chacín');
-                        const isRomero = stu.fullName.includes('Romero');
-                        const mathScore = getMediaScore(stu.id, 'mat', isChacin ? 12 : isRomero ? 14 : 17);
-                        const castScore = getMediaScore(stu.id, 'cas', isChacin ? 15 : 20);
-                        const fisScore = getMediaScore(stu.id, 'fis', isChacin ? 11 : isRomero ? 10 : 18);
-                        const quiScore = getMediaScore(stu.id, 'qui', isChacin ? 13 : 17);
-                        const avg = ((mathScore + castScore + fisScore + quiScore) / 4).toFixed(2);
-                        const isPassing = Number(avg) >= 10;
+                        const mathScore = getMediaScore(stu.id, 'mat', 0);
+                        const castScore = getMediaScore(stu.id, 'cas', 0);
+                        const fisScore = getMediaScore(stu.id, 'fis', 0);
+                        const quiScore = getMediaScore(stu.id, 'qui', 0);
+                        const validScores = [mathScore, castScore, fisScore, quiScore].filter(s => s > 0);
+                        const avg = validScores.length > 0 ? (validScores.reduce((a, b) => a + b, 0) / validScores.length).toFixed(2) : '-';
+                        const isPassing = validScores.length > 0 && Number(avg) >= 10;
 
                         return (
                           <tr key={stu.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors">
                             <td className="py-3 px-4 font-mono font-bold text-[#2C2E53] dark:text-amber-300">{stu.cedula}</td>
                             <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">{stu.fullName}</td>
                             <td className="py-3 px-4 font-semibold text-slate-600 dark:text-slate-300">{stu.grade} {stu.section}</td>
-                            <td className="py-3 px-4 text-center font-mono font-bold">{mathScore}</td>
-                            <td className="py-3 px-4 text-center font-mono font-bold">{castScore}</td>
-                            <td className="py-3 px-4 text-center font-mono font-bold">{fisScore}</td>
-                            <td className="py-3 px-4 text-center font-mono font-bold">{quiScore}</td>
+                            <td className="py-3 px-4 text-center font-mono font-bold">{mathScore > 0 ? mathScore : '-'}</td>
+                            <td className="py-3 px-4 text-center font-mono font-bold">{castScore > 0 ? castScore : '-'}</td>
+                            <td className="py-3 px-4 text-center font-mono font-bold">{fisScore > 0 ? fisScore : '-'}</td>
+                            <td className="py-3 px-4 text-center font-mono font-bold">{quiScore > 0 ? quiScore : '-'}</td>
                             <td className="py-3 px-4 text-center font-mono font-black text-[#2C2E53] dark:text-white">
                               <span className="px-2 py-0.5 rounded bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200 border border-amber-200 dark:border-amber-800">
                                 {avg}
                               </span>
                             </td>
                             <td className="py-3 px-4 text-center">
-                              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${
-                                isPassing
-                                  ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
-                                  : 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800'
-                              }`}>
-                                {isPassing ? 'Aprobado' : 'Materia Pendiente'}
-                              </span>
+                              {validScores.length === 0 ? (
+                                <span className="text-[10px] text-slate-400 font-semibold italic">Sin notas</span>
+                              ) : (
+                                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${
+                                  isPassing
+                                    ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+                                    : 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800'
+                                }`}>
+                                  {isPassing ? 'Aprobado' : 'Materia Pendiente'}
+                                </span>
+                              )}
                             </td>
                           </tr>
                         );
@@ -776,31 +799,41 @@ export const ConsultasModule: React.FC<ConsultasModuleProps> = ({
 
       {/* VIEW 4: ESTADÍSTICAS */}
       {activeTab === 'ESTADISTICAS' && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-cba-card text-center space-y-2">
-            <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider block">
-              Tasa General de Aprobación
-            </span>
-            <p className="text-4xl font-black text-[#2C2E53] dark:text-white">94.2%</p>
-            <p className="text-xs text-emerald-600 dark:text-emerald-400 font-bold">↑ +2.1% respecto al año anterior</p>
+        students.length === 0 ? (
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-12 border border-dashed border-slate-200 dark:border-slate-800 text-center space-y-3">
+            <BarChart3 className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto" />
+            <h3 className="font-extrabold text-sm text-slate-800 dark:text-white">Sin estadísticas registradas</h3>
+            <p className="text-xs text-slate-500 max-w-md mx-auto">
+              Las tasas de aprobación, promedios institucionales y estadísticas comparativas se generarán automáticamente al inscribir estudiantes y asentar sus evaluaciones.
+            </p>
           </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-cba-card text-center space-y-2">
+              <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider block">
+                Total Estudiantes Matriculados
+              </span>
+              <p className="text-4xl font-black text-[#2C2E53] dark:text-white">{students.length}</p>
+              <p className="text-xs text-emerald-600 dark:text-emerald-400 font-bold">Matrícula activa CBA</p>
+            </div>
 
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-cba-card text-center space-y-2">
-            <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider block">
-              Promedio General Institucional
-            </span>
-            <p className="text-4xl font-black text-[#D4AF37]">16.8 / 20</p>
-            <p className="text-xs text-slate-500 font-semibold">Media General y Primaria</p>
-          </div>
+            <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-cba-card text-center space-y-2">
+              <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider block">
+                Evaluaciones Procesales
+              </span>
+              <p className="text-4xl font-black text-[#D4AF37]">{evaluations.length}</p>
+              <p className="text-xs text-slate-500 font-semibold">Registros asentados en Lapso {activeLapso}</p>
+            </div>
 
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-cba-card text-center space-y-2">
-            <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider block">
-              Alumnos con Materias Pendientes
-            </span>
-            <p className="text-4xl font-black text-amber-600">1</p>
-            <p className="text-xs text-amber-700 dark:text-amber-400 font-bold">En plan remedial activo</p>
+            <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-cba-card text-center space-y-2">
+              <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider block">
+                Pases por Retraso Emitidos
+              </span>
+              <p className="text-4xl font-black text-amber-600">{passes.length}</p>
+              <p className="text-xs text-slate-500 font-semibold">Control de puntualidad</p>
+            </div>
           </div>
-        </div>
+        )
       )}
 
       {/* VIEW 5: EXPEDIENTES / NÓMINAS */}
