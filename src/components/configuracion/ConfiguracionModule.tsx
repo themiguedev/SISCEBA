@@ -28,6 +28,7 @@ import {
   ShieldX
 } from 'lucide-react';
 import { hasSubTabAccess, canConfigureSchool, ROLE_METADATA } from '../../utils/rbac';
+import { getDefaultAvatarForUser } from '../../utils/avatarCatalog';
 
 interface ConfiguracionModuleProps {
   activeSubTab?: 'LAPSOS' | 'ESTRUCTURA' | 'DOCENTES' | 'TEMAS';
@@ -48,6 +49,7 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
   const [newEmail, setNewEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [newRole, setNewRole] = useState<UserRole>('DOCENTE');
+  const [newGender, setNewGender] = useState<'MASCULINO' | 'FEMENINO'>('FEMENINO');
   const [newDefaultLevel, setNewDefaultLevel] = useState<EducationalLevel>('MEDIA_GENERAL');
 
   const handleRegisterUser = async (e: React.FormEvent) => {
@@ -56,21 +58,29 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
       return;
     }
 
+    const defaultAvatar = getDefaultAvatarForUser({
+      gender: newGender,
+      role: newRole,
+      fullName: newFullName.trim()
+    });
+
     await addUser({
       fullName: newFullName.trim(),
       username: newUsername.trim().toLowerCase(),
       email: newEmail.trim().toLowerCase(),
       password: newPassword,
       role: newRole,
+      gender: newGender,
       defaultLevel: newDefaultLevel,
       active: true,
-      avatarUrl: `https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150`
+      avatarUrl: defaultAvatar
     });
 
     setNewFullName('');
     setNewUsername('');
     setNewEmail('');
     setNewPassword('');
+    setNewGender('FEMENINO');
     setShowRegisterForm(false);
     handleSaveSettings();
   };
@@ -451,6 +461,18 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
                       <option value="INICIAL">Educación Inicial (Literales A-E)</option>
                     </select>
                   </div>
+
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Sexo / Género (Avatar Predeterminado) *</label>
+                    <select
+                      value={newGender}
+                      onChange={(e) => setNewGender(e.target.value as 'MASCULINO' | 'FEMENINO')}
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#2C2E53] focus:border-transparent outline-none font-bold"
+                    >
+                      <option value="FEMENINO">Mujer (Femenino)</option>
+                      <option value="MASCULINO">Hombre (Masculino)</option>
+                    </select>
+                  </div>
                 </div>
 
                 <div className="flex items-center justify-end gap-3 pt-2">
@@ -488,9 +510,9 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
                     <div key={u.id} className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-white transition-colors flex items-start justify-between gap-3 shadow-xs">
                       <div className="flex items-start gap-3">
                         <img
-                          src={u.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}
+                          src={u.avatarUrl || getDefaultAvatarForUser(u)}
                           alt={u.fullName}
-                          className="w-10 h-10 rounded-full object-cover border border-slate-300 shrink-0"
+                          className="w-10 h-10 rounded-full object-contain border border-slate-300 shrink-0 bg-white"
                         />
                         <div className="space-y-1">
                           <p className="font-bold text-slate-900 leading-tight">{u.fullName}</p>

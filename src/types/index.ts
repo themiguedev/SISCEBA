@@ -12,6 +12,7 @@ export interface AppUser {
   defaultLevel: EducationalLevel;
   active: boolean;
   avatarUrl?: string;
+  gender?: 'MASCULINO' | 'FEMENINO';
   phone?: string;
   bio?: string;
   receiveEmails?: boolean;

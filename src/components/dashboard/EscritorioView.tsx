@@ -25,6 +25,7 @@ import {
   Image as ImageIcon,
   Phone
 } from 'lucide-react';
+import { OFFICIAL_AVATARS, getDefaultAvatarForUser } from '../../utils/avatarCatalog';
 
 export type EscritorioTab = 'DASHBOARD' | 'PERFIL' | 'SUGERENCIAS';
 
@@ -48,70 +49,28 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
     setInternalActiveTab(tab);
   };
 
-  // Avatar Presets Catalog (Avatares masculinos y femeninos profesionales y estilizados)
-  const AVATAR_PRESETS = [
-    {
-      id: 'female-1',
-      label: 'Docente / Directiva (Mujer)',
-      gender: 'FEMENINO',
-      url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&auto=format&fit=crop&q=80'
-    },
-    {
-      id: 'female-2',
-      label: 'Profesora / Coordinadora',
-      gender: 'FEMENINO',
-      url: 'https://images.unsplash.com/photo-1580894732470-349830501a35?w=200&auto=format&fit=crop&q=80'
-    },
-    {
-      id: 'female-3',
-      label: 'Especialista / Asistente',
-      gender: 'FEMENINO',
-      url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80'
-    },
-    {
-      id: 'female-4',
-      label: 'Orientadora / Docente',
-      gender: 'FEMENINO',
-      url: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&auto=format&fit=crop&q=80'
-    },
-    {
-      id: 'male-1',
-      label: 'Administrador / Directivo (Hombre)',
-      gender: 'MASCULINO',
-      url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&auto=format&fit=crop&q=80'
-    },
-    {
-      id: 'male-2',
-      label: 'Profesor / Coordinador',
-      gender: 'MASCULINO',
-      url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80'
-    },
-    {
-      id: 'male-3',
-      label: 'Docente de Ciencias / Tecnología',
-      gender: 'MASCULINO',
-      url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&auto=format&fit=crop&q=80'
-    },
-    {
-      id: 'male-4',
-      label: 'Coordinador / Asistente Académico',
-      gender: 'MASCULINO',
-      url: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=200&auto=format&fit=crop&q=80'
-    }
-  ];
+  // Avatar Presets Catalog oficiales según la imagen de referencia (Trajes y círculos)
+  const AVATAR_PRESETS = OFFICIAL_AVATARS;
 
   // Profile Form State synced with currentUser
   const [fullName, setFullName] = useState(currentUser?.fullName || '');
   const [email, setEmail] = useState(currentUser?.email || '');
   const [phone, setPhone] = useState(currentUser?.phone || '');
+  const [gender, setGender] = useState<'MASCULINO' | 'FEMENINO'>(
+    currentUser?.gender || (currentUser ? (getDefaultAvatarForUser(currentUser).includes('female') ? 'FEMENINO' : 'MASCULINO') : 'MASCULINO')
+  );
   const [profileComment, setProfileComment] = useState(
     currentUser?.bio || 'Coordinación de Evaluación y Docencia - Colegio Bellas Artes'
   );
   const [receiveEmails, setReceiveEmails] = useState(currentUser?.receiveEmails !== false ? 'SI' : 'NO');
   const [receiveMessages, setReceiveMessages] = useState(currentUser?.receiveMessages !== false ? 'SI' : 'NO');
-  const [selectedAvatarUrl, setSelectedAvatarUrl] = useState(currentUser?.avatarUrl || '');
+  const [selectedAvatarUrl, setSelectedAvatarUrl] = useState(
+    currentUser?.avatarUrl || (currentUser ? getDefaultAvatarForUser(currentUser) : '')
+  );
   const [customImageUrl, setCustomImageUrl] = useState('');
-  const [avatarGenderFilter, setAvatarGenderFilter] = useState<'ALL' | 'FEMENINO' | 'MASCULINO'>('ALL');
+  const [avatarGenderFilter, setAvatarGenderFilter] = useState<'ALL' | 'FEMENINO' | 'MASCULINO'>(
+    currentUser?.gender || 'ALL'
+  );
   const [profileSaved, setProfileSaved] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -126,10 +85,13 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
       setFullName(currentUser.fullName || '');
       setEmail(currentUser.email || '');
       setPhone(currentUser.phone || '');
+      const userGender = currentUser.gender || (getDefaultAvatarForUser(currentUser).includes('female') ? 'FEMENINO' : 'MASCULINO');
+      setGender(userGender);
       setProfileComment(currentUser.bio || 'Coordinación de Evaluación y Docencia - Colegio Bellas Artes');
       setReceiveEmails(currentUser.receiveEmails !== false ? 'SI' : 'NO');
       setReceiveMessages(currentUser.receiveMessages !== false ? 'SI' : 'NO');
-      setSelectedAvatarUrl(currentUser.avatarUrl || '');
+      setSelectedAvatarUrl(currentUser.avatarUrl || getDefaultAvatarForUser(currentUser));
+      setAvatarGenderFilter(userGender);
     }
   }, [currentUser]);
 
@@ -178,6 +140,7 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
       fullName: fullName.trim() || currentUser.fullName,
       email: email.trim() || currentUser.email,
       phone: phone.trim(),
+      gender: gender,
       bio: profileComment.trim(),
       avatarUrl: selectedAvatarUrl,
       receiveEmails: receiveEmails === 'SI',
@@ -465,7 +428,7 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
                     <img
                       src={selectedAvatarUrl}
                       alt={currentUser?.fullName || 'Usuario'}
-                      className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-[#D4AF37] shadow-md"
+                      className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-contain bg-white border-2 border-[#D4AF37] shadow-md p-0.5"
                     />
                   ) : (
                     <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-[#2C2E53] to-[#1B1C33] text-[#D4AF37] border-2 border-[#D4AF37]/50 flex items-center justify-center font-black text-2xl sm:text-3xl shadow-md">
@@ -582,12 +545,15 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
                   {AVATAR_PRESETS.filter(
                     a => avatarGenderFilter === 'ALL' || a.gender === avatarGenderFilter
                   ).map(avatar => {
-                    const isSelected = selectedAvatarUrl === avatar.url;
+                    const isSelected = selectedAvatarUrl === avatar.svgDataUri;
                     return (
                       <button
                         key={avatar.id}
                         type="button"
-                        onClick={() => setSelectedAvatarUrl(avatar.url)}
+                        onClick={() => {
+                          setSelectedAvatarUrl(avatar.svgDataUri);
+                          setGender(avatar.gender);
+                        }}
                         className={`relative group p-2 rounded-xl border transition-all text-left flex items-center gap-2.5 ${
                           isSelected
                             ? 'bg-[#2C2E53]/5 border-[#D4AF37] ring-2 ring-[#D4AF37]/50 shadow-sm'
@@ -596,12 +562,12 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
                       >
                         <div className="relative">
                           <img
-                            src={avatar.url}
+                            src={avatar.svgDataUri}
                             alt={avatar.label}
-                            className="w-10 h-10 rounded-xl object-cover border border-slate-200 group-hover:scale-105 transition"
+                            className="w-10 h-10 rounded-xl object-contain border border-slate-200 group-hover:scale-105 transition bg-white"
                           />
                           {isSelected && (
-                            <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center">
+                            <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-xs">
                               <Check className="w-2.5 h-2.5 stroke-[3]" />
                             </span>
                           )}
@@ -701,7 +667,7 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
                     Nombre de Usuario (Inmutable):
@@ -713,7 +679,38 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-100 text-slate-500 text-xs font-mono font-semibold cursor-not-allowed"
                   />
                   <span className="text-[10px] text-slate-400 mt-1 block">
-                    Identificador oficial en el sistema de auditoría forense.
+                    Identificador oficial de auditoría.
+                  </span>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Sexo / Género Institucional:
+                  </label>
+                  <select
+                    value={gender}
+                    onChange={(e) => {
+                      const newGender = e.target.value as 'MASCULINO' | 'FEMENINO';
+                      setGender(newGender);
+                      setAvatarGenderFilter(newGender);
+                      // Si no ha subido una foto personalizada externa, ajustar avatar por defecto al sexo
+                      if (!selectedAvatarUrl || selectedAvatarUrl.startsWith('data:image/svg+xml')) {
+                        setSelectedAvatarUrl(
+                          getDefaultAvatarForUser({
+                            gender: newGender,
+                            role: currentUser?.role,
+                            fullName: fullName
+                          })
+                        );
+                      }
+                    }}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 font-bold focus:outline-none focus:ring-2 focus:ring-[#2C2E53]"
+                  >
+                    <option value="MASCULINO">Hombre (Masculino)</option>
+                    <option value="FEMENINO">Mujer (Femenino)</option>
+                  </select>
+                  <span className="text-[10px] text-slate-400 mt-1 block">
+                    Define la correspondencia del avatar institucional.
                   </span>
                 </div>
 
@@ -731,6 +728,9 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
                     />
                     <Phone className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3.5" />
                   </div>
+                  <span className="text-[10px] text-slate-400 mt-1 block">
+                    Para avisos internos o emergencias.
+                  </span>
                 </div>
               </div>
 

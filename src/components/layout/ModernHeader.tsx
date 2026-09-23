@@ -20,6 +20,7 @@ import { SeasonalAccessoryIcon } from '../auth/LogoSeasonalAccessory';
 import { ThemeSwitcherDropdown } from './ThemeSwitcherDropdown';
 import { NotificationCenterPopover } from '../notifications/NotificationCenterPopover';
 import { MainNavigationTab } from '../../types';
+import { getDefaultAvatarForUser } from '../../utils/avatarCatalog';
 
 interface ModernHeaderProps {
   sidebarOpen: boolean;
@@ -259,17 +260,20 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
               className="flex items-center gap-1.5 bg-[#2C2E53] hover:bg-[#353866] text-white px-2 sm:px-2.5 py-1.5 rounded-xl border border-[#414474] text-xs font-bold transition whitespace-nowrap"
               title={`Usuario: ${currentUser?.fullName || currentUser?.username || 'Usuario'} • Rol: ${currentRole}`}
             >
-              {currentUser?.avatarUrl ? (
-                <img
-                  src={currentUser.avatarUrl}
-                  alt={currentUser.fullName}
-                  className="w-5 h-5 rounded-full object-cover border border-[#D4AF37]/50 shrink-0"
-                />
-              ) : (
-                <div className="w-5 h-5 rounded-full bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-[10px] text-[#D4AF37] font-black shrink-0">
-                  {(currentUser?.fullName?.[0] || currentRole[0] || 'U').toUpperCase()}
-                </div>
-              )}
+              {(() => {
+                const avatarSrc = currentUser?.avatarUrl || (currentUser ? getDefaultAvatarForUser(currentUser) : '');
+                return avatarSrc ? (
+                  <img
+                    src={avatarSrc}
+                    alt={currentUser?.fullName || 'Avatar'}
+                    className="w-5 h-5 rounded-full object-contain border border-[#D4AF37]/50 shrink-0 bg-white"
+                  />
+                ) : (
+                  <div className="w-5 h-5 rounded-full bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-[10px] text-[#D4AF37] font-black shrink-0">
+                    {(currentUser?.fullName?.[0] || currentRole[0] || 'U').toUpperCase()}
+                  </div>
+                );
+              })()}
               <span className="hidden xl:inline max-w-[130px] truncate">{currentUser?.fullName || currentRole}</span>
               <span className="hidden sm:inline xl:hidden">{currentRole}</span>
               <ChevronDown className="w-3 h-3 text-slate-400 shrink-0" />
@@ -282,17 +286,20 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
                 />
                 <div className="absolute right-0 mt-2 w-64 bg-[#1B1C33] border border-[#414474] rounded-xl shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95">
                   <div className="px-3 py-2 border-b border-[#2C2E53] mb-1.5 flex items-center gap-2.5">
-                    {currentUser?.avatarUrl ? (
-                      <img
-                        src={currentUser.avatarUrl}
-                        alt={currentUser.fullName}
-                        className="w-8 h-8 rounded-xl object-cover border border-[#D4AF37]/50 shrink-0"
-                      />
-                    ) : (
-                      <div className="w-8 h-8 rounded-xl bg-[#2C2E53] text-[#D4AF37] border border-[#D4AF37]/40 flex items-center justify-center font-bold text-xs shrink-0">
-                        {(currentUser?.fullName?.[0] || currentRole[0] || 'U').toUpperCase()}
-                      </div>
-                    )}
+                    {(() => {
+                      const avatarSrc = currentUser?.avatarUrl || (currentUser ? getDefaultAvatarForUser(currentUser) : '');
+                      return avatarSrc ? (
+                        <img
+                          src={avatarSrc}
+                          alt={currentUser?.fullName || 'Avatar'}
+                          className="w-8 h-8 rounded-xl object-contain border border-[#D4AF37]/50 shrink-0 bg-white"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded-xl bg-[#2C2E53] text-[#D4AF37] border border-[#D4AF37]/40 flex items-center justify-center font-bold text-xs shrink-0">
+                          {(currentUser?.fullName?.[0] || currentRole[0] || 'U').toUpperCase()}
+                        </div>
+                      );
+                    })()}
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-bold text-white truncate">
                         {currentUser?.fullName || 'Usuario CBA'}

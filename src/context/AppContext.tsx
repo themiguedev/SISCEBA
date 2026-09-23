@@ -39,6 +39,7 @@ import {
   is2FARequiredForRole,
   verifyTOTPCode
 } from '../utils/security';
+import { getDefaultAvatarForUser } from '../utils/avatarCatalog';
 import {
   INITIAL_AREAS,
   INITIAL_COMPETENCIES,
@@ -342,8 +343,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       securePassword = await hashPassword(securePassword);
     }
 
+    const assignedAvatar = userData.avatarUrl || getDefaultAvatarForUser({
+      gender: userData.gender,
+      role: userData.role,
+      fullName: userData.fullName
+    });
+
     const newUser: AppUser = {
       ...userData,
+      avatarUrl: assignedAvatar,
       password: securePassword,
       passwordLastChanged: new Date().toISOString(),
       twoFactorEnabled: is2FARequiredForRole(userData.role),
@@ -362,22 +370,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const idx = prev.findIndex(u => u.id === userId);
       if (idx === -1) return prev;
       const copy = [...prev];
-      const merged = { ...copy[idx], ...updates };
+      const current = copy[idx];
+      // Si cambia de género y no tiene imagen propia personalizada o tiene avatar svg previo, adaptar avatar
+      let newAvatarUrl = updates.avatarUrl !== undefined ? updates.avatarUrl : current.avatarUrl;
+      if (updates.gender && updates.gender !== current.gender && (!newAvatarUrl || newAvatarUrl.startsWith('data:image/svg+xml'))) {
+        newAvatarUrl = getDefaultAvatarForUser({
+          gender: updates.gender,
+          role: updates.role || current.role,
+          fullName: updates.fullName || current.fullName
+        });
+      }
+      const merged = { ...current, ...updates, avatarUrl: newAvatarUrl };
       copy[idx] = merged;
       updatedUser = merged;
       return copy;
     });
 
-    if (currentUser && currentUser.id === userId) {
-      const mergedCurrent = { ...currentUser, ...updates };
-      setCurrentUser(mergedCurrent);
+    if (currentUser && currentUser.id === userId && updatedUser) {
+      setCurrentUser(updatedUser);
       if (updates.role) {
         setCurrentRole(updates.role);
       }
       if (updates.defaultLevel) {
         setCurrentLevel(updates.defaultLevel);
       }
-      updatedUser = mergedCurrent;
     }
 
     if (updatedUser) {

@@ -22,6 +22,12 @@ import {
   BirthdayPerson,
   AppUser
 } from '../types';
+import {
+  SVG_MALE_CYAN,
+  SVG_MALE_ORANGE,
+  SVG_FEMALE_CIRCLE_TEAL,
+  SVG_FEMALE_ORANGE
+} from '../utils/avatarCatalog';
 
 export const INITIAL_AREAS: SubjectArea[] = [
   // --- INICIAL ---
@@ -1474,8 +1480,9 @@ export const INITIAL_USERS: AppUser[] = [
     email: 'admin@bellasartes.edu.ve',
     role: 'ADMINISTRADOR',
     defaultLevel: 'MEDIA_GENERAL',
+    gender: 'MASCULINO',
     active: true,
-    avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150'
+    avatarUrl: SVG_MALE_CYAN
   },
   {
     id: 'usr-director',
@@ -1485,8 +1492,9 @@ export const INITIAL_USERS: AppUser[] = [
     email: 'director@bellasartes.edu.ve',
     role: 'DIRECTOR',
     defaultLevel: 'MEDIA_GENERAL',
+    gender: 'MASCULINO',
     active: true,
-    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150'
+    avatarUrl: SVG_MALE_ORANGE
   },
   {
     id: 'usr-coordinador',
@@ -1496,8 +1504,9 @@ export const INITIAL_USERS: AppUser[] = [
     email: 'coordinacion@bellasartes.edu.ve',
     role: 'COORDINACION',
     defaultLevel: 'MEDIA_GENERAL',
+    gender: 'FEMENINO',
     active: true,
-    avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150'
+    avatarUrl: SVG_FEMALE_CIRCLE_TEAL
   },
   {
     id: 'usr-asistente',
@@ -1507,8 +1516,9 @@ export const INITIAL_USERS: AppUser[] = [
     email: 'asistente@bellasartes.edu.ve',
     role: 'ASISTENTE',
     defaultLevel: 'MEDIA_GENERAL',
+    gender: 'FEMENINO',
     active: true,
-    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'
+    avatarUrl: SVG_FEMALE_ORANGE
   }
 ];
 
