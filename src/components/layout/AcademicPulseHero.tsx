@@ -11,15 +11,18 @@ import {
   ShieldCheck,
   TrendingUp,
   CheckCircle2,
-  CalendarCheck2
+  CalendarCheck2,
+  Clock,
+  FileText
 } from 'lucide-react';
+import { canEditGrades, hasTabAccess } from '../../utils/rbac';
 
 interface AcademicPulseHeroProps {
-  onQuickAction: (tab: 'PLANIFICACION' | 'EVALUACION' | 'COMUNICACION', subTab: string) => void;
+  onQuickAction: (tab: any, subTab: string) => void;
 }
 
 export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAction }) => {
-  const { currentLevel, students, areas, evaluations, activeLapso } = useApp();
+  const { currentLevel, students, areas, evaluations, activeLapso, currentRole, passes, documentRequests } = useApp();
 
   const levelStudents = students.filter(s => s.level === currentLevel);
   const levelAreas = areas.filter(a => a.level === currentLevel);
@@ -32,6 +35,9 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
   };
 
   const currentInfo = levelLabels[currentLevel];
+
+  // Identificar si tiene acceso a módulos pedagógicos o es de gestión operativa
+  const hasAcademicModules = hasTabAccess(currentRole, 'MEDIA_GENERAL');
 
   return (
     <section aria-label="Resumen ejecutivo institucional" className="space-y-4 mb-6">
@@ -51,35 +57,101 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
             </div>
 
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight">
-              Panel Académico Ejecutivo
+              {currentRole === 'ASISTENTE'
+                ? 'Panel Operativo de Asistencia y Disciplina'
+                : currentRole === 'SECRETARIA'
+                ? 'Panel de Control de Estudios y Trámites'
+                : 'Panel Académico Ejecutivo'}
             </h1>
           </div>
 
-          {/* Quick Shortcuts */}
+          {/* Quick Shortcuts Adaptados por Rol */}
           <div className="flex flex-wrap items-center gap-2.5">
-            <button
-              onClick={() => onQuickAction('PLANIFICACION', 'AREAS_PERFILES')}
-              className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold transition border border-white/10"
-            >
-              <BookOpen className="w-4 h-4 text-[#D4AF37]" />
-              <span>Pensum</span>
-            </button>
+            {currentRole === 'ASISTENTE' ? (
+              <>
+                <button
+                  onClick={() => onQuickAction('GESTION', 'PASES')}
+                  className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#b89327] text-slate-950 text-xs font-black transition shadow-lg shadow-[#D4AF37]/20"
+                >
+                  <Clock className="w-4 h-4" />
+                  <span>Emitir Pase</span>
+                </button>
+                <button
+                  onClick={() => onQuickAction('GESTION', 'INASISTENCIAS')}
+                  className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold transition border border-white/10"
+                >
+                  <Users className="w-4 h-4 text-[#D4AF37]" />
+                  <span>Pase de Lista</span>
+                </button>
+                <button
+                  onClick={() => onQuickAction('GESTION', 'CONDUCTAS')}
+                  className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white text-xs font-black transition shadow-md"
+                >
+                  <ShieldCheck className="w-4 h-4 text-white" />
+                  <span>Registrar Conducta</span>
+                </button>
+              </>
+            ) : currentRole === 'SECRETARIA' ? (
+              <>
+                <button
+                  onClick={() => onQuickAction('GESTION', 'INSCRIPCIONES')}
+                  className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#b89327] text-slate-950 text-xs font-black transition shadow-lg shadow-[#D4AF37]/20"
+                >
+                  <Users className="w-4 h-4" />
+                  <span>Nueva Inscripción</span>
+                </button>
+                <button
+                  onClick={() => onQuickAction('GESTION', 'DOCUMENTOS')}
+                  className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold transition border border-white/10"
+                >
+                  <FileText className="w-4 h-4 text-[#D4AF37]" />
+                  <span>Bandeja de Trámites</span>
+                </button>
+                <button
+                  onClick={() => onQuickAction('GESTION', 'MATRICULA')}
+                  className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-black transition shadow-md"
+                >
+                  <ClipboardList className="w-4 h-4 text-[#D4AF37]" />
+                  <span>Padrón Estudiantil</span>
+                </button>
+              </>
+            ) : hasAcademicModules ? (
+              <>
+                <button
+                  onClick={() => onQuickAction('PLANIFICACION', 'AREAS_PERFILES')}
+                  className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold transition border border-white/10"
+                >
+                  <BookOpen className="w-4 h-4 text-[#D4AF37]" />
+                  <span>Pensum</span>
+                </button>
 
-            <button
-              onClick={() => onQuickAction('EVALUACION', 'PROCESAL')}
-              className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#b89327] text-slate-950 text-xs font-black transition shadow-lg shadow-[#D4AF37]/20"
-            >
-              <TrendingUp className="w-4 h-4" />
-              <span>Calificar</span>
-            </button>
+                {canEditGrades(currentRole) && (
+                  <button
+                    onClick={() => onQuickAction('EVALUACION', 'PROCESAL')}
+                    className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#b89327] text-slate-950 text-xs font-black transition shadow-lg shadow-[#D4AF37]/20"
+                  >
+                    <TrendingUp className="w-4 h-4" />
+                    <span>Calificar</span>
+                  </button>
+                )}
 
-            <button
-              onClick={() => onQuickAction('COMUNICACION', 'IA_ACTION_PLANS')}
-              className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-black transition shadow-md"
-            >
-              <ClipboardList className="w-4 h-4 text-[#D4AF37]" />
-              <span>Planes de Acción</span>
-            </button>
+                <button
+                  onClick={() => onQuickAction('COMUNICACION', 'IA_ACTION_PLANS')}
+                  className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-black transition shadow-md"
+                >
+                  <ClipboardList className="w-4 h-4 text-[#D4AF37]" />
+                  <span>Planes de Acción</span>
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => onQuickAction('CONSULTAS', 'RENDIMIENTO')}
+                className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#b89327] text-slate-950 text-xs font-black transition shadow-lg shadow-[#D4AF37]/20"
+              >
+                <ClipboardList className="w-4 h-4" />
+                <span>Consultar Rendimiento</span>
+              </button>
+            )}
           </div>
         </div>
       </div>

@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import { OFFICIAL_AVATARS, getDefaultAvatarForUser } from '../../utils/avatarCatalog';
 import { PasswordStrengthBar } from '../common/PasswordStrengthBar';
+import { ROLE_METADATA } from '../../utils/rbac';
 
 export type EscritorioTab = 'DASHBOARD' | 'PERFIL' | 'SUGERENCIAS';
 
@@ -308,25 +309,18 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
 
               {/* Roles Asignados */}
               <div>
-                <span className="text-xs font-bold text-slate-600 block mb-2">Roles y Perfiles Asignados en esta Cuenta:</span>
+                <span className="text-xs font-bold text-slate-600 block mb-2">Rol y Perfil Asignado en esta Cuenta:</span>
                 <div className="flex flex-wrap gap-2">
-                  <span className="px-3 py-1 rounded-xl text-xs font-bold bg-[#1B1C33] text-[#D4AF37] border border-[#2C2E53] shadow-sm flex items-center gap-1.5">
-                    <ShieldCheck className="w-3.5 h-3.5 text-[#D4AF37]" />
-                    Administrador del Sistema (ADM)
-                  </span>
-                  <span className="px-3 py-1 rounded-xl text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 flex items-center gap-1.5">
-                    <User className="w-3.5 h-3.5 text-blue-600" />
-                    Docente de Aula (DOC)
-                  </span>
-                  <span className="px-3 py-1 rounded-xl text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 flex items-center gap-1.5">
-                    <Layers className="w-3.5 h-3.5 text-amber-600" />
-                    Control y Evaluación (UCE)
+                  <span className={`px-3 py-1.5 rounded-xl text-xs font-bold border shadow-sm flex items-center gap-1.5 ${ROLE_METADATA[currentRole]?.badgeBg || 'bg-[#1B1C33] text-[#D4AF37] border-[#2C2E53]'}`}>
+                    <ShieldCheck className="w-4 h-4" />
+                    <span>{ROLE_METADATA[currentRole]?.label || currentRole}</span>
+                    <span className="opacity-75 text-[10px]">({currentRole})</span>
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* Sitios Más Visitados */}
+            {/* Sitios Más Visitados según el rol */}
             <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-cba-card">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
                 <div className="flex items-center gap-2">
@@ -336,47 +330,109 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
                 <span className="text-[11px] text-slate-400 font-medium">Frecuencia de Uso</span>
               </div>
 
-              <div className="space-y-3">
-                <div>
-                  <div className="flex justify-between text-xs font-bold mb-1">
-                    <span className="text-slate-700">1. Indicadores (Primaria)</span>
-                    <span className="text-[#D4AF37] font-extrabold">16.3 %</span>
+              {currentRole === 'ASISTENTE' ? (
+                <div className="space-y-3">
+                  <div>
+                    <div className="flex justify-between text-xs font-bold mb-1">
+                      <span className="text-slate-700">1. Pases por Retraso (Gestión)</span>
+                      <span className="text-[#D4AF37] font-extrabold">42.5 %</span>
+                    </div>
+                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-amber-400 to-[#D4AF37] rounded-full" style={{ width: '42.5%' }}></div>
+                    </div>
                   </div>
-                  <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-amber-400 to-[#D4AF37] rounded-full" style={{ width: '16.3%' }}></div>
+                  <div>
+                    <div className="flex justify-between text-xs font-bold mb-1">
+                      <span className="text-slate-700">2. Inasistencias y Pase de Lista</span>
+                      <span className="text-emerald-600 font-extrabold">34.8 %</span>
+                    </div>
+                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-emerald-500 rounded-full" style={{ width: '34.8%' }}></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex justify-between text-xs font-bold mb-1">
+                      <span className="text-slate-700">3. Registro de Conductas y Faltas</span>
+                      <span className="text-amber-600 font-extrabold">22.7 %</span>
+                    </div>
+                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-amber-500 rounded-full" style={{ width: '22.7%' }}></div>
+                    </div>
                   </div>
                 </div>
+              ) : currentRole === 'SECRETARIA' ? (
+                <div className="space-y-3">
+                  <div>
+                    <div className="flex justify-between text-xs font-bold mb-1">
+                      <span className="text-slate-700">1. Solicitudes y Documentos Académicos</span>
+                      <span className="text-[#D4AF37] font-extrabold">45.0 %</span>
+                    </div>
+                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-amber-400 to-[#D4AF37] rounded-full" style={{ width: '45%' }}></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex justify-between text-xs font-bold mb-1">
+                      <span className="text-slate-700">2. Padrón Estudiantil y Matrícula</span>
+                      <span className="text-indigo-600 font-extrabold">31.2 %</span>
+                    </div>
+                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-indigo-500 rounded-full" style={{ width: '31.2%' }}></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex justify-between text-xs font-bold mb-1">
+                      <span className="text-slate-700">3. Registro de Inscripciones</span>
+                      <span className="text-emerald-600 font-extrabold">23.8 %</span>
+                    </div>
+                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-emerald-500 rounded-full" style={{ width: '23.8%' }}></div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div>
+                    <div className="flex justify-between text-xs font-bold mb-1">
+                      <span className="text-slate-700">1. Calificaciones y Notas</span>
+                      <span className="text-[#D4AF37] font-extrabold">36.3 %</span>
+                    </div>
+                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-amber-400 to-[#D4AF37] rounded-full" style={{ width: '36.3%' }}></div>
+                    </div>
+                  </div>
 
-                <div>
-                  <div className="flex justify-between text-xs font-bold mb-1">
-                    <span className="text-slate-700">2. Literales Finales (ES) (Primaria)</span>
-                    <span className="text-blue-600 font-extrabold">11.6 %</span>
+                  <div>
+                    <div className="flex justify-between text-xs font-bold mb-1">
+                      <span className="text-slate-700">2. Planificación Didáctica</span>
+                      <span className="text-blue-600 font-extrabold">26.6 %</span>
+                    </div>
+                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-blue-500 rounded-full" style={{ width: '26.6%' }}></div>
+                    </div>
                   </div>
-                  <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                    <div className="h-full bg-blue-500 rounded-full" style={{ width: '11.6%' }}></div>
-                  </div>
-                </div>
 
-                <div>
-                  <div className="flex justify-between text-xs font-bold mb-1">
-                    <span className="text-slate-700">3. Usuarios y Matrícula (Gestión)</span>
-                    <span className="text-emerald-600 font-extrabold">8.2 %</span>
+                  <div>
+                    <div className="flex justify-between text-xs font-bold mb-1">
+                      <span className="text-slate-700">3. Asistencias y Matrícula</span>
+                      <span className="text-emerald-600 font-extrabold">21.2 %</span>
+                    </div>
+                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-emerald-500 rounded-full" style={{ width: '21.2%' }}></div>
+                    </div>
                   </div>
-                  <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                    <div className="h-full bg-emerald-500 rounded-full" style={{ width: '8.2%' }}></div>
-                  </div>
-                </div>
 
-                <div>
-                  <div className="flex justify-between text-xs font-bold mb-1">
-                    <span className="text-slate-700">4. Consejo de Curso y Actas (Media General)</span>
-                    <span className="text-purple-600 font-extrabold">3.9 %</span>
-                  </div>
-                  <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                    <div className="h-full bg-purple-500 rounded-full" style={{ width: '3.9%' }}></div>
+                  <div>
+                    <div className="flex justify-between text-xs font-bold mb-1">
+                      <span className="text-slate-700">4. Boletines y Reportes</span>
+                      <span className="text-purple-600 font-extrabold">15.9 %</span>
+                    </div>
+                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-purple-500 rounded-full" style={{ width: '15.9%' }}></div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
 

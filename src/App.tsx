@@ -371,6 +371,66 @@ const SiscebaMainApp: React.FC = () => {
         }
         return;
       }
+      if (currentRole === 'ASISTENTE') {
+        switch (key) {
+          case '1':
+            handleQuickAction('ESCRITORIO', 'DASHBOARD');
+            showToast('Escritorio', 'Dashboard operativo de asistencia');
+            break;
+          case '2':
+            handleQuickAction('GESTION', 'PASES');
+            showToast('Pases por Retraso', 'Emisión y control de pases');
+            break;
+          case '3':
+            handleQuickAction('GESTION', 'INASISTENCIAS');
+            showToast('Pase de Lista', 'Inasistencias diarias de aula');
+            break;
+          case '4':
+            handleQuickAction('GESTION', 'CONDUCTAS');
+            showToast('Disciplina y Conducta', 'Registro de incidencias');
+            break;
+          case '5':
+            handleQuickAction('COMUNIDAD', 'NOTICIAS');
+            showToast('Comunidad CBA', 'Noticias y cartelera escolar');
+            break;
+          case '6':
+            handleQuickAction('AYUDA', 'MANUAL');
+            showToast('Manual de Ayuda', 'Guía para asistentes');
+            break;
+        }
+        return;
+      }
+
+      if (currentRole === 'SECRETARIA') {
+        switch (key) {
+          case '1':
+            handleQuickAction('ESCRITORIO', 'DASHBOARD');
+            showToast('Escritorio', 'Dashboard de control de estudios');
+            break;
+          case '2':
+            handleQuickAction('GESTION', 'INSCRIPCIONES');
+            showToast('Inscripciones', 'Registro y admisión de alumnos');
+            break;
+          case '3':
+            handleQuickAction('GESTION', 'MATRICULA');
+            showToast('Matrícula Escolar', 'Padrón estudiantil y expedientes');
+            break;
+          case '4':
+            handleQuickAction('GESTION', 'DOCUMENTOS');
+            showToast('Trámites y Constancias', 'Bandeja de solicitudes');
+            break;
+          case '5':
+            handleQuickAction('COMUNIDAD', 'NOTICIAS');
+            showToast('Comunidad CBA', 'Cartelera y avisos');
+            break;
+          case '6':
+            handleQuickAction('AYUDA', 'MANUAL');
+            showToast('Manual y Soporte', 'Guía interactiva');
+            break;
+        }
+        return;
+      }
+
       switch (key) {
         case '1':
           handleQuickAction('ESCRITORIO', 'DASHBOARD');

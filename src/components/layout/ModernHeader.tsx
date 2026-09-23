@@ -21,6 +21,7 @@ import { ThemeSwitcherDropdown } from './ThemeSwitcherDropdown';
 import { NotificationCenterPopover } from '../notifications/NotificationCenterPopover';
 import { MainNavigationTab } from '../../types';
 import { getDefaultAvatarForUser } from '../../utils/avatarCatalog';
+import { hasTabAccess } from '../../utils/rbac';
 
 interface ModernHeaderProps {
   sidebarOpen: boolean;
@@ -134,15 +135,8 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
           </div>
         </div>
 
-        {/* Center: Interactive Level Switcher (Pills) or Portal de Consultas for Representante / Estudiante */}
-        {(currentRole === 'REPRESENTANTE' || currentRole === 'ESTUDIANTE') ? (
-          <div className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#141525] border border-[#D4AF37]/50 shadow-inner">
-            <span className="w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse shrink-0"></span>
-            <span className="text-xs font-black text-[#D4AF37] tracking-wider uppercase">
-              Portal de Consultas • {currentRole === 'REPRESENTANTE' ? 'Padres y Representantes' : 'Estudiantes CBA'}
-            </span>
-          </div>
-        ) : (
+        {/* Center: Interactive Level Switcher (Pills) for Academic Staff or Scope Badge for Specific Roles */}
+        {hasTabAccess(currentRole, 'MEDIA_GENERAL') ? (
           <div className="hidden lg:flex items-center bg-[#141525] p-1 rounded-2xl border border-[#2C2E53] shadow-inner shrink-0">
             {(['INICIAL', 'PRIMARIA', 'MEDIA_GENERAL'] as EducationalLevel[]).map((lvl) => {
               const isCurrentModule = activeTab === lvl;
@@ -179,6 +173,21 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
                 </button>
               );
             })}
+          </div>
+        ) : (
+          <div className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#141525] border border-[#D4AF37]/50 shadow-inner">
+            <span className="w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse shrink-0"></span>
+            <span className="text-xs font-black text-[#D4AF37] tracking-wider uppercase">
+              {currentRole === 'ASISTENTE'
+                ? 'Control de Asistencia y Disciplina'
+                : currentRole === 'SECRETARIA'
+                ? 'Secretaría y Control de Estudios'
+                : currentRole === 'REPRESENTANTE'
+                ? 'Portal de Consultas • Representantes'
+                : currentRole === 'ESTUDIANTE'
+                ? 'Portal del Alumno CBA'
+                : 'Panel Operativo Institucional'}
+            </span>
           </div>
         )}
 
