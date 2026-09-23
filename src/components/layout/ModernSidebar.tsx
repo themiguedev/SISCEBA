@@ -70,7 +70,7 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
   onCloseMobile,
   onGoHome
 }) => {
-  const { currentLevel, currentRole, passes, documentRequests } = useApp();
+  const { currentLevel, currentRole, passes, documentRequests, currentUser } = useApp();
 
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     [activeTab]: true
@@ -354,7 +354,13 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
           {(() => {
             const isConsultasOnly = currentRole === 'REPRESENTANTE' || currentRole === 'ESTUDIANTE';
             const visibleSections = navigationSections
-              .filter((s) => hasTabAccess(currentRole, s.id))
+              .filter((s) => {
+                if (!hasTabAccess(currentRole, s.id)) return false;
+                if ((s.id === 'INICIAL' || s.id === 'PRIMARIA' || s.id === 'MEDIA_GENERAL') && currentUser?.allowedLevels && currentUser.allowedLevels.length > 0) {
+                  return currentUser.allowedLevels.includes(s.id);
+                }
+                return true;
+              })
               .map((section) => ({
                 ...section,
                 subTabs: section.subTabs.filter((sub) => hasSubTabAccess(currentRole, section.id, sub.id))

@@ -10,6 +10,7 @@ export interface AppUser {
   email: string;
   role: UserRole;
   defaultLevel: EducationalLevel;
+  allowedLevels?: EducationalLevel[];
   active: boolean;
   avatarUrl?: string;
   gender?: 'MASCULINO' | 'FEMENINO';

@@ -23,6 +23,8 @@ import {
   Moon,
   Laptop,
   Sparkles,
+  GraduationCap,
+  BookOpen,
   Check,
   RotateCcw,
   ShieldX,
@@ -67,7 +69,24 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
   const [newPassword, setNewPassword] = useState('');
   const [newRole, setNewRole] = useState<UserRole>('DOCENTE');
   const [newGender, setNewGender] = useState<'MASCULINO' | 'FEMENINO'>('FEMENINO');
+  const [newSelectedLevels, setNewSelectedLevels] = useState<EducationalLevel[]>(['MEDIA_GENERAL']);
   const [newDefaultLevel, setNewDefaultLevel] = useState<EducationalLevel>('MEDIA_GENERAL');
+
+  const toggleNewUserLevel = (lvl: EducationalLevel) => {
+    setNewSelectedLevels(prev => {
+      let next: EducationalLevel[];
+      if (prev.includes(lvl)) {
+        if (prev.length === 1) return prev;
+        next = prev.filter(l => l !== lvl);
+      } else {
+        next = [...prev, lvl];
+      }
+      if (!next.includes(newDefaultLevel)) {
+        setNewDefaultLevel(next[0]);
+      }
+      return next;
+    });
+  };
 
   const handleRegisterUser = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,6 +108,7 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
       role: newRole,
       gender: newGender,
       defaultLevel: newDefaultLevel,
+      allowedLevels: newSelectedLevels,
       active: true,
       avatarUrl: defaultAvatar
     });
@@ -98,6 +118,8 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
     setNewEmail('');
     setNewPassword('');
     setNewGender('FEMENINO');
+    setNewSelectedLevels(['MEDIA_GENERAL']);
+    setNewDefaultLevel('MEDIA_GENERAL');
     setShowRegisterForm(false);
     handleSaveSettings();
   };
@@ -471,17 +493,105 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
                     </select>
                   </div>
 
-                  <div>
-                    <label className="block font-bold text-slate-700 mb-1">Nivel Educativo Principal</label>
-                    <select
-                      value={newDefaultLevel}
-                      onChange={(e) => setNewDefaultLevel(e.target.value as EducationalLevel)}
-                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#2C2E53] focus:border-transparent outline-none font-bold"
-                    >
-                      <option value="MEDIA_GENERAL">Media General (01-20 pts)</option>
-                      <option value="PRIMARIA">Educación Primaria (L/P/EP/I)</option>
-                      <option value="INICIAL">Educación Inicial (Literales A-E)</option>
-                    </select>
+                  {/* Subsistemas / Niveles Educativos Asignados */}
+                  <div className="md:col-span-2 space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                    <div className="flex items-center justify-between">
+                      <label className="block font-bold text-slate-800 text-xs sm:text-sm">
+                        Subsistemas / Niveles Educativos Asignados *
+                      </label>
+                      <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200">
+                        {newSelectedLevels.length} {newSelectedLevels.length === 1 ? 'nivel seleccionado' : 'niveles seleccionados'}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      {[
+                        {
+                          id: 'MEDIA_GENERAL' as EducationalLevel,
+                          title: 'Media General',
+                          scale: '01 a 20 pts',
+                          icon: GraduationCap
+                        },
+                        {
+                          id: 'PRIMARIA' as EducationalLevel,
+                          title: 'Primaria',
+                          scale: 'Literal A-E',
+                          icon: Layers
+                        },
+                        {
+                          id: 'INICIAL' as EducationalLevel,
+                          title: 'Inicial',
+                          scale: 'Cualitativa L/EP/I',
+                          icon: BookOpen
+                        }
+                      ].map((item) => {
+                        const isChecked = newSelectedLevels.includes(item.id);
+                        const Icon = item.icon;
+                        return (
+                          <button
+                            type="button"
+                            key={item.id}
+                            onClick={() => toggleNewUserLevel(item.id)}
+                            className={`p-2 rounded-xl border text-left transition flex items-center justify-between gap-2 cursor-pointer ${
+                              isChecked
+                                ? 'bg-[#1B1C33] text-white border-[#D4AF37] shadow-sm'
+                                : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2 min-w-0">
+                              <div
+                                className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
+                                  isChecked
+                                    ? 'bg-[#D4AF37]/20 text-[#D4AF37]'
+                                    : 'bg-slate-100 text-slate-500'
+                                }`}
+                              >
+                                <Icon className="w-4 h-4" />
+                              </div>
+                              <div className="min-w-0">
+                                <p className={`text-xs font-bold truncate ${isChecked ? 'text-white' : 'text-slate-800'}`}>
+                                  {item.title}
+                                </p>
+                                <p className={`text-[10px] truncate ${isChecked ? 'text-[#D4AF37]' : 'text-slate-400'}`}>
+                                  {item.scale}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div
+                              className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 border ${
+                                isChecked
+                                  ? 'bg-[#D4AF37] border-[#D4AF37] text-slate-950'
+                                  : 'border-slate-300 bg-white'
+                              }`}
+                            >
+                              {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-200/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                      <label className="block text-xs font-bold text-slate-700">
+                        Nivel Educativo Principal al Iniciar Sesión:
+                      </label>
+                      <select
+                        value={newDefaultLevel}
+                        onChange={(e) => setNewDefaultLevel(e.target.value as EducationalLevel)}
+                        className="px-3 py-1.5 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#2C2E53] outline-none font-bold text-xs text-slate-800 shrink-0"
+                      >
+                        {newSelectedLevels.map((lvl) => (
+                          <option key={lvl} value={lvl}>
+                            {lvl === 'MEDIA_GENERAL'
+                              ? 'Media General (01-20 pts)'
+                              : lvl === 'PRIMARIA'
+                              ? 'Educación Primaria'
+                              : 'Educación Inicial'}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
 
                   <div>
@@ -543,6 +653,25 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
                             <span>•</span>
                             <span className="flex items-center gap-1"><Mail className="w-3 h-3 text-slate-400" />{u.email}</span>
                           </div>
+                          {/* Niveles Asignados */}
+                          {u.allowedLevels && u.allowedLevels.length > 0 && (
+                            <div className="flex items-center gap-1 flex-wrap pt-0.5">
+                              {u.allowedLevels.map(lvl => (
+                                <span
+                                  key={lvl}
+                                  className={`text-[9px] font-extrabold px-1.5 py-0.2 rounded border ${
+                                    lvl === u.defaultLevel
+                                      ? 'bg-amber-100 text-amber-900 border-amber-300'
+                                      : 'bg-slate-100 text-slate-700 border-slate-200'
+                                  }`}
+                                  title={lvl === u.defaultLevel ? 'Nivel Principal' : 'Nivel Habilitado'}
+                                >
+                                  {lvl === 'MEDIA_GENERAL' ? 'Media' : lvl === 'PRIMARIA' ? 'Primaria' : 'Inicial'}
+                                  {lvl === u.defaultLevel && ' ★'}
+                                </span>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       </div>
 

@@ -138,7 +138,9 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
         {/* Center: Interactive Level Switcher (Pills) for Academic Staff or Scope Badge for Specific Roles */}
         {hasTabAccess(currentRole, 'MEDIA_GENERAL') ? (
           <div className="hidden lg:flex items-center bg-[#141525] p-1 rounded-2xl border border-[#2C2E53] shadow-inner shrink-0">
-            {(['INICIAL', 'PRIMARIA', 'MEDIA_GENERAL'] as EducationalLevel[]).map((lvl) => {
+            {((['INICIAL', 'PRIMARIA', 'MEDIA_GENERAL'] as EducationalLevel[]).filter(
+              lvl => !currentUser?.allowedLevels || currentUser.allowedLevels.length === 0 || currentUser.allowedLevels.includes(lvl)
+            )).map((lvl) => {
               const isCurrentModule = activeTab === lvl;
               const isContextLevel = currentLevel === lvl;
               const isSelected = isCurrentModule || (isContextLevel && (activeTab === 'ESCRITORIO' || !['INICIAL', 'PRIMARIA', 'MEDIA_GENERAL'].includes(activeTab || '')));
