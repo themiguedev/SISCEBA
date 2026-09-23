@@ -13,7 +13,8 @@ import {
   CheckCircle2,
   Clock,
   LogOut,
-  Keyboard
+  Keyboard,
+  User
 } from 'lucide-react';
 import { SeasonalAccessoryIcon } from '../auth/LogoSeasonalAccessory';
 import { ThemeSwitcherDropdown } from './ThemeSwitcherDropdown';
@@ -258,9 +259,17 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
               className="flex items-center gap-1.5 bg-[#2C2E53] hover:bg-[#353866] text-white px-2 sm:px-2.5 py-1.5 rounded-xl border border-[#414474] text-xs font-bold transition whitespace-nowrap"
               title={`Usuario: ${currentUser?.fullName || currentUser?.username || 'Usuario'} • Rol: ${currentRole}`}
             >
-              <div className="w-5 h-5 rounded-full bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-[10px] text-[#D4AF37] font-black shrink-0">
-                {(currentUser?.fullName?.[0] || currentRole[0] || 'U').toUpperCase()}
-              </div>
+              {currentUser?.avatarUrl ? (
+                <img
+                  src={currentUser.avatarUrl}
+                  alt={currentUser.fullName}
+                  className="w-5 h-5 rounded-full object-cover border border-[#D4AF37]/50 shrink-0"
+                />
+              ) : (
+                <div className="w-5 h-5 rounded-full bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-[10px] text-[#D4AF37] font-black shrink-0">
+                  {(currentUser?.fullName?.[0] || currentRole[0] || 'U').toUpperCase()}
+                </div>
+              )}
               <span className="hidden xl:inline max-w-[130px] truncate">{currentUser?.fullName || currentRole}</span>
               <span className="hidden sm:inline xl:hidden">{currentRole}</span>
               <ChevronDown className="w-3 h-3 text-slate-400 shrink-0" />
@@ -272,13 +281,43 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
                   onClick={() => setRoleMenuOpen(false)}
                 />
                 <div className="absolute right-0 mt-2 w-64 bg-[#1B1C33] border border-[#414474] rounded-xl shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95">
-                  <div className="px-3 py-2 border-b border-[#2C2E53] mb-1.5">
-                    <p className="text-xs font-bold text-white truncate">
-                      {currentUser?.fullName || 'Usuario CBA'}
-                    </p>
-                    <p className="text-[10px] font-mono text-[#D4AF37]">
-                      @{currentUser?.username || 'usuario'} • {currentRole}
-                    </p>
+                  <div className="px-3 py-2 border-b border-[#2C2E53] mb-1.5 flex items-center gap-2.5">
+                    {currentUser?.avatarUrl ? (
+                      <img
+                        src={currentUser.avatarUrl}
+                        alt={currentUser.fullName}
+                        className="w-8 h-8 rounded-xl object-cover border border-[#D4AF37]/50 shrink-0"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 rounded-xl bg-[#2C2E53] text-[#D4AF37] border border-[#D4AF37]/40 flex items-center justify-center font-bold text-xs shrink-0">
+                        {(currentUser?.fullName?.[0] || currentRole[0] || 'U').toUpperCase()}
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-bold text-white truncate">
+                        {currentUser?.fullName || 'Usuario CBA'}
+                      </p>
+                      <p className="text-[10px] font-mono text-[#D4AF37] truncate">
+                        @{currentUser?.username || 'usuario'} • {currentRole}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Acceso Directo a Mi Perfil */}
+                  <div className="mb-1.5">
+                    <button
+                      onClick={() => {
+                        setRoleMenuOpen(false);
+                        onNavigate?.('ESCRITORIO', 'PERFIL');
+                      }}
+                      className="w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs font-bold text-sky-300 hover:bg-sky-500/15 transition border border-transparent hover:border-sky-500/30"
+                    >
+                      <span className="flex items-center gap-2">
+                        <User className="w-3.5 h-3.5" />
+                        <span>Mi Perfil y Foto</span>
+                      </span>
+                      <span className="text-[10px] text-sky-400 font-mono">Editar →</span>
+                    </button>
                   </div>
 
                   {currentUser?.role === 'ADMINISTRADOR' ? (

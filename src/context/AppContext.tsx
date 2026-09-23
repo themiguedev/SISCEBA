@@ -102,6 +102,7 @@ interface AppContextType {
   currentUser: AppUser | null;
   users: AppUser[];
   addUser: (user: Omit<AppUser, 'id'>) => Promise<AppUser>;
+  updateUser: (userId: string, updates: Partial<AppUser>) => Promise<boolean>;
   login: (
     username: string,
     password?: string,
@@ -352,6 +353,38 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setUsers(prev => [newUser, ...prev]);
     supabaseSaveUser(newUser).catch(err => console.warn('Supabase save user err:', err));
     return newUser;
+  };
+
+  const updateUser = async (userId: string, updates: Partial<AppUser>): Promise<boolean> => {
+    let updatedUser: AppUser | null = null;
+
+    setUsers(prev => {
+      const idx = prev.findIndex(u => u.id === userId);
+      if (idx === -1) return prev;
+      const copy = [...prev];
+      const merged = { ...copy[idx], ...updates };
+      copy[idx] = merged;
+      updatedUser = merged;
+      return copy;
+    });
+
+    if (currentUser && currentUser.id === userId) {
+      const mergedCurrent = { ...currentUser, ...updates };
+      setCurrentUser(mergedCurrent);
+      if (updates.role) {
+        setCurrentRole(updates.role);
+      }
+      if (updates.defaultLevel) {
+        setCurrentLevel(updates.defaultLevel);
+      }
+      updatedUser = mergedCurrent;
+    }
+
+    if (updatedUser) {
+      supabaseSaveUser(updatedUser).catch(err => console.warn('Error al guardar usuario en Supabase:', err));
+      return true;
+    }
+    return false;
   };
 
   useEffect(() => {
@@ -1377,6 +1410,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         currentUser,
         users,
         addUser,
+        updateUser,
         login,
         logout,
         currentLevel,

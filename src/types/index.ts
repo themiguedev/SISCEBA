@@ -12,6 +12,10 @@ export interface AppUser {
   defaultLevel: EducationalLevel;
   active: boolean;
   avatarUrl?: string;
+  phone?: string;
+  bio?: string;
+  receiveEmails?: boolean;
+  receiveMessages?: boolean;
   twoFactorEnabled?: boolean;
   twoFactorSecret?: string;
   passwordLastChanged?: string;

@@ -17,7 +17,13 @@ import {
   FileText,
   ExternalLink,
   Layers,
-  HelpCircle
+  HelpCircle,
+  Camera,
+  Upload,
+  Trash2,
+  Check,
+  Image as ImageIcon,
+  Phone
 } from 'lucide-react';
 
 export type EscritorioTab = 'DASHBOARD' | 'PERFIL' | 'SUGERENCIAS';
@@ -31,7 +37,7 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
   activeSubTab,
   setActiveSubTab
 }) => {
-  const { currentRole, birthdays } = useApp();
+  const { currentRole, birthdays, currentUser, updateUser } = useApp();
   const [internalActiveTab, setInternalActiveTab] = useState<EscritorioTab>('DASHBOARD');
 
   const activeTab = activeSubTab || internalActiveTab;
@@ -42,21 +48,144 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
     setInternalActiveTab(tab);
   };
 
-  // Profile Form State
-  const [profileComment, setProfileComment] = useState('Coordinación de Evaluación y Docencia - Colegio Bellas Artes');
-  const [receiveEmails, setReceiveEmails] = useState('SI');
-  const [receiveMessages, setReceiveMessages] = useState('SI');
+  // Avatar Presets Catalog (Avatares masculinos y femeninos profesionales y estilizados)
+  const AVATAR_PRESETS = [
+    {
+      id: 'female-1',
+      label: 'Docente / Directiva (Mujer)',
+      gender: 'FEMENINO',
+      url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&auto=format&fit=crop&q=80'
+    },
+    {
+      id: 'female-2',
+      label: 'Profesora / Coordinadora',
+      gender: 'FEMENINO',
+      url: 'https://images.unsplash.com/photo-1580894732470-349830501a35?w=200&auto=format&fit=crop&q=80'
+    },
+    {
+      id: 'female-3',
+      label: 'Especialista / Asistente',
+      gender: 'FEMENINO',
+      url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80'
+    },
+    {
+      id: 'female-4',
+      label: 'Orientadora / Docente',
+      gender: 'FEMENINO',
+      url: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&auto=format&fit=crop&q=80'
+    },
+    {
+      id: 'male-1',
+      label: 'Administrador / Directivo (Hombre)',
+      gender: 'MASCULINO',
+      url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&auto=format&fit=crop&q=80'
+    },
+    {
+      id: 'male-2',
+      label: 'Profesor / Coordinador',
+      gender: 'MASCULINO',
+      url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80'
+    },
+    {
+      id: 'male-3',
+      label: 'Docente de Ciencias / Tecnología',
+      gender: 'MASCULINO',
+      url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&auto=format&fit=crop&q=80'
+    },
+    {
+      id: 'male-4',
+      label: 'Coordinador / Asistente Académico',
+      gender: 'MASCULINO',
+      url: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=200&auto=format&fit=crop&q=80'
+    }
+  ];
+
+  // Profile Form State synced with currentUser
+  const [fullName, setFullName] = useState(currentUser?.fullName || '');
+  const [email, setEmail] = useState(currentUser?.email || '');
+  const [phone, setPhone] = useState(currentUser?.phone || '');
+  const [profileComment, setProfileComment] = useState(
+    currentUser?.bio || 'Coordinación de Evaluación y Docencia - Colegio Bellas Artes'
+  );
+  const [receiveEmails, setReceiveEmails] = useState(currentUser?.receiveEmails !== false ? 'SI' : 'NO');
+  const [receiveMessages, setReceiveMessages] = useState(currentUser?.receiveMessages !== false ? 'SI' : 'NO');
+  const [selectedAvatarUrl, setSelectedAvatarUrl] = useState(currentUser?.avatarUrl || '');
+  const [customImageUrl, setCustomImageUrl] = useState('');
+  const [avatarGenderFilter, setAvatarGenderFilter] = useState<'ALL' | 'FEMENINO' | 'MASCULINO'>('ALL');
   const [profileSaved, setProfileSaved] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   // Suggestions Form State
   const [suggestionMessage, setSuggestionMessage] = useState('');
   const [suggestionCheck, setSuggestionCheck] = useState(false);
   const [suggestionSent, setSuggestionSent] = useState(false);
 
-  const handleProfileSubmit = (e: React.FormEvent) => {
+  // Sincronizar si cambia de usuario en sesión
+  React.useEffect(() => {
+    if (currentUser) {
+      setFullName(currentUser.fullName || '');
+      setEmail(currentUser.email || '');
+      setPhone(currentUser.phone || '');
+      setProfileComment(currentUser.bio || 'Coordinación de Evaluación y Docencia - Colegio Bellas Artes');
+      setReceiveEmails(currentUser.receiveEmails !== false ? 'SI' : 'NO');
+      setReceiveMessages(currentUser.receiveMessages !== false ? 'SI' : 'NO');
+      setSelectedAvatarUrl(currentUser.avatarUrl || '');
+    }
+  }, [currentUser]);
+
+  // Manejador de carga de archivo local (convierte a base64 Data URL)
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('Por favor seleccione un archivo de imagen válido (PNG, JPG, JPEG, WEBP).');
+      return;
+    }
+
+    if (file.size > 3 * 1024 * 1024) {
+      alert('La imagen no debe superar los 3 MB para garantizar un rendimiento óptimo.');
+      return;
+    }
+
+    setIsUploading(true);
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        setSelectedAvatarUrl(reader.result);
+        setIsUploading(false);
+      }
+    };
+    reader.onerror = () => {
+      setIsUploading(false);
+      alert('Error al leer el archivo de imagen.');
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Manejador de URL externa personalizada
+  const handleApplyCustomUrl = () => {
+    if (!customImageUrl.trim()) return;
+    setSelectedAvatarUrl(customImageUrl.trim());
+    setCustomImageUrl('');
+  };
+
+  const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!currentUser) return;
+
+    await updateUser(currentUser.id, {
+      fullName: fullName.trim() || currentUser.fullName,
+      email: email.trim() || currentUser.email,
+      phone: phone.trim(),
+      bio: profileComment.trim(),
+      avatarUrl: selectedAvatarUrl,
+      receiveEmails: receiveEmails === 'SI',
+      receiveMessages: receiveMessages === 'SI'
+    });
+
     setProfileSaved(true);
-    setTimeout(() => setProfileSaved(false), 3000);
+    setTimeout(() => setProfileSaved(false), 3500);
   };
 
   const handleSuggestionSubmit = (e: React.FormEvent) => {
@@ -325,87 +454,343 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
 
       {/* VIEW: MI PERFIL */}
       {activeTab === 'PERFIL' && (
-        <div className="max-w-3xl mx-auto bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-cba-card">
-          <div className="flex items-center gap-3 border-b border-slate-100 pb-4 mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-[#2C2E53] text-[#D4AF37] flex items-center justify-center font-black text-xl">
-              U
-            </div>
-            <div>
-              <h3 className="font-black text-lg text-[#2C2E53]">Perfil de Usuario</h3>
-              <p className="text-xs text-slate-400">Gestione su perfil, preferencias y credenciales de acceso</p>
-            </div>
-          </div>
+        <div className="max-w-4xl mx-auto space-y-6">
+          {/* Tarjeta Principal de Perfil */}
+          <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-cba-card">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5 mb-6">
+              <div className="flex items-center gap-4">
+                {/* Avatar Preview Grande */}
+                <div className="relative group shrink-0">
+                  {selectedAvatarUrl ? (
+                    <img
+                      src={selectedAvatarUrl}
+                      alt={currentUser?.fullName || 'Usuario'}
+                      className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-[#D4AF37] shadow-md"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-[#2C2E53] to-[#1B1C33] text-[#D4AF37] border-2 border-[#D4AF37]/50 flex items-center justify-center font-black text-2xl sm:text-3xl shadow-md">
+                      {(currentUser?.fullName?.[0] || currentRole[0] || 'U').toUpperCase()}
+                    </div>
+                  )}
+                  <label
+                    htmlFor="avatar-file-input"
+                    className="absolute -bottom-1.5 -right-1.5 p-1.5 bg-[#2C2E53] hover:bg-[#1B1C33] text-[#D4AF37] border border-[#D4AF37]/60 rounded-xl shadow-lg cursor-pointer transition transform hover:scale-110"
+                    title="Subir foto desde su equipo"
+                  >
+                    <Camera className="w-3.5 h-3.5" />
+                  </label>
+                  <input
+                    id="avatar-file-input"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                </div>
 
-          {profileSaved && (
-            <div className="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2 animate-in fade-in">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-              ¡Perfil actualizado satisfactoriamente en el sistema!
-            </div>
-          )}
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="font-black text-lg sm:text-xl text-[#2C2E53]">
+                      {currentUser?.fullName || 'Perfil de Usuario'}
+                    </h3>
+                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-[#2C2E53]/10 text-[#2C2E53] border border-[#2C2E53]/20">
+                      {currentRole}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    @{currentUser?.username || 'usuario'} • {currentUser?.email || 'Sin correo asignado'}
+                  </p>
+                  <p className="text-[11px] text-slate-400 mt-1">
+                    Personalice su foto institucional, elija un avatar oficial (hombre o mujer) o suba una imagen de su equipo.
+                  </p>
+                </div>
+              </div>
 
-          <div className="mb-6 p-4 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
-            <span className="font-bold block mb-0.5">Normas para comentarios:</span>
-            Por favor, abstenerse de dejar comentarios ofensivos de cualquier tipo en las fichas del sistema. Gracias.
-          </div>
-
-          <form onSubmit={handleProfileSubmit} className="space-y-5">
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Nombre de Usuario (Identificador):</label>
-              <input
-                type="text"
-                disabled
-                value="administrador.cba"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-100 text-slate-500 text-xs font-mono font-semibold cursor-not-allowed"
-              />
-              <span className="text-[10px] text-slate-400 mt-1 block">El nombre de usuario es inmutable por seguridad de auditoría.</span>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Comentario o Estado Institucional:</label>
-              <textarea
-                rows={3}
-                value={profileComment}
-                onChange={(e) => setProfileComment(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2C2E53]"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Recibir Correo Electrónico:</label>
-                <select
-                  value={receiveEmails}
-                  onChange={(e) => setReceiveEmails(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-[#2C2E53]"
+              {selectedAvatarUrl && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedAvatarUrl('')}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl transition border border-rose-200 self-start sm:self-center"
                 >
-                  <option value="SI">Sí, recibir notificaciones</option>
-                  <option value="NO">No, desactivar correos</option>
-                </select>
+                  <Trash2 className="w-3.5 h-3.5" />
+                  Quitar Imagen
+                </button>
+              )}
+            </div>
+
+            {profileSaved && (
+              <div className="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2 animate-in fade-in duration-200">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>¡Perfil e imagen de usuario actualizados satisfactoriamente en SICE-CBA!</span>
+              </div>
+            )}
+
+            {/* SECCIÓN 1: SELECCIÓN Y MODIFICACIÓN DE IMAGEN / AVATAR */}
+            <div className="mb-8 p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
+                <div className="flex items-center gap-2">
+                  <ImageIcon className="w-4 h-4 text-[#D4AF37]" />
+                  <h4 className="font-extrabold text-xs sm:text-sm text-[#2C2E53] uppercase tracking-wider">
+                    Foto o Avatar de Usuario
+                  </h4>
+                </div>
+
+                {/* Filtro de Género de Avatares (Hombre / Mujer / Todos) */}
+                <div className="flex items-center bg-white p-0.5 rounded-xl border border-slate-200 text-xs font-bold shadow-xs">
+                  <button
+                    type="button"
+                    onClick={() => setAvatarGenderFilter('ALL')}
+                    className={`px-2.5 py-1 rounded-lg transition ${
+                      avatarGenderFilter === 'ALL'
+                        ? 'bg-[#2C2E53] text-[#D4AF37]'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    Todos
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAvatarGenderFilter('FEMENINO')}
+                    className={`px-2.5 py-1 rounded-lg transition flex items-center gap-1 ${
+                      avatarGenderFilter === 'FEMENINO'
+                        ? 'bg-[#2C2E53] text-[#D4AF37]'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    <span>Mujer</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAvatarGenderFilter('MASCULINO')}
+                    className={`px-2.5 py-1 rounded-lg transition flex items-center gap-1 ${
+                      avatarGenderFilter === 'MASCULINO'
+                        ? 'bg-[#2C2E53] text-[#D4AF37]'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    <span>Hombre</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Galería de Avatares Predefinidos */}
+              <div>
+                <span className="block text-[11px] font-bold text-slate-500 mb-2">
+                  Seleccione un avatar institucional oficial:
+                </span>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {AVATAR_PRESETS.filter(
+                    a => avatarGenderFilter === 'ALL' || a.gender === avatarGenderFilter
+                  ).map(avatar => {
+                    const isSelected = selectedAvatarUrl === avatar.url;
+                    return (
+                      <button
+                        key={avatar.id}
+                        type="button"
+                        onClick={() => setSelectedAvatarUrl(avatar.url)}
+                        className={`relative group p-2 rounded-xl border transition-all text-left flex items-center gap-2.5 ${
+                          isSelected
+                            ? 'bg-[#2C2E53]/5 border-[#D4AF37] ring-2 ring-[#D4AF37]/50 shadow-sm'
+                            : 'bg-white border-slate-200 hover:border-slate-300 hover:shadow-xs'
+                        }`}
+                      >
+                        <div className="relative">
+                          <img
+                            src={avatar.url}
+                            alt={avatar.label}
+                            className="w-10 h-10 rounded-xl object-cover border border-slate-200 group-hover:scale-105 transition"
+                          />
+                          {isSelected && (
+                            <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center">
+                              <Check className="w-2.5 h-2.5 stroke-[3]" />
+                            </span>
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[11px] font-bold text-slate-800 truncate">
+                            {avatar.label}
+                          </p>
+                          <span className="text-[10px] text-slate-400 block font-medium">
+                            {avatar.gender === 'FEMENINO' ? 'Femenino' : 'Masculino'}
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Alternativa: Subir archivo o ingresar URL */}
+              <div className="pt-3 border-t border-slate-200/80 grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Opción A: Subir imagen desde la computadora */}
+                <div className="bg-white p-3.5 rounded-xl border border-slate-200">
+                  <span className="block text-[11px] font-bold text-slate-700 mb-1.5">
+                    Subir imagen desde el equipo:
+                  </span>
+                  <label className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border-2 border-dashed border-slate-300 hover:border-[#2C2E53] bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-[#2C2E53] cursor-pointer text-xs font-semibold transition">
+                    <Upload className="w-4 h-4 text-[#D4AF37]" />
+                    <span>{isUploading ? 'Procesando imagen...' : 'Examinar foto local (PNG, JPG)'}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                    />
+                  </label>
+                  <span className="text-[10px] text-slate-400 mt-1 block">
+                    Formatos: PNG, JPG, JPEG o WEBP (Máximo 3 MB).
+                  </span>
+                </div>
+
+                {/* Opción B: Enlace web directo a una foto */}
+                <div className="bg-white p-3.5 rounded-xl border border-slate-200">
+                  <span className="block text-[11px] font-bold text-slate-700 mb-1.5">
+                    O pegar enlace / URL de imagen:
+                  </span>
+                  <div className="flex gap-2">
+                    <input
+                      type="url"
+                      value={customImageUrl}
+                      onChange={(e) => setCustomImageUrl(e.target.value)}
+                      placeholder="https://ejemplo.com/mifoto.jpg"
+                      className="flex-1 px-3 py-1.5 rounded-xl border border-slate-300 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2C2E53]"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleApplyCustomUrl}
+                      disabled={!customImageUrl.trim()}
+                      className="px-3 py-1.5 rounded-xl bg-[#2C2E53] hover:bg-[#1B1C33] text-[#D4AF37] font-bold text-xs disabled:opacity-50 transition shrink-0"
+                    >
+                      Aplicar
+                    </button>
+                  </div>
+                  <span className="text-[10px] text-slate-400 mt-1 block">
+                    Cargue una fotografía institucional alojada en la web.
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* SECCIÓN 2: FORMULARIO DE DATOS PERSONALES Y PREFERENCIAS */}
+            <form onSubmit={handleProfileSubmit} className="space-y-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Nombre Completo:
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2C2E53]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Correo Electrónico Institucional:
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2C2E53]"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Nombre de Usuario (Inmutable):
+                  </label>
+                  <input
+                    type="text"
+                    disabled
+                    value={currentUser?.username || 'usuario'}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-100 text-slate-500 text-xs font-mono font-semibold cursor-not-allowed"
+                  />
+                  <span className="text-[10px] text-slate-400 mt-1 block">
+                    Identificador oficial en el sistema de auditoría forense.
+                  </span>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Teléfono de Contacto (Opcional):
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="+58 412 1234567"
+                      className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2C2E53]"
+                    />
+                    <Phone className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3.5" />
+                  </div>
+                </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Recibir Mensajes Internos:</label>
-                <select
-                  value={receiveMessages}
-                  onChange={(e) => setReceiveMessages(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-[#2C2E53]"
-                >
-                  <option value="SI">Sí, habilitar mensajería</option>
-                  <option value="NO">No recibir mensajes</option>
-                </select>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Biografía / Estado Institucional:
+                </label>
+                <textarea
+                  rows={2}
+                  value={profileComment}
+                  onChange={(e) => setProfileComment(e.target.value)}
+                  placeholder="Descripción de cargo o departamento..."
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2C2E53]"
+                />
               </div>
-            </div>
 
-            <div className="pt-4 border-t border-slate-100 flex justify-end">
-              <button
-                type="submit"
-                className="px-5 py-2.5 rounded-xl bg-[#2C2E53] hover:bg-[#1E2A4A] text-[#D4AF37] font-bold text-xs shadow-md transition-all flex items-center gap-2"
-              >
-                <CheckCircle2 className="w-4 h-4" />
-                Actualizar Perfil
-              </button>
-            </div>
-          </form>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Notificaciones por Correo Electrónico:
+                  </label>
+                  <select
+                    value={receiveEmails}
+                    onChange={(e) => setReceiveEmails(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-[#2C2E53]"
+                  >
+                    <option value="SI">Sí, recibir notificaciones</option>
+                    <option value="NO">No, desactivar correos</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Mensajería Interna SICE-CBA:
+                  </label>
+                  <select
+                    value={receiveMessages}
+                    onChange={(e) => setReceiveMessages(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-[#2C2E53]"
+                  >
+                    <option value="SI">Sí, habilitar mensajería</option>
+                    <option value="NO">No recibir mensajes</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                <span className="text-[11px] text-slate-400">
+                  Los cambios se reflejarán inmediatamente en su sesión institucional.
+                </span>
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 rounded-xl bg-[#2C2E53] hover:bg-[#1E2A4A] text-[#D4AF37] font-bold text-xs shadow-md transition-all flex items-center gap-2 cursor-pointer"
+                >
+                  <CheckCircle2 className="w-4 h-4 text-[#D4AF37]" />
+                  Guardar Perfil e Imagen
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 

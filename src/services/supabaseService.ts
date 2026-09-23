@@ -840,7 +840,11 @@ export const supabaseFetchUsers = async (): Promise<AppUser[] | null> => {
       role: row.role,
       defaultLevel: row.default_level || 'MEDIA_GENERAL',
       active: row.active ?? true,
-      avatarUrl: row.avatar_url
+      avatarUrl: row.avatar_url,
+      phone: row.phone,
+      bio: row.bio,
+      receiveEmails: row.receive_emails ?? true,
+      receiveMessages: row.receive_messages ?? true
     }));
   } catch (e) {
     console.error('Error en supabaseFetchUsers:', e);
@@ -860,7 +864,11 @@ export const supabaseSaveUser = async (user: AppUser): Promise<boolean> => {
       role: user.role,
       default_level: user.defaultLevel,
       active: user.active,
-      avatar_url: user.avatarUrl
+      avatar_url: user.avatarUrl,
+      phone: user.phone || null,
+      bio: user.bio || null,
+      receive_emails: user.receiveEmails ?? true,
+      receive_messages: user.receiveMessages ?? true
     });
     return !error;
   } catch {
