@@ -10,9 +10,11 @@ import {
   Phone,
   Mail,
   ShieldCheck,
-  X
+  X,
+  UserPlus
 } from 'lucide-react';
 import { LogoSeasonalAccessory } from './LogoSeasonalAccessory';
+import { SelfRegisterModal } from './SelfRegisterModal';
 
 interface LoginViewProps {
   onLoginSuccess?: () => void;
@@ -30,12 +32,11 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
   const [capsLockActive, setCapsLockActive] = useState(false);
   const [loginState, setLoginState] = useState<'IDLE' | 'LOADING' | 'SUCCESS'>('IDLE');
   const [errorMsg, setErrorMsg] = useState('');
+  const [successInfoMsg, setSuccessInfoMsg] = useState('');
   const [showHelpModal, setShowHelpModal] = useState(false);
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [userFocused, setUserFocused] = useState(false);
   const [passFocused, setPassFocused] = useState(false);
-  const [totpFocused, setTotpFocused] = useState(false);
-  const [show2FAInput, setShow2FAInput] = useState(false);
-  const [totpCode, setTotpCode] = useState('');
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,21 +48,15 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
       setErrorMsg('Por favor ingrese su contraseña.');
       return;
     }
-    if (show2FAInput && !totpCode.trim()) {
-      setErrorMsg('Por favor ingrese el código de autenticación de dos factores (2FA).');
-      return;
-    }
 
     setLoginState('LOADING');
     setErrorMsg('');
+    setSuccessInfoMsg('');
 
     try {
-      const res = await login(userInput, password, show2FAInput ? totpCode : undefined);
+      const res = await login(userInput, password);
       if (!res.success) {
         setLoginState('IDLE');
-        if (res.requires2FA) {
-          setShow2FAInput(true);
-        }
         setErrorMsg(res.message || 'Credenciales inválidas. Acceso restringido a cuentas registradas en la base de datos.');
         return;
       }
@@ -141,6 +136,13 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
             <div className="p-2.5 rounded-[2px] bg-rose-50 border border-rose-200 text-rose-700 text-xs text-center font-medium flex items-center justify-center gap-1.5 animate-in fade-in duration-200">
               <AlertCircle className="w-3.5 h-3.5 shrink-0 text-rose-600" />
               <span>{errorMsg}</span>
+            </div>
+          )}
+
+          {successInfoMsg && (
+            <div className="p-2.5 rounded-[2px] bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs text-center font-medium flex items-center justify-center gap-1.5 animate-in fade-in duration-200">
+              <CheckCircle2 className="w-3.5 h-3.5 shrink-0 text-emerald-600" />
+              <span>{successInfoMsg}</span>
             </div>
           )}
 
@@ -229,48 +231,6 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
             )}
           </div>
 
-          {/* Campo Condicional: Autenticación de Dos Factores (2FA) */}
-          {show2FAInput && (
-            <div className="space-y-1.5 p-3 rounded bg-amber-500/10 border border-amber-400/40 animate-in slide-in-from-top-2 duration-200">
-              <div className="flex items-center gap-1.5 text-amber-900 text-xs font-bold">
-                <ShieldCheck className="w-4 h-4 text-[#D4AF37]" />
-                <span>Autenticación en Dos Pasos (2FA)</span>
-              </div>
-              <p className="text-[11px] text-slate-600">
-                Su rol directivo/administrativo requiere verificación TOTP. Ingrese el código de su aplicación autenticadora (Google Authenticator / Authy).
-              </p>
-              <div
-                className={`flex rounded-[2px] border transition-all duration-200 bg-white h-10 overflow-hidden ${
-                  totpFocused
-                    ? 'border-[#2C2E53] ring-1 ring-[#D4AF37]/50 shadow-xs'
-                    : 'border-amber-300 hover:border-amber-400'
-                }`}
-              >
-                <div
-                  className={`w-10 flex items-center justify-center border-r transition-colors duration-200 shrink-0 ${
-                    totpFocused
-                      ? 'bg-[#2C2E53] border-[#2C2E53] text-[#D4AF37]'
-                      : 'bg-amber-100 border-amber-300 text-amber-800'
-                  }`}
-                >
-                  <ShieldCheck className="w-4 h-4" />
-                </div>
-                <input
-                  type="text"
-                  maxLength={6}
-                  required
-                  value={totpCode}
-                  onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, ''))}
-                  onFocus={() => setTotpFocused(true)}
-                  onBlur={() => setTotpFocused(false)}
-                  placeholder="Código 2FA de 6 dígitos"
-                  className="w-full px-3 text-center tracking-widest font-mono text-sm sm:text-base font-bold text-slate-900 placeholder-slate-400 focus:outline-none bg-transparent"
-                  autoComplete="one-time-code"
-                />
-              </div>
-            </div>
-          )}
-
           {/* Opciones prácticas: Recordar y Ayuda */}
           <div className="flex items-center justify-between pt-0.5 text-[11px] text-slate-500">
             <label className="flex items-center gap-1.5 cursor-pointer hover:text-[#2C2E53] transition select-none">
@@ -293,7 +253,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
           </div>
 
           {/* Botón: INGRESAR (Paleta SICE-CBA: Azul Marino #2C2E53 + Texto Dorado #D4AF37) */}
-          <div className="pt-2">
+          <div className="pt-2 space-y-2.5">
             <button
               type="submit"
               disabled={loginState !== 'IDLE'}
@@ -317,6 +277,18 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
               )}
               {loginState === 'IDLE' && <span>INGRESAR</span>}
             </button>
+
+            {/* Botón de Auto-Registro Institucional */}
+            <div className="pt-1 text-center">
+              <button
+                type="button"
+                onClick={() => setShowRegisterModal(true)}
+                className="w-full py-2 px-3 rounded-[2px] border border-slate-200 hover:border-[#D4AF37]/60 bg-slate-50 hover:bg-slate-100 text-[#2C2E53] hover:text-[#1B1C33] text-[11px] font-bold transition flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+              >
+                <UserPlus className="w-3.5 h-3.5 text-[#D4AF37]" />
+                <span>¿Nuevo personal? Regístrese aquí</span>
+              </button>
+            </div>
           </div>
         </form>
       </div>
@@ -368,6 +340,17 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
           </div>
         </div>
       )}
+
+      {/* Modal de Auto-Registro con Validación de Código y Generador de Contraseña */}
+      <SelfRegisterModal
+        isOpen={showRegisterModal}
+        onClose={() => setShowRegisterModal(false)}
+        onSuccess={(registeredUser) => {
+          setUserInput(registeredUser);
+          setSuccessInfoMsg(`¡Registro completado para @${registeredUser}! Ingrese con su contraseña creada.`);
+          setErrorMsg('');
+        }}
+      />
     </div>
   );
 };

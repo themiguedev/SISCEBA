@@ -305,6 +305,7 @@ export function getDefaultAvatarForUser(user: {
   const isFemaleName =
     name.includes('coordinacion') ||
     name.includes('coordinadora') ||
+    name.includes('secretaria') ||
     name.includes('asistente') ||
     name.includes('profesora') ||
     name.includes('lic.') ||

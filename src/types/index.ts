@@ -1,6 +1,6 @@
 export type EducationalLevel = 'INICIAL' | 'PRIMARIA' | 'MEDIA_GENERAL';
 
-export type UserRole = 'DOCENTE' | 'COORDINACION' | 'COORDINADOR' | 'DIRECTOR' | 'ADMINISTRADOR' | 'REPRESENTANTE' | 'ESTUDIANTE' | 'ASISTENTE';
+export type UserRole = 'DOCENTE' | 'COORDINACION' | 'COORDINADOR' | 'DIRECTOR' | 'ADMINISTRADOR' | 'REPRESENTANTE' | 'ESTUDIANTE' | 'ASISTENTE' | 'SECRETARIA';
 
 export interface AppUser {
   id: string;
@@ -20,6 +20,17 @@ export interface AppUser {
   twoFactorEnabled?: boolean;
   twoFactorSecret?: string;
   passwordLastChanged?: string;
+}
+
+export interface RegistrationCode {
+  id: string;
+  code: string;
+  allowedRole?: 'DOCENTE' | 'ASISTENTE' | 'SECRETARIA';
+  createdBy: string;
+  createdAt: string;
+  used: boolean;
+  usedBy?: string;
+  usedAt?: string;
 }
 
 export type SubjectType = 'REGULAR' | 'INTEGRADA' | 'ESPECIALIZADA';

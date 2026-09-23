@@ -9,6 +9,7 @@ export const ROLE_HIERARCHY: Record<UserRole, number> = {
   DIRECTOR: 80,
   COORDINACION: 60,
   COORDINADOR: 60, // Alias de compatibilidad
+  SECRETARIA: 50,
   DOCENTE: 40,
   ASISTENTE: 30,
   REPRESENTANTE: 20,
@@ -73,6 +74,15 @@ export const ROLE_METADATA: Record<UserRole, RoleMetadata> = {
     description: 'Planificación didáctica oficial, asentamiento de notas procesales y asistencia diaria de clase.',
     department: 'Cuerpo Docente CBA',
     scope: 'Planificación, Evaluación y Asistencia de Aula'
+  },
+  SECRETARIA: {
+    id: 'SECRETARIA',
+    label: 'Secretaría Académica / Control de Estudios',
+    badge: '📂 Secretaría',
+    badgeBg: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
+    description: 'Gestión de admisiones, inscripciones, expedientes de matrícula, solicitud y emisión de documentos académicos y constancias.',
+    department: 'Secretaría de Control de Estudios (UCE)',
+    scope: 'Gestión de Matrícula, Expedientes y Emisión de Documentos'
   },
   ASISTENTE: {
     id: 'ASISTENTE',
@@ -160,6 +170,13 @@ export const ROLE_TAB_PERMISSIONS: Record<UserRole, MainNavigationTab[]> = {
     'CONSULTAS',
     'COMUNIDAD',
     'CONFIGURACION',
+    'AYUDA'
+  ],
+  SECRETARIA: [
+    'ESCRITORIO',
+    'GESTION',
+    'CONSULTAS',
+    'COMUNIDAD',
     'AYUDA'
   ],
   ASISTENTE: [
@@ -262,6 +279,13 @@ export const ROLE_SUBTAB_PERMISSIONS: Record<UserRole, Partial<Record<MainNaviga
     CONSULTAS: ['RENDIMIENTO', 'BOLETIN', 'ASISTENCIA', 'NOMINAS'], // Rendimiento de sus materias
     COMUNIDAD: ['NOTICIAS', 'CUMPLEANOS', 'COMUNICADOS'],
     CONFIGURACION: ['TEMAS'], // Solo personalización de tema
+    AYUDA: ['MANUAL', 'MAPA_SITIO']
+  },
+  SECRETARIA: {
+    ESCRITORIO: ['DASHBOARD', 'PERFIL', 'SUGERENCIAS'],
+    GESTION: ['INSCRIPCIONES', 'DOCUMENTOS', 'MATRICULA'], // Admisiones, expedientes y trámites
+    CONSULTAS: ['RENDIMIENTO', 'BOLETIN', 'ASISTENCIA', 'ESTADISTICAS', 'NOMINAS'],
+    COMUNIDAD: ['NOTICIAS', 'CUMPLEANOS', 'COMUNICADOS'],
     AYUDA: ['MANUAL', 'MAPA_SITIO']
   },
   ASISTENTE: {

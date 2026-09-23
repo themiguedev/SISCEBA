@@ -1519,6 +1519,18 @@ export const INITIAL_USERS: AppUser[] = [
     gender: 'FEMENINO',
     active: true,
     avatarUrl: SVG_FEMALE_ORANGE
+  },
+  {
+    id: 'usr-secretaria',
+    username: 'secretaria',
+    password: 'cba2026*secretaria',
+    fullName: 'Secretaría de Control de Estudios (UCE)',
+    email: 'secretaria@bellasartes.edu.ve',
+    role: 'SECRETARIA',
+    defaultLevel: 'MEDIA_GENERAL',
+    gender: 'FEMENINO',
+    active: true,
+    avatarUrl: SVG_FEMALE_CIRCLE_TEAL
   }
 ];
 

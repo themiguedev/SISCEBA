@@ -234,7 +234,7 @@ const SiscebaMainApp: React.FC = () => {
       showToast('Acceso Restringido', 'Solo la cuenta de Administrador puede simular otros roles.', true);
       return;
     }
-    const roles: UserRole[] = ['ADMINISTRADOR', 'DIRECTOR', 'COORDINACION', 'DOCENTE', 'REPRESENTANTE', 'ESTUDIANTE'];
+    const roles: UserRole[] = ['ADMINISTRADOR', 'DIRECTOR', 'COORDINACION', 'SECRETARIA', 'DOCENTE', 'ASISTENTE', 'REPRESENTANTE', 'ESTUDIANTE'];
     const nextIdx = (roles.indexOf(currentRole) + 1) % roles.length;
     const nextRole = roles[nextIdx];
     setCurrentRole(nextRole);

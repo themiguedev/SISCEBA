@@ -23,9 +23,14 @@ import {
   Trash2,
   Check,
   Image as ImageIcon,
-  Phone
+  Phone,
+  Key,
+  Eye,
+  EyeOff,
+  AlertCircle
 } from 'lucide-react';
 import { OFFICIAL_AVATARS, getDefaultAvatarForUser } from '../../utils/avatarCatalog';
+import { PasswordStrengthBar } from '../common/PasswordStrengthBar';
 
 export type EscritorioTab = 'DASHBOARD' | 'PERFIL' | 'SUGERENCIAS';
 
@@ -73,6 +78,13 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
   );
   const [profileSaved, setProfileSaved] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+
+  // Password Change State
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
 
   // Suggestions Form State
   const [suggestionMessage, setSuggestionMessage] = useState('');
@@ -149,6 +161,38 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
 
     setProfileSaved(true);
     setTimeout(() => setProfileSaved(false), 3500);
+  };
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordError('');
+    setPasswordSuccess(false);
+
+    if (!currentUser) return;
+    if (!newPassword.trim()) {
+      setPasswordError('Por favor ingrese la nueva contraseña.');
+      return;
+    }
+    if (newPassword.length < 6) {
+      setPasswordError('La contraseña debe contener al menos 6 caracteres.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError('Las contraseñas no coinciden. Por favor verifique.');
+      return;
+    }
+
+    try {
+      await updateUser(currentUser.id, {
+        password: newPassword
+      });
+      setPasswordSuccess(true);
+      setNewPassword('');
+      setConfirmPassword('');
+      setTimeout(() => setPasswordSuccess(false), 4500);
+    } catch {
+      setPasswordError('Error al actualizar la contraseña en el sistema.');
+    }
   };
 
   const handleSuggestionSubmit = (e: React.FormEvent) => {
@@ -790,6 +834,95 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
                 </button>
               </div>
             </form>
+
+            {/* SECCIÓN 3: CAMBIO DE CONTRASEÑA CON GENERADOR ROBUSTO */}
+            <div className="mt-8 pt-6 border-t border-slate-200">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 rounded-lg bg-[#2C2E53] text-[#D4AF37] flex items-center justify-center font-bold">
+                  <Key className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="font-extrabold text-sm text-[#2C2E53]">
+                    Seguridad y Cambio de Contraseña
+                  </h4>
+                  <p className="text-[11px] text-slate-500">
+                    Actualice su clave de acceso institucional o genere una contraseña robusta de alta seguridad.
+                  </p>
+                </div>
+              </div>
+
+              {passwordSuccess && (
+                <div className="mb-4 p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2 animate-in fade-in">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>¡Su contraseña institucional ha sido actualizada y protegida criptográficamente con éxito!</span>
+                </div>
+              )}
+
+              {passwordError && (
+                <div className="mb-4 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center gap-2 animate-in fade-in">
+                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                  <span>{passwordError}</span>
+                </div>
+              )}
+
+              <form onSubmit={handlePasswordChange} className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Nueva Contraseña:
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showNewPassword ? 'text' : 'password'}
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        placeholder="Nueva clave segura"
+                        className="w-full pl-3.5 pr-10 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2C2E53] bg-white font-medium"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                        className="absolute right-3 top-3 text-slate-400 hover:text-slate-700 transition"
+                      >
+                        {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+
+                    <PasswordStrengthBar
+                      password={newPassword}
+                      onGeneratePassword={(gen) => setNewPassword(gen)}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Confirmar Nueva Contraseña:
+                    </label>
+                    <input
+                      type={showNewPassword ? 'text' : 'password'}
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Repita la nueva clave"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2C2E53] bg-white font-medium"
+                    />
+                    <span className="text-[10px] text-slate-400 mt-1 block">
+                      Asegúrese de que ambas contraseñas coincidan exactamente.
+                    </span>
+                  </div>
+                </div>
+
+                <div className="pt-2 flex justify-end">
+                  <button
+                    type="submit"
+                    disabled={!newPassword.trim()}
+                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#2C2E53] to-[#1B1C33] hover:from-[#1B1C33] hover:to-slate-900 text-[#D4AF37] font-bold text-xs shadow-md transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                  >
+                    <Key className="w-3.5 h-3.5" />
+                    <span>Actualizar Contraseña</span>
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}

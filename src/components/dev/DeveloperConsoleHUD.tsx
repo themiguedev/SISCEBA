@@ -34,6 +34,7 @@ interface DeveloperConsoleHUDProps {
 const AVAILABLE_ROLES: { id: UserRole; label: string; desc: string }[] = [
   { id: 'ADMINISTRADOR', label: 'Admin / Rector', desc: 'Acceso total y configuración' },
   { id: 'COORDINADOR', label: 'Coordinador', desc: 'Validación de planes y actas' },
+  { id: 'SECRETARIA', label: 'Secretaria', desc: 'Gestión de matrícula y expedientes' },
   { id: 'DOCENTE', label: 'Docente', desc: 'Evaluación y planificación de aula' },
   { id: 'ASISTENTE', label: 'Asistente', desc: 'Registro de asistencia, pases y conducta' },
   { id: 'REPRESENTANTE', label: 'Representante', desc: 'Portal de familia y notas' },

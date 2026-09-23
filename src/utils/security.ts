@@ -202,15 +202,15 @@ export function resetLoginAttempts(identifier: string): void {
   loginAttemptsStore.delete(identifier.toLowerCase().trim());
 }
 
-// --- 3. SEGUNDO FACTOR DE AUTENTICACIÓN (2FA / TOTP) ---
+// --- 3. AUTENTICACIÓN DIRECTA (2FA DESHABILITADO SEGÚN POLÍTICA INSTITUCIONAL) ---
 
 /**
- * Roles que requieren obligatoriamente 2FA para acceder al sistema
+ * Roles que requieren 2FA (Vacío: 2FA deshabilitado por requerimiento del sistema)
  */
-export const ROLES_REQUIRING_2FA: UserRole[] = ['ADMINISTRADOR', 'DIRECTOR', 'COORDINACION', 'COORDINADOR'];
+export const ROLES_REQUIRING_2FA: UserRole[] = [];
 
-export function is2FARequiredForRole(role: UserRole): boolean {
-  return ROLES_REQUIRING_2FA.includes(role);
+export function is2FARequiredForRole(_role: UserRole): boolean {
+  return false;
 }
 
 /**
