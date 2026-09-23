@@ -283,7 +283,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // User & Accounts Store
   const [users, setUsers] = useState<AppUser[]>(() => {
     const saved = localStorage.getItem('sisceba_users_v3');
-    return saved ? JSON.parse(saved) : INITIAL_USERS;
+    if (saved) {
+      try {
+        const parsed: AppUser[] = JSON.parse(saved);
+        return parsed.map(u => (u.id === 'usr-admin' || u.fullName === 'Administrador General de Sistemas') ? { ...u, fullName: 'Administrador' } : u);
+      } catch {
+        return INITIAL_USERS;
+      }
+    }
+    return INITIAL_USERS;
   });
 
   const [currentUser, setCurrentUser] = useState<AppUser | null>(() => {
@@ -291,7 +299,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const auth = localStorage.getItem('sisceba_auth_session');
     if (auth === 'true' && saved) {
       try {
-        return JSON.parse(saved);
+        const u = JSON.parse(saved);
+        if (u.id === 'usr-admin' || u.fullName === 'Administrador General de Sistemas') {
+          u.fullName = 'Administrador';
+        }
+        return u;
       } catch {
         return null;
       }

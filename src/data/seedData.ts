@@ -1476,7 +1476,7 @@ export const INITIAL_USERS: AppUser[] = [
     id: 'usr-admin',
     username: 'admin',
     password: 'cba2026*admin',
-    fullName: 'Administrador General de Sistemas',
+    fullName: 'Administrador',
     email: 'admin@bellasartes.edu.ve',
     role: 'ADMINISTRADOR',
     defaultLevel: 'MEDIA_GENERAL',
