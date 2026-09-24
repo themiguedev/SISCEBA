@@ -71,7 +71,8 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
       setTimeout(() => {
         onLoginSuccess?.();
       }, 350);
-    } catch {
+    } catch (err) {
+      console.error('Error durante handleLogin:', err);
       setLoginState('IDLE');
       setErrorMsg('Error al conectar con la base de datos institucional.');
     }
