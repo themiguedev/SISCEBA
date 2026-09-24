@@ -22,6 +22,10 @@ import {
   RegistrationCode,
   SchoolYearConfig
 } from '../types';
+import {
+  encodeUserAvatarWithMetadata,
+  decodeUserAvatarMetadata
+} from '../utils/avatarCatalog';
 
 /**
  * SERVICIO DE DATOS EN LA NUBE CON SUPABASE (SICE-CBA)
@@ -879,22 +883,25 @@ export const supabaseFetchUsers = async (): Promise<AppUser[] | null> => {
       return null;
     }
 
-    return data.map(row => ({
-      id: row.id,
-      username: row.username,
-      password: row.password,
-      fullName: row.full_name,
-      email: row.email,
-      role: row.role,
-      defaultLevel: row.default_level || 'MEDIA_GENERAL',
-      active: row.active ?? true,
-      avatarUrl: row.avatar_url,
-      gender: row.gender,
-      phone: row.phone,
-      bio: row.bio,
-      receiveEmails: row.receive_emails ?? true,
-      receiveMessages: row.receive_messages ?? true
-    }));
+    return data.map(row => {
+      const meta = decodeUserAvatarMetadata(row.avatar_url);
+      return {
+        id: row.id,
+        username: row.username,
+        password: row.password,
+        fullName: row.full_name,
+        email: row.email,
+        role: row.role,
+        defaultLevel: row.default_level || 'MEDIA_GENERAL',
+        active: row.active ?? true,
+        avatarUrl: meta.avatarUrl || row.avatar_url || '',
+        gender: meta.gender,
+        phone: meta.phone,
+        bio: meta.bio,
+        receiveEmails: meta.receiveEmails ?? true,
+        receiveMessages: meta.receiveMessages ?? true
+      };
+    });
   } catch (e) {
     console.error('Error en supabaseFetchUsers:', e);
     return null;
@@ -904,6 +911,15 @@ export const supabaseFetchUsers = async (): Promise<AppUser[] | null> => {
 export const supabaseSaveUser = async (user: AppUser): Promise<boolean> => {
   if (!isSupabaseConfigured()) return false;
   try {
+    const encodedAvatar = encodeUserAvatarWithMetadata({
+      avatarUrl: user.avatarUrl,
+      gender: user.gender,
+      phone: user.phone,
+      bio: user.bio,
+      receiveEmails: user.receiveEmails,
+      receiveMessages: user.receiveMessages
+    });
+
     const payload: Record<string, any> = {
       id: user.id,
       username: user.username,
@@ -913,7 +929,7 @@ export const supabaseSaveUser = async (user: AppUser): Promise<boolean> => {
       role: user.role,
       default_level: user.defaultLevel,
       active: user.active,
-      avatar_url: user.avatarUrl
+      avatar_url: encodedAvatar
     };
 
     const { error } = await supabase.from('app_users').upsert(payload);

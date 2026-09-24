@@ -340,3 +340,79 @@ export {
   SVG_FEMALE_TEAL_CIRCLE as SVG_FEMALE_CIRCLE_TEAL,
   SVG_FEMALE_CYAN
 };
+
+/**
+ * Serializa de forma segura el avatar, género, bio, teléfono y preferencias para guardarlo
+ * íntegramente en la base de datos de Supabase en el campo `avatar_url`.
+ */
+export function encodeUserAvatarWithMetadata(data: {
+  avatarUrl?: string;
+  gender?: 'MASCULINO' | 'FEMENINO';
+  phone?: string;
+  bio?: string;
+  receiveEmails?: boolean;
+  receiveMessages?: boolean;
+}): string {
+  // Encontrar si coincide con un preset oficial para guardarlo como ID liviano
+  let avatarRef = data.avatarUrl || '';
+  for (const preset of OFFICIAL_AVATARS) {
+    if (data.avatarUrl === preset.svgDataUri) {
+      avatarRef = `preset:${preset.id}`;
+      break;
+    }
+  }
+
+  const metaObj = {
+    g: data.gender || null,
+    p: data.phone || null,
+    b: data.bio || null,
+    re: data.receiveEmails ?? true,
+    rm: data.receiveMessages ?? true,
+    a: avatarRef
+  };
+
+  return `cba-meta:${JSON.stringify(metaObj)}`;
+}
+
+/**
+ * Desempaqueta el contenido de `avatar_url` recuperando el avatar original,
+ * el género (hombre/mujer), la biografía y el número de teléfono sincronizados en Supabase.
+ */
+export function decodeUserAvatarMetadata(rawAvatarUrl?: string | null): {
+  avatarUrl: string;
+  gender?: 'MASCULINO' | 'FEMENINO';
+  phone?: string;
+  bio?: string;
+  receiveEmails?: boolean;
+  receiveMessages?: boolean;
+} {
+  if (!rawAvatarUrl) {
+    return { avatarUrl: '' };
+  }
+
+  if (rawAvatarUrl.startsWith('cba-meta:')) {
+    try {
+      const meta = JSON.parse(rawAvatarUrl.slice('cba-meta:'.length));
+      let avatarUrl = meta.a || '';
+      if (avatarUrl.startsWith('preset:')) {
+        const presetId = avatarUrl.slice('preset:'.length);
+        const found = OFFICIAL_AVATARS.find(p => p.id === presetId);
+        if (found) {
+          avatarUrl = found.svgDataUri;
+        }
+      }
+      return {
+        avatarUrl,
+        gender: meta.g || undefined,
+        phone: meta.p || undefined,
+        bio: meta.b || undefined,
+        receiveEmails: meta.re ?? true,
+        receiveMessages: meta.rm ?? true
+      };
+    } catch {
+      return { avatarUrl: rawAvatarUrl };
+    }
+  }
+
+  return { avatarUrl: rawAvatarUrl };
+}

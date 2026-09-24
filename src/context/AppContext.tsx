@@ -40,7 +40,7 @@ import {
   is2FARequiredForRole,
   verifyTOTPCode
 } from '../utils/security';
-import { getDefaultAvatarForUser } from '../utils/avatarCatalog';
+import { getDefaultAvatarForUser, decodeUserAvatarMetadata } from '../utils/avatarCatalog';
 import {
   INITIAL_AREAS,
   INITIAL_COMPETENCIES,
@@ -376,7 +376,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     if (updatedUser) {
-      supabaseSaveUser(updatedUser).catch(err => console.warn('Error al guardar usuario en Supabase:', err));
+      await supabaseSaveUser(updatedUser);
       return true;
     }
     return false;
@@ -533,6 +533,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
         if (!error && data && data.length > 0) {
           const row = data[0];
+          const meta = decodeUserAvatarMetadata(row.avatar_url);
           matched = {
             id: row.id,
             username: row.username,
@@ -542,7 +543,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             role: row.role,
             defaultLevel: row.default_level || 'MEDIA_GENERAL',
             active: row.active ?? true,
-            avatarUrl: row.avatar_url,
+            avatarUrl: meta.avatarUrl || row.avatar_url || '',
+            gender: meta.gender,
+            phone: meta.phone,
+            bio: meta.bio,
+            receiveEmails: meta.receiveEmails ?? true,
+            receiveMessages: meta.receiveMessages ?? true,
             twoFactorEnabled: row.two_factor_enabled ?? is2FARequiredForRole(row.role),
             twoFactorSecret: row.two_factor_secret,
             passwordLastChanged: row.password_last_changed
