@@ -224,8 +224,8 @@ export const ConsultasModule: React.FC<ConsultasModuleProps> = ({
         </div>
       </div>
 
-      {/* Full-Width Responsive Subtabs Navigation Bar (No text truncation) */}
-      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 p-1.5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+      {/* Full-Width Responsive Subtabs Navigation Bar (No text truncation & Smooth Scroll) */}
+      <div className="flex items-center overflow-x-auto no-scrollbar gap-1.5 sm:gap-2 p-1.5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
         {/* 1. Sábana de Notas */}
         {allowedTabs.includes('RENDIMIENTO') && (
           <button

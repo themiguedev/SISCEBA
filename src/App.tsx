@@ -7,6 +7,7 @@ import { ModernSidebar } from './components/layout/ModernSidebar';
 import { AcademicPulseHero } from './components/layout/AcademicPulseHero';
 import { CompactWorkspaceHeader } from './components/layout/CompactWorkspaceHeader';
 import { QuickActionDock } from './components/layout/QuickActionDock';
+import { ModernMobileNav } from './components/layout/ModernMobileNav';
 import { CommandSearchModal } from './components/layout/CommandSearchModal';
 import { KeyboardShortcutsModal } from './components/layout/KeyboardShortcutsModal';
 import { DeveloperConsoleHUD } from './components/dev/DeveloperConsoleHUD';
@@ -722,7 +723,7 @@ const SiscebaMainApp: React.FC = () => {
           </main>
 
           {/* Modern Executive Footer */}
-          <footer className="w-full bg-[#1B1C33] text-white border-t border-[#2C2E53] py-6 px-4 sm:px-6 lg:px-8 mt-auto no-print">
+          <footer className="w-full bg-[#1B1C33] text-white border-t border-[#2C2E53] py-6 px-4 sm:px-6 lg:px-8 mt-auto mb-14 lg:mb-0 no-print">
             <div className="max-w-[1600px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
               <div className="flex items-center gap-3 text-center md:text-left">
                 <div className="relative flex items-center justify-center shrink-0 select-none cursor-default">
@@ -762,6 +763,13 @@ const SiscebaMainApp: React.FC = () => {
       <QuickActionDock
         onNavigate={handleQuickAction}
         onOpenSearch={() => setSearchModalOpen(true)}
+      />
+
+      {/* Mobile Native-Style Bottom Navigation Bar */}
+      <ModernMobileNav
+        activeTab={activeTab}
+        onNavigate={handleQuickAction}
+        onOpenSidebar={() => setSidebarOpen(true)}
       />
     </div>
   );

@@ -102,7 +102,7 @@ export const QuickActionDock: React.FC<QuickActionDockProps> = ({
   });
 
   return (
-    <aside aria-label="Acciones rápidas flotantes" className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-2 no-print">
+    <aside aria-label="Acciones rápidas flotantes" className="fixed bottom-20 lg:bottom-6 right-4 sm:right-6 z-40 flex flex-col items-end gap-2 no-print">
       {/* Expanded Quick Action Items */}
       {isOpen && (
         <div className="flex flex-col items-end gap-2 mb-2 animate-in fade-in slide-in-from-bottom-4 duration-200">

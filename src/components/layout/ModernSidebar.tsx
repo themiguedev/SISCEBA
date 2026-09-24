@@ -100,8 +100,11 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
         [section.id]: true
       }));
     }
-    if (section.id === 'ESCRITORIO' && typeof window !== 'undefined' && window.innerWidth < 1024) {
-      onCloseMobile();
+    // Si la sección no tiene subtabs o es ESCRITORIO o AYUDA, o en pantallas móviles (<1024px)
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+      if (section.id === 'ESCRITORIO' || section.id === 'AYUDA') {
+        onCloseMobile();
+      }
     }
   };
 

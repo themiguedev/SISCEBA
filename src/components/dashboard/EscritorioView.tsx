@@ -228,8 +228,8 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
           </div>
         </div>
 
-        {/* Subtabs Pill Switcher */}
-        <div className="flex items-center bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200 dark:border-slate-700/60 shadow-inner shrink-0">
+        {/* Subtabs Pill Switcher - Con scroll horizontal en móviles */}
+        <div className="w-full sm:w-auto overflow-x-auto no-scrollbar flex items-center bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200 dark:border-slate-700/60 shadow-inner shrink-0">
           <button
             onClick={() => setActiveTab('DASHBOARD')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
