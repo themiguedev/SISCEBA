@@ -275,12 +275,32 @@ CREATE TABLE IF NOT EXISTS app_users (
     username VARCHAR(50) UNIQUE NOT NULL,
     password VARCHAR(100) NOT NULL,
     full_name VARCHAR(150) NOT NULL,
-    email VARCHAR(120),
-    role VARCHAR(30) NOT NULL CHECK (role IN ('DOCENTE', 'COORDINACION', 'COORDINADOR', 'DIRECTOR', 'ADMINISTRADOR', 'REPRESENTANTE', 'ESTUDIANTE', 'ASISTENTE')),
+    role VARCHAR(30) NOT NULL CHECK (role IN ('DOCENTE', 'COORDINACION', 'COORDINADOR', 'DIRECTOR', 'ADMINISTRADOR', 'REPRESENTANTE', 'ESTUDIANTE', 'ASISTENTE', 'SECRETARIA')),
     default_level VARCHAR(20) DEFAULT 'MEDIA_GENERAL' CHECK (default_level IN ('INICIAL', 'PRIMARIA', 'MEDIA_GENERAL')),
     active BOOLEAN DEFAULT TRUE,
     avatar_url TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 19. TABLA DE CÓDIGOS DE AUTORIZACIÓN (USO ÚNICO PARA AUTO-REGISTRO)
+CREATE TABLE IF NOT EXISTS registration_codes (
+    id VARCHAR(60) PRIMARY KEY,
+    code VARCHAR(50) UNIQUE NOT NULL,
+    allowed_role VARCHAR(30) CHECK (allowed_role IN ('DOCENTE', 'ASISTENTE', 'SECRETARIA')),
+    created_by VARCHAR(100) NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    used BOOLEAN DEFAULT FALSE,
+    used_by VARCHAR(100),
+    used_at TIMESTAMPTZ
+);
+
+-- 20. TABLA DE CONFIGURACIÓN DEL AÑO ESCOLAR Y LAPSOS
+CREATE TABLE IF NOT EXISTS school_year_config (
+    id VARCHAR(60) PRIMARY KEY DEFAULT 'current_config',
+    year VARCHAR(20) NOT NULL,
+    is_current BOOLEAN DEFAULT TRUE,
+    lapsos JSONB NOT NULL DEFAULT '[]'::jsonb,
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- 19. TRIGGERS PARA UPDATED_AT
@@ -411,4 +431,17 @@ DROP POLICY IF EXISTS "Permitir lectura general a app_users" ON app_users;
 DROP POLICY IF EXISTS "Permitir escritura general a app_users" ON app_users;
 CREATE POLICY "Permitir lectura general a app_users" ON app_users FOR SELECT USING (true);
 CREATE POLICY "Permitir escritura general a app_users" ON app_users FOR ALL USING (true);
+
+ALTER TABLE registration_codes ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Permitir lectura general a registration_codes" ON registration_codes;
+DROP POLICY IF EXISTS "Permitir escritura general a registration_codes" ON registration_codes;
+CREATE POLICY "Permitir lectura general a registration_codes" ON registration_codes FOR SELECT USING (true);
+CREATE POLICY "Permitir escritura general a registration_codes" ON registration_codes FOR ALL USING (true);
+
+ALTER TABLE school_year_config ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Permitir lectura general a school_year_config" ON school_year_config;
+DROP POLICY IF EXISTS "Permitir escritura general a school_year_config" ON school_year_config;
+CREATE POLICY "Permitir lectura general a school_year_config" ON school_year_config FOR SELECT USING (true);
+CREATE POLICY "Permitir escritura general a school_year_config" ON school_year_config FOR ALL USING (true);
+
 

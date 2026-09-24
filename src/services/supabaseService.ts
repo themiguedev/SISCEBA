@@ -16,7 +16,10 @@ import {
   TitleRecord,
   CommunityNotice,
   SystemNotification,
-  AppUser
+  AppUser,
+  PlanLapso,
+  RegistrationCode,
+  SchoolYearConfig
 } from '../types';
 
 /**
@@ -877,3 +880,160 @@ export const supabaseSaveUser = async (user: AppUser): Promise<boolean> => {
     return false;
   }
 };
+
+// ==========================================
+// 15. PLANES DE EVALUACIÓN DE LAPSO (plans_lapso)
+// ==========================================
+export const supabaseFetchPlansLapso = async (): Promise<PlanLapso[] | null> => {
+  if (!isSupabaseConfigured()) return null;
+  try {
+    const { data, error } = await supabase.from('plans_lapso').select('*');
+    if (error || !data) {
+      console.warn('Supabase fetch plans_lapso aviso:', error?.message);
+      return null;
+    }
+
+    return data.map(row => ({
+      id: row.id,
+      areaId: row.area_id,
+      level: row.level,
+      gradeSection: row.grade_section,
+      lapso: row.lapso,
+      status: row.status,
+      generalObjective: row.general_objective || '',
+      items: row.items || [],
+      reviewFeedback: row.review_feedback || undefined,
+      updatedAt: row.updated_at ? row.updated_at.split('T')[0] : new Date().toISOString().split('T')[0]
+    }));
+  } catch (e) {
+    console.error('Error en supabaseFetchPlansLapso:', e);
+    return null;
+  }
+};
+
+export const supabaseSavePlanLapso = async (plan: PlanLapso): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('plans_lapso').upsert({
+      id: plan.id,
+      area_id: plan.areaId,
+      level: plan.level,
+      grade_section: plan.gradeSection,
+      lapso: plan.lapso,
+      status: plan.status,
+      general_objective: plan.generalObjective,
+      items: plan.items || [],
+      review_feedback: plan.reviewFeedback || null,
+      updated_at: new Date().toISOString()
+    });
+    return !error;
+  } catch (e) {
+    console.error('Error en supabaseSavePlanLapso:', e);
+    return false;
+  }
+};
+
+// ==========================================
+// 16. CÓDIGOS DE AUTORIZACIÓN (registration_codes)
+// ==========================================
+export const supabaseFetchRegistrationCodes = async (): Promise<RegistrationCode[] | null> => {
+  if (!isSupabaseConfigured()) return null;
+  try {
+    const { data, error } = await supabase.from('registration_codes').select('*');
+    if (error || !data) {
+      console.warn('Supabase fetch registration_codes aviso:', error?.message);
+      return null;
+    }
+
+    return data.map(row => ({
+      id: row.id,
+      code: row.code,
+      allowedRole: row.allowed_role,
+      createdBy: row.created_by,
+      createdAt: row.created_at,
+      used: row.used ?? false,
+      usedBy: row.used_by || undefined,
+      usedAt: row.used_at || undefined
+    }));
+  } catch (e) {
+    console.error('Error en supabaseFetchRegistrationCodes:', e);
+    return null;
+  }
+};
+
+export const supabaseSaveRegistrationCode = async (code: RegistrationCode): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('registration_codes').upsert({
+      id: code.id,
+      code: code.code,
+      allowed_role: code.allowedRole || null,
+      created_by: code.createdBy,
+      created_at: code.createdAt,
+      used: code.used,
+      used_by: code.usedBy || null,
+      used_at: code.usedAt || null
+    });
+    return !error;
+  } catch (e) {
+    console.error('Error en supabaseSaveRegistrationCode:', e);
+    return false;
+  }
+};
+
+export const supabaseDeleteRegistrationCode = async (codeId: string): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('registration_codes').delete().eq('id', codeId);
+    return !error;
+  } catch (e) {
+    console.error('Error en supabaseDeleteRegistrationCode:', e);
+    return false;
+  }
+};
+
+// ==========================================
+// 17. CONFIGURACIÓN DEL AÑO ESCOLAR (school_year_config)
+// ==========================================
+export const supabaseFetchSchoolYearConfig = async (): Promise<SchoolYearConfig | null> => {
+  if (!isSupabaseConfigured()) return null;
+  try {
+    const { data, error } = await supabase
+      .from('school_year_config')
+      .select('*')
+      .eq('id', 'current_config')
+      .maybeSingle();
+
+    if (error || !data) {
+      console.warn('Supabase fetch school_year_config aviso:', error?.message);
+      return null;
+    }
+
+    return {
+      year: data.year,
+      isCurrent: data.is_current ?? true,
+      lapsos: data.lapsos || []
+    };
+  } catch (e) {
+    console.error('Error en supabaseFetchSchoolYearConfig:', e);
+    return null;
+  }
+};
+
+export const supabaseSaveSchoolYearConfig = async (config: SchoolYearConfig): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('school_year_config').upsert({
+      id: 'current_config',
+      year: config.year,
+      is_current: config.isCurrent,
+      lapsos: config.lapsos,
+      updated_at: new Date().toISOString()
+    });
+    return !error;
+  } catch (e) {
+    console.error('Error en supabaseSaveSchoolYearConfig:', e);
+    return false;
+  }
+};
+

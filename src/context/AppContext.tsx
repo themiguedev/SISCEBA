@@ -82,6 +82,15 @@ import {
   supabaseFetchCommunityNotices,
   supabaseFetchNotifications,
   supabaseFetchUsers,
+  supabaseFetchPlansLapso,
+  supabaseSavePlanLapso,
+  supabaseFetchRegistrationCodes,
+  supabaseSaveRegistrationCode,
+  supabaseDeleteRegistrationCode,
+  supabaseFetchSchoolYearConfig,
+  supabaseSaveSchoolYearConfig,
+  supabaseSaveCompetency,
+  supabaseSaveIndicator,
   supabaseSaveStudent,
   supabaseSaveEvaluation,
   supabaseBulkSaveEvaluations,
@@ -435,11 +444,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
 
     setRegistrationCodes(prev => [newCode, ...prev]);
+    supabaseSaveRegistrationCode(newCode).catch(err => console.warn('Supabase save code err:', err));
     return newCode;
   };
 
   const deleteRegistrationCode = (codeId: string) => {
     setRegistrationCodes(prev => prev.filter(c => c.id !== codeId));
+    supabaseDeleteRegistrationCode(codeId).catch(err => console.warn('Supabase delete code err:', err));
   };
 
   const validateAndUseRegistrationCode = async (
@@ -468,6 +479,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (matched.used) {
       // Si ya estaba marcado como usado, se remueve inmediatamente para evitar reuso
       setRegistrationCodes(prev => prev.filter(c => c.id !== matched.id));
+      supabaseDeleteRegistrationCode(matched.id).catch(err => console.warn('Supabase delete code err:', err));
       return {
         valid: false,
         message: `Este código de autorización ya fue utilizado previamente y ha sido revocado.`
@@ -483,6 +495,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // Código de un solo uso: Al ser detectado y validado satisfactoriamente, se elimina de inmediato
     setRegistrationCodes(prev => prev.filter(c => c.id !== matched.id));
+    supabaseDeleteRegistrationCode(matched.id).catch(err => console.warn('Supabase delete code err:', err));
 
     return { valid: true };
   };
@@ -686,7 +699,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         remoteTitles,
         remoteNotices,
         remoteNotifications,
-        remoteUsers
+        remoteUsers,
+        remotePlansLapso,
+        remoteCodes,
+        remoteSchoolYear
       ] = await Promise.all([
         supabaseFetchStudents(),
         supabaseFetchSubjectAreas(),
@@ -702,7 +718,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         supabaseFetchTitleRecords(),
         supabaseFetchCommunityNotices(),
         supabaseFetchNotifications(),
-        supabaseFetchUsers()
+        supabaseFetchUsers(),
+        supabaseFetchPlansLapso(),
+        supabaseFetchRegistrationCodes(),
+        supabaseFetchSchoolYearConfig()
       ]);
 
       if (remoteStudents !== null) setStudents(remoteStudents);
@@ -711,6 +730,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (remoteIndicators !== null) setIndicators(remoteIndicators);
       if (remoteEvaluations !== null) setEvaluations(remoteEvaluations);
       if (remotePlans !== null) setPlansQuincenal(remotePlans);
+      if (remotePlansLapso !== null) setPlansLapso(remotePlansLapso);
+      if (remoteCodes !== null) setRegistrationCodes(remoteCodes);
+      if (remoteSchoolYear !== null) setSchoolYearConfig(remoteSchoolYear);
       if (remotePasses !== null) setPasses(remotePasses);
       if (remoteAttendance !== null) setDailyAttendance(remoteAttendance);
       if (remoteConducts !== null) setConducts(remoteConducts);
@@ -990,6 +1012,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id: `comp-${Date.now()}`
     };
     setCompetencies(prev => [newComp, ...prev]);
+    supabaseSaveCompetency(newComp).catch(err => console.warn('Supabase save comp err:', err));
     return newComp;
   };
 
@@ -999,6 +1022,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id: `ind-${Date.now()}`
     };
     setIndicators(prev => [newInd, ...prev]);
+    supabaseSaveIndicator(newInd).catch(err => console.warn('Supabase save ind err:', err));
     return newInd;
   };
 
@@ -1013,6 +1037,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       title: `${comp.title} (Transferida a L${targetLapso})`
     };
     setCompetencies(prev => [cloned, ...prev]);
+    supabaseSaveCompetency(cloned).catch(err => console.warn('Supabase transfer comp err:', err));
   };
 
   const transferIndicator = (indicatorId: string, targetLapso: 1 | 2 | 3) => {
@@ -1026,6 +1051,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       description: `${ind.description} (Reforzado en L${targetLapso})`
     };
     setIndicators(prev => [cloned, ...prev]);
+    supabaseSaveIndicator(cloned).catch(err => console.warn('Supabase transfer ind err:', err));
   };
 
   const addStrategy = (strat: Omit<Strategy, 'id'>): Strategy => {
@@ -1085,20 +1111,34 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const savePlanLapso = (plan: PlanLapso) => {
+    const updatedPlan: PlanLapso = { ...plan, updatedAt: new Date().toISOString().split('T')[0] };
     setPlansLapso(prev => {
       const idx = prev.findIndex(p => p.id === plan.id);
       if (idx >= 0) {
         const copy = [...prev];
-        copy[idx] = { ...plan, updatedAt: new Date().toISOString().split('T')[0] };
+        copy[idx] = updatedPlan;
         return copy;
       }
-      return [plan, ...prev];
+      return [updatedPlan, ...prev];
     });
+    supabaseSavePlanLapso(updatedPlan).catch(err => console.warn('Supabase save plan lapso err:', err));
   };
 
   const updateLapsoPlanStatus = (planId: string, status: PlanStatus, feedback?: string) => {
     setPlansLapso(prev =>
-      prev.map(p => (p.id === planId ? { ...p, status, reviewFeedback: feedback ?? p.reviewFeedback } : p))
+      prev.map(p => {
+        if (p.id === planId) {
+          const updated: PlanLapso = {
+            ...p,
+            status,
+            reviewFeedback: feedback !== undefined ? feedback : p.reviewFeedback,
+            updatedAt: new Date().toISOString().split('T')[0]
+          };
+          supabaseSavePlanLapso(updated).catch(err => console.warn('Supabase update plan lapso err:', err));
+          return updated;
+        }
+        return p;
+      })
     );
   };
 
@@ -1327,10 +1367,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const isLapsoOpenForGrading = schoolYearConfig.lapsos.find(l => l.lapso === activeLapso)?.isGradingOpen ?? true;
 
   const toggleLapsoGrading = (lapso: 1 | 2 | 3) => {
-    setSchoolYearConfig(prev => ({
-      ...prev,
-      lapsos: prev.lapsos.map(l => (l.lapso === lapso ? { ...l, isGradingOpen: !l.isGradingOpen } : l))
-    }));
+    setSchoolYearConfig(prev => {
+      const updated: SchoolYearConfig = {
+        ...prev,
+        lapsos: prev.lapsos.map(l => (l.lapso === lapso ? { ...l, isGradingOpen: !l.isGradingOpen } : l))
+      };
+      supabaseSaveSchoolYearConfig(updated).catch(err => console.warn('Supabase save school year config err:', err));
+      return updated;
+    });
   };
 
   const addPass = (pass: Omit<PassRecord, 'id' | 'ticketNumber'>): PassRecord => {
