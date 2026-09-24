@@ -491,7 +491,7 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
                       <option value="SECRETARIA">SECRETARIA (Control de Estudios / Matrícula)</option>
                       <option value="COORDINACION">COORDINACION (Control de Estudios)</option>
                       <option value="DIRECTOR">DIRECTOR (Dirección General)</option>
-                      <option value="ADMINISTRADOR">ADMINISTRADOR (Admin TI)</option>
+                      <option value="ADMINISTRADOR">ADMINISTRADOR (Administrador)</option>
                     </select>
                   </div>
 

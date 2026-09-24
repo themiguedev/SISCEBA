@@ -33,10 +33,10 @@ export const ROLE_METADATA: Record<UserRole, RoleMetadata> = {
   ADMINISTRADOR: {
     id: 'ADMINISTRADOR',
     label: 'Administrador de Sistemas',
-    badge: '👑 Admin TI',
+    badge: '👑 Administrador',
     badgeBg: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
     description: 'Control y configuración global de base de datos, seguridad, usuarios y auditoría técnica.',
-    department: 'Dirección de Tecnología / TI',
+    department: 'Dirección de Tecnología',
     scope: 'Acceso Total al Sistema'
   },
   DIRECTOR: {

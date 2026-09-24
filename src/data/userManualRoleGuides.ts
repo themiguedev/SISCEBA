@@ -458,8 +458,8 @@ export const ROLE_SPECIFIC_MANUALS: Record<UserRole, DetailedRoleGuide> = {
     roleId: 'ADMINISTRADOR',
     roleTitle: 'Administrador de Sistemas',
     badgeEmoji: '👑',
-    department: 'Dirección de Tecnología / TI',
-    roleGreeting: '¡Bienvenido(a), Administrador TI!',
+    department: 'Dirección de Tecnología',
+    roleGreeting: '¡Bienvenido(a), Administrador!',
     roleOverview: 'Tienes control total del sistema SICE-CBA: gestión de cuentas de usuarios, generación de códigos de autorización, seguridad, parametrización curricular y supervisión técnica de la base de datos en Supabase.',
     badgeColor: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
     missions: [
