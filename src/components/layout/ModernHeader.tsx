@@ -360,8 +360,15 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
                   </div>
                 );
               })()}
-              <span className="hidden xl:inline max-w-[130px] truncate">{currentUser?.fullName || currentRole}</span>
-              <span className="hidden sm:inline xl:hidden">{currentRole}</span>
+              {(() => {
+                const rawName = currentUser?.fullName?.trim() || currentUser?.username || currentRole;
+                const firstName = rawName.split(' ')[0] || rawName;
+                return (
+                  <span className="inline max-w-[120px] sm:max-w-[140px] truncate uppercase font-extrabold tracking-wide">
+                    {firstName}
+                  </span>
+                );
+              })()}
               <ChevronDown className="w-3 h-3 text-slate-400 shrink-0" />
             </button>
             {roleMenuOpen && (
