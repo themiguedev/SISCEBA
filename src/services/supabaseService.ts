@@ -18,6 +18,8 @@ import {
   CommunityNotice,
   SystemNotification,
   AppUser,
+  UserRole,
+  EducationalLevel,
   PlanLapso,
   RegistrationCode,
   SchoolYearConfig
@@ -905,14 +907,16 @@ export const supabaseFetchUsers = async (): Promise<AppUser[] | null> => {
 
     return data.map(row => {
       const meta = decodeUserAvatarMetadata(row.avatar_url);
+      const effectiveRole = (meta.role as UserRole) || row.role;
       return {
         id: row.id,
         username: row.username,
         password: row.password,
         fullName: row.full_name,
         email: row.email,
-        role: row.role,
+        role: effectiveRole,
         defaultLevel: row.default_level || 'MEDIA_GENERAL',
+        allowedLevels: (meta.allowedLevels as EducationalLevel[]) || undefined,
         active: row.active ?? true,
         avatarUrl: meta.avatarUrl || row.avatar_url || '',
         gender: meta.gender,
@@ -937,8 +941,17 @@ export const supabaseSaveUser = async (user: AppUser): Promise<boolean> => {
       phone: user.phone,
       bio: user.bio,
       receiveEmails: user.receiveEmails,
-      receiveMessages: user.receiveMessages
+      receiveMessages: user.receiveMessages,
+      role: user.role,
+      allowedLevels: user.allowedLevels
     });
+
+    // En Supabase la tabla app_users puede tener check constraint original
+    // Guardamos en la columna role un valor compatible si aplica, mientras los metadatos preservan su rol institucional real
+    let dbRole = user.role;
+    if (user.role === 'ASISTENTE' || user.role === 'SECRETARIA') {
+      dbRole = 'COORDINACION';
+    }
 
     const payload: Record<string, any> = {
       id: user.id,
@@ -946,7 +959,7 @@ export const supabaseSaveUser = async (user: AppUser): Promise<boolean> => {
       password: user.password,
       full_name: user.fullName,
       email: user.email,
-      role: user.role,
+      role: dbRole,
       default_level: user.defaultLevel,
       active: user.active,
       avatar_url: encodedAvatar

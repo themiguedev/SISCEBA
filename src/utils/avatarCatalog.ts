@@ -352,6 +352,8 @@ export function encodeUserAvatarWithMetadata(data: {
   bio?: string;
   receiveEmails?: boolean;
   receiveMessages?: boolean;
+  role?: string;
+  allowedLevels?: string[];
 }): string {
   // Encontrar si coincide con un preset oficial para guardarlo como ID liviano
   let avatarRef = data.avatarUrl || '';
@@ -368,6 +370,8 @@ export function encodeUserAvatarWithMetadata(data: {
     b: data.bio || null,
     re: data.receiveEmails ?? true,
     rm: data.receiveMessages ?? true,
+    r: data.role || null,
+    al: data.allowedLevels || null,
     a: avatarRef
   };
 
@@ -376,7 +380,7 @@ export function encodeUserAvatarWithMetadata(data: {
 
 /**
  * Desempaqueta el contenido de `avatar_url` recuperando el avatar original,
- * el género (hombre/mujer), la biografía y el número de teléfono sincronizados en Supabase.
+ * el género (hombre/mujer), la biografía, el número de teléfono y rol sincronizados en Supabase.
  */
 export function decodeUserAvatarMetadata(rawAvatarUrl?: string | null): {
   avatarUrl: string;
@@ -385,6 +389,8 @@ export function decodeUserAvatarMetadata(rawAvatarUrl?: string | null): {
   bio?: string;
   receiveEmails?: boolean;
   receiveMessages?: boolean;
+  role?: string;
+  allowedLevels?: string[];
 } {
   if (!rawAvatarUrl) {
     return { avatarUrl: '' };
@@ -407,7 +413,9 @@ export function decodeUserAvatarMetadata(rawAvatarUrl?: string | null): {
         phone: meta.p || undefined,
         bio: meta.b || undefined,
         receiveEmails: meta.re ?? true,
-        receiveMessages: meta.rm ?? true
+        receiveMessages: meta.rm ?? true,
+        role: meta.r || undefined,
+        allowedLevels: meta.al || undefined
       };
     } catch {
       return { avatarUrl: rawAvatarUrl };

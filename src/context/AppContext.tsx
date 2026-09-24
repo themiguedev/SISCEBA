@@ -535,14 +535,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (!error && data && data.length > 0) {
           const row = data[0];
           const meta = decodeUserAvatarMetadata(row.avatar_url);
+          const effectiveRole = (meta.role as UserRole) || row.role;
           matched = {
             id: row.id,
             username: row.username,
             password: row.password,
             fullName: row.full_name,
             email: row.email,
-            role: row.role,
+            role: effectiveRole,
             defaultLevel: row.default_level || 'MEDIA_GENERAL',
+            allowedLevels: (meta.allowedLevels as EducationalLevel[]) || undefined,
             active: row.active ?? true,
             avatarUrl: meta.avatarUrl || row.avatar_url || '',
             gender: meta.gender,
@@ -550,7 +552,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             bio: meta.bio,
             receiveEmails: meta.receiveEmails ?? true,
             receiveMessages: meta.receiveMessages ?? true,
-            twoFactorEnabled: row.two_factor_enabled ?? is2FARequiredForRole(row.role),
+            twoFactorEnabled: row.two_factor_enabled ?? is2FARequiredForRole(effectiveRole),
             twoFactorSecret: row.two_factor_secret,
             passwordLastChanged: row.password_last_changed
           };
