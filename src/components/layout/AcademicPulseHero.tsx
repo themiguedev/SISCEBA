@@ -61,7 +61,7 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
                 ? 'Panel Operativo de Asistencia y Disciplina'
                 : currentRole === 'SECRETARIA'
                 ? 'Panel de Control de Estudios y Trámites'
-                : 'Panel Académico Ejecutivo'}
+                : 'Panel Académico'}
             </h1>
           </div>
 
