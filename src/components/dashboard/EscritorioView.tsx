@@ -108,7 +108,9 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
     }
   }, [currentUser]);
 
-  // Manejador de carga de archivo local (convierte a base64 Data URL)
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+
+  // Manejador de carga de archivo local con compresión y redimensionamiento inteligente
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -118,8 +120,8 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
       return;
     }
 
-    if (file.size > 3 * 1024 * 1024) {
-      alert('La imagen no debe superar los 3 MB para garantizar un rendimiento óptimo.');
+    if (file.size > 5 * 1024 * 1024) {
+      alert('La imagen no debe superar los 5 MB.');
       return;
     }
 
@@ -127,8 +129,42 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
     const reader = new FileReader();
     reader.onload = () => {
       if (typeof reader.result === 'string') {
-        setSelectedAvatarUrl(reader.result);
-        setIsUploading(false);
+        const rawDataUrl = reader.result;
+        // Redimensionar la imagen a un avatar óptimo (máx 280x280) para guardar ágilmente en Supabase
+        const img = new Image();
+        img.onload = () => {
+          const maxDim = 280;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            const optimizedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+            setSelectedAvatarUrl(optimizedDataUrl);
+          } else {
+            setSelectedAvatarUrl(rawDataUrl);
+          }
+          setIsUploading(false);
+        };
+        img.onerror = () => {
+          setSelectedAvatarUrl(rawDataUrl);
+          setIsUploading(false);
+        };
+        img.src = rawDataUrl;
       }
     };
     reader.onerror = () => {
@@ -147,21 +183,29 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!currentUser) return;
+    if (!currentUser || isSavingProfile) return;
 
-    await updateUser(currentUser.id, {
-      fullName: fullName.trim() || currentUser.fullName,
-      email: email.trim() || currentUser.email,
-      phone: phone.trim(),
-      gender: gender,
-      bio: profileComment.trim(),
-      avatarUrl: selectedAvatarUrl,
-      receiveEmails: receiveEmails === 'SI',
-      receiveMessages: receiveMessages === 'SI'
-    });
+    setIsSavingProfile(true);
+    try {
+      await updateUser(currentUser.id, {
+        fullName: fullName.trim() || currentUser.fullName,
+        email: email.trim() || currentUser.email,
+        phone: phone.trim(),
+        gender: gender,
+        bio: profileComment.trim(),
+        avatarUrl: selectedAvatarUrl,
+        receiveEmails: receiveEmails === 'SI',
+        receiveMessages: receiveMessages === 'SI'
+      });
 
-    setProfileSaved(true);
-    setTimeout(() => setProfileSaved(false), 3500);
+      setProfileSaved(true);
+      setTimeout(() => setProfileSaved(false), 3500);
+    } catch (err) {
+      console.error('Error al actualizar perfil:', err);
+      alert('No se pudo guardar el perfil en la base de datos.');
+    } finally {
+      setIsSavingProfile(false);
+    }
   };
 
   const handlePasswordChange = async (e: React.FormEvent) => {
@@ -883,14 +927,17 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
 
               <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
                 <span className="text-[11px] text-slate-400">
-                  Los cambios se reflejarán inmediatamente en su sesión institucional.
+                  Los cambios se reflejarán y guardarán inmediatamente en la base de datos de SICE-CBA.
                 </span>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 rounded-xl bg-[#2C2E53] hover:bg-[#1E2A4A] text-[#D4AF37] font-bold text-xs shadow-md transition-all flex items-center gap-2 cursor-pointer"
+                  disabled={isSavingProfile}
+                  className={`px-6 py-2.5 rounded-xl bg-[#2C2E53] hover:bg-[#1E2A4A] text-[#D4AF37] font-bold text-xs shadow-md transition-all flex items-center gap-2 cursor-pointer ${
+                    isSavingProfile ? 'opacity-70 cursor-wait' : ''
+                  }`}
                 >
-                  <CheckCircle2 className="w-4 h-4 text-[#D4AF37]" />
-                  Guardar Perfil e Imagen
+                  <CheckCircle2 className={`w-4 h-4 text-[#D4AF37] ${isSavingProfile ? 'animate-spin' : ''}`} />
+                  {isSavingProfile ? 'Guardando en Base de Datos...' : 'Guardar Perfil e Imagen'}
                 </button>
               </div>
             </form>

@@ -339,8 +339,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const updateUser = async (userId: string, updates: Partial<AppUser>): Promise<boolean> => {
-    let updatedUser: AppUser | null = null;
-
     // Si se actualizó la contraseña y no está hasheada, procesar
     let cleanUpdates = { ...updates };
     if (cleanUpdates.password && !cleanUpdates.password.startsWith('$pbkdf2$')) {
@@ -348,41 +346,57 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       cleanUpdates.passwordLastChanged = new Date().toISOString();
     }
 
+    // Localizar usuario base de manera síncrona
+    const currentTarget = users.find(u => u.id === userId) || (currentUser?.id === userId ? currentUser : null);
+    if (!currentTarget) {
+      console.warn(`updateUser: Usuario con id ${userId} no encontrado en memoria.`);
+      return false;
+    }
+
+    // Si cambia de género y no tiene imagen propia personalizada o tiene avatar svg previo, adaptar avatar
+    let newAvatarUrl = cleanUpdates.avatarUrl !== undefined ? cleanUpdates.avatarUrl : currentTarget.avatarUrl;
+    if (cleanUpdates.gender && cleanUpdates.gender !== currentTarget.gender && (!newAvatarUrl || newAvatarUrl.startsWith('data:image/svg+xml'))) {
+      newAvatarUrl = getDefaultAvatarForUser({
+        gender: cleanUpdates.gender,
+        role: cleanUpdates.role || currentTarget.role,
+        fullName: cleanUpdates.fullName || currentTarget.fullName
+      });
+    }
+
+    const mergedUser: AppUser = {
+      ...currentTarget,
+      ...cleanUpdates,
+      avatarUrl: newAvatarUrl
+    };
+
+    // Actualizar el array global de usuarios en memoria y caché
     setUsers(prev => {
       const idx = prev.findIndex(u => u.id === userId);
-      if (idx === -1) return prev;
+      if (idx === -1) return [mergedUser, ...prev];
       const copy = [...prev];
-      const current = copy[idx];
-      // Si cambia de género y no tiene imagen propia personalizada o tiene avatar svg previo, adaptar avatar
-      let newAvatarUrl = cleanUpdates.avatarUrl !== undefined ? cleanUpdates.avatarUrl : current.avatarUrl;
-      if (cleanUpdates.gender && cleanUpdates.gender !== current.gender && (!newAvatarUrl || newAvatarUrl.startsWith('data:image/svg+xml'))) {
-        newAvatarUrl = getDefaultAvatarForUser({
-          gender: cleanUpdates.gender,
-          role: cleanUpdates.role || current.role,
-          fullName: cleanUpdates.fullName || current.fullName
-        });
-      }
-      const merged = { ...current, ...cleanUpdates, avatarUrl: newAvatarUrl };
-      copy[idx] = merged;
-      updatedUser = merged;
+      copy[idx] = mergedUser;
       return copy;
     });
 
-    if (currentUser && currentUser.id === userId && updatedUser) {
-      setCurrentUser(updatedUser);
-      if (updates.role) {
-        setCurrentRole(updates.role);
+    // Actualizar usuario actual si corresponde
+    if (currentUser && currentUser.id === userId) {
+      setCurrentUser(mergedUser);
+      localStorage.setItem('sisceba_current_user', JSON.stringify(mergedUser));
+      if (cleanUpdates.role) {
+        setCurrentRole(cleanUpdates.role);
       }
-      if (updates.defaultLevel) {
-        setCurrentLevel(updates.defaultLevel);
+      if (cleanUpdates.defaultLevel) {
+        setCurrentLevel(cleanUpdates.defaultLevel);
       }
     }
 
-    if (updatedUser) {
-      await supabaseSaveUser(updatedUser);
-      return true;
+    // Persistir de inmediato en la base de datos de Supabase y notificar sincronización
+    if (isSupabaseConfigured()) {
+      const saved = await syncWithCloud(() => supabaseSaveUser(mergedUser), 'actualizar perfil de usuario');
+      return saved !== null && saved !== false;
     }
-    return false;
+
+    return true;
   };
 
   useEffect(() => {
