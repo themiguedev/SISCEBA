@@ -313,8 +313,8 @@ export const PasesRetrasoView: React.FC = () => {
 
       {/* PRINTABLE PASS TICKET PREVIEW MODAL */}
       {activeTicketToPrint && (
-        <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 print:p-0 print:static print:bg-transparent print:backdrop-blur-none">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-300 print:shadow-none print:border-none print:p-2 animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 print-modal-container print:p-0 print:static print:bg-white print:text-slate-900 print:backdrop-blur-none">
+          <div className="bg-white text-slate-900 rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-300 print:shadow-none print:border-none print:p-0 print:w-full print:max-w-full animate-in zoom-in-95 duration-200">
             {/* Modal Non-print Header */}
             <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-200 no-print">
               <div className="flex items-center gap-2">
