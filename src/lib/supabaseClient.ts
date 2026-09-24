@@ -1,43 +1,34 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
+const DEFAULT_SUPABASE_URL = 'https://ctoiqqzrxgqxmdhsgyby.supabase.co';
+const DEFAULT_SUPABASE_ANON_KEY = 'sb_publishable_HYfs8uxFG2UV_8bMpO30vQ_orCqmwJ4';
+
+const rawUrl = (import.meta.env.VITE_SUPABASE_URL as string | undefined)?.trim();
+const rawKey = (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined)?.trim();
+
+const supabaseUrl = (rawUrl && !rawUrl.includes('tu-proyecto') && rawUrl.startsWith('https://'))
+  ? rawUrl
+  : DEFAULT_SUPABASE_URL;
+
+const supabaseAnonKey = (rawKey && !rawKey.includes('tu-clave-anon'))
+  ? rawKey
+  : DEFAULT_SUPABASE_ANON_KEY;
 
 /**
- * Verifica si las variables de entorno para Supabase están provistas y tienen un formato válido.
+ * Verifica si las variables de entorno o credenciales por defecto para Supabase están provistas y tienen un formato válido.
  */
 export const isSupabaseConfigured = (): boolean => {
-  if (!supabaseUrl || !supabaseAnonKey) return false;
-  const trimmedUrl = supabaseUrl.trim();
-  const trimmedKey = supabaseAnonKey.trim();
-
-  if (
-    trimmedUrl === '' ||
-    trimmedUrl.includes('tu-proyecto') ||
-    trimmedUrl.includes('your-project') ||
-    !trimmedUrl.startsWith('https://')
-  ) {
-    return false;
-  }
-
-  if (
-    trimmedKey === '' ||
-    trimmedKey.includes('tu-clave-anon') ||
-    trimmedKey.includes('your-anon-key')
-  ) {
-    return false;
-  }
-
-  return true;
+  return (
+    !!supabaseUrl &&
+    !!supabaseAnonKey &&
+    supabaseUrl.startsWith('https://') &&
+    !supabaseUrl.includes('placeholder')
+  );
 };
 
-// Si las credenciales no están presentes, proveemos una URL y clave dummy para instanciar el cliente sin romper la app.
-const dummyUrl = 'https://placeholder-sicecba.supabase.co';
-const dummyKey = 'placeholder-key';
-
 export const supabase: SupabaseClient = createClient(
-  isSupabaseConfigured() ? supabaseUrl!.trim() : dummyUrl,
-  isSupabaseConfigured() ? supabaseAnonKey!.trim() : dummyKey,
+  supabaseUrl,
+  supabaseAnonKey,
   {
     auth: {
       persistSession: true,
