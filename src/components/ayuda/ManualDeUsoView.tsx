@@ -662,29 +662,35 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
           <div className="flex items-center gap-1.5 flex-wrap w-full xl:w-auto py-1">
             <span className="text-[11px] font-bold text-slate-400 mr-1 shrink-0 flex items-center gap-1">
               <Filter className="w-3 h-3" />
-              Vista de rol:
+              {currentRole === 'ADMINISTRADOR' ? 'Vista de rol:' : 'Tu rol institucional:'}
             </span>
-            {(['DOCENTE', 'SECRETARIA', 'ASISTENTE', 'COORDINACION', 'DIRECTOR', 'ADMINISTRADOR', 'REPRESENTANTE', 'ESTUDIANTE'] as UserRole[]).map((r) => {
-              const isSelected = selectedRole === r;
-              const isSessionRole = currentRole === r;
-              return (
-                <button
-                  key={r}
-                  onClick={() => setSelectedRole(r)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 ${
-                    isSelected
-                      ? 'bg-[#D4AF37] text-slate-950 shadow-md ring-2 ring-[#D4AF37]/40'
-                      : 'bg-white/10 hover:bg-white/15 text-slate-300'
-                  }`}
-                  title={isSessionRole ? 'Este es el rol de tu sesión activa' : `Ver guía del rol ${r}`}
-                >
-                  <span>{ROLE_METADATA[r]?.badge || r}</span>
-                  {isSessionRole && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 ml-0.5" title="Tu rol actual" />
-                  )}
-                </button>
-              );
-            })}
+            {(['DOCENTE', 'SECRETARIA', 'ASISTENTE', 'COORDINACION', 'DIRECTOR', 'ADMINISTRADOR', 'REPRESENTANTE', 'ESTUDIANTE'] as UserRole[])
+              .filter((r) => currentRole === 'ADMINISTRADOR' || r === currentRole)
+              .map((r) => {
+                const isSelected = selectedRole === r;
+                const isSessionRole = currentRole === r;
+                return (
+                  <button
+                    key={r}
+                    onClick={() => {
+                      if (currentRole === 'ADMINISTRADOR') {
+                        setSelectedRole(r);
+                      }
+                    }}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 ${
+                      isSelected
+                        ? 'bg-[#D4AF37] text-slate-950 shadow-md ring-2 ring-[#D4AF37]/40 cursor-default'
+                        : 'bg-white/10 hover:bg-white/15 text-slate-300'
+                    }`}
+                    title={isSessionRole ? 'Este es el rol de tu cuenta' : `Ver guía del rol ${r}`}
+                  >
+                    <span>{ROLE_METADATA[r]?.badge || r}</span>
+                    {isSessionRole && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 ml-0.5" title="Tu rol actual" />
+                    )}
+                  </button>
+                );
+              })}
           </div>
 
           {/* Campo de Búsqueda */}
@@ -1234,7 +1240,7 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
                 <button
                   onClick={() => {
                     setSearchQuery('');
-                    setSelectedRole('ADMINISTRADOR');
+                    setSelectedRole(currentRole || 'ADMINISTRADOR');
                   }}
                   className="mt-2 text-xs text-[#2C2E53] dark:text-amber-300 underline font-bold"
                 >
