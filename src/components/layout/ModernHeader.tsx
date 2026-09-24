@@ -122,16 +122,11 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
             </div>
           </button>
 
-          {/* Title SICE-CBA & Period Badge - Adaptable Responsivo */}
+          {/* Title SICE-CBA - Limpio y legible */}
           <div className="flex flex-col justify-center shrink-0 select-none cursor-default">
-            <div className="flex items-center gap-1.5 sm:gap-2 whitespace-nowrap">
-              <span className="font-extrabold text-xs sm:text-base tracking-wider text-white whitespace-nowrap">
-                SICE-CBA
-              </span>
-              <span className="text-[9px] sm:text-[10px] uppercase tracking-wider font-extrabold px-1.5 sm:px-2 py-0.5 rounded-full bg-amber-400/15 text-amber-300 border border-amber-400/30 shadow-sm whitespace-nowrap shrink-0">
-                26-27
-              </span>
-            </div>
+            <span className="font-extrabold text-sm sm:text-base tracking-wider text-white whitespace-nowrap">
+              SICE-CBA
+            </span>
           </div>
         </div>
 
