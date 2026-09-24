@@ -816,6 +816,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             } else {
               setCurrentUser(verified);
               setCurrentRole(verified.role);
+              if (verified.defaultLevel) {
+                setCurrentLevel(verified.defaultLevel);
+              } else if (verified.allowedLevels && verified.allowedLevels.length > 0) {
+                setCurrentLevel(verified.allowedLevels[0]);
+              }
             }
           } catch {
             setIsAuthenticated(false);

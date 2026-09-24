@@ -27,8 +27,11 @@ import {
   Key,
   Eye,
   EyeOff,
-  AlertCircle
+  AlertCircle,
+  BookOpen,
+  GraduationCap
 } from 'lucide-react';
+import { EducationalLevel } from '../../types';
 import { OFFICIAL_AVATARS, getDefaultAvatarForUser } from '../../utils/avatarCatalog';
 import { PasswordStrengthBar } from '../common/PasswordStrengthBar';
 import { ROLE_METADATA } from '../../utils/rbac';
@@ -92,6 +95,34 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
   const [suggestionCheck, setSuggestionCheck] = useState(false);
   const [suggestionSent, setSuggestionSent] = useState(false);
 
+  // Subsistemas / Niveles asignados
+  const [selectedLevels, setSelectedLevels] = useState<EducationalLevel[]>(() => {
+    if (currentUser?.allowedLevels && currentUser.allowedLevels.length > 0) {
+      return currentUser.allowedLevels;
+    }
+    if (currentUser?.defaultLevel) {
+      return [currentUser.defaultLevel];
+    }
+    return ['MEDIA_GENERAL'];
+  });
+  const [defaultLevel, setDefaultLevel] = useState<EducationalLevel>(currentUser?.defaultLevel || 'MEDIA_GENERAL');
+
+  const toggleLevel = (lvl: EducationalLevel) => {
+    setSelectedLevels(prev => {
+      let next: EducationalLevel[];
+      if (prev.includes(lvl)) {
+        if (prev.length === 1) return prev; // Mantener al menos un nivel asignado
+        next = prev.filter(l => l !== lvl);
+      } else {
+        next = [...prev, lvl];
+      }
+      if (!next.includes(defaultLevel)) {
+        setDefaultLevel(next[0]);
+      }
+      return next;
+    });
+  };
+
   // Sincronizar si cambia de usuario en sesión
   React.useEffect(() => {
     if (currentUser) {
@@ -105,6 +136,14 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
       setReceiveMessages(currentUser.receiveMessages !== false ? 'SI' : 'NO');
       setSelectedAvatarUrl(currentUser.avatarUrl || getDefaultAvatarForUser(currentUser));
       setAvatarGenderFilter(userGender);
+      if (currentUser.allowedLevels && currentUser.allowedLevels.length > 0) {
+        setSelectedLevels(currentUser.allowedLevels);
+      } else if (currentUser.defaultLevel) {
+        setSelectedLevels([currentUser.defaultLevel]);
+      }
+      if (currentUser.defaultLevel) {
+        setDefaultLevel(currentUser.defaultLevel);
+      }
     }
   }, [currentUser]);
 
@@ -195,7 +234,9 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
         bio: profileComment.trim(),
         avatarUrl: selectedAvatarUrl,
         receiveEmails: receiveEmails === 'SI',
-        receiveMessages: receiveMessages === 'SI'
+        receiveMessages: receiveMessages === 'SI',
+        allowedLevels: selectedLevels,
+        defaultLevel: defaultLevel
       });
 
       setProfileSaved(true);
@@ -893,6 +934,124 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
                   placeholder="Descripción de cargo o departamento..."
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2C2E53]"
                 />
+              </div>
+
+              {/* SUBSISTEMAS / NIVELES EDUCATIVOS ASIGNADOS */}
+              <div className="space-y-3 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800">
+                      Subsistemas / Niveles Educativos Asignados:
+                    </label>
+                    <p className="text-[11px] text-slate-500">
+                      Seleccione los niveles a los que tiene acceso en el colegio. Se habilitarán de inmediato en su barra de navegación.
+                    </p>
+                  </div>
+                  <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-200 shrink-0">
+                    {selectedLevels.length} {selectedLevels.length === 1 ? 'nivel activo' : 'niveles activos'}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+                  {[
+                    {
+                      id: 'INICIAL' as EducationalLevel,
+                      title: 'Educación Inicial',
+                      scale: 'Cualitativa (L / EP / I)',
+                      icon: BookOpen,
+                      color: 'text-amber-500',
+                      badgeBg: 'bg-amber-500/15 text-amber-700 border-amber-300'
+                    },
+                    {
+                      id: 'PRIMARIA' as EducationalLevel,
+                      title: 'Educación Primaria',
+                      scale: 'Formativa / Cualitativa',
+                      icon: Layers,
+                      color: 'text-emerald-500',
+                      badgeBg: 'bg-emerald-500/15 text-emerald-700 border-emerald-300'
+                    },
+                    {
+                      id: 'MEDIA_GENERAL' as EducationalLevel,
+                      title: 'Media General',
+                      scale: 'Cuantitativa (01 - 20 pts)',
+                      icon: GraduationCap,
+                      color: 'text-indigo-500',
+                      badgeBg: 'bg-indigo-500/15 text-indigo-700 border-indigo-300'
+                    }
+                  ].map((item) => {
+                    const isChecked = selectedLevels.includes(item.id);
+                    const Icon = item.icon;
+                    return (
+                      <button
+                        type="button"
+                        key={item.id}
+                        onClick={() => toggleLevel(item.id)}
+                        className={`p-2.5 rounded-xl border text-left transition flex items-center justify-between gap-2 cursor-pointer ${
+                          isChecked
+                            ? 'bg-[#1B1C33] text-white border-[#D4AF37] shadow-sm'
+                            : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div
+                            className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
+                              isChecked
+                                ? 'bg-[#D4AF37]/20 text-[#D4AF37]'
+                                : 'bg-slate-100 text-slate-500'
+                            }`}
+                          >
+                            <Icon className="w-4 h-4" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className={`text-xs font-bold truncate ${isChecked ? 'text-white' : 'text-slate-800'}`}>
+                              {item.title}
+                            </p>
+                            <p className={`text-[10px] truncate ${isChecked ? 'text-[#D4AF37]' : 'text-slate-400'}`}>
+                              {item.scale}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div
+                          className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 border ${
+                            isChecked
+                              ? 'bg-[#D4AF37] border-[#D4AF37] text-slate-950'
+                              : 'border-slate-300 bg-white'
+                          }`}
+                        >
+                          {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Nivel Predeterminado al ingresar */}
+                <div className="pt-2 border-t border-slate-200/70 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700">
+                      Nivel Principal Predeterminado:
+                    </label>
+                    <span className="text-[10px] text-slate-400">
+                      Nivel que se mostrará al iniciar sesión institucional.
+                    </span>
+                  </div>
+                  <select
+                    value={defaultLevel}
+                    onChange={(e) => setDefaultLevel(e.target.value as EducationalLevel)}
+                    className="px-3 py-1.5 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#2C2E53] outline-none font-bold text-xs text-slate-800 shrink-0"
+                  >
+                    {selectedLevels.map((lvl) => (
+                      <option key={lvl} value={lvl}>
+                        {lvl === 'MEDIA_GENERAL'
+                          ? 'Educación Media General'
+                          : lvl === 'PRIMARIA'
+                          ? 'Educación Primaria'
+                          : 'Educación Inicial'}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
