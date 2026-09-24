@@ -71,6 +71,8 @@ import {
   supabaseFetchSubjectAreas,
   supabaseFetchCompetencies,
   supabaseFetchIndicators,
+  supabaseFetchStrategies,
+  supabaseSaveStrategy,
   supabaseFetchEvaluations,
   supabaseFetchDidacticPlans,
   supabaseFetchPasses,
@@ -689,6 +691,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         remoteAreas,
         remoteCompetencies,
         remoteIndicators,
+        remoteStrategies,
         remoteEvaluations,
         remotePlans,
         remotePasses,
@@ -708,6 +711,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         supabaseFetchSubjectAreas(),
         supabaseFetchCompetencies(),
         supabaseFetchIndicators(),
+        supabaseFetchStrategies(),
         supabaseFetchEvaluations(),
         supabaseFetchDidacticPlans(),
         supabaseFetchPasses(),
@@ -728,6 +732,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (remoteAreas !== null) setAreas(remoteAreas);
       if (remoteCompetencies !== null) setCompetencies(remoteCompetencies);
       if (remoteIndicators !== null) setIndicators(remoteIndicators);
+      if (remoteStrategies !== null) setStrategies(remoteStrategies);
       if (remoteEvaluations !== null) setEvaluations(remoteEvaluations);
       if (remotePlans !== null) setPlansQuincenal(remotePlans);
       if (remotePlansLapso !== null) setPlansLapso(remotePlansLapso);
@@ -1060,6 +1065,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id: `strat-${Date.now()}`
     };
     setStrategies(prev => [newStrat, ...prev]);
+    supabaseSaveStrategy(newStrat).catch(err => console.warn('Supabase save strategy err:', err));
     return newStrat;
   };
 
@@ -1075,6 +1081,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       name: `${strat.name} [Transferida a ${targetArea.name}]`
     };
     setStrategies(prev => [cloned, ...prev]);
+    supabaseSaveStrategy(cloned).catch(err => console.warn('Supabase transfer strategy err:', err));
   };
 
   // Planning Actions

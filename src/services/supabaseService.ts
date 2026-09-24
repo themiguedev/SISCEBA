@@ -4,6 +4,7 @@ import {
   SubjectArea,
   Competency,
   Indicator,
+  Strategy,
   EvaluationRecord,
   QualitativeScore,
   LiteralScore,
@@ -209,6 +210,50 @@ export const supabaseSaveIndicator = async (ind: Indicator): Promise<boolean> =>
       lapso: ind.lapso,
       weight: ind.weight,
       evaluation_instrument: ind.evaluationInstrument
+    });
+    return !error;
+  } catch {
+    return false;
+  }
+};
+
+export const supabaseFetchStrategies = async (): Promise<Strategy[] | null> => {
+  if (!isSupabaseConfigured()) return null;
+  try {
+    const { data, error } = await supabase.from('strategies').select('*');
+    if (error || !data) {
+      console.warn('Supabase fetch strategies aviso:', error?.message);
+      return null;
+    }
+
+    return data.map(row => ({
+      id: row.id,
+      areaId: row.area_id,
+      name: row.name,
+      type: row.type,
+      category: row.category || '',
+      description: row.description,
+      resources: row.resources || '',
+      level: row.level
+    }));
+  } catch (e) {
+    console.error('Error en supabaseFetchStrategies:', e);
+    return null;
+  }
+};
+
+export const supabaseSaveStrategy = async (strat: Strategy): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('strategies').upsert({
+      id: strat.id,
+      area_id: strat.areaId,
+      name: strat.name,
+      type: strat.type,
+      category: strat.category,
+      description: strat.description,
+      resources: strat.resources,
+      level: strat.level
     });
     return !error;
   } catch {
