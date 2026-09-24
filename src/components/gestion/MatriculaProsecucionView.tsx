@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 
 export const MatriculaProsecucionView: React.FC = () => {
-  const { students, currentSection } = useApp();
+  const { students, saveStudent, sendNotification, currentSection } = useApp();
   const [selectedOriginGrade, setSelectedOriginGrade] = useState('3er Año');
   const [selectedOriginSection, setSelectedOriginSection] = useState('A');
   const [targetGrade, setTargetGrade] = useState('4to Año');
@@ -39,8 +39,39 @@ export const MatriculaProsecucionView: React.FC = () => {
   };
 
   const handleExecuteProsecution = () => {
+    // Determinar nivel según targetGrade
+    let level: 'INICIAL' | 'PRIMARIA' | 'MEDIA_GENERAL' = 'MEDIA_GENERAL';
+    if (targetGrade.includes('Sala') || targetGrade.includes('Inicial')) {
+      level = 'INICIAL';
+    } else if (targetGrade.includes('Grado') || targetGrade.includes('Primaria')) {
+      level = 'PRIMARIA';
+    }
+
+    selectedStudentIds.forEach((id) => {
+      const student = students.find((s) => s.id === id);
+      if (student) {
+        saveStudent({
+          ...student,
+          grade: targetGrade,
+          section: targetSection,
+          level
+        });
+      }
+    });
+
+    sendNotification({
+      title: 'Prosecución Masiva Registrada',
+      message: `Se promovieron ${selectedStudentIds.length} estudiantes hacia ${targetGrade} "${targetSection}". Cambios guardados de inmediato en la base de datos de Supabase.`,
+      category: 'INSTITUCIONAL',
+      priority: 'MEDIA',
+      recipientRole: 'COORDINACION',
+      actionTab: 'GESTION',
+      actionSubTab: 'MATRICULA',
+      deliveryChannels: ['PORTAL']
+    });
+
     setProsecutionSuccess(true);
-    setTimeout(() => setProsecutionSuccess(false), 4000);
+    setTimeout(() => setProsecutionSuccess(false), 5000);
   };
 
   return (

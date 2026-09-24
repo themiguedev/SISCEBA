@@ -38,8 +38,15 @@ export const InasistenciasGestionView: React.FC = () => {
   };
 
   const handleSaveAll = () => {
+    // Asegurar que cada estudiante tenga su registro del día persistido
+    sectionStudents.forEach((stu) => {
+      const existing = dailyAttendance.find(
+        (a) => a.studentId === stu.id && a.date === selectedDate
+      );
+      markDailyAttendance(stu.id, existing?.status || 'PRESENTE');
+    });
     setSaveBanner(true);
-    setTimeout(() => setSaveBanner(false), 3000);
+    setTimeout(() => setSaveBanner(false), 4000);
   };
 
   return (

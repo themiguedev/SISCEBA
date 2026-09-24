@@ -233,6 +233,8 @@ interface AppContextType {
   // Supabase Cloud State
   isSupabaseActive: boolean;
   supabaseStatusText: string;
+  isSavingCloud: boolean;
+  lastCloudSync: string | null;
   refreshFromSupabase: () => Promise<void>;
 }
 
@@ -669,6 +671,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Supabase Cloud State
   const [isSupabaseActive, setIsSupabaseActive] = useState<boolean>(false);
   const [supabaseStatusText, setSupabaseStatusText] = useState<string>('Verificando conexión...');
+  const [isSavingCloud, setIsSavingCloud] = useState<boolean>(false);
+  const [lastCloudSync, setLastCloudSync] = useState<string | null>(() => {
+    return localStorage.getItem('sisceba_last_cloud_sync') || null;
+  });
+
+  // Helper centralizado para ejecutar operaciones en segundo plano y registrar sincronización inmediata
+  const syncWithCloud = async <T,>(operation: () => Promise<T>, label?: string): Promise<T | null> => {
+    if (!isSupabaseConfigured()) return null;
+    setIsSavingCloud(true);
+    try {
+      const result = await operation();
+      const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      setLastCloudSync(now);
+      localStorage.setItem('sisceba_last_cloud_sync', now);
+      return result;
+    } catch (err) {
+      console.warn(`Aviso al sincronizar en la nube (${label || 'operación'}):`, err);
+      return null;
+    } finally {
+      setTimeout(() => setIsSavingCloud(false), 800);
+    }
+  };
 
   // Data Store with LocalStorage Persistence
   const [areas, setAreas] = useState<SubjectArea[]>(() => {
@@ -919,7 +943,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       read: false
     };
     setNotifications(prev => [newNotif, ...prev]);
-    supabaseSaveNotification(newNotif).catch(err => console.warn('Supabase save notification err:', err));
+    syncWithCloud(() => supabaseSaveNotification(newNotif), 'enviar notificación');
   };
 
   const markNotificationAsRead = (id: string) => {
@@ -933,7 +957,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const clearNotifications = () => {
     setNotifications([]);
     localStorage.removeItem('sisceba_system_notifications');
-    supabaseClearNotifications().catch(err => console.warn('Supabase clear notifications err:', err));
+    syncWithCloud(() => supabaseClearNotifications(), 'limpiar notificaciones');
   };
 
   useEffect(() => {
@@ -1028,7 +1052,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id: `comp-${Date.now()}`
     };
     setCompetencies(prev => [newComp, ...prev]);
-    supabaseSaveCompetency(newComp).catch(err => console.warn('Supabase save comp err:', err));
+    syncWithCloud(() => supabaseSaveCompetency(newComp), 'guardar competencia');
     return newComp;
   };
 
@@ -1038,7 +1062,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id: `ind-${Date.now()}`
     };
     setIndicators(prev => [newInd, ...prev]);
-    supabaseSaveIndicator(newInd).catch(err => console.warn('Supabase save ind err:', err));
+    syncWithCloud(() => supabaseSaveIndicator(newInd), 'guardar indicador');
     return newInd;
   };
 
@@ -1053,7 +1077,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       title: `${comp.title} (Transferida a L${targetLapso})`
     };
     setCompetencies(prev => [cloned, ...prev]);
-    supabaseSaveCompetency(cloned).catch(err => console.warn('Supabase transfer comp err:', err));
+    syncWithCloud(() => supabaseSaveCompetency(cloned), 'transferir competencia');
   };
 
   const transferIndicator = (indicatorId: string, targetLapso: 1 | 2 | 3) => {
@@ -1067,7 +1091,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       description: `${ind.description} (Reforzado en L${targetLapso})`
     };
     setIndicators(prev => [cloned, ...prev]);
-    supabaseSaveIndicator(cloned).catch(err => console.warn('Supabase transfer ind err:', err));
+    syncWithCloud(() => supabaseSaveIndicator(cloned), 'transferir indicador');
   };
 
   const addStrategy = (strat: Omit<Strategy, 'id'>): Strategy => {
@@ -1076,7 +1100,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id: `strat-${Date.now()}`
     };
     setStrategies(prev => [newStrat, ...prev]);
-    supabaseSaveStrategy(newStrat).catch(err => console.warn('Supabase save strategy err:', err));
+    syncWithCloud(() => supabaseSaveStrategy(newStrat), 'guardar estrategia');
     return newStrat;
   };
 
@@ -1092,7 +1116,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       name: `${strat.name} [Transferida a ${targetArea.name}]`
     };
     setStrategies(prev => [cloned, ...prev]);
-    supabaseSaveStrategy(cloned).catch(err => console.warn('Supabase transfer strategy err:', err));
+    syncWithCloud(() => supabaseSaveStrategy(cloned), 'transferir estrategia');
   };
 
   // Planning Actions
@@ -1107,7 +1131,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       return [updatedPlan, ...prev];
     });
-    supabaseSaveDidacticPlan(updatedPlan).catch(err => console.warn('Supabase save plan err:', err));
+    syncWithCloud(() => supabaseSaveDidacticPlan(updatedPlan), 'guardar plan didáctico');
   };
 
   const updateQuincenalStatus = (planId: string, status: PlanStatus, feedback?: string) => {
@@ -1120,7 +1144,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             reviewFeedback: feedback !== undefined ? feedback : p.reviewFeedback,
             updatedAt: new Date().toISOString().split('T')[0]
           };
-          supabaseSaveDidacticPlan(updated).catch(err => console.warn('Supabase update plan status err:', err));
+          syncWithCloud(() => supabaseSaveDidacticPlan(updated), 'actualizar estado plan didáctico');
           return updated;
         }
         return p;
@@ -1139,7 +1163,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       return [updatedPlan, ...prev];
     });
-    supabaseSavePlanLapso(updatedPlan).catch(err => console.warn('Supabase save plan lapso err:', err));
+    syncWithCloud(() => supabaseSavePlanLapso(updatedPlan), 'guardar plan de lapso');
   };
 
   const updateLapsoPlanStatus = (planId: string, status: PlanStatus, feedback?: string) => {
@@ -1152,7 +1176,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             reviewFeedback: feedback !== undefined ? feedback : p.reviewFeedback,
             updatedAt: new Date().toISOString().split('T')[0]
           };
-          supabaseSavePlanLapso(updated).catch(err => console.warn('Supabase update plan lapso err:', err));
+          syncWithCloud(() => supabaseSavePlanLapso(updated), 'actualizar estado plan de lapso');
           return updated;
         }
         return p;
@@ -1167,7 +1191,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id: `stu-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`
     };
     setStudents(prev => [newStudent, ...prev]);
-    supabaseSaveStudent(newStudent).catch(err => console.warn('Supabase save student err:', err));
+    syncWithCloud(() => supabaseSaveStudent(newStudent), 'inscribir estudiante');
     return newStudent;
   };
 
@@ -1181,7 +1205,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       return [student, ...prev];
     });
-    supabaseSaveStudent(student).catch(err => console.warn('Supabase save student err:', err));
+    syncWithCloud(() => supabaseSaveStudent(student), 'actualizar estudiante');
   };
 
   // Evaluation Actions
@@ -1204,7 +1228,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       );
       return [newRecord, ...filtered];
     });
-    supabaseSaveEvaluation(newRecord).catch(err => console.warn('Supabase save eval err:', err));
+    syncWithCloud(() => supabaseSaveEvaluation(newRecord), 'asentar calificación');
   };
 
   const bulkRecordEvaluations = (records: Omit<EvaluationRecord, 'id' | 'recordedAt'>[]) => {
@@ -1235,7 +1259,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return [...newRecords, ...filtered];
     });
 
-    supabaseBulkSaveEvaluations(newRecords).catch(err => console.warn('Supabase bulk save eval err:', err));
+    syncWithCloud(() => supabaseBulkSaveEvaluations(newRecords), 'guardar bloque de calificaciones');
   };
 
   const adjustStudentGrade = (
@@ -1402,13 +1426,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ticketNumber: `RET-2026-${Math.floor(1000 + Math.random() * 9000)}`
     };
     setPasses(prev => [newPass, ...prev]);
-    supabaseSavePass(newPass).catch(err => console.warn('Supabase save pass err:', err));
+    syncWithCloud(() => supabaseSavePass(newPass), 'emitir pase de retraso');
     return newPass;
   };
 
   const deletePass = (passId: string) => {
     setPasses(prev => prev.filter(p => p.id !== passId));
-    supabaseDeletePass(passId).catch(err => console.warn('Supabase delete pass err:', err));
+    syncWithCloud(() => supabaseDeletePass(passId), 'eliminar pase');
   };
 
   const printPass = (passId: string) => {
@@ -1416,7 +1440,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       prev.map(p => {
         if (p.id === passId) {
           const updated = { ...p, printed: true };
-          supabaseSavePass(updated).catch(err => console.warn('Supabase print pass err:', err));
+          syncWithCloud(() => supabaseSavePass(updated), 'imprimir pase');
           return updated;
         }
         return p;
@@ -1441,7 +1465,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const filtered = prev.filter(a => !(a.studentId === studentId && a.date === today));
       return [newRec, ...filtered];
     });
-    supabaseSaveDailyAttendance(newRec).catch(err => console.warn('Supabase attendance err:', err));
+    syncWithCloud(() => supabaseSaveDailyAttendance(newRec), 'marcar asistencia');
   };
 
   const addConduct = (conduct: Omit<ConductEntry, 'id'>): ConductEntry => {
@@ -1450,7 +1474,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id: `cond-${Date.now()}`
     };
     setConducts(prev => [newEntry, ...prev]);
-    supabaseSaveConduct(newEntry).catch(err => console.warn('Supabase conduct err:', err));
+    syncWithCloud(() => supabaseSaveConduct(newEntry), 'registrar conducta');
     return newEntry;
   };
 
@@ -1459,7 +1483,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       prev.map(d => {
         if (d.id === requestId) {
           const updated = { ...d, status };
-          supabaseSaveDocumentRequest(updated).catch(err => console.warn('Supabase doc status err:', err));
+          syncWithCloud(() => supabaseSaveDocumentRequest(updated), 'actualizar estado documento');
           return updated;
         }
         return d;
@@ -1475,7 +1499,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       elapsedDays: 0
     };
     setDocumentRequests(prev => [newReq, ...prev]);
-    supabaseSaveDocumentRequest(newReq).catch(err => console.warn('Supabase doc request err:', err));
+    syncWithCloud(() => supabaseSaveDocumentRequest(newReq), 'solicitar documento');
     return newReq;
   };
 
@@ -1484,7 +1508,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       prev.map(b => {
         if (b.id === blockId) {
           const updated = { ...b, active: !b.active };
-          supabaseSaveAdminBlock(updated).catch(err => console.warn('Supabase admin block err:', err));
+          syncWithCloud(() => supabaseSaveAdminBlock(updated), 'actualizar bloqueo administrativo');
           return updated;
         }
         return b;
@@ -1502,7 +1526,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       return [...prev, record];
     });
-    supabaseSaveTitleRecord(record).catch(err => console.warn('Supabase save title err:', err));
+    syncWithCloud(() => supabaseSaveTitleRecord(record), 'guardar título bachiller');
   };
 
   const addCommunityNotice = (notice: Omit<CommunityNotice, 'id'>): CommunityNotice => {
@@ -1511,7 +1535,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id: `not-${Date.now()}`
     };
     setCommunityNotices(prev => [newNotice, ...prev]);
-    supabaseSaveCommunityNotice(newNotice).catch(err => console.warn('Supabase notice err:', err));
+    syncWithCloud(() => supabaseSaveCommunityNotice(newNotice), 'publicar comunicado comunitario');
     return newNotice;
   };
 
@@ -1623,6 +1647,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         resetToSeedData,
         isSupabaseActive,
         supabaseStatusText,
+        isSavingCloud,
+        lastCloudSync,
         refreshFromSupabase,
         registrationCodes,
         createRegistrationCode,

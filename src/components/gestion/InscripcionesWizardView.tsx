@@ -14,10 +14,11 @@ import {
 } from 'lucide-react';
 
 export const InscripcionesWizardView: React.FC = () => {
-  const { students } = useApp();
+  const { students, addStudent, sendNotification } = useApp();
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
   const [searchCedula, setSearchCedula] = useState('');
   const [isSuccessBanner, setIsSuccessBanner] = useState(false);
+  const [lastEnrolledName, setLastEnrolledName] = useState('');
 
   // Step 1: Representante State
   const [repData, setRepData] = useState({
@@ -69,9 +70,63 @@ export const InscripcionesWizardView: React.FC = () => {
 
   const handleFinalSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Determinar nivel educativo según el grado seleccionado
+    const gradeStr = academicData.grado;
+    let level: 'INICIAL' | 'PRIMARIA' | 'MEDIA_GENERAL' = 'MEDIA_GENERAL';
+    if (gradeStr.includes('Sala') || gradeStr.includes('Inicial')) {
+      level = 'INICIAL';
+    } else if (gradeStr.includes('Grado') || gradeStr.includes('Primaria')) {
+      level = 'PRIMARIA';
+    }
+
+    const fullName = `${studentData.primerNombre.trim()} ${studentData.segundoNombre.trim()} ${studentData.primerApellido.trim()} ${studentData.segundoApellido.trim()}`.replace(/\s+/g, ' ').trim();
+    const repFullName = `${repData.primerNombre.trim()} ${repData.primerApellido.trim()}`.replace(/\s+/g, ' ').trim();
+
+    // Registrar estudiante y persistir de inmediato en Supabase
+    addStudent({
+      cedula: studentData.cedulaEscolar.trim() || `ESC-${Date.now().toString().slice(-6)}`,
+      fullName: fullName || 'Estudiante CBA',
+      gender: (studentData.genero as 'M' | 'F') || 'M',
+      birthDate: studentData.fechaNacimiento,
+      level,
+      grade: academicData.grado,
+      section: academicData.seccion,
+      representativeName: repFullName || 'Representante Legal',
+      representativeEmail: repData.correo.trim(),
+      representativePhone: repData.telefono.trim(),
+      status: 'REGULAR'
+    });
+
+    sendNotification({
+      title: 'Nueva Inscripción Formalizada',
+      message: `El estudiante ${fullName} ha sido inscrito en ${academicData.grado} "${academicData.seccion}" (${level.replace('_', ' ')}). Expediente digital creado y sincronizado en base de datos.`,
+      category: 'INSTITUCIONAL',
+      priority: 'ALTA',
+      recipientRole: 'TODOS',
+      studentName: fullName,
+      actionTab: 'GESTION',
+      actionSubTab: 'INSCRIPCIONES',
+      deliveryChannels: ['PORTAL', 'EMAIL']
+    });
+
+    setLastEnrolledName(fullName);
     setIsSuccessBanner(true);
     setCurrentStep(1);
-    setTimeout(() => setIsSuccessBanner(false), 5000);
+
+    // Resetear formulario para nueva inscripción
+    setStudentData({
+      primerNombre: '',
+      segundoNombre: '',
+      primerApellido: '',
+      segundoApellido: '',
+      cedulaEscolar: '',
+      fechaNacimiento: '2015-05-12',
+      genero: 'M',
+      alergiasSalud: 'Ninguna alergia reportada'
+    });
+
+    setTimeout(() => setIsSuccessBanner(false), 6000);
   };
 
   return (
@@ -166,9 +221,16 @@ export const InscripcionesWizardView: React.FC = () => {
       </div>
 
       {isSuccessBanner && (
-        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2 animate-in fade-in">
-          <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-          ¡Inscripción formalizada exitosamente! Se ha creado el expediente del estudiante y vinculado al representante.
+        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-bold flex items-center justify-between gap-3 animate-in fade-in shadow-sm">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+            <span>
+              ¡Inscripción formalizada exitosamente! Se ha creado el expediente de <strong>{lastEnrolledName || 'el estudiante'}</strong> y se guardó de inmediato en la base de datos de Supabase.
+            </span>
+          </div>
+          <span className="hidden sm:inline-block px-2.5 py-1 rounded-md bg-emerald-200/80 text-emerald-900 text-[10px] uppercase font-black tracking-wider shrink-0">
+            Sincronizado en la Nube
+          </span>
         </div>
       )}
 

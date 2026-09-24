@@ -14,7 +14,9 @@ import {
   Clock,
   LogOut,
   Keyboard,
-  User
+  User,
+  Cloud,
+  Loader2
 } from 'lucide-react';
 import { SeasonalAccessoryIcon } from '../auth/LogoSeasonalAccessory';
 import { ThemeSwitcherDropdown } from './ThemeSwitcherDropdown';
@@ -54,7 +56,10 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
     activeLapso,
     setActiveLapso,
     logout,
-    currentUser
+    currentUser,
+    isSavingCloud,
+    lastCloudSync,
+    isSupabaseActive
   } = useApp();
 
   const [roleMenuOpen, setRoleMenuOpen] = useState(false);
@@ -235,6 +240,31 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
             Ctrl K
           </kbd>
         </button>
+
+        {/* Cloud Sync Status Indicator */}
+        <div
+          className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-[#141525]/70 border border-[#2C2E53] text-[11px] font-bold shrink-0 select-none cursor-default transition-all"
+          title={isSavingCloud ? 'Guardando cambios inmediatamente en la base de datos Supabase...' : lastCloudSync ? `Sincronizado en la nube: ${lastCloudSync}` : 'Conexión a base de datos activa'}
+        >
+          {isSavingCloud ? (
+            <>
+              <Loader2 className="w-3.5 h-3.5 text-[#D4AF37] animate-spin shrink-0" />
+              <span className="text-[#D4AF37]">Guardando en la nube...</span>
+            </>
+          ) : isSupabaseActive ? (
+            <>
+              <Cloud className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+              <span className="text-slate-300">
+                {lastCloudSync ? `Guardado ${lastCloudSync}` : 'BD Conectada'}
+              </span>
+            </>
+          ) : (
+            <>
+              <Cloud className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <span className="text-amber-300">Modo Local</span>
+            </>
+          )}
+        </div>
 
         {/* Right: Controls */}
         <div className="flex items-center gap-1 sm:gap-1.5 lg:gap-2 shrink-0">
