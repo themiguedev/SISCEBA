@@ -21,7 +21,7 @@ import { ThemeSwitcherDropdown } from './ThemeSwitcherDropdown';
 import { NotificationCenterPopover } from '../notifications/NotificationCenterPopover';
 import { MainNavigationTab } from '../../types';
 import { getDefaultAvatarForUser } from '../../utils/avatarCatalog';
-import { hasTabAccess } from '../../utils/rbac';
+import { hasTabAccess, getUserAllowedLevels } from '../../utils/rbac';
 
 interface ModernHeaderProps {
   sidebarOpen: boolean;
@@ -130,63 +130,99 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
           </div>
         </div>
 
-        {/* Center: Interactive Level Switcher (Pills) for Academic Staff or Scope Badge for Specific Roles */}
-        {hasTabAccess(currentRole, 'MEDIA_GENERAL') ? (
-          <div className="hidden lg:flex items-center bg-[#141525] p-1 rounded-2xl border border-[#2C2E53] shadow-inner shrink-0">
-            {((['INICIAL', 'PRIMARIA', 'MEDIA_GENERAL'] as EducationalLevel[]).filter(
-              lvl => !currentUser?.allowedLevels || currentUser.allowedLevels.length === 0 || currentUser.allowedLevels.includes(lvl)
-            )).map((lvl) => {
-              const isCurrentModule = activeTab === lvl;
-              const isContextLevel = currentLevel === lvl;
-              const isSelected = isCurrentModule || (isContextLevel && (activeTab === 'ESCRITORIO' || !['INICIAL', 'PRIMARIA', 'MEDIA_GENERAL'].includes(activeTab || '')));
-              const data = levelDetails[lvl];
-              return (
-                <button
-                  key={lvl}
-                  onClick={() => {
-                    setCurrentLevel(lvl);
-                    if (onSelectLevel) {
-                      onSelectLevel(lvl);
-                    }
-                  }}
-                  className={`flex items-center gap-1.5 px-2 xl:px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 whitespace-nowrap ${
-                    isSelected
-                      ? 'bg-[#2C2E53] text-[#D4AF37] shadow-md border border-[#D4AF37]/50 scale-[1.01]'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-[#1B1C33]'
-                  }`}
-                  title={`Acceder a ${data.label}`}
-                >
-                  <span className="text-sm">{data.icon}</span>
-                  <div className="text-left">
-                    <div className="flex items-center gap-1.5">
-                      <span className={isSelected ? 'text-white font-black' : ''}>{lvl.replace('_', ' ')}</span>
-                      {isSelected && (
-                        <span className="hidden 2xl:inline text-[9px] px-1.5 py-0.2 rounded bg-[#D4AF37]/20 text-[#D4AF37] font-extrabold">
-                          {data.badge}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#141525] border border-[#D4AF37]/50 shadow-inner">
-            <span className="w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse shrink-0"></span>
-            <span className="text-xs font-black text-[#D4AF37] tracking-wider uppercase">
-              {currentRole === 'ASISTENTE'
-                ? 'Control de Asistencia y Disciplina'
-                : currentRole === 'SECRETARIA'
-                ? 'Secretaría y Control de Estudios'
-                : currentRole === 'REPRESENTANTE'
-                ? 'Portal de Consultas • Representantes'
-                : currentRole === 'ESTUDIANTE'
-                ? 'Portal del Alumno CBA'
-                : 'Panel Operativo Institucional'}
-            </span>
-          </div>
-        )}
+        {/* Center: Interactive Level Switcher (Pills) for Multi-level Staff or Scope Badge */}
+        {(() => {
+          const userLevels = getUserAllowedLevels(currentRole, currentUser);
+
+          // Si el usuario tiene acceso a múltiples niveles (ej: Administrador, Director, Coordinador o Docente multinivel)
+          if (userLevels.length > 1) {
+            return (
+              <div className="hidden lg:flex items-center bg-[#141525] p-1 rounded-2xl border border-[#2C2E53] shadow-inner shrink-0">
+                {userLevels.map((lvl) => {
+                  const isCurrentModule = activeTab === lvl;
+                  const isContextLevel = currentLevel === lvl;
+                  const isSelected = isCurrentModule || (isContextLevel && (activeTab === 'ESCRITORIO' || !['INICIAL', 'PRIMARIA', 'MEDIA_GENERAL'].includes(activeTab || '')));
+                  const data = levelDetails[lvl];
+                  return (
+                    <button
+                      key={lvl}
+                      onClick={() => {
+                        setCurrentLevel(lvl);
+                        if (onSelectLevel) {
+                          onSelectLevel(lvl);
+                        }
+                      }}
+                      className={`flex items-center gap-1.5 px-2 xl:px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 whitespace-nowrap ${
+                        isSelected
+                          ? 'bg-[#2C2E53] text-[#D4AF37] shadow-md border border-[#D4AF37]/50 scale-[1.01]'
+                          : 'text-slate-400 hover:text-slate-200 hover:bg-[#1B1C33]'
+                      }`}
+                      title={`Acceder a ${data.label}`}
+                    >
+                      <span className="text-sm">{data.icon}</span>
+                      <div className="text-left">
+                        <div className="flex items-center gap-1.5">
+                          <span className={isSelected ? 'text-white font-black' : ''}>{lvl.replace('_', ' ')}</span>
+                          {isSelected && (
+                            <span className="hidden 2xl:inline text-[9px] px-1.5 py-0.2 rounded bg-[#D4AF37]/20 text-[#D4AF37] font-extrabold">
+                              {data.badge}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            );
+          }
+
+          // Si el usuario/docente tiene exactamente 1 nivel asignado
+          if (userLevels.length === 1) {
+            const singleLvl = userLevels[0];
+            const data = levelDetails[singleLvl];
+            const isCurrentModule = activeTab === singleLvl;
+            return (
+              <button
+                type="button"
+                onClick={() => {
+                  setCurrentLevel(singleLvl);
+                  if (onSelectLevel) {
+                    onSelectLevel(singleLvl);
+                  }
+                }}
+                className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#141525] border border-[#D4AF37]/50 shadow-inner hover:bg-[#1B1C33] transition cursor-pointer group"
+                title={`Nivel asignado: ${data.label}. Clic para ir a su módulo.`}
+              >
+                <span className="text-base group-hover:scale-110 transition-transform">{data.icon}</span>
+                <span className="text-xs font-black text-[#D4AF37] tracking-wider uppercase">
+                  {data.label}
+                </span>
+                <span className="hidden md:inline text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30">
+                  {data.badge}
+                </span>
+              </button>
+            );
+          }
+
+          // Para roles no pedagógicos (ASISTENTE, SECRETARIA, REPRESENTANTE, ESTUDIANTE)
+          return (
+            <div className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#141525] border border-[#D4AF37]/50 shadow-inner">
+              <span className="w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse shrink-0"></span>
+              <span className="text-xs font-black text-[#D4AF37] tracking-wider uppercase">
+                {currentRole === 'ASISTENTE'
+                  ? 'Control de Asistencia y Disciplina'
+                  : currentRole === 'SECRETARIA'
+                  ? 'Secretaría y Control de Estudios'
+                  : currentRole === 'REPRESENTANTE'
+                  ? 'Portal de Consultas • Representantes'
+                  : currentRole === 'ESTUDIANTE'
+                  ? 'Portal del Alumno CBA'
+                  : 'Panel Operativo Institucional'}
+              </span>
+            </div>
+          );
+        })()}
 
         {/* Center Search Trigger (Expanded for desktop) */}
         <button
@@ -407,38 +443,41 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
         </div>
       </div>
 
-      {/* Mobile Level Selector Bar (when screen is < 1024px and user has academic access) */}
-      {hasTabAccess(currentRole, 'MEDIA_GENERAL') && (
-        <div className="lg:hidden px-2 py-1.5 border-t border-[#2C2E53] bg-[#141525] flex items-center justify-between gap-1 overflow-x-auto no-scrollbar">
-          {((['INICIAL', 'PRIMARIA', 'MEDIA_GENERAL'] as EducationalLevel[]).filter(
-            lvl => !currentUser?.allowedLevels || currentUser.allowedLevels.length === 0 || currentUser.allowedLevels.includes(lvl)
-          )).map((lvl) => {
-            const isCurrentModule = activeTab === lvl;
-            const isContextLevel = currentLevel === lvl;
-            const isSelected = isCurrentModule || (isContextLevel && (activeTab === 'ESCRITORIO' || !['INICIAL', 'PRIMARIA', 'MEDIA_GENERAL'].includes(activeTab || '')));
-            const data = levelDetails[lvl];
-            return (
-              <button
-                key={lvl}
-                onClick={() => {
-                  setCurrentLevel(lvl);
-                  if (onSelectLevel) {
-                    onSelectLevel(lvl);
-                  }
-                }}
-                className={`flex-1 flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition active:scale-95 ${
-                  isSelected
-                    ? 'bg-[#2C2E53] text-[#D4AF37] border border-[#D4AF37]/40 shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                <span>{data.icon}</span>
-                <span>{lvl === 'MEDIA_GENERAL' ? 'Media Gen.' : lvl.replace('_', ' ')}</span>
-              </button>
-            );
-          })}
-        </div>
-      )}
+      {/* Mobile Level Selector Bar (only when user has multiple allowed levels to switch between) */}
+      {(() => {
+        const userLevels = getUserAllowedLevels(currentRole, currentUser);
+        if (userLevels.length <= 1) return null;
+
+        return (
+          <div className="lg:hidden px-2 py-1.5 border-t border-[#2C2E53] bg-[#141525] flex items-center justify-between gap-1 overflow-x-auto no-scrollbar">
+            {userLevels.map((lvl) => {
+              const isCurrentModule = activeTab === lvl;
+              const isContextLevel = currentLevel === lvl;
+              const isSelected = isCurrentModule || (isContextLevel && (activeTab === 'ESCRITORIO' || !['INICIAL', 'PRIMARIA', 'MEDIA_GENERAL'].includes(activeTab || '')));
+              const data = levelDetails[lvl];
+              return (
+                <button
+                  key={lvl}
+                  onClick={() => {
+                    setCurrentLevel(lvl);
+                    if (onSelectLevel) {
+                      onSelectLevel(lvl);
+                    }
+                  }}
+                  className={`flex-1 flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition active:scale-95 ${
+                    isSelected
+                      ? 'bg-[#2C2E53] text-[#D4AF37] border border-[#D4AF37]/40 shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <span>{data.icon}</span>
+                  <span>{lvl === 'MEDIA_GENERAL' ? 'Media Gen.' : lvl.replace('_', ' ')}</span>
+                </button>
+              );
+            })}
+          </div>
+        );
+      })()}
     </header>
   );
 };

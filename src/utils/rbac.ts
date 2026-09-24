@@ -1,4 +1,4 @@
-import { UserRole, MainNavigationTab } from '../types';
+import { UserRole, MainNavigationTab, EducationalLevel } from '../types';
 
 /**
  * Escala jerárquica numérica de roles institucionales SICE-CBA
@@ -405,4 +405,35 @@ export const canPublishCommunity = (role: UserRole): boolean => {
  */
 export const isConsultasOnlyRole = (role: UserRole): boolean => {
   return role === 'REPRESENTANTE' || role === 'ESTUDIANTE';
+};
+
+/**
+ * Retorna los niveles educativos autorizados y visibles según el rol y la cuenta de usuario
+ */
+export const getUserAllowedLevels = (
+  role: UserRole,
+  user?: { allowedLevels?: EducationalLevel[]; defaultLevel?: EducationalLevel } | null
+): EducationalLevel[] => {
+  // 1. Roles directivos y de supervisión general tienen acceso a todos los niveles
+  if (role === 'ADMINISTRADOR' || role === 'DIRECTOR' || role === 'COORDINACION' || role === 'COORDINADOR') {
+    return ['INICIAL', 'PRIMARIA', 'MEDIA_GENERAL'];
+  }
+
+  // 2. Roles puramente operativos o de consulta no son docentes de aula
+  if (role === 'ASISTENTE' || role === 'SECRETARIA' || role === 'REPRESENTANTE' || role === 'ESTUDIANTE') {
+    return [];
+  }
+
+  // 3. Usuario con niveles explícitamente configurados
+  if (user?.allowedLevels && user.allowedLevels.length > 0) {
+    return user.allowedLevels;
+  }
+
+  // 4. Docente con defaultLevel asignado
+  if (user?.defaultLevel) {
+    return [user.defaultLevel];
+  }
+
+  // 5. Fallback por defecto si no está especificado
+  return ['MEDIA_GENERAL'];
 };

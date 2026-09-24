@@ -15,7 +15,7 @@ import { ShortcutToast, ShortcutToastMessage } from './components/common/Shortcu
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { LoginView } from './components/auth/LoginView';
 import { SeasonalAccessoryIcon } from './components/auth/LogoSeasonalAccessory';
-import { hasTabAccess, hasSubTabAccess, getDefaultTabForRole, ROLE_METADATA } from './utils/rbac';
+import { hasTabAccess, hasSubTabAccess, getDefaultTabForRole, getUserAllowedLevels, ROLE_METADATA } from './utils/rbac';
 
 // Modules
 import { EscritorioView } from './components/dashboard/EscritorioView';
@@ -73,19 +73,26 @@ const SiscebaMainApp: React.FC = () => {
 
   const { mode, palette, isDark, toggleMode, setPalette } = useTheme();
 
-  // Keep activeTab synchronized with RBAC hierarchy and educational levels
+  // Keep activeTab and currentLevel synchronized with RBAC hierarchy and user allowed educational levels
   useEffect(() => {
+    const userLevels = getUserAllowedLevels(currentRole, currentUser);
+    if (userLevels.length > 0 && !userLevels.includes(currentLevel)) {
+      setCurrentLevel(userLevels[0]);
+    }
+
     if (!hasTabAccess(currentRole, activeTab)) {
       const defaultTab = getDefaultTabForRole(currentRole);
       setActiveTab(defaultTab);
       return;
     }
     if (activeTab === 'INICIAL' || activeTab === 'PRIMARIA' || activeTab === 'MEDIA_GENERAL') {
-      if (activeTab !== currentLevel) {
+      if (userLevels.length > 0 && !userLevels.includes(activeTab)) {
+        setActiveTab(userLevels[0]);
+      } else if (activeTab !== currentLevel) {
         setActiveTab(currentLevel);
       }
     }
-  }, [currentLevel, currentRole, activeTab]);
+  }, [currentLevel, currentRole, activeTab, currentUser]);
 
   const handleTabChange = (tab: MainNavigationTab) => {
     if (!hasTabAccess(currentRole, tab)) {
@@ -96,10 +103,20 @@ const SiscebaMainApp: React.FC = () => {
       );
       return;
     }
-    setActiveTab(tab);
+
     if (tab === 'INICIAL' || tab === 'PRIMARIA' || tab === 'MEDIA_GENERAL') {
+      const userLevels = getUserAllowedLevels(currentRole, currentUser);
+      if (userLevels.length > 0 && !userLevels.includes(tab)) {
+        showToast(
+          'Nivel No Asignado',
+          `Su cuenta no tiene asignado el nivel de ${tab.replace('_', ' ')}.`,
+          true
+        );
+        return;
+      }
       setCurrentLevel(tab);
     }
+    setActiveTab(tab);
   };
 
   const handleSubTabChange = (sub: string) => {

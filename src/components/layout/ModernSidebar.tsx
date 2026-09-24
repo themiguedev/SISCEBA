@@ -29,7 +29,7 @@ import {
   Palette
 } from 'lucide-react';
 import { SeasonalAccessoryIcon } from '../auth/LogoSeasonalAccessory';
-import { hasTabAccess, hasSubTabAccess, ROLE_METADATA } from '../../utils/rbac';
+import { hasTabAccess, hasSubTabAccess, getUserAllowedLevels, ROLE_METADATA } from '../../utils/rbac';
 
 interface ModernSidebarProps {
   isOpen: boolean;
@@ -356,11 +356,12 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
         <div className="flex-1 overflow-y-auto no-scrollbar py-4 px-3 space-y-4">
           {(() => {
             const isConsultasOnly = currentRole === 'REPRESENTANTE' || currentRole === 'ESTUDIANTE';
+            const userLevels = getUserAllowedLevels(currentRole, currentUser);
             const visibleSections = navigationSections
               .filter((s) => {
                 if (!hasTabAccess(currentRole, s.id)) return false;
-                if ((s.id === 'INICIAL' || s.id === 'PRIMARIA' || s.id === 'MEDIA_GENERAL') && currentUser?.allowedLevels && currentUser.allowedLevels.length > 0) {
-                  return currentUser.allowedLevels.includes(s.id);
+                if (s.id === 'INICIAL' || s.id === 'PRIMARIA' || s.id === 'MEDIA_GENERAL') {
+                  return userLevels.includes(s.id as any);
                 }
                 return true;
               })
