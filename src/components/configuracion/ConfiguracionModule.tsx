@@ -30,15 +30,17 @@ import {
   ShieldX,
   Key,
   Copy,
-  Trash2
+  Trash2,
+  SlidersHorizontal
 } from 'lucide-react';
 import { hasSubTabAccess, canConfigureSchool, ROLE_METADATA } from '../../utils/rbac';
 import { getDefaultAvatarForUser } from '../../utils/avatarCatalog';
 import { PasswordStrengthBar } from '../common/PasswordStrengthBar';
+import { ConfiguracionAvanzadaView } from './ConfiguracionAvanzadaView';
 
 interface ConfiguracionModuleProps {
-  activeSubTab?: 'LAPSOS' | 'ESTRUCTURA' | 'DOCENTES' | 'TEMAS';
-  setActiveSubTab?: (subTab: 'LAPSOS' | 'ESTRUCTURA' | 'DOCENTES' | 'TEMAS') => void;
+  activeSubTab?: 'LAPSOS' | 'ESTRUCTURA' | 'DOCENTES' | 'TEMAS' | 'AVANZADA';
+  setActiveSubTab?: (subTab: 'LAPSOS' | 'ESTRUCTURA' | 'DOCENTES' | 'TEMAS' | 'AVANZADA') => void;
 }
 
 export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
@@ -126,18 +128,18 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
     handleSaveSettings();
   };
   
-  const allowedTabs = (['LAPSOS', 'ESTRUCTURA', 'DOCENTES', 'TEMAS'] as const).filter(
+  const allowedTabs = (['LAPSOS', 'ESTRUCTURA', 'DOCENTES', 'TEMAS', 'AVANZADA'] as const).filter(
     (t) => hasSubTabAccess(currentRole, 'CONFIGURACION', t)
   );
 
-  const [internalActiveTab, setInternalActiveTab] = useState<'LAPSOS' | 'ESTRUCTURA' | 'DOCENTES' | 'TEMAS'>(() => {
+  const [internalActiveTab, setInternalActiveTab] = useState<'LAPSOS' | 'ESTRUCTURA' | 'DOCENTES' | 'TEMAS' | 'AVANZADA'>(() => {
     return allowedTabs[0] || 'TEMAS';
   });
 
   const requestedTab = activeSubTab || internalActiveTab;
   const activeTab = allowedTabs.includes(requestedTab) ? requestedTab : (allowedTabs[0] || 'TEMAS');
 
-  const setActiveTab = (tab: 'LAPSOS' | 'ESTRUCTURA' | 'DOCENTES' | 'TEMAS') => {
+  const setActiveTab = (tab: 'LAPSOS' | 'ESTRUCTURA' | 'DOCENTES' | 'TEMAS' | 'AVANZADA') => {
     if (!allowedTabs.includes(tab)) return;
     if (setActiveSubTab) {
       setActiveSubTab(tab);
@@ -224,6 +226,20 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
               <Palette className={`w-3.5 h-3.5 shrink-0 ${activeTab === 'TEMAS' ? 'text-violet-400' : 'text-slate-400'}`} />
               <span className="hidden sm:inline">Apariencia y Temas</span>
               <span className="sm:hidden">Temas</span>
+            </button>
+          )}
+          {allowedTabs.includes('AVANZADA') && (
+            <button
+              onClick={() => setActiveTab('AVANZADA')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
+                activeTab === 'AVANZADA'
+                  ? 'bg-violet-700 text-white shadow-sm border border-violet-400'
+                  : 'text-violet-700 dark:text-violet-300 hover:text-violet-900 dark:hover:text-white bg-violet-50/70 dark:bg-violet-950/40'
+              }`}
+            >
+              <SlidersHorizontal className={`w-3.5 h-3.5 shrink-0 ${activeTab === 'AVANZADA' ? 'text-white' : 'text-violet-500'}`} />
+              <span className="hidden sm:inline">Conf. Avanzada</span>
+              <span className="sm:hidden">Avanzada</span>
             </button>
           )}
         </div>
@@ -1233,6 +1249,11 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
             </div>
           </div>
         </div>
+      )}
+
+      {/* VIEW 5: CONFIGURACIÓN AVANZADA (SISTEMA CEO - SOLO ADMIN) */}
+      {activeTab === 'AVANZADA' && (
+        <ConfiguracionAvanzadaView />
       )}
     </div>
   );
