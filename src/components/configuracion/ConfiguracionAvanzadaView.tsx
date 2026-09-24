@@ -31,9 +31,13 @@ import {
   MapPin,
   Save,
   CheckCircle2,
-  Lock
+  Lock,
+  CheckSquare,
+  Square,
+  Filter
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import PRIVILEGIOS_DATA from '../../data/privilegiosCEO.json';
 
 // 17 CEO Catalog Options
 export type AvanzadaSection =
@@ -69,7 +73,7 @@ const MENU_ITEMS: SectionMenuItem[] = [
   { id: 'EXCEPCIONES', label: 'EXCEPCIONES', icon: AlertOctagon, count: 0 },
   { id: 'AUDITORIA', label: 'AUDITORÍA', icon: FileSearch, count: 'Live' },
   { id: 'ROLES_USUARIO', label: 'ROLES DE USUARIO', icon: Users2, count: 8 },
-  { id: 'PRIVILEGIOS', label: 'PRIVILEGIOS', icon: ShieldAlert, badge: 'Pendiente' },
+  { id: 'PRIVILEGIOS', label: 'PRIVILEGIOS', icon: ShieldAlert, count: '142 x 13 Roles', badge: 'Matriz CEO' },
   { id: 'REPORTES', label: 'REPORTES', icon: FileBarChart2, count: 14 },
   { id: 'ASIGNAR_REPORTES', label: 'ASIGNAR REPORTES', icon: Share2, count: 12 },
   { id: 'LITERALES', label: 'LITERALES', icon: GraduationCap, count: '3 Escalas' },
@@ -88,6 +92,12 @@ export const ConfiguracionAvanzadaView: React.FC = () => {
   const [activeSection, setActiveSection] = useState<AvanzadaSection>('MODULOS');
   const [searchTerm, setSearchTerm] = useState('');
   const [saveToast, setSaveToast] = useState(false);
+
+  // Estados para la Matriz de Privilegios CEO (13 roles x 142 privilegios)
+  const [selectedRolePrivilegios, setSelectedRolePrivilegios] = useState<string>('Administrador del Sistema');
+  const [privSearchTerm, setPrivSearchTerm] = useState<string>('');
+  const [privCategoryFilter, setPrivCategoryFilter] = useState<string>('TODAS');
+  const [privilegiosMatrix, setPrivilegiosMatrix] = useState(() => PRIVILEGIOS_DATA);
 
   // Initial catalogs state (persisted locally / editable)
   const [parentescos, setParentescos] = useState<string[]>([
@@ -445,23 +455,231 @@ export const ConfiguracionAvanzadaView: React.FC = () => {
             </div>
           )}
 
-          {/* DETAIL 6: PRIVILEGIOS (RESERVED PLACEHOLDER AS REQUESTED) */}
-          {activeSection === 'PRIVILEGIOS' && (
-            <div className="p-12 rounded-2xl border-2 border-dashed border-slate-200 text-center space-y-4 bg-slate-50/50">
-              <div className="w-16 h-16 mx-auto rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600">
-                <ShieldAlert className="w-8 h-8" />
+          {/* DETAIL 6: PRIVILEGIOS (MATRIZ CEO - 13 ROLES x 142 PRIVILEGIOS EXACTOS) */}
+          {activeSection === 'PRIVILEGIOS' && (() => {
+            const currentRoleObj = privilegiosMatrix.roles.find(
+              (r) => r.nombre === selectedRolePrivilegios
+            ) || privilegiosMatrix.roles[0];
+
+            const categories = [
+              'TODAS',
+              'COMUNIDAD CEO',
+              'CONF. AVANZADA',
+              'CONFIGURACIÓN',
+              'CONSULTAS',
+              'GESTIÓN',
+              'INICIAL',
+              'MEDIA GENERAL',
+              'PRIMARIA'
+            ];
+
+            const filteredPrivs = currentRoleObj.privilegios.filter((p) => {
+              const matchesCat = privCategoryFilter === 'TODAS' || p.categoria === privCategoryFilter;
+              const matchesSearch =
+                !privSearchTerm ||
+                p.opcion.toLowerCase().includes(privSearchTerm.toLowerCase()) ||
+                p.descripcion.toLowerCase().includes(privSearchTerm.toLowerCase()) ||
+                p.nro.toString() === privSearchTerm.trim();
+              return matchesCat && matchesSearch;
+            });
+
+            const enabledCount = currentRoleObj.privilegios.filter((p) => p.habilitar).length;
+
+            const togglePrivilege = (nro: number) => {
+              setPrivilegiosMatrix((prev) => {
+                const nextRoles = prev.roles.map((r) => {
+                  if (r.nombre !== selectedRolePrivilegios) return r;
+                  const nextPrivs = r.privilegios.map((p) => {
+                    if (p.nro !== nro) return p;
+                    return { ...p, habilitar: !p.habilitar };
+                  });
+                  return { ...r, privilegios: nextPrivs };
+                });
+                return { ...prev, roles: nextRoles };
+              });
+              triggerToast();
+            };
+
+            return (
+              <div className="space-y-4">
+                {/* Role description and summary bar */}
+                <div className="p-4 rounded-xl border border-violet-200 bg-violet-50/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-violet-700">
+                        Descripción Oficial
+                      </span>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-violet-200/80 text-violet-900 font-bold">
+                        142 Registros Consecutivos
+                      </span>
+                    </div>
+                    <p className="text-xs font-bold text-slate-800 mt-1">
+                      ADM: Gestione los accesos a cada rol de usuario.
+                    </p>
+                    <p className="text-[11px] text-slate-500">
+                      Rol actual:{' '}
+                      <span className="font-extrabold text-violet-900">
+                        {currentRoleObj.nombre}
+                      </span>{' '}
+                      • {enabledCount} habilitados / {142 - enabledCount} deshabilitados
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <select
+                      value={selectedRolePrivilegios}
+                      onChange={(e) => setSelectedRolePrivilegios(e.target.value)}
+                      className="px-3 py-2 text-xs rounded-xl border border-violet-300 bg-white font-black text-violet-950 focus:outline-none focus:ring-2 focus:ring-violet-500 w-full sm:w-auto shadow-sm"
+                    >
+                      {privilegiosMatrix.roles.map((r) => (
+                        <option key={r.nombre} value={r.nombre}>
+                          Rol: {r.nombre} ({r.privilegios.filter(p => p.habilitar).length}/142 ☑)
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Filters toolbar */}
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+                  {/* Category Filter */}
+                  <div className="md:col-span-6 flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
+                    <Filter className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                    <div className="flex gap-1">
+                      {categories.map((cat) => (
+                        <button
+                          key={cat}
+                          onClick={() => setPrivCategoryFilter(cat)}
+                          className={`px-2 py-1 rounded-md text-[10px] font-bold shrink-0 transition-colors ${
+                            privCategoryFilter === cat
+                              ? 'bg-violet-600 text-white'
+                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                          }`}
+                        >
+                          {cat}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Search in Options / Descriptions */}
+                  <div className="md:col-span-6">
+                    <div className="relative">
+                      <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400" />
+                      <input
+                        type="text"
+                        placeholder="Buscar por opción, descripción o número..."
+                        value={privSearchTerm}
+                        onChange={(e) => setPrivSearchTerm(e.target.value)}
+                        className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-violet-500 bg-white"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* The 142 Privileges Table */}
+                <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
+                  <div className="max-h-[580px] overflow-y-auto no-scrollbar">
+                    <table className="w-full text-left border-collapse text-xs">
+                      <thead className="bg-slate-50 sticky top-0 z-10 border-b border-slate-200 text-[11px] font-bold text-slate-600">
+                        <tr>
+                          <th className="py-2.5 px-3 w-14 text-center">Nro</th>
+                          <th className="py-2.5 px-3 w-36">Categoría</th>
+                          <th className="py-2.5 px-3 w-48">Opción</th>
+                          <th className="py-2.5 px-4">Descripción</th>
+                          <th className="py-2.5 px-3 w-24 text-center">Habilitar</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 font-medium">
+                        {filteredPrivs.map((priv) => {
+                          return (
+                            <tr
+                              key={priv.nro}
+                              className={`hover:bg-violet-50/40 transition-colors ${
+                                priv.habilitar ? 'bg-white' : 'bg-slate-50/30'
+                              }`}
+                            >
+                              <td className="py-2 px-3 text-center font-mono font-bold text-slate-500 text-[11px]">
+                                {priv.nro}
+                              </td>
+                              <td className="py-2 px-3">
+                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                                  priv.categoria === 'COMUNIDAD CEO' ? 'bg-pink-100 text-pink-800' :
+                                  priv.categoria === 'CONF. AVANZADA' ? 'bg-purple-100 text-purple-800' :
+                                  priv.categoria === 'CONFIGURACIÓN' ? 'bg-amber-100 text-amber-800' :
+                                  priv.categoria === 'CONSULTAS' ? 'bg-cyan-100 text-cyan-800' :
+                                  priv.categoria === 'GESTIÓN' ? 'bg-blue-100 text-blue-800' :
+                                  priv.categoria === 'INICIAL' ? 'bg-rose-100 text-rose-800' :
+                                  priv.categoria === 'MEDIA GENERAL' ? 'bg-indigo-100 text-indigo-800' :
+                                  'bg-emerald-100 text-emerald-800'
+                                }`}>
+                                  {priv.categoria}
+                                </span>
+                              </td>
+                              <td className="py-2 px-3 font-bold text-slate-900 text-xs">
+                                {priv.opcion}
+                              </td>
+                              <td className="py-2 px-4 text-slate-600 text-xs leading-relaxed">
+                                {priv.descripcion ? (
+                                  <span>
+                                    {priv.descripcion.startsWith('ADM:') ? (
+                                      <strong className="text-purple-700 font-black">ADM: </strong>
+                                    ) : priv.descripcion.startsWith('DOC:') ? (
+                                      <strong className="text-blue-700 font-black">DOC: </strong>
+                                    ) : priv.descripcion.startsWith('EST:') ? (
+                                      <strong className="text-emerald-700 font-black">EST: </strong>
+                                    ) : priv.descripcion.startsWith('REP:') ? (
+                                      <strong className="text-amber-700 font-black">REP: </strong>
+                                    ) : priv.descripcion.startsWith('UCE:') ? (
+                                      <strong className="text-cyan-700 font-black">UCE: </strong>
+                                    ) : null}
+                                    {priv.descripcion.replace(/^(ADM:|DOC:|EST:|REP:|UCE:)\s*/, '')}
+                                  </span>
+                                ) : (
+                                  <span className="text-slate-300 italic text-[11px]">—</span>
+                                )}
+                              </td>
+                              <td className="py-2 px-3 text-center">
+                                <button
+                                  type="button"
+                                  onClick={() => togglePrivilege(priv.nro)}
+                                  className="inline-flex items-center justify-center p-1 rounded hover:bg-slate-100 transition"
+                                  title={priv.habilitar ? 'Habilitado (Click para alternar)' : 'Deshabilitado (Click para alternar)'}
+                                >
+                                  {priv.habilitar ? (
+                                    <span className="inline-flex items-center justify-center w-5 h-5 rounded bg-violet-600 text-white shadow-sm font-bold text-xs">
+                                      ✓
+                                    </span>
+                                  ) : (
+                                    <span className="inline-flex items-center justify-center w-5 h-5 rounded border border-slate-300 bg-white"></span>
+                                  )}
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {filteredPrivs.length === 0 && (
+                    <div className="p-8 text-center text-xs text-slate-400">
+                      No se encontraron privilegios que coincidan con la búsqueda o filtro.
+                    </div>
+                  )}
+
+                  {/* Table footer with stats */}
+                  <div className="p-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-[11px] text-slate-500 font-bold">
+                    <span>
+                      Mostrando {filteredPrivs.length} de 142 privilegios para el rol:{' '}
+                      <span className="text-slate-800">{currentRoleObj.nombre}</span>
+                    </span>
+                    <span>Total Matriz: 13 Roles • 1.846 Casillas Verificadas</span>
+                  </div>
+                </div>
               </div>
-              <div>
-                <h3 className="text-base font-black text-slate-800">Módulo de Privilegios Reservado</h3>
-                <p className="text-xs text-slate-500 max-w-md mx-auto mt-1">
-                  Este apartado está preparado para recibir la estructura de permisos granulares que suministrarás. Por ahora se mantiene limpio sin configuraciones predeterminadas.
-                </p>
-              </div>
-              <div className="inline-block px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-[11px] font-bold">
-                A la espera de estructura de privilegios
-              </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* DETAIL 7: REPORTES */}
           {activeSection === 'REPORTES' && (
