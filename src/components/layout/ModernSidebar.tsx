@@ -274,6 +274,7 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
         { id: 'ESTRUCTURA', label: 'Estructura de Cursos y Aulas', icon: Layers },
         { id: 'DOCENTES', label: 'Carga Horaria y Docentes Guías', icon: UserCheck },
         { id: 'TEMAS', label: 'Apariencia y Temas', icon: Palette },
+        { id: 'CONFIG_CEO', label: 'Configuración CEO (Académica)', icon: Settings },
         { id: 'AVANZADA', label: 'Conf. Avanzada (CEO / Sistema)', icon: Sliders }
       ]
     },

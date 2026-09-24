@@ -49,7 +49,7 @@ const SiscebaMainApp: React.FC = () => {
   const [gestionSubTab, setGestionSubTab] = useState<string>('INSCRIPCIONES');
   const [consultasSubTab, setConsultasSubTab] = useState<ConsultasSubTab>('RENDIMIENTO');
   const [comunidadSubTab, setComunidadSubTab] = useState<'NOTICIAS' | 'CUMPLEANOS' | 'COMUNICADOS'>('NOTICIAS');
-  const [configuracionSubTab, setConfiguracionSubTab] = useState<'LAPSOS' | 'ESTRUCTURA' | 'DOCENTES' | 'TEMAS' | 'AVANZADA'>('LAPSOS');
+  const [configuracionSubTab, setConfiguracionSubTab] = useState<'LAPSOS' | 'ESTRUCTURA' | 'DOCENTES' | 'TEMAS' | 'CONFIG_CEO' | 'AVANZADA'>('LAPSOS');
   const [ayudaSubTab, setAyudaSubTab] = useState<'MANUAL' | 'MAPA_SITIO'>('MANUAL');
   const [planningSubTab, setPlanningSubTab] = useState<string>('AREAS_PERFILES');
   const [evaluationSubTab, setEvaluationSubTab] = useState<string>('PROCESAL');
@@ -136,8 +136,8 @@ const SiscebaMainApp: React.FC = () => {
       setConsultasSubTab(sub as ConsultasSubTab);
     } else if (['NOTICIAS', 'CUMPLEANOS', 'COMUNICADOS'].includes(sub)) {
       setComunidadSubTab(sub as 'NOTICIAS' | 'CUMPLEANOS' | 'COMUNICADOS');
-    } else if (['LAPSOS', 'ESTRUCTURA', 'DOCENTES', 'TEMAS', 'AVANZADA'].includes(sub)) {
-      setConfiguracionSubTab(sub as 'LAPSOS' | 'ESTRUCTURA' | 'DOCENTES' | 'TEMAS' | 'AVANZADA');
+    } else if (['LAPSOS', 'ESTRUCTURA', 'DOCENTES', 'TEMAS', 'CONFIG_CEO', 'AVANZADA'].includes(sub)) {
+      setConfiguracionSubTab(sub as 'LAPSOS' | 'ESTRUCTURA' | 'DOCENTES' | 'TEMAS' | 'CONFIG_CEO' | 'AVANZADA');
     } else if (['MANUAL', 'MAPA_SITIO'].includes(sub)) {
       setAyudaSubTab(sub as 'MANUAL' | 'MAPA_SITIO');
     } else if (['DIAGNOSTICA', 'PROCESAL', 'FINAL_LAPSO', 'ESTADISTICAS'].includes(sub)) {

@@ -37,10 +37,11 @@ import { hasSubTabAccess, canConfigureSchool, ROLE_METADATA } from '../../utils/
 import { getDefaultAvatarForUser } from '../../utils/avatarCatalog';
 import { PasswordStrengthBar } from '../common/PasswordStrengthBar';
 import { ConfiguracionAvanzadaView } from './ConfiguracionAvanzadaView';
+import { ConfiguracionGeneralCEOView } from './ConfiguracionGeneralCEOView';
 
 interface ConfiguracionModuleProps {
-  activeSubTab?: 'LAPSOS' | 'ESTRUCTURA' | 'DOCENTES' | 'TEMAS' | 'AVANZADA';
-  setActiveSubTab?: (subTab: 'LAPSOS' | 'ESTRUCTURA' | 'DOCENTES' | 'TEMAS' | 'AVANZADA') => void;
+  activeSubTab?: 'LAPSOS' | 'ESTRUCTURA' | 'DOCENTES' | 'TEMAS' | 'CONFIG_CEO' | 'AVANZADA';
+  setActiveSubTab?: (subTab: 'LAPSOS' | 'ESTRUCTURA' | 'DOCENTES' | 'TEMAS' | 'CONFIG_CEO' | 'AVANZADA') => void;
 }
 
 export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
@@ -128,18 +129,18 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
     handleSaveSettings();
   };
   
-  const allowedTabs = (['LAPSOS', 'ESTRUCTURA', 'DOCENTES', 'TEMAS', 'AVANZADA'] as const).filter(
+  const allowedTabs = (['LAPSOS', 'ESTRUCTURA', 'DOCENTES', 'TEMAS', 'CONFIG_CEO', 'AVANZADA'] as const).filter(
     (t) => hasSubTabAccess(currentRole, 'CONFIGURACION', t)
   );
 
-  const [internalActiveTab, setInternalActiveTab] = useState<'LAPSOS' | 'ESTRUCTURA' | 'DOCENTES' | 'TEMAS' | 'AVANZADA'>(() => {
+  const [internalActiveTab, setInternalActiveTab] = useState<'LAPSOS' | 'ESTRUCTURA' | 'DOCENTES' | 'TEMAS' | 'CONFIG_CEO' | 'AVANZADA'>(() => {
     return allowedTabs[0] || 'TEMAS';
   });
 
   const requestedTab = activeSubTab || internalActiveTab;
   const activeTab = allowedTabs.includes(requestedTab) ? requestedTab : (allowedTabs[0] || 'TEMAS');
 
-  const setActiveTab = (tab: 'LAPSOS' | 'ESTRUCTURA' | 'DOCENTES' | 'TEMAS' | 'AVANZADA') => {
+  const setActiveTab = (tab: 'LAPSOS' | 'ESTRUCTURA' | 'DOCENTES' | 'TEMAS' | 'CONFIG_CEO' | 'AVANZADA') => {
     if (!allowedTabs.includes(tab)) return;
     if (setActiveSubTab) {
       setActiveSubTab(tab);
@@ -226,6 +227,20 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
               <Palette className={`w-3.5 h-3.5 shrink-0 ${activeTab === 'TEMAS' ? 'text-violet-400' : 'text-slate-400'}`} />
               <span className="hidden sm:inline">Apariencia y Temas</span>
               <span className="sm:hidden">Temas</span>
+            </button>
+          )}
+          {allowedTabs.includes('CONFIG_CEO') && (
+            <button
+              onClick={() => setActiveTab('CONFIG_CEO')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
+                activeTab === 'CONFIG_CEO'
+                  ? 'bg-amber-600 text-white shadow-sm border border-amber-400'
+                  : 'text-amber-800 dark:text-amber-300 hover:text-amber-950 dark:hover:text-white bg-amber-50/70 dark:bg-amber-950/40'
+              }`}
+            >
+              <Settings className={`w-3.5 h-3.5 shrink-0 ${activeTab === 'CONFIG_CEO' ? 'text-white' : 'text-amber-600'}`} />
+              <span className="hidden sm:inline">Configuración CEO</span>
+              <span className="sm:hidden">CEO</span>
             </button>
           )}
           {allowedTabs.includes('AVANZADA') && (
@@ -491,7 +506,7 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
                     />
                     <PasswordStrengthBar
                       password={newPassword}
-                      onGeneratePassword={(gen) => setNewPassword(gen)}
+                      onGeneratePassword={(gen: string) => setNewPassword(gen)}
                     />
                   </div>
 
@@ -1251,7 +1266,12 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
         </div>
       )}
 
-      {/* VIEW 5: CONFIGURACIÓN AVANZADA (SISTEMA CEO - SOLO ADMIN) */}
+      {/* VIEW 5: CONFIGURACIÓN GENERAL / ESTRUCTURA ACADÉMICA (SISTEMA CEO - SOLO ADMIN) */}
+      {activeTab === 'CONFIG_CEO' && (
+        <ConfiguracionGeneralCEOView />
+      )}
+
+      {/* VIEW 6: CONFIGURACIÓN AVANZADA (SISTEMA CEO - SOLO ADMIN) */}
       {activeTab === 'AVANZADA' && (
         <ConfiguracionAvanzadaView />
       )}
