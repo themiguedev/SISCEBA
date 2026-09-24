@@ -331,7 +331,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id: `usr-${Date.now()}`
     };
     setUsers(prev => [newUser, ...prev]);
-    supabaseSaveUser(newUser).catch(err => console.warn('Supabase save user err:', err));
+    await supabaseSaveUser(newUser);
     return newUser;
   };
 

@@ -904,7 +904,7 @@ export const supabaseFetchUsers = async (): Promise<AppUser[] | null> => {
 export const supabaseSaveUser = async (user: AppUser): Promise<boolean> => {
   if (!isSupabaseConfigured()) return false;
   try {
-    const { error } = await supabase.from('app_users').upsert({
+    const payload: Record<string, any> = {
       id: user.id,
       username: user.username,
       password: user.password,
@@ -913,15 +913,17 @@ export const supabaseSaveUser = async (user: AppUser): Promise<boolean> => {
       role: user.role,
       default_level: user.defaultLevel,
       active: user.active,
-      avatar_url: user.avatarUrl,
-      gender: user.gender || null,
-      phone: user.phone || null,
-      bio: user.bio || null,
-      receive_emails: user.receiveEmails ?? true,
-      receive_messages: user.receiveMessages ?? true
-    });
-    return !error;
-  } catch {
+      avatar_url: user.avatarUrl
+    };
+
+    const { error } = await supabase.from('app_users').upsert(payload);
+    if (error) {
+      console.error('Error al guardar usuario en Supabase (app_users):', error);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error('Excepción al guardar usuario en Supabase:', e);
     return false;
   }
 };
