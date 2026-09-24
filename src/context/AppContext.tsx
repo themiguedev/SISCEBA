@@ -106,6 +106,7 @@ import {
   supabaseSaveTitleRecord,
   supabaseSaveCommunityNotice,
   supabaseSaveNotification,
+  supabaseClearNotifications,
   supabaseSaveUser
 } from '../services/supabaseService';
 
@@ -929,6 +930,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const clearNotifications = () => {
     setNotifications([]);
+    localStorage.removeItem('sisceba_system_notifications');
+    supabaseClearNotifications().catch(err => console.warn('Supabase clear notifications err:', err));
   };
 
   useEffect(() => {

@@ -871,6 +871,26 @@ export const supabaseSaveNotification = async (notif: SystemNotification): Promi
   }
 };
 
+export const supabaseClearNotifications = async (): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('system_notifications').delete().neq('id', 'keep_none');
+    return !error;
+  } catch {
+    return false;
+  }
+};
+
+export const supabaseDeleteNotification = async (id: string): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('system_notifications').delete().eq('id', id);
+    return !error;
+  } catch {
+    return false;
+  }
+};
+
 // ==========================================
 // 14. USUARIOS DEL SISTEMA (app_users)
 // ==========================================
