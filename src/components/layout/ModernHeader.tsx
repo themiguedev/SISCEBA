@@ -391,7 +391,7 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
                     >
                       <span className="flex items-center gap-2">
                         <User className="w-3.5 h-3.5" />
-                        <span>Mi Perfil y Foto</span>
+                        <span>Mi Perfil</span>
                       </span>
                       <span className="text-[10px] text-sky-400 font-mono">Editar →</span>
                     </button>
