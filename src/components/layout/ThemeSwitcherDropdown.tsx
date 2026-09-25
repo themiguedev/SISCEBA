@@ -61,7 +61,7 @@ export const ThemeSwitcherDropdown: React.FC<ThemeSwitcherDropdownProps> = ({
       {/* Botón Disparador en la Cabecera */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="min-h-[44px] min-w-[44px] flex items-center justify-center gap-1.5 p-2.5 rounded-xl bg-[#2C2E53]/70 hover:bg-[#2C2E53] active:scale-95 text-slate-300 hover:text-white transition-all border border-[#414474]/50 focus:outline-none cursor-pointer"
+        className="min-h-[38px] sm:min-h-[42px] px-2 sm:px-2.5 py-1.5 sm:py-2 rounded-xl bg-[#2C2E53]/70 hover:bg-[#2C2E53] active:scale-95 text-slate-300 hover:text-white transition-all border border-[#414474]/50 focus:outline-none flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer shrink-0"
         title="Cambiar Tema y Apariencia (Modo Claro / Oscuro / Otros Temas)"
         aria-label="Selector de Tema"
       >

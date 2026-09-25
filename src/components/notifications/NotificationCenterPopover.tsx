@@ -79,7 +79,7 @@ export const NotificationCenterPopover: React.FC<NotificationCenterPopoverProps>
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="min-h-[44px] min-w-[44px] relative p-2.5 rounded-xl bg-[#141525] hover:bg-[#2C2E53] active:scale-95 text-slate-300 hover:text-white border border-[#2C2E53] transition-all shadow-inner shrink-0 group focus:outline-none flex items-center justify-center cursor-pointer"
+        className="min-h-[38px] min-w-[38px] sm:min-h-[42px] sm:min-w-[42px] relative p-2 sm:p-2.5 rounded-xl bg-[#141525] hover:bg-[#2C2E53] active:scale-95 text-slate-300 hover:text-white border border-[#2C2E53] transition-all shadow-inner shrink-0 group focus:outline-none flex items-center justify-center cursor-pointer"
         title="Centro de Notificaciones Institucionales"
         aria-label="Abrir centro de notificaciones"
       >

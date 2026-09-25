@@ -97,21 +97,21 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
       {/* Top Main Command Bar */}
       <div className="max-w-[1700px] mx-auto px-2.5 sm:px-4 lg:px-6 h-16 sm:h-20 flex items-center justify-between gap-2 lg:gap-3">
         {/* Left: Sidebar Toggle & Brand Crest */}
-        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+        <div className="flex items-center gap-1 sm:gap-2.5 shrink-0">
           <button
             onClick={() => setSidebarOpen((prev) => !prev)}
-            className="min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#2C2E53]/70 hover:bg-[#2C2E53] active:scale-95 text-slate-300 hover:text-white transition-all border border-[#414474]/50 focus:outline-none flex items-center justify-center shrink-0 cursor-pointer"
+            className="min-h-[38px] min-w-[38px] sm:min-h-[44px] sm:min-w-[44px] p-2 sm:p-2.5 rounded-xl bg-[#2C2E53]/70 hover:bg-[#2C2E53] active:scale-95 text-slate-300 hover:text-white transition-all border border-[#414474]/50 focus:outline-none flex items-center justify-center shrink-0 cursor-pointer"
             title="Alternar Menú Lateral"
             aria-label="Abrir menú de navegación"
           >
-            <Menu className="w-5 h-5" />
+            <Menu className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
 
           {/* Institutional Logo Button - Click to return to Home */}
           <button
             type="button"
             onClick={onGoHome}
-            className="min-h-[44px] relative flex items-center justify-center shrink-0 group focus:outline-none transition-all duration-200 cursor-pointer p-1.5 rounded-xl hover:bg-white/5 active:scale-95"
+            className="min-h-[38px] sm:min-h-[44px] relative flex items-center justify-center shrink-0 group focus:outline-none transition-all duration-200 cursor-pointer p-1 sm:p-1.5 rounded-xl hover:bg-white/5 active:scale-95"
             title="Ir a la página principal (Inicio)"
             aria-label="Ir al inicio"
           >
@@ -119,10 +119,10 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
               <img
                 src={`${import.meta.env.BASE_URL}logo-cba.png`}
                 alt="Colegio Bellas Artes"
-                width="36"
-                height="36"
+                width="34"
+                height="34"
                 decoding="async"
-                className="h-8 sm:h-9 w-auto object-contain brightness-0 invert drop-shadow-[0_2px_8px_rgba(212,175,55,0.3)]"
+                className="h-7 sm:h-9 w-auto object-contain brightness-0 invert drop-shadow-[0_2px_8px_rgba(212,175,55,0.3)]"
               />
               <span className="absolute -bottom-0.5 -right-0.5 flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#D4AF37] opacity-75"></span>
@@ -131,9 +131,9 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
             </div>
           </button>
 
-          {/* Title SICE-CBA - Limpio y legible */}
-          <div className="flex flex-col justify-center shrink-0 select-none cursor-default">
-            <span className="font-extrabold text-sm sm:text-base tracking-wider text-white whitespace-nowrap">
+          {/* Title SICE-CBA - Visible en pantallas medianas o si hay espacio */}
+          <div className="hidden xs:flex flex-col justify-center shrink-0 select-none cursor-default">
+            <span className="font-extrabold text-xs sm:text-base tracking-wider text-white whitespace-nowrap">
               SICE-CBA
             </span>
           </div>
