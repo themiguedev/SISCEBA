@@ -127,10 +127,10 @@ html.dark ::-webkit-scrollbar-thumb:hover {
   padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
 }
 
-/* Prevent horizontal overflow and enable smooth tap feedback */
+/* Prevent horizontal overflow and enable smooth tap feedback without breaking sticky positioning */
 html,
 body {
-  overflow-x: hidden;
+  overflow-x: clip;
   -webkit-tap-highlight-color: transparent;
 }
 

@@ -88,7 +88,7 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
   };
 
   return (
-    <header className="w-full bg-[#1B1C33] border-b border-[#2C2E53] sticky top-0 z-40 text-white shadow-xl backdrop-blur-md">
+    <header className="w-full bg-[#1B1C33] border-b border-[#2C2E53] sticky top-0 z-50 text-white shadow-xl backdrop-blur-md isolate">
       {/* Top Main Command Bar */}
       <div className="max-w-[1700px] mx-auto px-2.5 sm:px-4 lg:px-6 h-16 sm:h-20 flex items-center justify-between gap-2 lg:gap-3">
         {/* Left: Sidebar Toggle & Brand Crest */}
