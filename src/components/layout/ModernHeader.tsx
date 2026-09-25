@@ -97,10 +97,10 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
       {/* Top Main Command Bar */}
       <div className="max-w-[1700px] mx-auto px-2.5 sm:px-4 lg:px-6 h-16 sm:h-20 flex items-center justify-between gap-2 lg:gap-3">
         {/* Left: Sidebar Toggle & Brand Crest */}
-        <div className="flex items-center gap-1 sm:gap-2.5 shrink-0">
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
           <button
             onClick={() => setSidebarOpen((prev) => !prev)}
-            className="min-h-[38px] min-w-[38px] sm:min-h-[44px] sm:min-w-[44px] p-2 sm:p-2.5 rounded-xl bg-[#2C2E53]/70 hover:bg-[#2C2E53] active:scale-95 text-slate-300 hover:text-white transition-all border border-[#414474]/50 focus:outline-none flex items-center justify-center shrink-0 cursor-pointer"
+            className="min-h-[36px] min-w-[36px] sm:min-h-[42px] sm:min-w-[42px] p-1.5 sm:p-2.5 rounded-xl bg-[#2C2E53]/70 hover:bg-[#2C2E53] active:scale-95 text-slate-300 hover:text-white transition-all border border-[#414474]/50 focus:outline-none flex items-center justify-center shrink-0 cursor-pointer"
             title="Alternar Menú Lateral"
             aria-label="Abrir menú de navegación"
           >
@@ -111,7 +111,7 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
           <button
             type="button"
             onClick={onGoHome}
-            className="min-h-[38px] sm:min-h-[44px] relative flex items-center justify-center shrink-0 group focus:outline-none transition-all duration-200 cursor-pointer p-1 sm:p-1.5 rounded-xl hover:bg-white/5 active:scale-95"
+            className="min-h-[36px] sm:min-h-[42px] relative flex items-center justify-center shrink-0 group focus:outline-none transition-all duration-200 cursor-pointer p-0.5 sm:p-1.5 rounded-xl hover:bg-white/5 active:scale-95"
             title="Ir a la página principal (Inicio)"
             aria-label="Ir al inicio"
           >
@@ -119,20 +119,20 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
               <img
                 src={`${import.meta.env.BASE_URL}logo-cba.png`}
                 alt="Colegio Bellas Artes"
-                width="34"
-                height="34"
+                width="32"
+                height="32"
                 decoding="async"
-                className="h-7 sm:h-9 w-auto object-contain brightness-0 invert drop-shadow-[0_2px_8px_rgba(212,175,55,0.3)]"
+                className="h-6 sm:h-9 w-auto object-contain brightness-0 invert drop-shadow-[0_2px_8px_rgba(212,175,55,0.3)]"
               />
-              <span className="absolute -bottom-0.5 -right-0.5 flex h-2 w-2">
+              <span className="absolute -bottom-0.5 -right-0.5 flex h-1.5 w-1.5 sm:h-2 sm:w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#D4AF37] opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#D4AF37]"></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 bg-[#D4AF37]"></span>
               </span>
             </div>
           </button>
 
           {/* Title SICE-CBA - Visible en pantallas medianas o si hay espacio */}
-          <div className="hidden xs:flex flex-col justify-center shrink-0 select-none cursor-default">
+          <div className="hidden sm:flex flex-col justify-center shrink-0 select-none cursor-default">
             <span className="font-extrabold text-xs sm:text-base tracking-wider text-white whitespace-nowrap">
               SICE-CBA
             </span>
@@ -271,16 +271,16 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
         </div>
 
         {/* Right: Controls */}
-        <div className="flex items-center gap-1 sm:gap-1.5 lg:gap-2 shrink-0">
+        <div className="flex items-center gap-0.5 xs:gap-1 sm:gap-1.5 lg:gap-2 shrink-0">
           {/* Mobile Search Button (<md) */}
           <button
             type="button"
             onClick={onOpenSearch}
-            className="md:hidden min-h-[40px] min-w-[40px] p-2 rounded-xl bg-[#141525] hover:bg-[#2C2E53] active:scale-95 text-[#D4AF37] border border-[#2C2E53] transition-all shadow-inner flex items-center justify-center shrink-0 cursor-pointer"
+            className="md:hidden min-h-[36px] min-w-[36px] p-1.5 rounded-xl bg-[#141525] hover:bg-[#2C2E53] active:scale-95 text-[#D4AF37] border border-[#2C2E53] transition-all shadow-inner flex items-center justify-center shrink-0 cursor-pointer"
             title="Buscar en todo el sistema (Ctrl+K)"
             aria-label="Buscar"
           >
-            <Search className="w-4 h-4" />
+            <Search className="w-3.5 h-3.5" />
           </button>
 
           {/* Keyboard Shortcuts Trigger Button */}
@@ -288,7 +288,7 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
             <button
               type="button"
               onClick={onOpenShortcuts}
-              className="hidden sm:flex min-h-[40px] min-w-[40px] p-2 sm:p-2.5 rounded-xl bg-[#141525] hover:bg-[#2C2E53] active:scale-95 text-[#D4AF37] border border-[#2C2E53] transition-all shadow-inner items-center justify-center shrink-0 cursor-pointer"
+              className="hidden sm:flex min-h-[36px] min-w-[36px] sm:min-h-[40px] sm:min-w-[40px] p-2 sm:p-2.5 rounded-xl bg-[#141525] hover:bg-[#2C2E53] active:scale-95 text-[#D4AF37] border border-[#2C2E53] transition-all shadow-inner items-center justify-center shrink-0 cursor-pointer"
               title="Atajos de Teclado del Sistema (Presiona ?)"
               aria-label="Atajos de Teclado"
             >
@@ -306,12 +306,12 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
           <div className="relative shrink-0">
             <button
               onClick={() => setLapsoMenuOpen(!lapsoMenuOpen)}
-              className="min-h-[40px] flex items-center gap-1 sm:gap-1.5 bg-[#2C2E53] hover:bg-[#353866] active:scale-95 text-white px-2 sm:px-2.5 py-1.5 rounded-xl border border-[#414474] text-xs font-bold transition-all whitespace-nowrap cursor-pointer"
+              className="min-h-[36px] sm:min-h-[40px] flex items-center gap-1 sm:gap-1.5 bg-[#2C2E53] hover:bg-[#353866] active:scale-95 text-white px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-xl border border-[#414474] text-xs font-bold transition-all whitespace-nowrap cursor-pointer"
               aria-label="Selector de Lapso"
             >
-              <Calendar className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
-              <span className="hidden sm:inline">Lapso </span><span className="sm:hidden text-[11px]">L</span><span className="text-[11px] sm:text-xs">{activeLapso}</span>
-              <ChevronDown className="w-3 h-3 text-slate-400 shrink-0" />
+              <Calendar className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#D4AF37] shrink-0" />
+              <span className="hidden sm:inline">Lapso </span><span className="sm:hidden text-[11px] font-extrabold text-amber-300">L</span><span className="text-[11px] sm:text-xs">{activeLapso}</span>
+              <ChevronDown className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400 shrink-0" />
             </button>
             {lapsoMenuOpen && (
               <>
@@ -349,7 +349,7 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
           <div className="relative shrink-0">
             <button
               onClick={() => setRoleMenuOpen(!roleMenuOpen)}
-              className="min-h-[40px] flex items-center gap-1 sm:gap-1.5 bg-[#2C2E53] hover:bg-[#353866] active:scale-95 text-white px-2 sm:px-2.5 py-1.5 rounded-xl border border-[#414474] text-xs font-bold transition-all whitespace-nowrap cursor-pointer"
+              className="min-h-[36px] sm:min-h-[40px] flex items-center gap-1 sm:gap-1.5 bg-[#2C2E53] hover:bg-[#353866] active:scale-95 text-white px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-xl border border-[#414474] text-xs font-bold transition-all whitespace-nowrap cursor-pointer"
               title={`Usuario: ${currentUser?.fullName || currentUser?.username || 'Usuario'} • Rol: ${currentRole}`}
               aria-label="Menú de Usuario y Rol"
             >
@@ -359,10 +359,10 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
                   <img
                     src={avatarSrc}
                     alt={currentUser?.fullName || 'Avatar'}
-                    className="w-5 h-5 rounded-full object-contain border border-[#D4AF37]/50 shrink-0 bg-white"
+                    className="w-4 h-4 sm:w-5 sm:h-5 rounded-full object-contain border border-[#D4AF37]/50 shrink-0 bg-white"
                   />
                 ) : (
-                  <div className="w-5 h-5 rounded-full bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-[10px] text-[#D4AF37] font-black shrink-0">
+                  <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-[10px] text-[#D4AF37] font-black shrink-0">
                     {(currentUser?.fullName?.[0] || currentRole[0] || 'U').toUpperCase()}
                   </div>
                 );
@@ -376,7 +376,7 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
                   </span>
                 );
               })()}
-              <ChevronDown className="w-3 h-3 text-slate-400 shrink-0" />
+              <ChevronDown className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400 shrink-0" />
             </button>
             {roleMenuOpen && (
               <>
@@ -492,11 +492,11 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
           {/* Direct Logout Action Button */}
           <button
             onClick={logout}
-            className="min-h-[40px] min-w-[40px] p-2 rounded-xl bg-rose-500/15 hover:bg-rose-600 active:scale-95 text-rose-300 hover:text-white transition border border-rose-500/30 focus:outline-none flex items-center justify-center shrink-0 cursor-pointer"
+            className="min-h-[36px] min-w-[36px] sm:min-h-[40px] sm:min-w-[40px] p-1.5 sm:p-2 rounded-xl bg-rose-500/15 hover:bg-rose-600 active:scale-95 text-rose-300 hover:text-white transition border border-rose-500/30 focus:outline-none flex items-center justify-center shrink-0 cursor-pointer"
             title="Cerrar Sesión (Ir a pantalla de Login)"
             aria-label="Cerrar Sesión"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
         </div>
       </div>
