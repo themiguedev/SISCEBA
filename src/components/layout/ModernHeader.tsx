@@ -97,11 +97,12 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
       {/* Top Main Command Bar */}
       <div className="max-w-[1700px] mx-auto px-2.5 sm:px-4 lg:px-6 h-16 sm:h-20 flex items-center justify-between gap-2 lg:gap-3">
         {/* Left: Sidebar Toggle & Brand Crest */}
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
           <button
             onClick={() => setSidebarOpen((prev) => !prev)}
-            className="p-2 rounded-xl bg-[#2C2E53]/70 hover:bg-[#2C2E53] text-slate-300 hover:text-white transition border border-[#414474]/50 focus:outline-none shrink-0"
+            className="min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#2C2E53]/70 hover:bg-[#2C2E53] active:scale-95 text-slate-300 hover:text-white transition-all border border-[#414474]/50 focus:outline-none flex items-center justify-center shrink-0 cursor-pointer"
             title="Alternar Menú Lateral"
+            aria-label="Abrir menú de navegación"
           >
             <Menu className="w-5 h-5" />
           </button>
@@ -110,13 +111,17 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
           <button
             type="button"
             onClick={onGoHome}
-            className="relative flex items-center justify-center shrink-0 group focus:outline-none transition-all duration-200 cursor-pointer p-1 rounded-xl hover:bg-white/5"
+            className="min-h-[44px] relative flex items-center justify-center shrink-0 group focus:outline-none transition-all duration-200 cursor-pointer p-1.5 rounded-xl hover:bg-white/5 active:scale-95"
             title="Ir a la página principal (Inicio)"
+            aria-label="Ir al inicio"
           >
             <div className="relative flex items-center justify-center shrink-0 group-hover:scale-105 transition-all duration-200">
               <img
                 src={`${import.meta.env.BASE_URL}logo-cba.png`}
                 alt="Colegio Bellas Artes"
+                width="36"
+                height="36"
+                decoding="async"
                 className="h-8 sm:h-9 w-auto object-contain brightness-0 invert drop-shadow-[0_2px_8px_rgba(212,175,55,0.3)]"
               />
               <span className="absolute -bottom-0.5 -right-0.5 flex h-2 w-2">
@@ -271,7 +276,7 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
           <button
             type="button"
             onClick={onOpenSearch}
-            className="md:hidden p-2 rounded-xl bg-[#141525] hover:bg-[#2C2E53] text-[#D4AF37] border border-[#2C2E53] transition shadow-inner shrink-0"
+            className="md:hidden min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#141525] hover:bg-[#2C2E53] active:scale-95 text-[#D4AF37] border border-[#2C2E53] transition-all shadow-inner flex items-center justify-center shrink-0 cursor-pointer"
             title="Buscar en todo el sistema (Ctrl+K)"
             aria-label="Buscar"
           >
@@ -283,8 +288,9 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
             <button
               type="button"
               onClick={onOpenShortcuts}
-              className="hidden sm:flex p-1.5 sm:p-2 rounded-xl bg-[#141525] hover:bg-[#2C2E53] text-[#D4AF37] border border-[#2C2E53] transition shadow-inner shrink-0"
+              className="hidden sm:flex min-h-[44px] min-w-[44px] p-2 sm:p-2.5 rounded-xl bg-[#141525] hover:bg-[#2C2E53] active:scale-95 text-[#D4AF37] border border-[#2C2E53] transition-all shadow-inner items-center justify-center shrink-0 cursor-pointer"
               title="Atajos de Teclado del Sistema (Presiona ?)"
+              aria-label="Atajos de Teclado"
             >
               <Keyboard className="w-4 h-4" />
             </button>
@@ -300,7 +306,8 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
           <div className="relative shrink-0">
             <button
               onClick={() => setLapsoMenuOpen(!lapsoMenuOpen)}
-              className="flex items-center gap-1 sm:gap-1.5 bg-[#2C2E53] hover:bg-[#353866] text-white px-2 sm:px-2.5 py-1.5 rounded-xl border border-[#414474] text-xs font-bold transition whitespace-nowrap"
+              className="min-h-[44px] flex items-center gap-1 sm:gap-1.5 bg-[#2C2E53] hover:bg-[#353866] active:scale-95 text-white px-2.5 sm:px-3 py-2 rounded-xl border border-[#414474] text-xs font-bold transition-all whitespace-nowrap cursor-pointer"
+              aria-label="Selector de Lapso"
             >
               <Calendar className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
               <span className="hidden sm:inline">Lapso </span><span className="sm:hidden text-[11px]">L</span><span className="text-[11px] sm:text-xs">{activeLapso}</span>
@@ -323,7 +330,7 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
                         setActiveLapso(l as 1 | 2 | 3);
                         setLapsoMenuOpen(false);
                       }}
-                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl sm:rounded-lg text-xs font-bold transition ${
+                      className={`w-full min-h-[44px] flex items-center justify-between px-3 py-2.5 rounded-xl sm:rounded-lg text-xs font-bold transition ${
                         activeLapso === l
                           ? 'bg-[#2C2E53] text-[#D4AF37] border border-[#D4AF37]/30'
                           : 'text-slate-300 hover:bg-[#2C2E53]/50'
@@ -342,8 +349,9 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
           <div className="relative shrink-0">
             <button
               onClick={() => setRoleMenuOpen(!roleMenuOpen)}
-              className="flex items-center gap-1.5 bg-[#2C2E53] hover:bg-[#353866] text-white px-2 sm:px-2.5 py-1.5 rounded-xl border border-[#414474] text-xs font-bold transition whitespace-nowrap"
+              className="min-h-[44px] flex items-center gap-1.5 bg-[#2C2E53] hover:bg-[#353866] active:scale-95 text-white px-2.5 sm:px-3 py-2 rounded-xl border border-[#414474] text-xs font-bold transition-all whitespace-nowrap cursor-pointer"
               title={`Usuario: ${currentUser?.fullName || currentUser?.username || 'Usuario'} • Rol: ${currentRole}`}
+              aria-label="Menú de Usuario y Rol"
             >
               {(() => {
                 const avatarSrc = currentUser?.avatarUrl || (currentUser ? getDefaultAvatarForUser(currentUser) : '');
@@ -513,7 +521,7 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
                       onSelectLevel(lvl);
                     }
                   }}
-                  className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap transition-all duration-150 active:scale-95 cursor-pointer ${
+                  className={`flex-1 min-h-[44px] flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-extrabold whitespace-nowrap transition-all duration-150 active:scale-95 cursor-pointer ${
                     isSelected
                       ? 'bg-[#2C2E53] text-[#F5C842] border border-[#D4AF37]/50 shadow-md ring-1 ring-[#D4AF37]/20'
                       : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'

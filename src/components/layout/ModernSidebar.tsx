@@ -348,8 +348,9 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
           </div>
           <button
             onClick={onCloseMobile}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#2C2E53] transition"
+            className="min-h-[44px] min-w-[44px] p-2 rounded-xl text-slate-400 hover:text-white hover:bg-[#2C2E53] active:scale-95 transition-all flex items-center justify-center cursor-pointer"
             title="Cerrar menú"
+            aria-label="Cerrar menú"
           >
             <X className="w-5 h-5" />
           </button>

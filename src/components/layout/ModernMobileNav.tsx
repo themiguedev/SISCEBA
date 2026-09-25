@@ -150,7 +150,7 @@ export const ModernMobileNav: React.FC<ModernMobileNavProps> = ({
       aria-label="Navegación móvil inferior"
       className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#16172B]/95 border-t border-[#2C2E53] backdrop-blur-lg px-2 py-1 safe-area-pb no-print shadow-[0_-4px_20px_rgba(0,0,0,0.4)]"
     >
-      <div className="flex items-center justify-around max-w-md mx-auto h-14">
+      <div className="flex items-center justify-around max-w-md mx-auto h-16">
         {navItems.map((item, idx) => {
           const Icon = item.icon;
           return (
@@ -158,19 +158,19 @@ export const ModernMobileNav: React.FC<ModernMobileNavProps> = ({
               key={idx}
               type="button"
               onClick={item.onClick}
-              className={`flex-1 flex flex-col items-center justify-center h-full py-1 px-1 rounded-xl transition-all duration-150 select-none ${
+              className={`flex-1 flex flex-col items-center justify-center min-h-[48px] py-1 px-1 rounded-xl transition-all duration-150 select-none cursor-pointer ${
                 item.isActive
-                  ? 'text-[#D4AF37] font-black scale-105'
+                  ? 'text-[#F5C842] font-black scale-105'
                   : 'text-slate-400 hover:text-slate-200 active:scale-95'
               }`}
             >
               <div className="relative">
                 <Icon className={`w-5 h-5 transition-transform ${item.isActive ? 'stroke-[2.5]' : 'stroke-2'}`} />
                 {item.isActive && (
-                  <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#D4AF37]"></span>
+                  <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#D4AF37]"></span>
                 )}
               </div>
-              <span className="text-[10px] tracking-tight mt-0.5 font-medium leading-none">
+              <span className="text-[11px] tracking-tight mt-1 font-semibold leading-none">
                 {item.label}
               </span>
             </button>
@@ -181,13 +181,14 @@ export const ModernMobileNav: React.FC<ModernMobileNavProps> = ({
         <button
           type="button"
           onClick={onOpenSidebar}
-          className="flex-1 flex flex-col items-center justify-center h-full py-1 px-1 text-slate-400 hover:text-white active:scale-95 transition-all select-none rounded-xl"
+          className="flex-1 flex flex-col items-center justify-center min-h-[48px] py-1 px-1 text-slate-400 hover:text-white active:scale-95 transition-all select-none rounded-xl cursor-pointer"
           title="Abrir menú completo de navegación"
+          aria-label="Abrir menú"
         >
-          <div className="p-1 rounded-lg bg-[#2C2E53]/60 border border-[#414474]/40">
+          <div className="p-1.5 rounded-lg bg-[#2C2E53]/60 border border-[#414474]/40">
             <Menu className="w-4 h-4 text-amber-300" />
           </div>
-          <span className="text-[10px] tracking-tight mt-0.5 font-medium text-amber-200/90 leading-none">
+          <span className="text-[11px] tracking-tight mt-1 font-semibold text-amber-200/90 leading-none">
             Menú
           </span>
         </button>

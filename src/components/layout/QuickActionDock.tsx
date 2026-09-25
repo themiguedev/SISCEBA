@@ -129,12 +129,13 @@ export const QuickActionDock: React.FC<QuickActionDockProps> = ({
       {/* Main Floating Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center gap-2 px-4 py-3 rounded-2xl font-black text-xs shadow-2xl transition-all duration-200 border ${
+        className={`min-h-[48px] flex items-center justify-center gap-2 px-4 py-3 rounded-2xl font-black text-xs shadow-2xl transition-all duration-200 border cursor-pointer active:scale-95 ${
           isOpen
             ? 'bg-rose-600 hover:bg-rose-700 text-white border-rose-500 scale-105'
             : 'bg-[#2C2E53] hover:bg-[#242646] text-[#D4AF37] border-[#D4AF37]/50 hover:border-[#D4AF37] shadow-[#2C2E53]/30'
         }`}
         title="Atajos de acción rápida institucional"
+        aria-label="Acciones rápidas"
       >
         {isOpen ? (
           <>

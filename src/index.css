@@ -134,6 +134,15 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Mobile-First Input Ergonomics: Minimum 16px to prevent intrusive iOS safari zoom-in */
+@media (max-width: 768px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
 /* Scrollbars inside dark cards/banners have transparent tracks */
 [class*="bg-[#2C2E53]"] ::-webkit-scrollbar-track,
 [class*="from-[#2C2E53]"] ::-webkit-scrollbar-track,

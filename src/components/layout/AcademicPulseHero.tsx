@@ -71,21 +71,21 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
               <>
                 <button
                   onClick={() => onQuickAction('GESTION', 'PASES')}
-                  className="flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#b89327] text-slate-950 text-xs font-black transition shadow-lg shadow-[#D4AF37]/20 active:scale-95 cursor-pointer"
+                  className="min-h-[48px] flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#b89327] text-slate-950 text-xs font-black transition shadow-lg shadow-[#D4AF37]/20 active:scale-95 cursor-pointer"
                 >
                   <Clock className="w-4 h-4 shrink-0" />
                   <span>Emitir Pase</span>
                 </button>
                 <button
                   onClick={() => onQuickAction('GESTION', 'INASISTENCIAS')}
-                  className="flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold transition border border-white/10 active:scale-95 cursor-pointer"
+                  className="min-h-[48px] flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold transition border border-white/10 active:scale-95 cursor-pointer"
                 >
                   <Users className="w-4 h-4 text-[#D4AF37] shrink-0" />
                   <span>Pase de Lista</span>
                 </button>
                 <button
                   onClick={() => onQuickAction('GESTION', 'CONDUCTAS')}
-                  className="col-span-2 sm:col-span-1 flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white text-xs font-black transition shadow-md active:scale-95 cursor-pointer"
+                  className="col-span-2 sm:col-span-1 min-h-[48px] flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white text-xs font-black transition shadow-md active:scale-95 cursor-pointer"
                 >
                   <ShieldCheck className="w-4 h-4 text-white shrink-0" />
                   <span>Registrar Conducta</span>
@@ -95,21 +95,21 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
               <>
                 <button
                   onClick={() => onQuickAction('GESTION', 'INSCRIPCIONES')}
-                  className="flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#b89327] text-slate-950 text-xs font-black transition shadow-lg shadow-[#D4AF37]/20 active:scale-95 cursor-pointer"
+                  className="min-h-[48px] flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#b89327] text-slate-950 text-xs font-black transition shadow-lg shadow-[#D4AF37]/20 active:scale-95 cursor-pointer"
                 >
                   <Users className="w-4 h-4 shrink-0" />
                   <span>Inscripción</span>
                 </button>
                 <button
                   onClick={() => onQuickAction('GESTION', 'DOCUMENTOS')}
-                  className="flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold transition border border-white/10 active:scale-95 cursor-pointer"
+                  className="min-h-[48px] flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold transition border border-white/10 active:scale-95 cursor-pointer"
                 >
                   <FileText className="w-4 h-4 text-[#D4AF37] shrink-0" />
                   <span>Trámites</span>
                 </button>
                 <button
                   onClick={() => onQuickAction('GESTION', 'MATRICULA')}
-                  className="col-span-2 sm:col-span-1 flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-black transition shadow-md active:scale-95 cursor-pointer"
+                  className="col-span-2 sm:col-span-1 min-h-[48px] flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-black transition shadow-md active:scale-95 cursor-pointer"
                 >
                   <ClipboardList className="w-4 h-4 text-[#D4AF37] shrink-0" />
                   <span>Padrón Estudiantil</span>
@@ -119,7 +119,7 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
               <>
                 <button
                   onClick={() => onQuickAction('PLANIFICACION', 'AREAS_PERFILES')}
-                  className="flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold transition border border-white/10 active:scale-95 cursor-pointer"
+                  className="min-h-[48px] flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold transition border border-white/10 active:scale-95 cursor-pointer"
                 >
                   <BookOpen className="w-4 h-4 text-[#D4AF37] shrink-0" />
                   <span>Pensum</span>
@@ -128,7 +128,7 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
                 {canEditGrades(currentRole) && (
                   <button
                     onClick={() => onQuickAction('EVALUACION', 'PROCESAL')}
-                    className="flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#b89327] text-slate-950 text-xs font-black transition shadow-lg shadow-[#D4AF37]/20 active:scale-95 cursor-pointer"
+                    className="min-h-[48px] flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#b89327] text-slate-950 text-xs font-black transition shadow-lg shadow-[#D4AF37]/20 active:scale-95 cursor-pointer"
                   >
                     <TrendingUp className="w-4 h-4 shrink-0" />
                     <span>Calificar</span>
@@ -137,7 +137,7 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
 
                 <button
                   onClick={() => onQuickAction('COMUNICACION', 'IA_ACTION_PLANS')}
-                  className={`${canEditGrades(currentRole) ? 'col-span-2 sm:col-span-1' : ''} flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-black transition shadow-md active:scale-95 cursor-pointer`}
+                  className={`${canEditGrades(currentRole) ? 'col-span-2 sm:col-span-1' : ''} min-h-[48px] flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-black transition shadow-md active:scale-95 cursor-pointer`}
                 >
                   <ClipboardList className="w-4 h-4 text-[#D4AF37] shrink-0" />
                   <span>Planes de Acción</span>
@@ -146,7 +146,7 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
             ) : (
               <button
                 onClick={() => onQuickAction('CONSULTAS', 'RENDIMIENTO')}
-                className="col-span-2 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#b89327] text-slate-950 text-xs font-black transition shadow-lg shadow-[#D4AF37]/20 active:scale-95 cursor-pointer"
+                className="col-span-2 min-h-[48px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#b89327] text-slate-950 text-xs font-black transition shadow-lg shadow-[#D4AF37]/20 active:scale-95 cursor-pointer"
               >
                 <ClipboardList className="w-4 h-4 shrink-0" />
                 <span>Consultar Rendimiento</span>
