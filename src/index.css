@@ -1124,3 +1124,105 @@ html.dark img[src*="logo-cba.png"]:not(.force-light *):not(.no-dark-invert) {
   }
 }
 
+/* ============================================================
+   SICE-CBA HIGH PERFORMANCE 60FPS UI MICRO-INTERACTIONS (CSS-ONLY)
+   ============================================================ */
+
+/* 1. Suavizado y aceleración de hardware para tarjetas, modales y botones */
+.animate-in {
+  animation-duration: 220ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+}
+
+@keyframes cbaFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes cbaScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes cbaPulseSubtle {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.88;
+    transform: scale(1.02);
+  }
+}
+
+/* Transición suave y consistente para botones y tarjetas interactivas */
+button,
+[role="button"],
+.interactive-card {
+  transition-property: transform, box-shadow, background-color, border-color, color, opacity;
+  transition-duration: 180ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hover suave en tarjetas de métricas y paneles */
+.card-hover-lift {
+  transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, box-shadow;
+}
+
+.card-hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(44, 46, 83, 0.12), 0 8px 10px -6px rgba(44, 46, 83, 0.08);
+}
+
+html.dark .card-hover-lift:hover {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(212, 175, 55, 0.1);
+}
+
+/* Indicador de carga elegante y ultra ligero (skeleton pulse CSS puro a 60fps) */
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.8s infinite linear;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Respeto estricto a las preferencias de accesibilidad del usuario (prefers-reduced-motion) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+
