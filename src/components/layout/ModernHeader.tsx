@@ -404,7 +404,7 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
                     >
                       <span className="flex items-center gap-2">
                         <Clock className="w-3.5 h-3.5 text-amber-400" />
-                        <span>Mi Horario de Clases / Labores</span>
+                        <span>Mi Horario de Clases</span>
                       </span>
                       <span className="text-[10px] text-amber-400 font-mono">Ver →</span>
                     </button>
