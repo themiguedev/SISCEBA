@@ -601,7 +601,7 @@ const SiscebaMainApp: React.FC = () => {
             sidebarOpen ? 'lg:pl-64' : 'lg:pl-20'
           }`}
         >
-          <main className="flex-1 max-w-[1700px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <main className="flex-1 max-w-[1700px] w-full mx-auto px-2.5 sm:px-6 lg:px-8 pt-4 pb-20 lg:py-6">
             {/* Show Academic Pulse Hero ONLY on the Executive Desktop */}
             {activeTab === 'ESCRITORIO' && (
               <AcademicPulseHero onQuickAction={handleQuickAction} />

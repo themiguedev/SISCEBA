@@ -472,4 +472,82 @@ DROP POLICY IF EXISTS "Permitir escritura general a user_schedules" ON user_sche
 CREATE POLICY "Permitir lectura general a user_schedules" ON user_schedules FOR SELECT USING (true);
 CREATE POLICY "Permitir escritura general a user_schedules" ON user_schedules FOR ALL USING (true);
 
+-- 20. TABLA DE DATOS INSTITUCIONALES DEL PLANTEL (institutional_school_data)
+CREATE TABLE IF NOT EXISTS institutional_school_data (
+    id VARCHAR(60) PRIMARY KEY DEFAULT 'cba_school_data_v1',
+    nombre VARCHAR(200) NOT NULL,
+    dea VARCHAR(50) NOT NULL,
+    rif VARCHAR(50) NOT NULL,
+    circuito VARCHAR(150),
+    distrito VARCHAR(150),
+    direccion TEXT,
+    telefono VARCHAR(100),
+    correo VARCHAR(120),
+    director VARCHAR(150),
+    subdirector VARCHAR(150),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE institutional_school_data ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Permitir lectura general a institutional_school_data" ON institutional_school_data;
+DROP POLICY IF EXISTS "Permitir escritura general a institutional_school_data" ON institutional_school_data;
+CREATE POLICY "Permitir lectura general a institutional_school_data" ON institutional_school_data FOR SELECT USING (true);
+CREATE POLICY "Permitir escritura general a institutional_school_data" ON institutional_school_data FOR ALL USING (true);
+
+-- 21. TABLA DE CATÁLOGOS DEL SISTEMA (system_catalogs)
+CREATE TABLE IF NOT EXISTS system_catalogs (
+    id VARCHAR(60) PRIMARY KEY DEFAULT 'cba_catalogs_v1',
+    parentescos TEXT[] DEFAULT '{}',
+    profesiones TEXT[] DEFAULT '{}',
+    vacunas TEXT[] DEFAULT '{}',
+    servicios_medicos TEXT[] DEFAULT '{}',
+    titulos_academicos TEXT[] DEFAULT '{}',
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE system_catalogs ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Permitir lectura general a system_catalogs" ON system_catalogs;
+DROP POLICY IF EXISTS "Permitir escritura general a system_catalogs" ON system_catalogs;
+CREATE POLICY "Permitir lectura general a system_catalogs" ON system_catalogs FOR SELECT USING (true);
+CREATE POLICY "Permitir escritura general a system_catalogs" ON system_catalogs FOR ALL USING (true);
+
+-- 22. TABLA DE AUDITORÍA Y BITÁCORA DEL SISTEMA (system_audit_logs)
+CREATE TABLE IF NOT EXISTS system_audit_logs (
+    id VARCHAR(60) PRIMARY KEY,
+    evento VARCHAR(150) NOT NULL,
+    usuario VARCHAR(80) NOT NULL,
+    rol VARCHAR(50) NOT NULL,
+    fecha VARCHAR(80) NOT NULL,
+    ip VARCHAR(50) DEFAULT 'Localhost',
+    detalles TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE system_audit_logs ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Permitir lectura general a system_audit_logs" ON system_audit_logs;
+DROP POLICY IF EXISTS "Permitir escritura general a system_audit_logs" ON system_audit_logs;
+CREATE POLICY "Permitir lectura general a system_audit_logs" ON system_audit_logs FOR SELECT USING (true);
+CREATE POLICY "Permitir escritura general a system_audit_logs" ON system_audit_logs FOR ALL USING (true);
+
+-- 23. TABLA DE CONFIGURACIÓN DE TIPOS DE HORARIOS (schedule_types)
+CREATE TABLE IF NOT EXISTS schedule_types (
+    id VARCHAR(60) PRIMARY KEY,
+    codigo VARCHAR(50) UNIQUE NOT NULL,
+    nombre VARCHAR(120) NOT NULL,
+    descripcion TEXT,
+    hora_inicio VARCHAR(10) NOT NULL,
+    hora_fin VARCHAR(10) NOT NULL,
+    duracion_bloque_minutos INT DEFAULT 45,
+    total_bloques INT DEFAULT 8,
+    niveles_aplicables TEXT[] DEFAULT '{}',
+    activo BOOLEAN DEFAULT TRUE,
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE schedule_types ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Permitir lectura general a schedule_types" ON schedule_types;
+DROP POLICY IF EXISTS "Permitir escritura general a schedule_types" ON schedule_types;
+CREATE POLICY "Permitir lectura general a schedule_types" ON schedule_types FOR SELECT USING (true);
+CREATE POLICY "Permitir escritura general a schedule_types" ON schedule_types FOR ALL USING (true);
+
 

@@ -32,7 +32,11 @@ import {
   RegistrationCode,
   SystemPrivilegesMatrix,
   UserSchedule,
-  ScheduleBlock
+  ScheduleBlock,
+  InstitutionalSchoolData,
+  SystemCatalogs,
+  AuditLogEntry,
+  ScheduleTypeConfig
 } from '../types';
 import {
   hashPassword,
@@ -68,7 +72,11 @@ import {
   INITIAL_COMMUNITY_NOTICES,
   INITIAL_BIRTHDAYS,
   INITIAL_USERS,
-  INITIAL_USER_SCHEDULES
+  INITIAL_USER_SCHEDULES,
+  INITIAL_SCHOOL_DATA,
+  INITIAL_SYSTEM_CATALOGS,
+  INITIAL_AUDIT_LOGS,
+  INITIAL_SCHEDULE_TYPES
 } from '../data/seedData';
 import { supabase, isSupabaseConfigured, checkSupabaseConnection } from '../lib/supabaseClient';
 import {
@@ -116,7 +124,15 @@ import {
   supabaseFetchPrivileges,
   supabaseSavePrivileges,
   supabaseFetchAllUserSchedules,
-  supabaseSaveUserSchedule
+  supabaseSaveUserSchedule,
+  supabaseFetchSchoolData,
+  supabaseSaveSchoolData,
+  supabaseFetchCatalogs,
+  supabaseSaveCatalogs,
+  supabaseFetchAuditLogs,
+  supabaseSaveAuditLog,
+  supabaseFetchScheduleTypes,
+  supabaseSaveScheduleType
 } from '../services/supabaseService';
 
 interface AppContextType {
@@ -246,6 +262,22 @@ interface AppContextType {
   currentUserSchedule: UserSchedule | null;
   saveUserSchedule: (schedule: UserSchedule) => Promise<boolean>;
   getUserSchedule: (userId: string) => UserSchedule | null;
+
+  // School Data (Database Connected)
+  schoolData: InstitutionalSchoolData;
+  saveSchoolData: (data: InstitutionalSchoolData) => Promise<boolean>;
+
+  // Catalogs (Database Connected)
+  systemCatalogs: SystemCatalogs;
+  saveSystemCatalogs: (catalogs: SystemCatalogs) => Promise<boolean>;
+
+  // Audit Logs (Database Connected)
+  auditLogs: AuditLogEntry[];
+  addAuditLog: (evento: string, detalles?: string) => Promise<boolean>;
+
+  // Schedule Types (Database Connected)
+  scheduleTypes: ScheduleTypeConfig[];
+  saveScheduleType: (item: ScheduleTypeConfig) => Promise<boolean>;
 
   // Helpers
   resetToSeedData: () => void;
@@ -761,6 +793,50 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return INITIAL_USER_SCHEDULES;
   });
 
+  // Datos Institucionales de la Escuela (Conexión Directa con la BD)
+  const [schoolData, setSchoolData] = useState<InstitutionalSchoolData>(() => {
+    const saved = localStorage.getItem('sisceba_school_data');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch { /* fallback */ }
+    }
+    return INITIAL_SCHOOL_DATA;
+  });
+
+  // Catálogos Oficiales del Sistema (Conexión Directa con la BD)
+  const [systemCatalogs, setSystemCatalogs] = useState<SystemCatalogs>(() => {
+    const saved = localStorage.getItem('sisceba_catalogs');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch { /* fallback */ }
+    }
+    return INITIAL_SYSTEM_CATALOGS;
+  });
+
+  // Bitácora de Auditoría (Conexión Directa con la BD)
+  const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>(() => {
+    const saved = localStorage.getItem('sisceba_audit_logs');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch { /* fallback */ }
+    }
+    return INITIAL_AUDIT_LOGS;
+  });
+
+  // Tipos de Horarios (Conexión Directa con la BD)
+  const [scheduleTypes, setScheduleTypes] = useState<ScheduleTypeConfig[]>(() => {
+    const saved = localStorage.getItem('sisceba_schedule_types');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch { /* fallback */ }
+    }
+    return INITIAL_SCHEDULE_TYPES;
+  });
+
   const refreshFromSupabase = async () => {
     if (!isSupabaseConfigured()) {
       setIsSupabaseActive(false);
@@ -801,7 +877,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         remoteCodes,
         remoteSchoolYear,
         remotePrivileges,
-        remoteSchedules
+        remoteSchedules,
+        remoteSchoolData,
+        remoteCatalogs,
+        remoteAuditLogs,
+        remoteScheduleTypes
       ] = await Promise.all([
         supabaseFetchStudents(),
         supabaseFetchSubjectAreas(),
@@ -823,7 +903,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         supabaseFetchRegistrationCodes(),
         supabaseFetchSchoolYearConfig(),
         supabaseFetchPrivileges(),
-        supabaseFetchAllUserSchedules()
+        supabaseFetchAllUserSchedules(),
+        supabaseFetchSchoolData(),
+        supabaseFetchCatalogs(),
+        supabaseFetchAuditLogs(),
+        supabaseFetchScheduleTypes()
       ]);
 
       if (remoteStudents !== null) setStudents(remoteStudents);
@@ -843,6 +927,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (remoteSchedules !== null && remoteSchedules.length > 0) {
         setUserSchedules(remoteSchedules);
         localStorage.setItem('sisceba_user_schedules', JSON.stringify(remoteSchedules));
+      }
+      if (remoteSchoolData !== null) {
+        setSchoolData(remoteSchoolData);
+        localStorage.setItem('sisceba_school_data', JSON.stringify(remoteSchoolData));
+      }
+      if (remoteCatalogs !== null) {
+        setSystemCatalogs(remoteCatalogs);
+        localStorage.setItem('sisceba_catalogs', JSON.stringify(remoteCatalogs));
+      }
+      if (remoteAuditLogs !== null && remoteAuditLogs.length > 0) {
+        setAuditLogs(remoteAuditLogs);
+        localStorage.setItem('sisceba_audit_logs', JSON.stringify(remoteAuditLogs));
+      }
+      if (remoteScheduleTypes !== null && remoteScheduleTypes.length > 0) {
+        setScheduleTypes(remoteScheduleTypes);
+        localStorage.setItem('sisceba_schedule_types', JSON.stringify(remoteScheduleTypes));
       }
       if (remotePasses !== null) setPasses(remotePasses);
       if (remoteAttendance !== null) setDailyAttendance(remoteAttendance);
@@ -1733,6 +1833,91 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setSystemPrivileges(PRIVILEGIOS_DATA as SystemPrivilegesMatrix);
     localStorage.removeItem('sisceba_system_notifications');
     setNotifications(INITIAL_SYSTEM_NOTIFICATIONS);
+    setSchoolData(INITIAL_SCHOOL_DATA);
+    setSystemCatalogs(INITIAL_SYSTEM_CATALOGS);
+    setAuditLogs(INITIAL_AUDIT_LOGS);
+    setScheduleTypes(INITIAL_SCHEDULE_TYPES);
+  };
+
+  const saveSchoolData = async (data: InstitutionalSchoolData): Promise<boolean> => {
+    const updated: InstitutionalSchoolData = {
+      ...data,
+      updatedAt: new Date().toISOString()
+    };
+    setSchoolData(updated);
+    localStorage.setItem('sisceba_school_data', JSON.stringify(updated));
+    if (isSupabaseConfigured()) {
+      const res = await syncWithCloud(
+        () => supabaseSaveSchoolData(updated),
+        'guardar datos institucionales del plantel'
+      );
+      return res === true;
+    }
+    return true;
+  };
+
+  const saveSystemCatalogs = async (catalogs: SystemCatalogs): Promise<boolean> => {
+    const updated: SystemCatalogs = {
+      ...catalogs,
+      updatedAt: new Date().toISOString()
+    };
+    setSystemCatalogs(updated);
+    localStorage.setItem('sisceba_catalogs', JSON.stringify(updated));
+    if (isSupabaseConfigured()) {
+      const res = await syncWithCloud(
+        () => supabaseSaveCatalogs(updated),
+        'guardar catálogos oficiales del sistema'
+      );
+      return res === true;
+    }
+    return true;
+  };
+
+  const addAuditLog = async (evento: string, detalles?: string): Promise<boolean> => {
+    const newLog: AuditLogEntry = {
+      id: `log-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      evento,
+      usuario: currentUser ? currentUser.username : 'sistema',
+      rol: currentUser ? currentUser.role : 'SISTEMA',
+      fecha: 'Hoy, ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      ip: 'Localhost',
+      detalles: detalles || '',
+      createdAt: new Date().toISOString()
+    };
+    setAuditLogs(prev => [newLog, ...prev.slice(0, 49)]);
+    localStorage.setItem('sisceba_audit_logs', JSON.stringify([newLog, ...auditLogs.slice(0, 49)]));
+    if (isSupabaseConfigured()) {
+      const res = await syncWithCloud(
+        () => supabaseSaveAuditLog(newLog),
+        `registrar evento de auditoría (${evento})`
+      );
+      return res === true;
+    }
+    return true;
+  };
+
+  const saveScheduleType = async (item: ScheduleTypeConfig): Promise<boolean> => {
+    setScheduleTypes(prev => {
+      const idx = prev.findIndex(t => t.id === item.id || t.codigo === item.codigo);
+      let next: ScheduleTypeConfig[];
+      if (idx >= 0) {
+        next = [...prev];
+        next[idx] = item;
+      } else {
+        next = [...prev, item];
+      }
+      localStorage.setItem('sisceba_schedule_types', JSON.stringify(next));
+      return next;
+    });
+
+    if (isSupabaseConfigured()) {
+      const res = await syncWithCloud(
+        () => supabaseSaveScheduleType(item),
+        `guardar tipo de horario ${item.nombre}`
+      );
+      return res === true;
+    }
+    return true;
   };
 
   return (
@@ -1822,6 +2007,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         currentUserSchedule,
         saveUserSchedule,
         getUserSchedule,
+        schoolData,
+        saveSchoolData,
+        systemCatalogs,
+        saveSystemCatalogs,
+        auditLogs,
+        addAuditLog,
+        scheduleTypes,
+        saveScheduleType,
         resetToSeedData,
         isSupabaseActive,
         supabaseStatusText,

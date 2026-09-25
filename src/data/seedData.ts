@@ -21,7 +21,11 @@ import {
   CommunityNotice,
   BirthdayPerson,
   AppUser,
-  UserSchedule
+  UserSchedule,
+  InstitutionalSchoolData,
+  SystemCatalogs,
+  AuditLogEntry,
+  ScheduleTypeConfig
 } from '../types';
 import {
   SVG_MALE_CYAN,
@@ -1119,6 +1123,109 @@ export const INITIAL_USER_SCHEDULES: UserSchedule[] = [
       { id: 'sch-sec-4', day: 'JUEVES', periodIndex: 2, startTime: '07:45', endTime: '08:30', subjectName: 'Gestión de Inscripciones y Prosecución', level: 'MEDIA_GENERAL', gradeSection: 'Secretaría UCE', classroom: 'Ventanilla 1', color: 'sky' },
       { id: 'sch-sec-5', day: 'VIERNES', periodIndex: 4, startTime: '09:30', endTime: '10:15', subjectName: 'Auditoría de Documentos Pendientes', level: 'MEDIA_GENERAL', gradeSection: 'Secretaría UCE', classroom: 'Archivo Central', color: 'violet' }
     ]
+  }
+];
+
+export const INITIAL_SCHOOL_DATA: InstitutionalSchoolData = {
+  id: 'cba_school_data_v1',
+  nombre: 'U.E. Colegio Belén San Juan (SISCEBA)',
+  dea: 'OD-05241503',
+  rif: 'J-31456789-0',
+  circuito: 'Circuito Escolar 05 - Parroquia El Carmen',
+  distrito: 'Distrito Escolar Nº 02',
+  direccion: 'Av. Las Delicias, Sector Sabana Grande, Barinas, Edo. Barinas',
+  telefono: '+58 (0273) 552-1489 / +58 (0414) 555-0199',
+  correo: 'administracion@colegiobelensanjuan.edu.ve',
+  director: 'Prof. Carlos R. Méndez P.',
+  subdirector: 'Lic. Mayuli G. Silva M.'
+};
+
+export const INITIAL_SYSTEM_CATALOGS: SystemCatalogs = {
+  id: 'cba_catalogs_v1',
+  parentescos: [
+    'MADRE',
+    'PADRE',
+    'TUTOR LEGAL',
+    'ABUELO / ABUELA',
+    'TÍO / TÍA',
+    'HERMANO / HERMANA MAYOR',
+    'PADRASTRO / MADRASTRA',
+    'OTRO FAMILIAR'
+  ],
+  profesiones: [
+    'DOCENTE / PROFESOR(A)',
+    'INGENIERO(A)',
+    'MÉDICO(A) / CIRUJANO(A)',
+    'ENFERMERO(A)',
+    'LICENCIADO(A) EN ADMINISTRACIÓN',
+    'CONTADOR(A) PÚBLICO(A)',
+    'ABOGADO(A)',
+    'COMERCIANTE / EMPRESARIO(A)',
+    'TÉCNICO(A) EN COMPUTACIÓN / SISTEMAS',
+    'ELECTRICISTA',
+    'MECÁNICO(A)',
+    'CHEF / GASTRONOMÍA',
+    'MILITAR / POLICÍA',
+    'OFICIOS DEL HOGAR',
+    'OTRA PROFESIÓN U OFICIO'
+  ],
+  vacunas: [
+    'BCG (Tuberculosis)',
+    'Hepatitis B Pediátrica',
+    'Polio (IPV / OPV)',
+    'Pentavalente (DTP + Hib + Hep B)',
+    'Antirrotavirus',
+    'Trivalente Viral (SRP: Sarampión, Rubéola, Parotiditis)',
+    'Fiebre Amarilla'
+  ],
+  serviciosMedicos: [
+    'SEGURO ESCOLAR INSTITUCIONAL',
+    'IVSS (Instituto Venezolano de los Seguros Sociales)',
+    'IPASME (Personal Docente y Administrativo)',
+    'CENTRO DE SALUD / CDI LOCAL',
+    'SEGURO PRIVADO FAMILIAR'
+  ],
+  titulosAcademicos: [
+    'Bachiller en Ciencias',
+    'Licenciado(a) en Educación',
+    'Profesor(a) de Educación Media',
+    'Técnico Superior Universitario (TSU)',
+    'Magíster Scientiarum / Postgrado',
+    'Doctor(a) en Educación / Ciencias'
+  ]
+};
+
+export const INITIAL_AUDIT_LOGS: AuditLogEntry[] = [
+  { id: 'log-1', evento: 'Inicio de Sesión Exitoso', usuario: 'admin', rol: 'ADMINISTRADOR', fecha: 'Hoy, Hace un momento', ip: '192.168.1.102' },
+  { id: 'log-2', evento: 'Sincronización Cloud Supabase', usuario: 'sistema', rol: 'SISTEMA', fecha: 'Hoy, 10:45 AM', ip: 'Localhost' },
+  { id: 'log-3', evento: 'Actualización Perfil Docente', usuario: 'contma', rol: 'DOCENTE', fecha: 'Hoy, 09:30 AM', ip: '192.168.1.115' },
+  { id: 'log-4', evento: 'Apertura de Ventana Evaluativa Lapso 1', usuario: 'admin', rol: 'ADMINISTRADOR', fecha: 'Ayer, 04:15 PM', ip: '192.168.1.102' }
+];
+
+export const INITIAL_SCHEDULE_TYPES: ScheduleTypeConfig[] = [
+  {
+    id: 'hor-diurno-reg',
+    codigo: 'HOR-DIURNO',
+    nombre: 'Horario Diurno Regular (Media General)',
+    descripcion: 'Jornada escolar de 8 bloques académicos de 45 minutos con receso de 30 minutos.',
+    horaInicio: '07:00',
+    horaFin: '13:30',
+    duracionBloqueMinutos: 45,
+    totalBloques: 8,
+    nivelesAplicables: ['MEDIA_GENERAL'],
+    activo: true
+  },
+  {
+    id: 'hor-manana-pri',
+    codigo: 'HOR-PRIM-INI',
+    nombre: 'Horario Integral (Inicial y Primaria)',
+    descripcion: 'Jornada continua matutina con actividades pedagógicas guiadas y recreo estructurado.',
+    horaInicio: '07:00',
+    horaFin: '12:15',
+    duracionBloqueMinutos: 45,
+    totalBloques: 6,
+    nivelesAplicables: ['INICIAL', 'PRIMARIA'],
+    activo: true
   }
 ];
 

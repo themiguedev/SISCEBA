@@ -176,33 +176,33 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
         </div>
 
         {/* Card 2: Áreas de Formación */}
-        <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm hover:shadow-md transition group">
+        <div className="bg-white dark:bg-slate-900/60 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition group">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Áreas / Pensum</span>
-            <div className="w-8 h-8 rounded-xl bg-amber-50 text-[#D4AF37] flex items-center justify-center group-hover:scale-110 transition">
+            <div className="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-[#D4AF37] flex items-center justify-center group-hover:scale-110 transition">
               <BookOpen className="w-4 h-4" />
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-black text-slate-900">{levelAreas.length}</span>
-            <span className="text-[11px] text-[#2C2E53] font-bold">Asignaturas</span>
+            <span className="text-2xl font-black text-slate-900 dark:text-white">{levelAreas.length}</span>
+            <span className="text-[11px] text-[#2C2E53] dark:text-[#F5C842] font-bold">Asignaturas</span>
           </div>
           <p className="text-[11px] text-slate-400 mt-1 truncate">Incluye Robótica y Bellas Artes</p>
         </div>
 
         {/* Card 3: Evaluaciones Registradas */}
-        <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm hover:shadow-md transition group">
+        <div className="bg-white dark:bg-slate-900/60 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition group">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Evaluación</span>
-            <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition">
+            <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-110 transition">
               <Award className="w-4 h-4" />
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-black text-slate-900">
+            <span className="text-2xl font-black text-slate-900 dark:text-white">
               {currentLevel === 'MEDIA_GENERAL' ? '18.4' : currentLevel === 'INICIAL' ? 'A' : '96%'}
             </span>
-            <span className="text-[11px] text-emerald-600 font-bold">
+            <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold">
               {currentLevel === 'MEDIA_GENERAL' ? '/ 20 Promedio' : currentLevel === 'INICIAL' ? 'Escala Literal (A-E)' : 'Logrado (L)'}
             </span>
           </div>

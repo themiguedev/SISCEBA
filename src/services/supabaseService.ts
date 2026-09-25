@@ -24,7 +24,11 @@ import {
   RegistrationCode,
   SchoolYearConfig,
   SystemPrivilegesMatrix,
-  UserSchedule
+  UserSchedule,
+  InstitutionalSchoolData,
+  SystemCatalogs,
+  AuditLogEntry,
+  ScheduleTypeConfig
 } from '../types';
 import {
   encodeUserAvatarWithMetadata,
@@ -1257,6 +1261,256 @@ export const supabaseSaveUserSchedule = async (schedule: UserSchedule): Promise<
     return true;
   } catch (e) {
     console.error('Error en supabaseSaveUserSchedule:', e);
+    return false;
+  }
+};
+
+// ==========================================
+// 20. DATOS INSTITUCIONALES DEL PLANTEL (institutional_school_data)
+// ==========================================
+export const supabaseFetchSchoolData = async (): Promise<InstitutionalSchoolData | null> => {
+  if (!isSupabaseConfigured()) return null;
+  try {
+    const { data, error } = await supabase
+      .from('institutional_school_data')
+      .select('*')
+      .eq('id', 'cba_school_data_v1')
+      .maybeSingle();
+
+    if (error || !data) {
+      if (error && error.code !== 'PGRST116') {
+        console.warn('Supabase fetch institutional_school_data aviso:', error.message);
+      }
+      return null;
+    }
+
+    return {
+      id: data.id,
+      nombre: data.nombre,
+      dea: data.dea,
+      rif: data.rif,
+      circuito: data.circuito || '',
+      distrito: data.distrito || '',
+      direccion: data.direccion || '',
+      telefono: data.telefono || '',
+      correo: data.correo || '',
+      director: data.director || '',
+      subdirector: data.subdirector || '',
+      updatedAt: data.updated_at
+    };
+  } catch (e) {
+    console.error('Error en supabaseFetchSchoolData:', e);
+    return null;
+  }
+};
+
+export const supabaseSaveSchoolData = async (schoolData: InstitutionalSchoolData): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('institutional_school_data').upsert({
+      id: 'cba_school_data_v1',
+      nombre: schoolData.nombre,
+      dea: schoolData.dea,
+      rif: schoolData.rif,
+      circuito: schoolData.circuito,
+      distrito: schoolData.distrito,
+      direccion: schoolData.direccion,
+      telefono: schoolData.telefono,
+      correo: schoolData.correo,
+      director: schoolData.director,
+      subdirector: schoolData.subdirector,
+      updated_at: new Date().toISOString()
+    });
+
+    if (error) {
+      console.warn('Error al guardar institutional_school_data en Supabase:', error.message);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error('Error en supabaseSaveSchoolData:', e);
+    return false;
+  }
+};
+
+// ==========================================
+// 21. CATÁLOGOS DEL SISTEMA (system_catalogs)
+// ==========================================
+export const supabaseFetchCatalogs = async (): Promise<SystemCatalogs | null> => {
+  if (!isSupabaseConfigured()) return null;
+  try {
+    const { data, error } = await supabase
+      .from('system_catalogs')
+      .select('*')
+      .eq('id', 'cba_catalogs_v1')
+      .maybeSingle();
+
+    if (error || !data) {
+      if (error && error.code !== 'PGRST116') {
+        console.warn('Supabase fetch system_catalogs aviso:', error.message);
+      }
+      return null;
+    }
+
+    return {
+      id: data.id,
+      parentescos: Array.isArray(data.parentescos) ? data.parentescos : [],
+      profesiones: Array.isArray(data.profesiones) ? data.profesiones : [],
+      vacunas: Array.isArray(data.vacunas) ? data.vacunas : [],
+      serviciosMedicos: Array.isArray(data.servicios_medicos) ? data.servicios_medicos : [],
+      titulosAcademicos: Array.isArray(data.titulos_academicos) ? data.titulos_academicos : [],
+      updatedAt: data.updated_at
+    };
+  } catch (e) {
+    console.error('Error en supabaseFetchCatalogs:', e);
+    return null;
+  }
+};
+
+export const supabaseSaveCatalogs = async (catalogs: SystemCatalogs): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('system_catalogs').upsert({
+      id: 'cba_catalogs_v1',
+      parentescos: catalogs.parentescos || [],
+      profesiones: catalogs.profesiones || [],
+      vacunas: catalogs.vacunas || [],
+      servicios_medicos: catalogs.serviciosMedicos || [],
+      titulos_academicos: catalogs.titulosAcademicos || [],
+      updated_at: new Date().toISOString()
+    });
+
+    if (error) {
+      console.warn('Error al guardar system_catalogs en Supabase:', error.message);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error('Error en supabaseSaveCatalogs:', e);
+    return false;
+  }
+};
+
+// ==========================================
+// 22. AUDITORÍA Y BITÁCORA DEL SISTEMA (system_audit_logs)
+// ==========================================
+export const supabaseFetchAuditLogs = async (): Promise<AuditLogEntry[] | null> => {
+  if (!isSupabaseConfigured()) return null;
+  try {
+    const { data, error } = await supabase
+      .from('system_audit_logs')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    if (error || !data) {
+      if (error && error.code !== 'PGRST116') {
+        console.warn('Supabase fetch system_audit_logs aviso:', error.message);
+      }
+      return null;
+    }
+
+    return data.map(row => ({
+      id: row.id,
+      evento: row.evento,
+      usuario: row.usuario,
+      rol: row.rol,
+      fecha: row.fecha,
+      ip: row.ip || 'Localhost',
+      detalles: row.detalles || '',
+      createdAt: row.created_at
+    }));
+  } catch (e) {
+    console.error('Error en supabaseFetchAuditLogs:', e);
+    return null;
+  }
+};
+
+export const supabaseSaveAuditLog = async (log: AuditLogEntry): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('system_audit_logs').upsert({
+      id: log.id,
+      evento: log.evento,
+      usuario: log.usuario,
+      rol: log.rol,
+      fecha: log.fecha,
+      ip: log.ip || 'Localhost',
+      detalles: log.detalles || null,
+      created_at: log.createdAt || new Date().toISOString()
+    });
+
+    if (error) {
+      console.warn('Error al guardar system_audit_logs en Supabase:', error.message);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error('Error en supabaseSaveAuditLog:', e);
+    return false;
+  }
+};
+
+// ==========================================
+// 23. CONFIGURACIÓN DE TIPOS DE HORARIOS (schedule_types)
+// ==========================================
+export const supabaseFetchScheduleTypes = async (): Promise<ScheduleTypeConfig[] | null> => {
+  if (!isSupabaseConfigured()) return null;
+  try {
+    const { data, error } = await supabase
+      .from('schedule_types')
+      .select('*')
+      .order('codigo', { ascending: true });
+
+    if (error || !data) {
+      if (error && error.code !== 'PGRST116') {
+        console.warn('Supabase fetch schedule_types aviso:', error.message);
+      }
+      return null;
+    }
+
+    return data.map(row => ({
+      id: row.id,
+      codigo: row.codigo,
+      nombre: row.nombre,
+      descripcion: row.descripcion || '',
+      horaInicio: row.hora_inicio,
+      horaFin: row.hora_fin,
+      duracionBloqueMinutos: row.duracion_bloque_minutos || 45,
+      totalBloques: row.total_bloques || 8,
+      nivelesAplicables: Array.isArray(row.niveles_aplicables) ? row.niveles_aplicables : [],
+      activo: row.activo ?? true
+    }));
+  } catch (e) {
+    console.error('Error en supabaseFetchScheduleTypes:', e);
+    return null;
+  }
+};
+
+export const supabaseSaveScheduleType = async (item: ScheduleTypeConfig): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('schedule_types').upsert({
+      id: item.id,
+      codigo: item.codigo,
+      nombre: item.nombre,
+      descripcion: item.descripcion || null,
+      hora_inicio: item.horaInicio,
+      hora_fin: item.horaFin,
+      duracion_bloque_minutos: item.duracionBloqueMinutos,
+      total_bloques: item.totalBloques,
+      niveles_aplicables: item.nivelesAplicables || [],
+      activo: item.activo,
+      updated_at: new Date().toISOString()
+    });
+
+    if (error) {
+      console.warn('Error al guardar schedule_types en Supabase:', error.message);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error('Error en supabaseSaveScheduleType:', e);
     return false;
   }
 };

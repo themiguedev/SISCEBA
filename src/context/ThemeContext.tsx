@@ -30,16 +30,16 @@ export const THEMES_CATALOG: ThemeDefinition[] = [
     id: 'cba-classic',
     name: 'CBA Institucional',
     category: 'Oficial',
-    description: 'Paleta oficial del Colegio Bellas Artes con Azul Marino Imperial y Oro Ateniense.',
+    description: 'Paleta oficial del Colegio Bellas Artes con Azul Marino Imperial y Oro Ateniense calibrado.',
     primaryColor: '#2C2E53',
     secondaryColor: '#1B1C33',
     accentColor: '#D4AF37',
     bgLight: '#F8FAFC',
-    bgDark: '#0B0E14',
+    bgDark: '#0D0F18',
     badge: 'Institucional',
     emoji: '🏛️',
-    accentTextLight: '#8F6B00',
-    accentTextDark: '#F3CC49'
+    accentTextLight: '#9A6F00',
+    accentTextDark: '#F5C842'
   },
   {
     id: 'emerald',

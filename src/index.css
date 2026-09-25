@@ -59,6 +59,51 @@ html.dark ::-webkit-scrollbar-thumb:hover {
   scrollbar-width: none !important;
 }
 
+/* Comfortable wide & styled scrollbar for table navigation */
+.custom-comfortable-scrollbar::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.custom-comfortable-scrollbar::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 8px;
+}
+
+.custom-comfortable-scrollbar::-webkit-scrollbar-thumb {
+  background: #a78bfa;
+  border-radius: 8px;
+  border: 2px solid #f1f5f9;
+}
+
+.custom-comfortable-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #7c3aed;
+}
+
+.dark .custom-comfortable-scrollbar::-webkit-scrollbar-track {
+  background: #0f172a;
+  border-radius: 8px;
+}
+
+.dark .custom-comfortable-scrollbar::-webkit-scrollbar-thumb {
+  background: #6366f1;
+  border-radius: 8px;
+  border: 2px solid #0f172a;
+}
+
+.dark .custom-comfortable-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #818cf8;
+}
+
+.custom-comfortable-scrollbar {
+  scrollbar-width: auto;
+  scrollbar-color: #a78bfa #f1f5f9;
+}
+
+.dark .custom-comfortable-scrollbar {
+  scrollbar-color: #6366f1 #0f172a;
+}
+
 /* ============================================================
    RESPONSIVE UTILITIES — SICE-CBA
    ============================================================ */
@@ -77,9 +122,16 @@ html.dark ::-webkit-scrollbar-thumb:hover {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Prevent horizontal overflow on the entire page */
+/* Mobile bottom safe area padding (for iPhone notch/pill home indicators) */
+.safe-area-pb {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+}
+
+/* Prevent horizontal overflow and enable smooth tap feedback */
+html,
 body {
   overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Scrollbars inside dark cards/banners have transparent tracks */
@@ -111,15 +163,15 @@ body {
   --theme-primary-hover: #353866;
   --theme-primary-dark: #242646;
   --theme-secondary: #1B1C33;
-  --theme-surface-dark: #141525;
-  --theme-border-dark: #414474;
+  --theme-surface-dark: #141628;
+  --theme-border-dark: #3F436E;
   --theme-accent: #D4AF37;
-  --theme-accent-hover: #b89327;
-  --theme-accent-text-light: #8F6B00;
-  --theme-accent-text-dark: #F3CC49;
+  --theme-accent-hover: #C29E2E;
+  --theme-accent-text-light: #9A6F00;
+  --theme-accent-text-dark: #F5C842;
   --theme-bg-light: #F8FAFC;
-  --theme-bg-dark: #0B0E14;
-  --theme-card-dark: #151A23;
+  --theme-bg-dark: #0D0F18;
+  --theme-card-dark: #151828;
 }
 
 [data-theme="emerald"] {

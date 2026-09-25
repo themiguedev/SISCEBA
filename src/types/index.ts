@@ -479,3 +479,52 @@ export interface UserSchedule {
   updatedAt?: string;
 }
 
+export interface InstitutionalSchoolData {
+  id?: string;
+  nombre: string;
+  dea: string;
+  rif: string;
+  circuito: string;
+  distrito: string;
+  direccion: string;
+  telefono: string;
+  correo: string;
+  director: string;
+  subdirector: string;
+  updatedAt?: string;
+}
+
+export interface SystemCatalogs {
+  id?: string;
+  parentescos: string[];
+  profesiones: string[];
+  vacunas: string[];
+  serviciosMedicos: string[];
+  titulosAcademicos: string[];
+  updatedAt?: string;
+}
+
+export interface AuditLogEntry {
+  id: string;
+  evento: string;
+  usuario: string;
+  rol: string;
+  fecha: string;
+  ip: string;
+  detalles?: string;
+  createdAt?: string;
+}
+
+export interface ScheduleTypeConfig {
+  id: string;
+  codigo: string;
+  nombre: string;
+  descripcion: string;
+  horaInicio: string;
+  horaFin: string;
+  duracionBloqueMinutos: number;
+  totalBloques: number;
+  nivelesAplicables: EducationalLevel[];
+  activo: boolean;
+}
+

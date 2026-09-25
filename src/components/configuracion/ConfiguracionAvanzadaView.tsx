@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   SlidersHorizontal,
   FolderKanban,
@@ -33,11 +33,11 @@ import {
   CheckCircle2,
   Lock,
   CheckSquare,
-  Square,
   Filter,
   RotateCcw
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { InstitutionalSchoolData } from '../../types';
 import PRIVILEGIOS_DATA from '../../data/privilegiosCEO.json';
 
 // 17 CEO Catalog Options
@@ -68,23 +68,32 @@ interface SectionMenuItem {
   badge?: string;
 }
 
-const MENU_ITEMS: SectionMenuItem[] = [
+const getMenuItems = (
+  privCount: string,
+  titulosCount: number,
+  parentescosCount: number,
+  profesionesCount: number,
+  vacunasCount: number,
+  serviciosCount: number,
+  horariosCount: number,
+  auditCount: number
+): SectionMenuItem[] => [
   { id: 'MODULOS', label: 'MÓDULOS', icon: FolderKanban, count: 9 },
   { id: 'CATEGORIAS_MENU', label: 'CATEGORÍAS DEL MENÚ', icon: MenuSquare, count: 3 },
   { id: 'EXCEPCIONES', label: 'EXCEPCIONES', icon: AlertOctagon, count: 0 },
-  { id: 'AUDITORIA', label: 'AUDITORÍA', icon: FileSearch, count: 'Live' },
+  { id: 'AUDITORIA', label: 'AUDITORÍA', icon: FileSearch, count: `${auditCount} eventos`, badge: 'BD' },
   { id: 'ROLES_USUARIO', label: 'ROLES DE USUARIO', icon: Users2, count: 8 },
-  { id: 'PRIVILEGIOS', label: 'PRIVILEGIOS', icon: ShieldAlert, count: '142 x 13 Roles', badge: 'Matriz CEO' },
+  { id: 'PRIVILEGIOS', label: 'PRIVILEGIOS', icon: ShieldAlert, count: privCount, badge: 'BD' },
   { id: 'REPORTES', label: 'REPORTES', icon: FileBarChart2, count: 14 },
   { id: 'ASIGNAR_REPORTES', label: 'ASIGNAR REPORTES', icon: Share2, count: 12 },
   { id: 'LITERALES', label: 'LITERALES', icon: GraduationCap, count: '3 Escalas' },
-  { id: 'TIPOS_HORARIOS', label: 'TIPOS DE HORARIOS', icon: Clock, count: 2 },
-  { id: 'TITULOS_ACADEMICOS', label: 'TÍTULOS ACADÉMICOS', icon: Award, count: 6 },
-  { id: 'PARENTESCOS', label: 'PARENTESCOS', icon: Users, count: 8 },
-  { id: 'PROFESIONES', label: 'PROFESIONES', icon: Briefcase, count: 15 },
-  { id: 'VACUNAS', label: 'VACUNAS', icon: Syringe, count: 7 },
-  { id: 'SERVICIOS_MEDICOS', label: 'SERVICIOS MÉDICOS', icon: Stethoscope, count: 5 },
-  { id: 'DATOS_ESCUELA', label: 'DATOS DE LA ESCUELA', icon: School, badge: 'CBA' },
+  { id: 'TIPOS_HORARIOS', label: 'TIPOS DE HORARIOS', icon: Clock, count: `${horariosCount} Tipos`, badge: 'BD' },
+  { id: 'TITULOS_ACADEMICOS', label: 'TÍTULOS ACADÉMICOS', icon: Award, count: `${titulosCount}`, badge: 'BD' },
+  { id: 'PARENTESCOS', label: 'PARENTESCOS', icon: Users, count: `${parentescosCount}`, badge: 'BD' },
+  { id: 'PROFESIONES', label: 'PROFESIONES', icon: Briefcase, count: `${profesionesCount}`, badge: 'BD' },
+  { id: 'VACUNAS', label: 'VACUNAS', icon: Syringe, count: `${vacunasCount}`, badge: 'BD' },
+  { id: 'SERVICIOS_MEDICOS', label: 'SERVICIOS MÉDICOS', icon: Stethoscope, count: `${serviciosCount}`, badge: 'BD' },
+  { id: 'DATOS_ESCUELA', label: 'DATOS DE LA ESCUELA', icon: School, badge: 'BD' },
   { id: 'EXPORTAR_CALIFICACIONES', label: 'EXPORTAR CALIFICACIONES', icon: FileSpreadsheet, badge: 'Oficial' }
 ];
 
@@ -97,6 +106,14 @@ export const ConfiguracionAvanzadaView: React.FC = () => {
     systemPrivileges,
     toggleSystemPrivilege,
     resetSystemPrivileges,
+    schoolData,
+    saveSchoolData,
+    systemCatalogs,
+    saveSystemCatalogs,
+    auditLogs,
+    addAuditLog,
+    scheduleTypes,
+    saveScheduleType,
     isSavingCloud,
     isSupabaseActive
   } = useApp();
@@ -108,88 +125,134 @@ export const ConfiguracionAvanzadaView: React.FC = () => {
   const [selectedRolePrivilegios, setSelectedRolePrivilegios] = useState<string>('Administrador del Sistema');
   const [privSearchTerm, setPrivSearchTerm] = useState<string>('');
   const [privCategoryFilter, setPrivCategoryFilter] = useState<string>('TODAS');
+  const [privStatusFilter, setPrivStatusFilter] = useState<'TODOS' | 'ACTIVOS' | 'INACTIVOS'>('TODOS');
   const [isResettingPrivs, setIsResettingPrivs] = useState(false);
 
-  // Initial catalogs state (persisted locally / editable)
-  const [parentescos, setParentescos] = useState<string[]>([
-    'MADRE',
-    'PADRE',
-    'TUTOR LEGAL',
-    'ABUELO / ABUELA',
-    'TÍO / TÍA',
-    'HERMANO / HERMANA MAYOR',
-    'PADRASTRO / MADRASTRA',
-    'OTRO FAMILIAR'
-  ]);
+  // Inputs para nuevos registros de catálogos
   const [newParentesco, setNewParentesco] = useState('');
-
-  const [profesiones, setProfesiones] = useState<string[]>([
-    'DOCENTE / PROFESOR(A)',
-    'INGENIERO(A)',
-    'MÉDICO(A) / CIRUJANO(A)',
-    'ENFERMERO(A)',
-    'LICENCIADO(A) EN ADMINISTRACIÓN',
-    'CONTADOR(A) PÚBLICO(A)',
-    'ABOGADO(A)',
-    'COMERCIANTE / EMPRESARIO(A)',
-    'TÉCNICO(A) EN COMPUTACIÓN / SISTEMAS',
-    'ELECTRICISTA',
-    'MECÁNICO(A)',
-    'CHEF / GASTRONOMÍA',
-    'MILITAR / POLICÍA',
-    'OFICIOS DEL HOGAR',
-    'OTRA PROFESIÓN U OFICIO'
-  ]);
   const [newProfesion, setNewProfesion] = useState('');
-
-  const [vacunas, setVacunas] = useState<string[]>([
-    'BCG (Tuberculosis)',
-    'Hepatitis B Pediátrica',
-    'Polio (IPV / OPV)',
-    'Pentavalente (DTP + Hib + Hep B)',
-    'Antirrotavirus',
-    'Trivalente Viral (SRP: Sarampión, Rubéola, Parotiditis)',
-    'Fiebre Amarilla'
-  ]);
   const [newVacuna, setNewVacuna] = useState('');
-
-  const [serviciosMedicos, setServiciosMedicos] = useState<string[]>([
-    'SEGURO ESCOLAR INSTITUCIONAL',
-    'IVSS (Instituto Venezolano de los Seguros Sociales)',
-    'IPASME (Personal Docente y Administrativo)',
-    'CENTRO DE SALUD / CDI LOCAL',
-    'SEGURO PRIVADO FAMILIAR'
-  ]);
   const [newServicio, setNewServicio] = useState('');
-
-  const [titulosAcademicos, setTitulosAcademicos] = useState<string[]>([
-    'Bachiller en Ciencias',
-    'Licenciado(a) en Educación',
-    'Profesor(a) de Educación Media',
-    'Técnico Superior Universitario (TSU)',
-    'Magíster Scientiarum / Postgrado',
-    'Doctor(a) en Educación / Ciencias'
-  ]);
   const [newTitulo, setNewTitulo] = useState('');
 
-  // School institutional metadata form
-  const [schoolData, setSchoolData] = useState({
-    nombre: 'U.E. Colegio Belén San Juan (SISCEBA)',
-    dea: 'OD-05241503',
-    rif: 'J-31456789-0',
-    circuito: 'Circuito Escolar 05 - Parroquia El Carmen',
-    distrito: 'Distrito Escolar Nº 02',
-    direccion: 'Av. Las Delicias, Sector Sabana Grande, Barinas, Edo. Barinas',
-    telefono: '+58 (0273) 552-1489 / +58 (0414) 555-0199',
-    correo: 'administracion@colegiobelensanjuan.edu.ve',
-    director: 'Prof. Carlos R. Méndez P.',
-    subdirector: 'Lic. Mayuli G. Silva M.'
-  });
+  // Formulario local editable de datos de la escuela (sincronizado con BD)
+  const [editSchoolData, setEditSchoolData] = useState<InstitutionalSchoolData>(schoolData);
+
+  useEffect(() => {
+    setEditSchoolData(schoolData);
+  }, [schoolData]);
 
   const triggerToast = () => {
     setSaveToast(true);
     setTimeout(() => setSaveToast(false), 3000);
   };
+
+  const handleSaveSchoolData = async () => {
+    await saveSchoolData(editSchoolData);
+    await addAuditLog('Actualización Datos Institucionales', `Modificados datos legales del plantel`);
+    triggerToast();
+  };
+
+  const handleAddParentesco = async () => {
+    if (!newParentesco.trim()) return;
+    const clean = newParentesco.trim().toUpperCase();
+    if (systemCatalogs.parentescos.includes(clean)) return;
+    const next = [...systemCatalogs.parentescos, clean];
+    await saveSystemCatalogs({ ...systemCatalogs, parentescos: next });
+    await addAuditLog('Nuevo Parentesco Agregado', `Agregado: ${clean}`);
+    setNewParentesco('');
+    triggerToast();
+  };
+
+  const handleRemoveParentesco = async (item: string) => {
+    const next = systemCatalogs.parentescos.filter(p => p !== item);
+    await saveSystemCatalogs({ ...systemCatalogs, parentescos: next });
+    await addAuditLog('Parentesco Eliminado', `Removido: ${item}`);
+    triggerToast();
+  };
+
+  const handleAddProfesion = async () => {
+    if (!newProfesion.trim()) return;
+    const clean = newProfesion.trim().toUpperCase();
+    if (systemCatalogs.profesiones.includes(clean)) return;
+    const next = [...systemCatalogs.profesiones, clean];
+    await saveSystemCatalogs({ ...systemCatalogs, profesiones: next });
+    await addAuditLog('Nueva Profesión Agregada', `Agregada: ${clean}`);
+    setNewProfesion('');
+    triggerToast();
+  };
+
+  const handleRemoveProfesion = async (item: string) => {
+    const next = systemCatalogs.profesiones.filter(p => p !== item);
+    await saveSystemCatalogs({ ...systemCatalogs, profesiones: next });
+    await addAuditLog('Profesión Eliminada', `Removida: ${item}`);
+    triggerToast();
+  };
+
+  const handleAddVacuna = async () => {
+    if (!newVacuna.trim()) return;
+    const clean = newVacuna.trim();
+    if (systemCatalogs.vacunas.includes(clean)) return;
+    const next = [...systemCatalogs.vacunas, clean];
+    await saveSystemCatalogs({ ...systemCatalogs, vacunas: next });
+    await addAuditLog('Nueva Vacuna Registrada', `Agregada: ${clean}`);
+    setNewVacuna('');
+    triggerToast();
+  };
+
+  const handleRemoveVacuna = async (item: string) => {
+    const next = systemCatalogs.vacunas.filter(v => v !== item);
+    await saveSystemCatalogs({ ...systemCatalogs, vacunas: next });
+    await addAuditLog('Vacuna Eliminada', `Removida: ${item}`);
+    triggerToast();
+  };
+
+  const handleAddServicio = async () => {
+    if (!newServicio.trim()) return;
+    const clean = newServicio.trim();
+    if (systemCatalogs.serviciosMedicos.includes(clean)) return;
+    const next = [...systemCatalogs.serviciosMedicos, clean];
+    await saveSystemCatalogs({ ...systemCatalogs, serviciosMedicos: next });
+    await addAuditLog('Nuevo Servicio Médico', `Agregado: ${clean}`);
+    setNewServicio('');
+    triggerToast();
+  };
+
+  const handleRemoveServicio = async (item: string) => {
+    const next = systemCatalogs.serviciosMedicos.filter(s => s !== item);
+    await saveSystemCatalogs({ ...systemCatalogs, serviciosMedicos: next });
+    await addAuditLog('Servicio Médico Eliminado', `Removido: ${item}`);
+    triggerToast();
+  };
+
+  const handleAddTitulo = async () => {
+    if (!newTitulo.trim()) return;
+    const clean = newTitulo.trim();
+    if (systemCatalogs.titulosAcademicos.includes(clean)) return;
+    const next = [...systemCatalogs.titulosAcademicos, clean];
+    await saveSystemCatalogs({ ...systemCatalogs, titulosAcademicos: next });
+    await addAuditLog('Nuevo Título Académico', `Agregado: ${clean}`);
+    setNewTitulo('');
+    triggerToast();
+  };
+
+  const handleRemoveTitulo = async (item: string) => {
+    const next = systemCatalogs.titulosAcademicos.filter(t => t !== item);
+    await saveSystemCatalogs({ ...systemCatalogs, titulosAcademicos: next });
+    await addAuditLog('Título Académico Eliminado', `Removido: ${item}`);
+    triggerToast();
+  };
+
+  const menuItems = getMenuItems(
+    '142 x 13 Roles',
+    systemCatalogs.titulosAcademicos.length,
+    systemCatalogs.parentescos.length,
+    systemCatalogs.profesiones.length,
+    systemCatalogs.vacunas.length,
+    systemCatalogs.serviciosMedicos.length,
+    scheduleTypes.length,
+    auditLogs.length
+  );
 
   // Solo Administrador
   if (currentRole !== 'ADMINISTRADOR') {
@@ -251,7 +314,7 @@ export const ConfiguracionAvanzadaView: React.FC = () => {
 
           {/* Menu Items List */}
           <div className="divide-y divide-slate-100 max-h-[680px] overflow-y-auto no-scrollbar">
-            {MENU_ITEMS.filter((item) =>
+            {menuItems.filter((item) =>
               item.label.toLowerCase().includes(searchTerm.toLowerCase())
             ).map((item) => {
               const Icon = item.icon;
@@ -328,7 +391,7 @@ export const ConfiguracionAvanzadaView: React.FC = () => {
                 </span>
               </div>
               <h2 className="text-xl font-extrabold text-slate-900 mt-1">
-                {MENU_ITEMS.find((i) => i.id === activeSection)?.label}
+                {menuItems.find((i) => i.id === activeSection)?.label}
               </h2>
             </div>
             <span className="px-3 py-1 rounded-lg bg-violet-50 text-violet-700 text-xs font-bold border border-violet-200">
@@ -406,33 +469,43 @@ export const ConfiguracionAvanzadaView: React.FC = () => {
             </div>
           )}
 
-          {/* DETAIL 4: AUDITORÍA */}
+          {/* DETAIL 4: AUDITORÍA (CONEXIÓN DIRECTA CON SUPABASE) */}
           {activeSection === 'AUDITORIA' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <p className="text-xs text-slate-500">Registro de eventos clave y accesos de seguridad:</p>
-                <span className="text-[10px] font-mono text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 font-bold">
-                  ● Sistema Monitoreado
+                <div>
+                  <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Bitácora Oficial de Seguridad y Eventos del Sistema:</p>
+                  <p className="text-[11px] text-slate-500">Sincronizado en tiempo real con la tabla <code className="font-mono text-violet-600 dark:text-violet-400">system_audit_logs</code></p>
+                </div>
+                <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold border ${
+                  isSupabaseActive
+                    ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800'
+                    : 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-800'
+                }`}>
+                  {isSupabaseActive ? '● Conectado a BD Supabase' : '● Caché Local'}
                 </span>
               </div>
-              <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden bg-white">
-                {[
-                  { evento: 'Inicio de Sesión Exitoso', usuario: 'admin', rol: 'ADMINISTRADOR', fecha: 'Hoy, Hace un momento', ip: '192.168.1.102' },
-                  { evento: 'Sincronización Cloud Supabase', usuario: 'sistema', rol: 'SISTEMA', fecha: 'Hoy, 10:45 AM', ip: 'Localhost' },
-                  { evento: 'Actualización Perfil Docente', usuario: 'contma', rol: 'DOCENTE', fecha: 'Hoy, 09:30 AM', ip: '192.168.1.115' },
-                  { evento: 'Apertura de Ventana Evaluativa Lapso 1', usuario: 'admin', rol: 'ADMINISTRADOR', fecha: 'Ayer, 04:15 PM', ip: '192.168.1.102' }
-                ].map((log, i) => (
-                  <div key={i} className="p-3 text-xs flex items-center justify-between hover:bg-slate-50">
+              <div className="divide-y divide-slate-100 dark:divide-slate-800 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden bg-white dark:bg-slate-900 max-h-[480px] overflow-y-auto custom-comfortable-scrollbar">
+                {auditLogs.map((log) => (
+                  <div key={log.id} className="p-3 text-xs flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/60 transition">
                     <div>
-                      <p className="font-bold text-slate-800">{log.evento}</p>
-                      <p className="text-[10px] text-slate-400">Usuario: <span className="font-mono text-slate-600">{log.usuario}</span> ({log.rol})</p>
+                      <p className="font-black text-slate-800 dark:text-slate-200">{log.evento}</p>
+                      <p className="text-[10px] text-slate-400">
+                        Usuario: <span className="font-mono font-bold text-violet-700 dark:text-violet-300">{log.usuario}</span> ({log.rol})
+                        {log.detalles && <span className="ml-1 text-slate-500">• {log.detalles}</span>}
+                      </p>
                     </div>
                     <div className="text-right">
-                      <span className="text-[10px] text-slate-500">{log.fecha}</span>
+                      <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400">{log.fecha}</span>
                       <p className="text-[9px] font-mono text-slate-400">IP: {log.ip}</p>
                     </div>
                   </div>
                 ))}
+                {auditLogs.length === 0 && (
+                  <div className="p-8 text-center text-xs text-slate-400">
+                    No se registran eventos en la bitácora actualmente.
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -486,12 +559,16 @@ export const ConfiguracionAvanzadaView: React.FC = () => {
 
             const filteredPrivs = currentRoleObj.privilegios.filter((p) => {
               const matchesCat = privCategoryFilter === 'TODAS' || p.categoria === privCategoryFilter;
+              const matchesStatus =
+                privStatusFilter === 'TODOS' ? true :
+                privStatusFilter === 'ACTIVOS' ? p.habilitar :
+                !p.habilitar;
               const matchesSearch =
                 !privSearchTerm ||
                 p.opcion.toLowerCase().includes(privSearchTerm.toLowerCase()) ||
                 p.descripcion.toLowerCase().includes(privSearchTerm.toLowerCase()) ||
                 p.nro.toString() === privSearchTerm.trim();
-              return matchesCat && matchesSearch;
+              return matchesCat && matchesStatus && matchesSearch;
             });
 
             const enabledCount = currentRoleObj.privilegios.filter((p) => p.habilitar).length;
@@ -513,103 +590,183 @@ export const ConfiguracionAvanzadaView: React.FC = () => {
             return (
               <div className="space-y-4">
                 {/* Role description and summary bar */}
-                <div className="p-4 rounded-xl border border-violet-200 bg-violet-50/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-black uppercase tracking-wider text-violet-700">
-                        Descripción Oficial
+                <div className="p-4 rounded-2xl border border-violet-200 dark:border-violet-900/60 bg-gradient-to-r from-violet-50/80 via-white to-purple-50/40 dark:from-slate-900 dark:via-slate-900/90 dark:to-violet-950/40 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                  <div className="flex-1 min-w-0 space-y-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-violet-100 dark:bg-violet-950/80 text-violet-800 dark:text-violet-300 border border-violet-200 dark:border-violet-800">
+                        Matriz Oficial CEO
                       </span>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-violet-200/80 text-violet-900 font-bold">
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold border border-slate-200 dark:border-slate-700">
                         142 Registros Consecutivos
                       </span>
-                      <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold ${
+                      <span className={`text-[10px] font-mono px-2 py-0.5 rounded-md font-bold flex items-center gap-1.5 shadow-2xs ${
                         isSupabaseActive
-                          ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                          : 'bg-amber-100 text-amber-800 border border-amber-300'
+                          ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
+                          : 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
                       }`}>
-                        {isSavingCloud ? 'Sincronizando con BD...' : (isSupabaseActive ? '● Conectado a BD' : '● Caché Local')}
+                        <span className={`w-1.5 h-1.5 rounded-full ${isSupabaseActive ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+                        {isSavingCloud ? 'Sincronizando con BD...' : (isSupabaseActive ? 'Conectado a Base de Datos' : 'Caché Local Offline')}
                       </span>
                     </div>
-                    <p className="text-xs font-bold text-slate-800 mt-1">
-                      ADM: Gestione los accesos a cada rol de usuario.
-                    </p>
-                    <p className="text-[11px] text-slate-500">
-                      Rol actual:{' '}
-                      <span className="font-extrabold text-violet-900">
-                        {currentRoleObj.nombre}
-                      </span>{' '}
-                      • {enabledCount} habilitados / {142 - enabledCount} deshabilitados
-                    </p>
+
+                    <div className="space-y-0.5">
+                      <p className="text-xs font-black text-slate-900 dark:text-white flex items-center gap-2">
+                        <span className="px-1.5 py-0.2 rounded bg-violet-600 text-white font-mono text-[10px]">ADM</span>
+                        Gestión Integral de Privilegios por Perfil de Usuario
+                      </p>
+                      <p className="text-[12px] text-slate-600 dark:text-slate-400">
+                        Configurando perfil activo:{' '}
+                        <span className="font-extrabold text-violet-700 dark:text-violet-300">
+                          {currentRoleObj.nombre}
+                        </span>
+                      </p>
+                    </div>
+
+                    {/* Progress Bar of enabled privileges */}
+                    <div className="pt-1 flex flex-col sm:flex-row sm:items-center gap-3">
+                      <div className="flex-1 max-w-md h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-violet-600 to-indigo-500 rounded-full transition-all duration-300"
+                          style={{ width: `${Math.round((enabledCount / 142) * 100)}%` }}
+                        />
+                      </div>
+                      <div className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 flex items-center gap-2">
+                        <span className="inline-flex items-center gap-1 font-bold text-emerald-600 dark:text-emerald-400">
+                          <CheckCircle2 className="w-3.5 h-3.5" /> {enabledCount} Activos
+                        </span>
+                        <span>•</span>
+                        <span className="inline-flex items-center gap-1 font-bold text-slate-500 dark:text-slate-400">
+                          <Lock className="w-3 h-3" /> {142 - enabledCount} Inactivos
+                        </span>
+                        <span className="text-[10px] font-mono text-violet-600 dark:text-violet-400 font-bold">
+                          ({Math.round((enabledCount / 142) * 100)}%)
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                  {/* Actions & Role Picker */}
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 shrink-0 w-full lg:w-auto">
                     <button
                       type="button"
                       onClick={handleReset}
                       disabled={isResettingPrivs}
-                      className="px-2.5 py-2 text-xs rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-600 font-bold flex items-center gap-1.5 transition shadow-sm shrink-0"
-                      title="Restablecer privilegios de los 13 roles a los valores originales"
+                      className="px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold flex items-center justify-center gap-1.5 transition shadow-sm shrink-0"
+                      title="Restablecer privilegios de los 13 roles a los valores originales del CEO"
                     >
-                      <RotateCcw className={`w-3.5 h-3.5 ${isResettingPrivs ? 'animate-spin' : ''}`} />
-                      <span className="hidden sm:inline">Restablecer</span>
+                      <RotateCcw className={`w-3.5 h-3.5 text-violet-600 dark:text-violet-400 ${isResettingPrivs ? 'animate-spin' : ''}`} />
+                      <span>Restablecer CEO</span>
                     </button>
-                    <select
-                      value={selectedRolePrivilegios}
-                      onChange={(e) => setSelectedRolePrivilegios(e.target.value)}
-                      className="px-3 py-2 text-xs rounded-xl border border-violet-300 bg-white font-black text-violet-950 focus:outline-none focus:ring-2 focus:ring-violet-500 w-full sm:w-auto shadow-sm"
-                    >
-                      {systemPrivileges.roles.map((r) => (
-                        <option key={r.nombre} value={r.nombre}>
-                          Rol: {r.nombre} ({r.privilegios.filter(p => p.habilitar).length}/142 ☑)
-                        </option>
-                      ))}
-                    </select>
+                    <div className="relative">
+                      <select
+                        value={selectedRolePrivilegios}
+                        onChange={(e) => setSelectedRolePrivilegios(e.target.value)}
+                        className="w-full sm:w-auto pl-3 pr-8 py-2 text-xs rounded-xl border border-violet-300 dark:border-violet-700 bg-white dark:bg-slate-800 font-extrabold text-violet-950 dark:text-violet-200 focus:outline-none focus:ring-2 focus:ring-violet-500 shadow-sm appearance-none cursor-pointer"
+                      >
+                        {systemPrivileges.roles.map((r) => {
+                          const activeInRole = r.privilegios.filter(p => p.habilitar).length;
+                          return (
+                            <option key={r.nombre} value={r.nombre} className="dark:bg-slate-800 dark:text-slate-200 font-medium">
+                              Rol: {r.nombre} ({activeInRole}/142 ☑)
+                            </option>
+                          );
+                        })}
+                      </select>
+                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-violet-500">
+                        <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 20 20">
+                          <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" fillRule="evenodd"></path>
+                        </svg>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
                 {/* Filters toolbar */}
-                <div className="space-y-2.5 bg-slate-50/80 p-3 rounded-xl border border-slate-200">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <div className="space-y-3 bg-slate-50/90 dark:bg-slate-900/60 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
                     {/* Search in Options / Descriptions */}
                     <div className="relative flex-1">
-                      <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400" />
+                      <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
                       <input
                         type="text"
-                        placeholder="Buscar por opción, descripción o número (ej. 1, Mensajeria, ADM)..."
+                        placeholder="Buscar por opción, descripción o Nro (ej. 1, Mensajería, ADM, Boleta)..."
                         value={privSearchTerm}
                         onChange={(e) => setPrivSearchTerm(e.target.value)}
-                        className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500 bg-white text-slate-800 shadow-2xs font-medium"
+                        className="w-full pl-9 pr-8 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 shadow-2xs font-medium placeholder:text-slate-400"
                       />
                       {privSearchTerm && (
                         <button
                           type="button"
                           onClick={() => setPrivSearchTerm('')}
-                          className="absolute right-2.5 top-2 text-xs text-slate-400 hover:text-slate-600 font-bold"
+                          className="absolute right-2.5 top-2 text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold px-1"
                         >
                           ✕
                         </button>
                       )}
                     </div>
 
-                    <div className="text-[11px] text-slate-500 font-medium shrink-0 flex items-center gap-1.5">
-                      <span className="font-bold text-slate-700">Coincidencias:</span>
-                      <span className="px-2 py-0.5 rounded bg-white border border-slate-200 font-mono font-bold text-violet-700">
-                        {filteredPrivs.length} de 142
+                    {/* Status Filter Buttons (Todos / Activos / Inactivos) */}
+                    <div className="flex items-center gap-1 bg-white dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setPrivStatusFilter('TODOS')}
+                        className={`px-2.5 py-1 text-[11px] font-bold rounded-lg transition ${
+                          privStatusFilter === 'TODOS'
+                            ? 'bg-violet-600 text-white shadow-2xs'
+                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
+                        }`}
+                      >
+                        Todos ({142})
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPrivStatusFilter('ACTIVOS')}
+                        className={`px-2.5 py-1 text-[11px] font-bold rounded-lg transition flex items-center gap-1 ${
+                          privStatusFilter === 'ACTIVOS'
+                            ? 'bg-emerald-600 text-white shadow-2xs'
+                            : 'text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40'
+                        }`}
+                      >
+                        <Check className="w-3 h-3" />
+                        Activos ({enabledCount})
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPrivStatusFilter('INACTIVOS')}
+                        className={`px-2.5 py-1 text-[11px] font-bold rounded-lg transition flex items-center gap-1 ${
+                          privStatusFilter === 'INACTIVOS'
+                            ? 'bg-slate-700 text-white shadow-2xs'
+                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
+                        }`}
+                      >
+                        <Lock className="w-3 h-3" />
+                        Inactivos ({142 - enabledCount})
+                      </button>
+                    </div>
+
+                    {/* Quick status counter badge */}
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium shrink-0 flex items-center gap-2">
+                      <span className="font-bold text-slate-700 dark:text-slate-300">Visibles:</span>
+                      <span className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-mono font-black text-violet-700 dark:text-violet-300 shadow-2xs">
+                        {filteredPrivs.length}
                       </span>
                     </div>
                   </div>
 
-                  {/* Category Filter Pills (Wrap multilinea limpio para ver todas las categorías sin cortes) */}
-                  <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-slate-200/60">
-                    <div className="flex items-center gap-1 text-[11px] font-bold text-slate-500 mr-1 shrink-0">
-                      <Filter className="w-3.5 h-3.5 text-slate-400" />
-                      <span>Categorías:</span>
+                  {/* Category Filter Pills */}
+                  <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-200/80 dark:border-slate-800/80">
+                    <div className="flex items-center gap-1.5 text-[11px] font-black text-slate-600 dark:text-slate-400 mr-1 shrink-0">
+                      <Filter className="w-3.5 h-3.5 text-violet-500" />
+                      <span>Categoría:</span>
                     </div>
                     {categories.map((cat) => {
                       const isSelected = privCategoryFilter === cat;
                       const countInCat = cat === 'TODAS'
                         ? currentRoleObj.privilegios.length
                         : currentRoleObj.privilegios.filter(p => p.categoria === cat).length;
+                      const activeInCat = cat === 'TODAS'
+                        ? enabledCount
+                        : currentRoleObj.privilegios.filter(p => p.categoria === cat && p.habilitar).length;
 
                       return (
                         <button
@@ -618,19 +775,20 @@ export const ConfiguracionAvanzadaView: React.FC = () => {
                           onClick={() => setPrivCategoryFilter(cat)}
                           className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold transition-all cursor-pointer flex items-center gap-1.5 ${
                             isSelected
-                              ? 'bg-violet-700 text-white shadow-xs scale-102 ring-1 ring-violet-700'
-                              : 'bg-white text-slate-700 hover:bg-slate-100 hover:text-slate-900 border border-slate-200/80 shadow-2xs'
+                              ? 'bg-violet-700 text-white shadow-xs scale-102 ring-2 ring-violet-700/50'
+                              : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 shadow-2xs'
                           }`}
                         >
                           <span>{cat}</span>
                           <span
-                            className={`text-[9px] px-1 py-0.2 rounded-full font-mono font-bold ${
+                            className={`text-[9px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
                               isSelected
-                                ? 'bg-violet-900/60 text-violet-100'
-                                : 'bg-slate-100 text-slate-500'
+                                ? 'bg-violet-900/80 text-violet-100'
+                                : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
                             }`}
+                            title={`${activeInCat} habilitados de ${countInCat}`}
                           >
-                            {countInCat}
+                            {activeInCat}/{countInCat}
                           </span>
                         </button>
                       );
@@ -638,81 +796,108 @@ export const ConfiguracionAvanzadaView: React.FC = () => {
                   </div>
                 </div>
 
-                {/* The 142 Privileges Table */}
-                <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
-                  <div className="max-h-[580px] overflow-y-auto no-scrollbar">
+                {/* The 142 Privileges Table with enhanced styling and comfortable scrollbar */}
+                <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden bg-white dark:bg-slate-900 shadow-sm">
+                  <div className="max-h-[600px] overflow-y-auto custom-comfortable-scrollbar pr-1">
                     <table className="w-full text-left border-collapse text-xs">
-                      <thead className="bg-slate-50 sticky top-0 z-10 border-b border-slate-200 text-[11px] font-bold text-slate-600">
+                      <thead className="bg-slate-50 dark:bg-slate-800/90 sticky top-0 z-10 border-b border-slate-200 dark:border-slate-800 text-[11px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider backdrop-blur-sm">
                         <tr>
-                          <th className="py-2.5 px-3 w-14 text-center">Nro</th>
-                          <th className="py-2.5 px-3 w-36">Categoría</th>
-                          <th className="py-2.5 px-3 w-48">Opción</th>
-                          <th className="py-2.5 px-4">Descripción</th>
-                          <th className="py-2.5 px-3 w-24 text-center">Habilitar</th>
+                          <th className="py-3 px-3 w-16 text-center">Nro</th>
+                          <th className="py-3 px-3 w-36">Categoría</th>
+                          <th className="py-3 px-3 w-52">Opción / Menú</th>
+                          <th className="py-3 px-4">Descripción del Privilegio</th>
+                          <th className="py-3 px-3 w-28 text-center">Estado</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-100 font-medium">
+                      <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
                         {filteredPrivs.map((priv) => {
+                          const isHabilitado = priv.habilitar;
+
+                          // Color de categoría específico y limpio
+                          const catBadgeClass =
+                            priv.categoria === 'COMUNIDAD CEO' ? 'bg-pink-100 dark:bg-pink-950/60 text-pink-800 dark:text-pink-300 border-pink-200 dark:border-pink-900' :
+                            priv.categoria === 'CONF. AVANZADA' ? 'bg-purple-100 dark:bg-purple-950/60 text-purple-800 dark:text-purple-300 border-purple-200 dark:border-purple-900' :
+                            priv.categoria === 'CONFIGURACIÓN' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-900' :
+                            priv.categoria === 'CONSULTAS' ? 'bg-cyan-100 dark:bg-cyan-950/60 text-cyan-800 dark:text-cyan-300 border-cyan-200 dark:border-cyan-900' :
+                            priv.categoria === 'GESTIÓN' ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-900' :
+                            priv.categoria === 'INICIAL' ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300 border-rose-200 dark:border-rose-900' :
+                            priv.categoria === 'MEDIA GENERAL' ? 'bg-indigo-100 dark:bg-indigo-950/60 text-indigo-800 dark:text-indigo-300 border-indigo-200 dark:border-indigo-900' :
+                            'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-900';
+
                           return (
                             <tr
                               key={priv.nro}
-                              className={`hover:bg-violet-50/40 transition-colors ${
-                                priv.habilitar ? 'bg-white' : 'bg-slate-50/30'
+                              className={`transition-colors duration-150 ${
+                                isHabilitado
+                                  ? 'bg-white dark:bg-slate-900 hover:bg-violet-50/50 dark:hover:bg-slate-800/70'
+                                  : 'bg-slate-50/40 dark:bg-slate-950/30 text-slate-400 dark:text-slate-500 hover:bg-slate-100/50 dark:hover:bg-slate-800/40'
                               }`}
                             >
-                              <td className="py-2 px-3 text-center font-mono font-bold text-slate-500 text-[11px]">
-                                {priv.nro}
+                              {/* Nro Consecutivo */}
+                              <td className="py-2.5 px-3 text-center font-mono font-bold text-slate-500 dark:text-slate-400 text-xs">
+                                #{priv.nro}
                               </td>
-                              <td className="py-2 px-3">
-                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                                  priv.categoria === 'COMUNIDAD CEO' ? 'bg-pink-100 text-pink-800' :
-                                  priv.categoria === 'CONF. AVANZADA' ? 'bg-purple-100 text-purple-800' :
-                                  priv.categoria === 'CONFIGURACIÓN' ? 'bg-amber-100 text-amber-800' :
-                                  priv.categoria === 'CONSULTAS' ? 'bg-cyan-100 text-cyan-800' :
-                                  priv.categoria === 'GESTIÓN' ? 'bg-blue-100 text-blue-800' :
-                                  priv.categoria === 'INICIAL' ? 'bg-rose-100 text-rose-800' :
-                                  priv.categoria === 'MEDIA GENERAL' ? 'bg-indigo-100 text-indigo-800' :
-                                  'bg-emerald-100 text-emerald-800'
-                                }`}>
+
+                              {/* Categoría */}
+                              <td className="py-2.5 px-3">
+                                <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md border ${catBadgeClass}`}>
                                   {priv.categoria}
                                 </span>
                               </td>
-                              <td className="py-2 px-3 font-bold text-slate-900 text-xs">
-                                {priv.opcion}
+
+                              {/* Opción */}
+                              <td className="py-2.5 px-3">
+                                <span className={`text-xs font-bold ${
+                                  isHabilitado ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400'
+                                }`}>
+                                  {priv.opcion}
+                                </span>
                               </td>
-                              <td className="py-2 px-4 text-slate-600 text-xs leading-relaxed">
+
+                              {/* Descripción con prefijos destacados */}
+                              <td className="py-2.5 px-4 text-xs leading-relaxed">
                                 {priv.descripcion ? (
-                                  <span>
+                                  <span className={isHabilitado ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500'}>
                                     {priv.descripcion.startsWith('ADM:') ? (
-                                      <strong className="text-purple-700 font-black">ADM: </strong>
+                                      <strong className="text-purple-600 dark:text-purple-400 font-black mr-1">ADM:</strong>
                                     ) : priv.descripcion.startsWith('DOC:') ? (
-                                      <strong className="text-blue-700 font-black">DOC: </strong>
+                                      <strong className="text-blue-600 dark:text-blue-400 font-black mr-1">DOC:</strong>
                                     ) : priv.descripcion.startsWith('EST:') ? (
-                                      <strong className="text-emerald-700 font-black">EST: </strong>
+                                      <strong className="text-emerald-600 dark:text-emerald-400 font-black mr-1">EST:</strong>
                                     ) : priv.descripcion.startsWith('REP:') ? (
-                                      <strong className="text-amber-700 font-black">REP: </strong>
+                                      <strong className="text-amber-600 dark:text-amber-400 font-black mr-1">REP:</strong>
                                     ) : priv.descripcion.startsWith('UCE:') ? (
-                                      <strong className="text-cyan-700 font-black">UCE: </strong>
+                                      <strong className="text-cyan-600 dark:text-cyan-400 font-black mr-1">UCE:</strong>
                                     ) : null}
                                     {priv.descripcion.replace(/^(ADM:|DOC:|EST:|REP:|UCE:)\s*/, '')}
                                   </span>
                                 ) : (
-                                  <span className="text-slate-300 italic text-[11px]">—</span>
+                                  <span className="text-slate-300 dark:text-slate-600 italic text-[11px]">—</span>
                                 )}
                               </td>
-                              <td className="py-2 px-3 text-center">
+
+                              {/* Habilitar / Deshabilitar Toggle */}
+                              <td className="py-2.5 px-3 text-center">
                                 <button
                                   type="button"
                                   onClick={() => handleToggle(priv.nro)}
-                                  className="inline-flex items-center justify-center p-1 rounded hover:bg-slate-100 transition"
-                                  title={priv.habilitar ? 'Habilitado (Click para alternar y guardar en BD)' : 'Deshabilitado (Click para alternar y guardar en BD)'}
+                                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-black transition-all shadow-2xs cursor-pointer ${
+                                    isHabilitado
+                                      ? 'bg-violet-600 hover:bg-violet-700 text-white'
+                                      : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700'
+                                  }`}
+                                  title={isHabilitado ? 'Habilitado (Click para desactivar en BD)' : 'Inactivo (Click para activar en BD)'}
                                 >
-                                  {priv.habilitar ? (
-                                    <span className="inline-flex items-center justify-center w-5 h-5 rounded bg-violet-600 text-white shadow-sm font-bold text-xs">
-                                      ✓
-                                    </span>
+                                  {isHabilitado ? (
+                                    <>
+                                      <Check className="w-3.5 h-3.5" />
+                                      <span>Activo</span>
+                                    </>
                                   ) : (
-                                    <span className="inline-flex items-center justify-center w-5 h-5 rounded border border-slate-300 bg-white"></span>
+                                    <>
+                                      <span className="w-3.5 h-3.5 flex items-center justify-center font-bold text-[10px]">✕</span>
+                                      <span>Inactivo</span>
+                                    </>
                                   )}
                                 </button>
                               </td>
@@ -724,18 +909,28 @@ export const ConfiguracionAvanzadaView: React.FC = () => {
                   </div>
 
                   {filteredPrivs.length === 0 && (
-                    <div className="p-8 text-center text-xs text-slate-400">
-                      No se encontraron privilegios que coincidan con la búsqueda o filtro.
+                    <div className="p-12 text-center text-xs text-slate-400 dark:text-slate-500 space-y-2">
+                      <Search className="w-6 h-6 mx-auto text-slate-300 dark:text-slate-600" />
+                      <p className="font-bold text-slate-600 dark:text-slate-400">No se encontraron privilegios que coincidan con la búsqueda o filtro.</p>
+                      <button
+                        type="button"
+                        onClick={() => { setPrivSearchTerm(''); setPrivCategoryFilter('TODAS'); }}
+                        className="text-violet-600 dark:text-violet-400 underline font-bold"
+                      >
+                        Limpiar filtros
+                      </button>
                     </div>
                   )}
 
                   {/* Table footer with stats */}
-                  <div className="p-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-[11px] text-slate-500 font-bold">
+                  <div className="p-3 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-slate-600 dark:text-slate-400 font-bold">
                     <span>
-                      Mostrando {filteredPrivs.length} de 142 privilegios para el rol:{' '}
-                      <span className="text-slate-800">{currentRoleObj.nombre}</span>
+                      Mostrando {filteredPrivs.length} de 142 registros para:{' '}
+                      <span className="text-violet-700 dark:text-violet-300 font-black">{currentRoleObj.nombre}</span>
                     </span>
-                    <span>Total Matriz: 13 Roles • 1.846 Casillas Verificadas</span>
+                    <span className="text-slate-500 dark:text-slate-500 font-mono text-[10px]">
+                      Base de Datos: 13 Roles • 1.846 Casillas Totales Sincronizadas
+                    </span>
                   </div>
                 </div>
               </div>
@@ -849,64 +1044,84 @@ export const ConfiguracionAvanzadaView: React.FC = () => {
             </div>
           )}
 
-          {/* DETAIL 10: TIPOS DE HORARIOS */}
+          {/* DETAIL 10: TIPOS DE HORARIOS (CONEXIÓN DIRECTA CON SUPABASE) */}
           {activeSection === 'TIPOS_HORARIOS' && (
             <div className="space-y-4">
-              <p className="text-xs text-slate-500">Modalidades y turnos escolares administrados:</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Modalidades y turnos escolares administrados:</p>
+                  <p className="text-[11px] text-slate-500">Sincronizado con tabla <code className="font-mono text-violet-600 dark:text-violet-400">schedule_types</code></p>
+                </div>
+                <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold border ${
+                  isSupabaseActive
+                    ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800'
+                    : 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-800'
+                }`}>
+                  {isSupabaseActive ? '● Conectado a BD Supabase' : '● Caché Local'}
+                </span>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div className="p-4 rounded-xl border border-slate-200 bg-white">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="text-xs font-bold text-slate-800">TURNO MAÑANA</h4>
-                    <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-bold">Activo</span>
+                {scheduleTypes.map((item) => (
+                  <div key={item.id} className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-xs font-black text-slate-800 dark:text-slate-200">{item.nombre}</h4>
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                        item.activo ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-slate-100 text-slate-600'
+                      }`}>
+                        {item.activo ? 'Activo' : 'Inactivo'}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">{item.descripcion}</p>
+                    <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] font-mono text-slate-600 dark:text-slate-400">
+                      <span>Jornada: {item.horaInicio} - {item.horaFin}</span>
+                      <span>{item.totalBloques} bloques ({item.duracionBloqueMinutos}m)</span>
+                    </div>
                   </div>
-                  <p className="text-[11px] text-slate-500">7:00 AM - 12:30 PM (Bloques pedagógicos de 45 min)</p>
-                </div>
-                <div className="p-4 rounded-xl border border-slate-200 bg-white">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="text-xs font-bold text-slate-800">TURNO COMPLETO / INTEGRAL</h4>
-                    <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-bold">Activo</span>
-                  </div>
-                  <p className="text-[11px] text-slate-500">7:00 AM - 2:30 PM (Incluye Comedor Escolar y Talleres)</p>
-                </div>
+                ))}
               </div>
             </div>
           )}
 
-          {/* DETAIL 11: TÍTULOS ACADÉMICOS */}
+          {/* DETAIL 11: TÍTULOS ACADÉMICOS (CONEXIÓN DIRECTA CON SUPABASE) */}
           {activeSection === 'TITULOS_ACADEMICOS' && (
             <div className="space-y-4">
-              <p className="text-xs text-slate-500">Catálogo de títulos académicos para docentes y personal:</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Catálogo de títulos académicos para docentes y personal:</p>
+                  <p className="text-[11px] text-slate-500">Sincronizado con tabla <code className="font-mono text-violet-600 dark:text-violet-400">system_catalogs</code></p>
+                </div>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded font-bold bg-violet-100 dark:bg-violet-950 text-violet-800 dark:text-violet-300 border border-violet-200 dark:border-violet-800">
+                  {systemCatalogs.titulosAcademicos.length} Títulos
+                </span>
+              </div>
               <div className="flex gap-2">
                 <input
                   type="text"
                   placeholder="Nuevo título académico..."
                   value={newTitulo}
                   onChange={(e) => setNewTitulo(e.target.value)}
-                  className="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-1 focus:ring-violet-500"
+                  className="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-violet-500"
                 />
                 <button
-                  onClick={() => {
-                    if (newTitulo.trim()) {
-                      setTitulosAcademicos([...titulosAcademicos, newTitulo.trim()]);
-                      setNewTitulo('');
-                      triggerToast();
-                    }
-                  }}
-                  className="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5"
+                  type="button"
+                  onClick={handleAddTitulo}
+                  className="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-sm transition"
                 >
                   <Plus className="w-3.5 h-3.5" /> Agregar
                 </button>
               </div>
-              <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden bg-white">
-                {titulosAcademicos.map((titulo, idx) => (
-                  <div key={idx} className="p-3 text-xs flex items-center justify-between hover:bg-slate-50">
+              <div className="divide-y divide-slate-100 dark:divide-slate-800 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden bg-white dark:bg-slate-900 max-h-[380px] overflow-y-auto custom-comfortable-scrollbar">
+                {systemCatalogs.titulosAcademicos.map((titulo, idx) => (
+                  <div key={idx} className="p-3 text-xs flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/60 transition">
                     <div className="flex items-center gap-2">
-                      <Award className="w-4 h-4 text-violet-500" />
-                      <span className="font-semibold text-slate-800">{titulo}</span>
+                      <Award className="w-4 h-4 text-violet-500 shrink-0" />
+                      <span className="font-semibold text-slate-800 dark:text-slate-200">{titulo}</span>
                     </div>
                     <button
-                      onClick={() => setTitulosAcademicos(titulosAcademicos.filter((_, i) => i !== idx))}
-                      className="text-slate-400 hover:text-rose-600 p-1"
+                      type="button"
+                      onClick={() => handleRemoveTitulo(titulo)}
+                      className="text-slate-400 hover:text-rose-600 p-1 transition"
+                      title="Eliminar del catálogo oficial en BD"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -916,38 +1131,43 @@ export const ConfiguracionAvanzadaView: React.FC = () => {
             </div>
           )}
 
-          {/* DETAIL 12: PARENTESCOS */}
+          {/* DETAIL 12: PARENTESCOS (CONEXIÓN DIRECTA CON SUPABASE) */}
           {activeSection === 'PARENTESCOS' && (
             <div className="space-y-4">
-              <p className="text-xs text-slate-500">Relación de parentesco entre representante y alumno:</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Relación de parentesco entre representante y alumno:</p>
+                  <p className="text-[11px] text-slate-500">Sincronizado con tabla <code className="font-mono text-violet-600 dark:text-violet-400">system_catalogs</code></p>
+                </div>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded font-bold bg-violet-100 dark:bg-violet-950 text-violet-800 dark:text-violet-300 border border-violet-200 dark:border-violet-800">
+                  {systemCatalogs.parentescos.length} Registros
+                </span>
+              </div>
               <div className="flex gap-2">
                 <input
                   type="text"
                   placeholder="Nuevo parentesco (ej: TÍO / TÍA)..."
                   value={newParentesco}
                   onChange={(e) => setNewParentesco(e.target.value)}
-                  className="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-1 focus:ring-violet-500"
+                  className="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-violet-500"
                 />
                 <button
-                  onClick={() => {
-                    if (newParentesco.trim()) {
-                      setParentescos([...parentescos, newParentesco.trim().toUpperCase()]);
-                      setNewParentesco('');
-                      triggerToast();
-                    }
-                  }}
-                  className="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5"
+                  type="button"
+                  onClick={handleAddParentesco}
+                  className="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-sm transition"
                 >
                   <Plus className="w-3.5 h-3.5" /> Agregar
                 </button>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {parentescos.map((par, idx) => (
-                  <div key={idx} className="p-2.5 rounded-lg border border-slate-200 bg-white flex items-center justify-between text-xs">
-                    <span className="font-bold text-slate-700">{par}</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[380px] overflow-y-auto custom-comfortable-scrollbar">
+                {systemCatalogs.parentescos.map((par, idx) => (
+                  <div key={idx} className="p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between text-xs">
+                    <span className="font-bold text-slate-700 dark:text-slate-300">{par}</span>
                     <button
-                      onClick={() => setParentescos(parentescos.filter((_, i) => i !== idx))}
-                      className="text-slate-400 hover:text-rose-600 p-1"
+                      type="button"
+                      onClick={() => handleRemoveParentesco(par)}
+                      className="text-slate-400 hover:text-rose-600 p-1 transition"
+                      title="Eliminar del catálogo oficial en BD"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -957,38 +1177,43 @@ export const ConfiguracionAvanzadaView: React.FC = () => {
             </div>
           )}
 
-          {/* DETAIL 13: PROFESIONES */}
+          {/* DETAIL 13: PROFESIONES (CONEXIÓN DIRECTA CON SUPABASE) */}
           {activeSection === 'PROFESIONES' && (
             <div className="space-y-4">
-              <p className="text-xs text-slate-500">Catálogo de profesiones y oficios para fichas de representantes:</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Catálogo de profesiones y oficios para fichas de representantes:</p>
+                  <p className="text-[11px] text-slate-500">Sincronizado con tabla <code className="font-mono text-violet-600 dark:text-violet-400">system_catalogs</code></p>
+                </div>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded font-bold bg-violet-100 dark:bg-violet-950 text-violet-800 dark:text-violet-300 border border-violet-200 dark:border-violet-800">
+                  {systemCatalogs.profesiones.length} Profesiones
+                </span>
+              </div>
               <div className="flex gap-2">
                 <input
                   type="text"
                   placeholder="Nueva profesión u oficio..."
                   value={newProfesion}
                   onChange={(e) => setNewProfesion(e.target.value)}
-                  className="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-1 focus:ring-violet-500"
+                  className="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-violet-500"
                 />
                 <button
-                  onClick={() => {
-                    if (newProfesion.trim()) {
-                      setProfesiones([...profesiones, newProfesion.trim().toUpperCase()]);
-                      setNewProfesion('');
-                      triggerToast();
-                    }
-                  }}
-                  className="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5"
+                  type="button"
+                  onClick={handleAddProfesion}
+                  className="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-sm transition"
                 >
                   <Plus className="w-3.5 h-3.5" /> Agregar
                 </button>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[380px] overflow-y-auto no-scrollbar">
-                {profesiones.map((prof, idx) => (
-                  <div key={idx} className="p-2.5 rounded-lg border border-slate-200 bg-white flex items-center justify-between text-xs">
-                    <span className="font-medium text-slate-700">{prof}</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[380px] overflow-y-auto custom-comfortable-scrollbar">
+                {systemCatalogs.profesiones.map((prof, idx) => (
+                  <div key={idx} className="p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between text-xs">
+                    <span className="font-medium text-slate-700 dark:text-slate-300">{prof}</span>
                     <button
-                      onClick={() => setProfesiones(profesiones.filter((_, i) => i !== idx))}
-                      className="text-slate-400 hover:text-rose-600 p-1"
+                      type="button"
+                      onClick={() => handleRemoveProfesion(prof)}
+                      className="text-slate-400 hover:text-rose-600 p-1 transition"
+                      title="Eliminar del catálogo oficial en BD"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -998,41 +1223,46 @@ export const ConfiguracionAvanzadaView: React.FC = () => {
             </div>
           )}
 
-          {/* DETAIL 14: VACUNAS */}
+          {/* DETAIL 14: VACUNAS (CONEXIÓN DIRECTA CON SUPABASE) */}
           {activeSection === 'VACUNAS' && (
             <div className="space-y-4">
-              <p className="text-xs text-slate-500">Esquema nacional de vacunación para expedientes médicos de alumnos:</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Esquema nacional de vacunación para expedientes médicos de alumnos:</p>
+                  <p className="text-[11px] text-slate-500">Sincronizado con tabla <code className="font-mono text-violet-600 dark:text-violet-400">system_catalogs</code></p>
+                </div>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded font-bold bg-violet-100 dark:bg-violet-950 text-violet-800 dark:text-violet-300 border border-violet-200 dark:border-violet-800">
+                  {systemCatalogs.vacunas.length} Vacunas
+                </span>
+              </div>
               <div className="flex gap-2">
                 <input
                   type="text"
                   placeholder="Nueva vacuna o dosis..."
                   value={newVacuna}
                   onChange={(e) => setNewVacuna(e.target.value)}
-                  className="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-1 focus:ring-violet-500"
+                  className="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-violet-500"
                 />
                 <button
-                  onClick={() => {
-                    if (newVacuna.trim()) {
-                      setVacunas([...vacunas, newVacuna.trim()]);
-                      setNewVacuna('');
-                      triggerToast();
-                    }
-                  }}
-                  className="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5"
+                  type="button"
+                  onClick={handleAddVacuna}
+                  className="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-sm transition"
                 >
                   <Plus className="w-3.5 h-3.5" /> Agregar
                 </button>
               </div>
-              <div className="space-y-2">
-                {vacunas.map((vac, idx) => (
-                  <div key={idx} className="p-2.5 rounded-lg border border-slate-200 bg-white flex items-center justify-between text-xs">
+              <div className="space-y-2 max-h-[380px] overflow-y-auto custom-comfortable-scrollbar">
+                {systemCatalogs.vacunas.map((vac, idx) => (
+                  <div key={idx} className="p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between text-xs">
                     <div className="flex items-center gap-2">
-                      <Syringe className="w-4 h-4 text-violet-500" />
-                      <span className="font-bold text-slate-800">{vac}</span>
+                      <Syringe className="w-4 h-4 text-violet-500 shrink-0" />
+                      <span className="font-bold text-slate-800 dark:text-slate-200">{vac}</span>
                     </div>
                     <button
-                      onClick={() => setVacunas(vacunas.filter((_, i) => i !== idx))}
-                      className="text-slate-400 hover:text-rose-600 p-1"
+                      type="button"
+                      onClick={() => handleRemoveVacuna(vac)}
+                      className="text-slate-400 hover:text-rose-600 p-1 transition"
+                      title="Eliminar del catálogo oficial en BD"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -1042,41 +1272,46 @@ export const ConfiguracionAvanzadaView: React.FC = () => {
             </div>
           )}
 
-          {/* DETAIL 15: SERVICIOS MÉDICOS */}
+          {/* DETAIL 15: SERVICIOS MÉDICOS (CONEXIÓN DIRECTA CON SUPABASE) */}
           {activeSection === 'SERVICIOS_MEDICOS' && (
             <div className="space-y-4">
-              <p className="text-xs text-slate-500">Centros asistenciales y seguros médicos vinculados:</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Centros asistenciales y seguros médicos vinculados:</p>
+                  <p className="text-[11px] text-slate-500">Sincronizado con tabla <code className="font-mono text-violet-600 dark:text-violet-400">system_catalogs</code></p>
+                </div>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded font-bold bg-violet-100 dark:bg-violet-950 text-violet-800 dark:text-violet-300 border border-violet-200 dark:border-violet-800">
+                  {systemCatalogs.serviciosMedicos.length} Servicios
+                </span>
+              </div>
               <div className="flex gap-2">
                 <input
                   type="text"
                   placeholder="Nuevo servicio o seguro médico..."
                   value={newServicio}
                   onChange={(e) => setNewServicio(e.target.value)}
-                  className="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-1 focus:ring-violet-500"
+                  className="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-violet-500"
                 />
                 <button
-                  onClick={() => {
-                    if (newServicio.trim()) {
-                      setServiciosMedicos([...serviciosMedicos, newServicio.trim()]);
-                      setNewServicio('');
-                      triggerToast();
-                    }
-                  }}
-                  className="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5"
+                  type="button"
+                  onClick={handleAddServicio}
+                  className="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-sm transition"
                 >
                   <Plus className="w-3.5 h-3.5" /> Agregar
                 </button>
               </div>
-              <div className="space-y-2">
-                {serviciosMedicos.map((serv, idx) => (
-                  <div key={idx} className="p-2.5 rounded-lg border border-slate-200 bg-white flex items-center justify-between text-xs">
+              <div className="space-y-2 max-h-[380px] overflow-y-auto custom-comfortable-scrollbar">
+                {systemCatalogs.serviciosMedicos.map((serv, idx) => (
+                  <div key={idx} className="p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between text-xs">
                     <div className="flex items-center gap-2">
-                      <Stethoscope className="w-4 h-4 text-emerald-600" />
-                      <span className="font-bold text-slate-800">{serv}</span>
+                      <Stethoscope className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span className="font-bold text-slate-800 dark:text-slate-200">{serv}</span>
                     </div>
                     <button
-                      onClick={() => setServiciosMedicos(serviciosMedicos.filter((_, i) => i !== idx))}
-                      className="text-slate-400 hover:text-rose-600 p-1"
+                      type="button"
+                      onClick={() => handleRemoveServicio(serv)}
+                      className="text-slate-400 hover:text-rose-600 p-1 transition"
+                      title="Eliminar del catálogo oficial en BD"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -1086,101 +1321,114 @@ export const ConfiguracionAvanzadaView: React.FC = () => {
             </div>
           )}
 
-          {/* DETAIL 16: DATOS DE LA ESCUELA */}
+          {/* DETAIL 16: DATOS DE LA ESCUELA (CONEXIÓN DIRECTA CON SUPABASE) */}
           {activeSection === 'DATOS_ESCUELA' && (
             <div className="space-y-4">
-              <p className="text-xs text-slate-500">
-                Información legal e institucional utilizada en boletines, actas y constancias oficiales:
-              </p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                    Información legal e institucional utilizada en boletines, actas y constancias oficiales:
+                  </p>
+                  <p className="text-[11px] text-slate-500">Sincronizado con tabla <code className="font-mono text-violet-600 dark:text-violet-400">institutional_school_data</code></p>
+                </div>
+                <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold border ${
+                  isSupabaseActive
+                    ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800'
+                    : 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-800'
+                }`}>
+                  {isSavingCloud ? 'Sincronizando...' : (isSupabaseActive ? '● Conectado a BD Supabase' : '● Caché Local')}
+                </span>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1">Nombre Oficial del Plantel</label>
+                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Nombre Oficial del Plantel</label>
                   <input
                     type="text"
-                    value={schoolData.nombre}
-                    onChange={(e) => setSchoolData({ ...schoolData, nombre: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-1 focus:ring-violet-500 font-bold"
+                    value={editSchoolData.nombre}
+                    onChange={(e) => setEditSchoolData({ ...editSchoolData, nombre: e.target.value })}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-violet-500 font-bold"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1">Código DEA MPPE</label>
+                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Código DEA MPPE</label>
                   <input
                     type="text"
-                    value={schoolData.dea}
-                    onChange={(e) => setSchoolData({ ...schoolData, dea: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-1 focus:ring-violet-500 font-mono font-bold"
+                    value={editSchoolData.dea}
+                    onChange={(e) => setEditSchoolData({ ...editSchoolData, dea: e.target.value })}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-violet-500 font-mono font-bold"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1">R.I.F. Institucional</label>
+                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">R.I.F. Institucional</label>
                   <input
                     type="text"
-                    value={schoolData.rif}
-                    onChange={(e) => setSchoolData({ ...schoolData, rif: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-1 focus:ring-violet-500 font-mono"
+                    value={editSchoolData.rif}
+                    onChange={(e) => setEditSchoolData({ ...editSchoolData, rif: e.target.value })}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-violet-500 font-mono"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1">Circuito Escolar</label>
+                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Circuito Escolar</label>
                   <input
                     type="text"
-                    value={schoolData.circuito}
-                    onChange={(e) => setSchoolData({ ...schoolData, circuito: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-1 focus:ring-violet-500"
+                    value={editSchoolData.circuito}
+                    onChange={(e) => setEditSchoolData({ ...editSchoolData, circuito: e.target.value })}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-violet-500"
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1">Dirección de Sede</label>
+                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Dirección de Sede</label>
                   <input
                     type="text"
-                    value={schoolData.direccion}
-                    onChange={(e) => setSchoolData({ ...schoolData, direccion: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-1 focus:ring-violet-500"
+                    value={editSchoolData.direccion}
+                    onChange={(e) => setEditSchoolData({ ...editSchoolData, direccion: e.target.value })}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-violet-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1">Teléfonos de Contacto</label>
+                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Teléfonos de Contacto</label>
                   <input
                     type="text"
-                    value={schoolData.telefono}
-                    onChange={(e) => setSchoolData({ ...schoolData, telefono: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-1 focus:ring-violet-500"
+                    value={editSchoolData.telefono}
+                    onChange={(e) => setEditSchoolData({ ...editSchoolData, telefono: e.target.value })}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-violet-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1">Correo Institucional</label>
+                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Correo Institucional</label>
                   <input
                     type="email"
-                    value={schoolData.correo}
-                    onChange={(e) => setSchoolData({ ...schoolData, correo: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-1 focus:ring-violet-500"
+                    value={editSchoolData.correo}
+                    onChange={(e) => setEditSchoolData({ ...editSchoolData, correo: e.target.value })}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-violet-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1">Director(a) General</label>
+                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Director(a) General</label>
                   <input
                     type="text"
-                    value={schoolData.director}
-                    onChange={(e) => setSchoolData({ ...schoolData, director: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-1 focus:ring-violet-500 font-bold"
+                    value={editSchoolData.director}
+                    onChange={(e) => setEditSchoolData({ ...editSchoolData, director: e.target.value })}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-violet-500 font-bold"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1">Subdirector(a) / Coordinador(a)</label>
+                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Subdirector(a) / Coordinador(a)</label>
                   <input
                     type="text"
-                    value={schoolData.subdirector}
-                    onChange={(e) => setSchoolData({ ...schoolData, subdirector: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-1 focus:ring-violet-500"
+                    value={editSchoolData.subdirector}
+                    onChange={(e) => setEditSchoolData({ ...editSchoolData, subdirector: e.target.value })}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-violet-500"
                   />
                 </div>
               </div>
               <div className="pt-2 flex justify-end">
                 <button
-                  onClick={triggerToast}
+                  type="button"
+                  onClick={handleSaveSchoolData}
                   className="px-5 py-2.5 bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold rounded-xl flex items-center gap-2 shadow-sm transition"
                 >
-                  <Save className="w-4 h-4" /> Guardar Datos Institucionales
+                  <Save className="w-4 h-4" /> Guardar en Base de Datos
                 </button>
               </div>
             </div>

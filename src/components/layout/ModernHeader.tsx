@@ -364,7 +364,7 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
                 const rawName = currentUser?.fullName?.trim() || currentUser?.username || currentRole;
                 const firstName = rawName.split(' ')[0] || rawName;
                 return (
-                  <span className="inline max-w-[120px] sm:max-w-[140px] truncate uppercase font-extrabold tracking-wide">
+                  <span className="hidden sm:inline max-w-[120px] sm:max-w-[140px] truncate uppercase font-extrabold tracking-wide">
                     {firstName}
                   </span>
                 );
