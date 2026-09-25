@@ -276,7 +276,7 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
           <button
             type="button"
             onClick={onOpenSearch}
-            className="md:hidden min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#141525] hover:bg-[#2C2E53] active:scale-95 text-[#D4AF37] border border-[#2C2E53] transition-all shadow-inner flex items-center justify-center shrink-0 cursor-pointer"
+            className="md:hidden min-h-[40px] min-w-[40px] p-2 rounded-xl bg-[#141525] hover:bg-[#2C2E53] active:scale-95 text-[#D4AF37] border border-[#2C2E53] transition-all shadow-inner flex items-center justify-center shrink-0 cursor-pointer"
             title="Buscar en todo el sistema (Ctrl+K)"
             aria-label="Buscar"
           >
@@ -288,7 +288,7 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
             <button
               type="button"
               onClick={onOpenShortcuts}
-              className="hidden sm:flex min-h-[44px] min-w-[44px] p-2 sm:p-2.5 rounded-xl bg-[#141525] hover:bg-[#2C2E53] active:scale-95 text-[#D4AF37] border border-[#2C2E53] transition-all shadow-inner items-center justify-center shrink-0 cursor-pointer"
+              className="hidden sm:flex min-h-[40px] min-w-[40px] p-2 sm:p-2.5 rounded-xl bg-[#141525] hover:bg-[#2C2E53] active:scale-95 text-[#D4AF37] border border-[#2C2E53] transition-all shadow-inner items-center justify-center shrink-0 cursor-pointer"
               title="Atajos de Teclado del Sistema (Presiona ?)"
               aria-label="Atajos de Teclado"
             >
@@ -306,7 +306,7 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
           <div className="relative shrink-0">
             <button
               onClick={() => setLapsoMenuOpen(!lapsoMenuOpen)}
-              className="min-h-[44px] flex items-center gap-1 sm:gap-1.5 bg-[#2C2E53] hover:bg-[#353866] active:scale-95 text-white px-2.5 sm:px-3 py-2 rounded-xl border border-[#414474] text-xs font-bold transition-all whitespace-nowrap cursor-pointer"
+              className="min-h-[40px] flex items-center gap-1 sm:gap-1.5 bg-[#2C2E53] hover:bg-[#353866] active:scale-95 text-white px-2 sm:px-2.5 py-1.5 rounded-xl border border-[#414474] text-xs font-bold transition-all whitespace-nowrap cursor-pointer"
               aria-label="Selector de Lapso"
             >
               <Calendar className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
@@ -349,7 +349,7 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
           <div className="relative shrink-0">
             <button
               onClick={() => setRoleMenuOpen(!roleMenuOpen)}
-              className="min-h-[44px] flex items-center gap-1.5 bg-[#2C2E53] hover:bg-[#353866] active:scale-95 text-white px-2.5 sm:px-3 py-2 rounded-xl border border-[#414474] text-xs font-bold transition-all whitespace-nowrap cursor-pointer"
+              className="min-h-[40px] flex items-center gap-1 sm:gap-1.5 bg-[#2C2E53] hover:bg-[#353866] active:scale-95 text-white px-2 sm:px-2.5 py-1.5 rounded-xl border border-[#414474] text-xs font-bold transition-all whitespace-nowrap cursor-pointer"
               title={`Usuario: ${currentUser?.fullName || currentUser?.username || 'Usuario'} • Rol: ${currentRole}`}
               aria-label="Menú de Usuario y Rol"
             >
@@ -371,7 +371,7 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
                 const rawName = currentUser?.fullName?.trim() || currentUser?.username || currentRole;
                 const firstName = rawName.split(' ')[0] || rawName;
                 return (
-                  <span className="hidden sm:inline max-w-[120px] sm:max-w-[140px] truncate uppercase font-extrabold tracking-wide">
+                  <span className="hidden md:inline max-w-[100px] lg:max-w-[130px] truncate uppercase font-extrabold tracking-wide">
                     {firstName}
                   </span>
                 );
@@ -492,8 +492,9 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
           {/* Direct Logout Action Button */}
           <button
             onClick={logout}
-            className="p-1.5 sm:p-2 rounded-xl bg-rose-500/15 hover:bg-rose-600 text-rose-300 hover:text-white transition border border-rose-500/30 focus:outline-none shrink-0"
+            className="min-h-[40px] min-w-[40px] p-2 rounded-xl bg-rose-500/15 hover:bg-rose-600 active:scale-95 text-rose-300 hover:text-white transition border border-rose-500/30 focus:outline-none flex items-center justify-center shrink-0 cursor-pointer"
             title="Cerrar Sesión (Ir a pantalla de Login)"
+            aria-label="Cerrar Sesión"
           >
             <LogOut className="w-4 h-4" />
           </button>
