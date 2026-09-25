@@ -437,3 +437,45 @@ export interface SystemNotification {
   deliveryChannels: NotificationDeliveryChannel[];
 }
 
+export interface PrivilegeItem {
+  nro: number;
+  categoria: string;
+  opcion: string;
+  descripcion: string;
+  habilitar: boolean;
+}
+
+export interface RolePrivilegeGroup {
+  nombre: string;
+  total: number;
+  privilegios: PrivilegeItem[];
+}
+
+export interface SystemPrivilegesMatrix {
+  roles: RolePrivilegeGroup[];
+}
+
+export type ScheduleDay = 'LUNES' | 'MARTES' | 'MIERCOLES' | 'JUEVES' | 'VIERNES';
+
+export interface ScheduleBlock {
+  id: string;
+  day: ScheduleDay;
+  startTime: string; // ej. "07:00"
+  endTime: string;   // ej. "07:45"
+  periodIndex: number; // 1..8
+  subjectAreaId?: string;
+  subjectName: string;
+  level: EducationalLevel;
+  gradeSection: string; // ej. "4to Año A", "5to Grado B"
+  classroom?: string;   // ej. "Aula 14", "Lab de Computación", "Cancha"
+  color?: string;       // Color temático para la grilla
+}
+
+export interface UserSchedule {
+  userId: string;
+  userRole?: UserRole;
+  schoolYear: string;   // ej. "2026 - 2027"
+  blocks: ScheduleBlock[];
+  updatedAt?: string;
+}
+

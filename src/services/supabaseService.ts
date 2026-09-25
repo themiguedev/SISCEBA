@@ -22,7 +22,9 @@ import {
   EducationalLevel,
   PlanLapso,
   RegistrationCode,
-  SchoolYearConfig
+  SchoolYearConfig,
+  SystemPrivilegesMatrix,
+  UserSchedule
 } from '../types';
 import {
   encodeUserAvatarWithMetadata,
@@ -1129,6 +1131,132 @@ export const supabaseSaveSchoolYearConfig = async (config: SchoolYearConfig): Pr
     return !error;
   } catch (e) {
     console.error('Error en supabaseSaveSchoolYearConfig:', e);
+    return false;
+  }
+};
+
+// ==========================================
+// 18. PRIVILEGIOS DEL SISTEMA CEO (system_privileges)
+// ==========================================
+export const supabaseFetchPrivileges = async (): Promise<SystemPrivilegesMatrix | null> => {
+  if (!isSupabaseConfigured()) return null;
+  try {
+    const { data, error } = await supabase
+      .from('system_privileges')
+      .select('*')
+      .eq('id', 'ceo_matrix_v1')
+      .maybeSingle();
+
+    if (error || !data) {
+      if (error && error.code !== 'PGRST116') {
+        console.warn('Supabase fetch system_privileges aviso:', error.message);
+      }
+      return null;
+    }
+
+    if (data.matrix && data.matrix.roles) {
+      return data.matrix as SystemPrivilegesMatrix;
+    }
+    return null;
+  } catch (e) {
+    console.error('Error en supabaseFetchPrivileges:', e);
+    return null;
+  }
+};
+
+export const supabaseSavePrivileges = async (matrix: SystemPrivilegesMatrix): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('system_privileges').upsert({
+      id: 'ceo_matrix_v1',
+      matrix: matrix,
+      updated_at: new Date().toISOString()
+    });
+    if (error) {
+      console.warn('Error al guardar privilegios en Supabase:', error.message);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error('Error en supabaseSavePrivileges:', e);
+    return false;
+  }
+};
+
+// ==========================================
+// 19. HORARIOS DE USUARIOS / PERSONAL (user_schedules)
+// ==========================================
+export const supabaseFetchUserSchedule = async (userId: string): Promise<UserSchedule | null> => {
+  if (!isSupabaseConfigured() || !userId) return null;
+  try {
+    const { data, error } = await supabase
+      .from('user_schedules')
+      .select('*')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (error || !data) {
+      if (error && error.code !== 'PGRST116') {
+        console.warn(`Supabase fetch user_schedules (${userId}) aviso:`, error.message);
+      }
+      return null;
+    }
+
+    return {
+      userId: data.user_id,
+      userRole: data.user_role || undefined,
+      schoolYear: data.school_year || '2026 - 2027',
+      blocks: Array.isArray(data.blocks) ? data.blocks : [],
+      updatedAt: data.updated_at
+    };
+  } catch (e) {
+    console.error('Error en supabaseFetchUserSchedule:', e);
+    return null;
+  }
+};
+
+export const supabaseFetchAllUserSchedules = async (): Promise<UserSchedule[] | null> => {
+  if (!isSupabaseConfigured()) return null;
+  try {
+    const { data, error } = await supabase.from('user_schedules').select('*');
+    if (error || !data) {
+      if (error && error.code !== 'PGRST116') {
+        console.warn('Supabase fetch all user_schedules aviso:', error.message);
+      }
+      return null;
+    }
+
+    return data.map(row => ({
+      userId: row.user_id,
+      userRole: row.user_role || undefined,
+      schoolYear: row.school_year || '2026 - 2027',
+      blocks: Array.isArray(row.blocks) ? row.blocks : [],
+      updatedAt: row.updated_at
+    }));
+  } catch (e) {
+    console.error('Error en supabaseFetchAllUserSchedules:', e);
+    return null;
+  }
+};
+
+export const supabaseSaveUserSchedule = async (schedule: UserSchedule): Promise<boolean> => {
+  if (!isSupabaseConfigured() || !schedule.userId) return false;
+  try {
+    const { error } = await supabase.from('user_schedules').upsert({
+      user_id: schedule.userId,
+      user_role: schedule.userRole || null,
+      school_year: schedule.schoolYear || '2026 - 2027',
+      blocks: schedule.blocks || [],
+      updated_at: new Date().toISOString()
+    });
+
+    if (error) {
+      console.warn(`Error al guardar horario para ${schedule.userId} en Supabase:`, error.message);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error('Error en supabaseSaveUserSchedule:', e);
     return false;
   }
 };

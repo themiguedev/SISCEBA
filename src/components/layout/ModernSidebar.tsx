@@ -126,6 +126,7 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
       subTabs: [
         { id: 'DASHBOARD', label: 'Tablero Principal', icon: Monitor },
         { id: 'PERFIL', label: 'Mi Perfil de Usuario', icon: UserCheck },
+        { id: 'HORARIO', label: 'Horario Institucional', icon: Clock },
         { id: 'SUGERENCIAS', label: 'Ideas y Sugerencias', icon: Sparkles }
       ]
     },

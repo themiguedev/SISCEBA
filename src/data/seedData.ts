@@ -20,7 +20,8 @@ import {
   SchoolYearConfig,
   CommunityNotice,
   BirthdayPerson,
-  AppUser
+  AppUser,
+  UserSchedule
 } from '../types';
 import {
   SVG_MALE_CYAN,
@@ -1047,6 +1048,77 @@ export const INITIAL_USERS: AppUser[] = [
     gender: 'FEMENINO',
     active: true,
     avatarUrl: SVG_FEMALE_CIRCLE_TEAL
+  }
+];
+
+export const INITIAL_USER_SCHEDULES: UserSchedule[] = [
+  {
+    userId: 'usr-admin',
+    userRole: 'ADMINISTRADOR',
+    schoolYear: '2026 - 2027',
+    blocks: [
+      { id: 'sch-adm-1', day: 'LUNES', periodIndex: 1, startTime: '07:00', endTime: '07:45', subjectName: 'Auditoría & Seguridad de Sistemas', level: 'MEDIA_GENERAL', gradeSection: 'Sede Central', classroom: 'Sala de Servidores', color: 'sky' },
+      { id: 'sch-adm-2', day: 'LUNES', periodIndex: 2, startTime: '07:45', endTime: '08:30', subjectName: 'Monitoreo de Infraestructura y BD', level: 'MEDIA_GENERAL', gradeSection: 'Sede Central', classroom: 'Sala de Servidores', color: 'sky' },
+      { id: 'sch-adm-3', day: 'MARTES', periodIndex: 3, startTime: '08:45', endTime: '09:30', subjectName: 'Respaldo y Mantenimiento Cloud', level: 'MEDIA_GENERAL', gradeSection: 'Plantel CBA', classroom: 'Dirección de TI', color: 'indigo' },
+      { id: 'sch-adm-4', day: 'MIERCOLES', periodIndex: 2, startTime: '07:45', endTime: '08:30', subjectName: 'Configuración y Asignación de Roles', level: 'MEDIA_GENERAL', gradeSection: 'Plantel CBA', classroom: 'Dirección de TI', color: 'violet' },
+      { id: 'sch-adm-5', day: 'JUEVES', periodIndex: 4, startTime: '09:30', endTime: '10:15', subjectName: 'Soporte Técnico Docente', level: 'MEDIA_GENERAL', gradeSection: 'Plantel CBA', classroom: 'Salas de Computación', color: 'emerald' },
+      { id: 'sch-adm-6', day: 'VIERNES', periodIndex: 5, startTime: '10:30', endTime: '11:15', subjectName: 'Cierre de Auditoría Semanal', level: 'MEDIA_GENERAL', gradeSection: 'Sede Central', classroom: 'Dirección de TI', color: 'amber' }
+    ]
+  },
+  {
+    userId: 'usr-doc-ciencias',
+    userRole: 'DOCENTE',
+    schoolYear: '2026 - 2027',
+    blocks: [
+      { id: 'sch-doc-1', day: 'LUNES', periodIndex: 1, startTime: '07:00', endTime: '07:45', subjectName: 'Física', level: 'MEDIA_GENERAL', gradeSection: '4to Año A', classroom: 'Laboratorio de Ciencias 1', color: 'blue' },
+      { id: 'sch-doc-2', day: 'LUNES', periodIndex: 2, startTime: '07:45', endTime: '08:30', subjectName: 'Física', level: 'MEDIA_GENERAL', gradeSection: '4to Año A', classroom: 'Laboratorio de Ciencias 1', color: 'blue' },
+      { id: 'sch-doc-3', day: 'LUNES', periodIndex: 4, startTime: '09:30', endTime: '10:15', subjectName: 'Química', level: 'MEDIA_GENERAL', gradeSection: '3er Año B', classroom: 'Aula 12', color: 'emerald' },
+      { id: 'sch-doc-4', day: 'MARTES', periodIndex: 2, startTime: '07:45', endTime: '08:30', subjectName: 'Física Teórica', level: 'MEDIA_GENERAL', gradeSection: '5to Año A', classroom: 'Aula 15', color: 'indigo' },
+      { id: 'sch-doc-5', day: 'MARTES', periodIndex: 3, startTime: '08:45', endTime: '09:30', subjectName: 'Física Práctica', level: 'MEDIA_GENERAL', gradeSection: '5to Año A', classroom: 'Laboratorio de Física', color: 'indigo' },
+      { id: 'sch-doc-6', day: 'MIERCOLES', periodIndex: 1, startTime: '07:00', endTime: '07:45', subjectName: 'Ciencias Naturales', level: 'PRIMARIA', gradeSection: '6to Grado A', classroom: 'Aula 8', color: 'amber' },
+      { id: 'sch-doc-7', day: 'MIERCOLES', periodIndex: 2, startTime: '07:45', endTime: '08:30', subjectName: 'Ciencias Naturales', level: 'PRIMARIA', gradeSection: '6to Grado A', classroom: 'Aula 8', color: 'amber' },
+      { id: 'sch-doc-8', day: 'JUEVES', periodIndex: 3, startTime: '08:45', endTime: '09:30', subjectName: 'Química Orgánica', level: 'MEDIA_GENERAL', gradeSection: '5to Año B', classroom: 'Laboratorio de Química', color: 'purple' },
+      { id: 'sch-doc-9', day: 'JUEVES', periodIndex: 4, startTime: '09:30', endTime: '10:15', subjectName: 'Química Orgánica', level: 'MEDIA_GENERAL', gradeSection: '5to Año B', classroom: 'Laboratorio de Química', color: 'purple' },
+      { id: 'sch-doc-10', day: 'VIERNES', periodIndex: 2, startTime: '07:45', endTime: '08:30', subjectName: 'Tutoría Académica y Planificación', level: 'MEDIA_GENERAL', gradeSection: '4to Año A', classroom: 'Sala de Profesores', color: 'teal' }
+    ]
+  },
+  {
+    userId: 'usr-director',
+    userRole: 'DIRECTOR',
+    schoolYear: '2026 - 2027',
+    blocks: [
+      { id: 'sch-dir-1', day: 'LUNES', periodIndex: 1, startTime: '07:00', endTime: '07:45', subjectName: 'Reunión Directiva y Acto Cívico', level: 'MEDIA_GENERAL', gradeSection: 'Plantel CBA', classroom: 'Patio Central', color: 'amber' },
+      { id: 'sch-dir-2', day: 'MARTES', periodIndex: 3, startTime: '08:45', endTime: '09:30', subjectName: 'Atención a Padres y Representantes', level: 'MEDIA_GENERAL', gradeSection: 'Comunidad CBA', classroom: 'Dirección General', color: 'blue' },
+      { id: 'sch-dir-3', day: 'MIERCOLES', periodIndex: 4, startTime: '09:30', endTime: '10:15', subjectName: 'Supervisión Pedagógica', level: 'PRIMARIA', gradeSection: 'Pabellón Primaria', classroom: 'Aulas 1-6', color: 'emerald' },
+      { id: 'sch-dir-4', day: 'JUEVES', periodIndex: 3, startTime: '08:45', endTime: '09:30', subjectName: 'Supervisión de Evaluación y Control', level: 'MEDIA_GENERAL', gradeSection: 'Control de Estudios', classroom: 'Oficina UCE', color: 'indigo' },
+      { id: 'sch-dir-5', day: 'VIERNES', periodIndex: 5, startTime: '10:30', endTime: '11:15', subjectName: 'Consejo Técnico Docente', level: 'MEDIA_GENERAL', gradeSection: 'Cuerpo Docente', classroom: 'Auditorio CBA', color: 'violet' }
+    ]
+  },
+  {
+    userId: 'usr-asistente',
+    userRole: 'ASISTENTE',
+    schoolYear: '2026 - 2027',
+    blocks: [
+      { id: 'sch-ast-1', day: 'LUNES', periodIndex: 1, startTime: '07:00', endTime: '07:45', subjectName: 'Control de Acceso y Pases por Retraso', level: 'MEDIA_GENERAL', gradeSection: 'Todos los niveles', classroom: 'Portería / Entrada Principal', color: 'rose' },
+      { id: 'sch-ast-2', day: 'LUNES', periodIndex: 2, startTime: '07:45', endTime: '08:30', subjectName: 'Toma de Inasistencias en Aulas', level: 'MEDIA_GENERAL', gradeSection: 'Media General', classroom: 'Pasillos 1er y 2do Piso', color: 'amber' },
+      { id: 'sch-ast-3', day: 'MARTES', periodIndex: 1, startTime: '07:00', endTime: '07:45', subjectName: 'Control de Acceso y Pases por Retraso', level: 'MEDIA_GENERAL', gradeSection: 'Todos los niveles', classroom: 'Portería / Entrada Principal', color: 'rose' },
+      { id: 'sch-ast-4', day: 'MARTES', periodIndex: 4, startTime: '09:30', endTime: '10:15', subjectName: 'Ronda de Convivencia y Disciplina', level: 'MEDIA_GENERAL', gradeSection: 'Canchas y Recreo', classroom: 'Áreas Comunes', color: 'emerald' },
+      { id: 'sch-ast-5', day: 'MIERCOLES', periodIndex: 1, startTime: '07:00', endTime: '07:45', subjectName: 'Control de Acceso y Pases por Retraso', level: 'MEDIA_GENERAL', gradeSection: 'Todos los niveles', classroom: 'Portería / Entrada Principal', color: 'rose' },
+      { id: 'sch-ast-6', day: 'JUEVES', periodIndex: 1, startTime: '07:00', endTime: '07:45', subjectName: 'Control de Acceso y Pases por Retraso', level: 'MEDIA_GENERAL', gradeSection: 'Todos los niveles', classroom: 'Portería / Entrada Principal', color: 'rose' },
+      { id: 'sch-ast-7', day: 'VIERNES', periodIndex: 1, startTime: '07:00', endTime: '07:45', subjectName: 'Control de Acceso y Pases por Retraso', level: 'MEDIA_GENERAL', gradeSection: 'Todos los niveles', classroom: 'Portería / Entrada Principal', color: 'rose' }
+    ]
+  },
+  {
+    userId: 'usr-secretaria',
+    userRole: 'SECRETARIA',
+    schoolYear: '2026 - 2027',
+    blocks: [
+      { id: 'sch-sec-1', day: 'LUNES', periodIndex: 1, startTime: '07:00', endTime: '07:45', subjectName: 'Recepción y Trámites de Constancias', level: 'MEDIA_GENERAL', gradeSection: 'Secretaría UCE', classroom: 'Ventanilla 1', color: 'indigo' },
+      { id: 'sch-sec-2', day: 'MARTES', periodIndex: 2, startTime: '07:45', endTime: '08:30', subjectName: 'Actualización de Padrón y Expedientes', level: 'MEDIA_GENERAL', gradeSection: 'Secretaría UCE', classroom: 'Archivo Central', color: 'blue' },
+      { id: 'sch-sec-3', day: 'MIERCOLES', periodIndex: 3, startTime: '08:45', endTime: '09:30', subjectName: 'Emisión de Notas Certificadas y Títulos', level: 'MEDIA_GENERAL', gradeSection: 'Secretaría UCE', classroom: 'Ventanilla 2', color: 'teal' },
+      { id: 'sch-sec-4', day: 'JUEVES', periodIndex: 2, startTime: '07:45', endTime: '08:30', subjectName: 'Gestión de Inscripciones y Prosecución', level: 'MEDIA_GENERAL', gradeSection: 'Secretaría UCE', classroom: 'Ventanilla 1', color: 'sky' },
+      { id: 'sch-sec-5', day: 'VIERNES', periodIndex: 4, startTime: '09:30', endTime: '10:15', subjectName: 'Auditoría de Documentos Pendientes', level: 'MEDIA_GENERAL', gradeSection: 'Secretaría UCE', classroom: 'Archivo Central', color: 'violet' }
+    ]
   }
 ];
 

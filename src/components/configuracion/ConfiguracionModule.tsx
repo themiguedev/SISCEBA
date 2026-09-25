@@ -171,90 +171,84 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
           </p>
         </div>
 
-        {/* Tab Switcher */}
-        <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 overflow-x-auto no-scrollbar">
+        {/* Tab Switcher - Flex-wrap responsivo y badges limpios sin desbordamiento */}
+        <div className="w-full sm:w-auto flex flex-wrap items-center gap-1.5 bg-slate-100 dark:bg-slate-800/90 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-700/80 shadow-inner">
           {allowedTabs.includes('LAPSOS') && (
             <button
               onClick={() => setActiveTab('LAPSOS')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'LAPSOS'
-                  ? 'bg-[#20162B] text-violet-300 shadow-sm border border-violet-500/40'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  ? 'bg-[#1B1C33] text-[#D4AF37] shadow-sm border border-[#D4AF37]/40 ring-1 ring-[#D4AF37]/30'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/50'
               }`}
             >
-              <Calendar className={`w-3.5 h-3.5 shrink-0 ${activeTab === 'LAPSOS' ? 'text-violet-400' : 'text-slate-400'}`} />
-              <span className="hidden sm:inline">Años Escolares y Lapsos</span>
-              <span className="sm:hidden">Lapsos</span>
+              <Calendar className={`w-3.5 h-3.5 shrink-0 ${activeTab === 'LAPSOS' ? 'text-[#D4AF37]' : 'text-slate-400'}`} />
+              <span>Años Escolares y Lapsos</span>
             </button>
           )}
           {allowedTabs.includes('ESTRUCTURA') && (
             <button
               onClick={() => setActiveTab('ESTRUCTURA')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'ESTRUCTURA'
-                  ? 'bg-[#20162B] text-violet-300 shadow-sm border border-violet-500/40'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  ? 'bg-[#1B1C33] text-[#D4AF37] shadow-sm border border-[#D4AF37]/40 ring-1 ring-[#D4AF37]/30'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/50'
               }`}
             >
-              <Layers className={`w-3.5 h-3.5 shrink-0 ${activeTab === 'ESTRUCTURA' ? 'text-violet-400' : 'text-slate-400'}`} />
-              <span className="hidden sm:inline">Grados y Secciones</span>
-              <span className="sm:hidden">Estructura</span>
+              <Layers className={`w-3.5 h-3.5 shrink-0 ${activeTab === 'ESTRUCTURA' ? 'text-[#D4AF37]' : 'text-slate-400'}`} />
+              <span>Grados y Secciones</span>
             </button>
           )}
           {allowedTabs.includes('DOCENTES') && (
             <button
               onClick={() => setActiveTab('DOCENTES')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'DOCENTES'
-                  ? 'bg-[#20162B] text-violet-300 shadow-sm border border-violet-500/40'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  ? 'bg-[#1B1C33] text-[#D4AF37] shadow-sm border border-[#D4AF37]/40 ring-1 ring-[#D4AF37]/30'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/50'
               }`}
             >
-              <UserCheck className={`w-3.5 h-3.5 shrink-0 ${activeTab === 'DOCENTES' ? 'text-violet-400' : 'text-slate-400'}`} />
-              <span className="hidden sm:inline">Carga Horaria y Docentes</span>
-              <span className="sm:hidden">Docentes</span>
+              <UserCheck className={`w-3.5 h-3.5 shrink-0 ${activeTab === 'DOCENTES' ? 'text-[#D4AF37]' : 'text-slate-400'}`} />
+              <span>Carga Horaria y Docentes</span>
             </button>
           )}
           {allowedTabs.includes('TEMAS') && (
             <button
               onClick={() => setActiveTab('TEMAS')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'TEMAS'
-                  ? 'bg-[#20162B] text-violet-300 shadow-sm border border-violet-500/40'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  ? 'bg-[#1B1C33] text-[#D4AF37] shadow-sm border border-[#D4AF37]/40 ring-1 ring-[#D4AF37]/30'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/50'
               }`}
             >
-              <Palette className={`w-3.5 h-3.5 shrink-0 ${activeTab === 'TEMAS' ? 'text-violet-400' : 'text-slate-400'}`} />
-              <span className="hidden sm:inline">Apariencia y Temas</span>
-              <span className="sm:hidden">Temas</span>
+              <Palette className={`w-3.5 h-3.5 shrink-0 ${activeTab === 'TEMAS' ? 'text-[#D4AF37]' : 'text-slate-400'}`} />
+              <span>Apariencia y Temas</span>
             </button>
           )}
           {allowedTabs.includes('CONFIG_CEO') && (
             <button
               onClick={() => setActiveTab('CONFIG_CEO')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'CONFIG_CEO'
-                  ? 'bg-amber-600 text-white shadow-sm border border-amber-400'
-                  : 'text-amber-800 dark:text-amber-300 hover:text-amber-950 dark:hover:text-white bg-amber-50/70 dark:bg-amber-950/40'
+                  ? 'bg-amber-600 text-white shadow-sm border border-amber-400 ring-1 ring-amber-400/40'
+                  : 'text-amber-800 dark:text-amber-300 hover:text-amber-950 dark:hover:text-white bg-amber-50/80 dark:bg-amber-950/40'
               }`}
             >
               <Settings className={`w-3.5 h-3.5 shrink-0 ${activeTab === 'CONFIG_CEO' ? 'text-white' : 'text-amber-600'}`} />
-              <span className="hidden sm:inline">Configuración CEO</span>
-              <span className="sm:hidden">CEO</span>
+              <span>Configuración CEO</span>
             </button>
           )}
           {allowedTabs.includes('AVANZADA') && (
             <button
               onClick={() => setActiveTab('AVANZADA')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'AVANZADA'
-                  ? 'bg-violet-700 text-white shadow-sm border border-violet-400'
-                  : 'text-violet-700 dark:text-violet-300 hover:text-violet-900 dark:hover:text-white bg-violet-50/70 dark:bg-violet-950/40'
+                  ? 'bg-violet-700 text-white shadow-sm border border-violet-400 ring-1 ring-violet-400/40'
+                  : 'text-violet-700 dark:text-violet-300 hover:text-violet-900 dark:hover:text-white bg-violet-50/80 dark:bg-violet-950/40'
               }`}
             >
               <SlidersHorizontal className={`w-3.5 h-3.5 shrink-0 ${activeTab === 'AVANZADA' ? 'text-white' : 'text-violet-500'}`} />
-              <span className="hidden sm:inline">Conf. Avanzada</span>
-              <span className="sm:hidden">Avanzada</span>
+              <span>Conf. Avanzada</span>
             </button>
           )}
         </div>

@@ -29,7 +29,10 @@ import {
   MainNavigationTab,
   SystemNotification,
   AppUser,
-  RegistrationCode
+  RegistrationCode,
+  SystemPrivilegesMatrix,
+  UserSchedule,
+  ScheduleBlock
 } from '../types';
 import {
   hashPassword,
@@ -41,6 +44,7 @@ import {
   verifyTOTPCode
 } from '../utils/security';
 import { getDefaultAvatarForUser, decodeUserAvatarMetadata } from '../utils/avatarCatalog';
+import PRIVILEGIOS_DATA from '../data/privilegiosCEO.json';
 import {
   INITIAL_AREAS,
   INITIAL_COMPETENCIES,
@@ -63,7 +67,8 @@ import {
   INITIAL_SCHOOL_YEAR_CONFIG,
   INITIAL_COMMUNITY_NOTICES,
   INITIAL_BIRTHDAYS,
-  INITIAL_USERS
+  INITIAL_USERS,
+  INITIAL_USER_SCHEDULES
 } from '../data/seedData';
 import { supabase, isSupabaseConfigured, checkSupabaseConnection } from '../lib/supabaseClient';
 import {
@@ -107,7 +112,11 @@ import {
   supabaseSaveCommunityNotice,
   supabaseSaveNotification,
   supabaseClearNotifications,
-  supabaseSaveUser
+  supabaseSaveUser,
+  supabaseFetchPrivileges,
+  supabaseSavePrivileges,
+  supabaseFetchAllUserSchedules,
+  supabaseSaveUserSchedule
 } from '../services/supabaseService';
 
 interface AppContextType {
@@ -226,6 +235,17 @@ interface AppContextType {
   markNotificationAsRead: (id: string) => void;
   markAllNotificationsAsRead: () => void;
   clearNotifications: () => void;
+
+  // CEO Privileges Matrix (Database Connected)
+  systemPrivileges: SystemPrivilegesMatrix;
+  toggleSystemPrivilege: (roleName: string, privilegeNro: number) => Promise<boolean>;
+  resetSystemPrivileges: () => Promise<boolean>;
+
+  // User Schedule (Database Connected)
+  userSchedules: UserSchedule[];
+  currentUserSchedule: UserSchedule | null;
+  saveUserSchedule: (schedule: UserSchedule) => Promise<boolean>;
+  getUserSchedule: (userId: string) => UserSchedule | null;
 
   // Helpers
   resetToSeedData: () => void;
@@ -714,6 +734,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return saved ? JSON.parse(saved) : INITIAL_AREAS;
   });
 
+  // Privilegios CEO del Sistema (Conexión Directa con la BD)
+  const [systemPrivileges, setSystemPrivileges] = useState<SystemPrivilegesMatrix>(() => {
+    const saved = localStorage.getItem('sisceba_system_privileges_cache');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed?.roles && parsed.roles.length > 0) return parsed;
+      } catch {
+        /* fallback to seed */
+      }
+    }
+    return PRIVILEGIOS_DATA as SystemPrivilegesMatrix;
+  });
+
+  // Horarios de Usuarios (Conexión Directa con la BD)
+  const [userSchedules, setUserSchedules] = useState<UserSchedule[]>(() => {
+    const saved = localStorage.getItem('sisceba_user_schedules');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        /* fallback */
+      }
+    }
+    return INITIAL_USER_SCHEDULES;
+  });
+
   const refreshFromSupabase = async () => {
     if (!isSupabaseConfigured()) {
       setIsSupabaseActive(false);
@@ -752,7 +799,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         remoteUsers,
         remotePlansLapso,
         remoteCodes,
-        remoteSchoolYear
+        remoteSchoolYear,
+        remotePrivileges,
+        remoteSchedules
       ] = await Promise.all([
         supabaseFetchStudents(),
         supabaseFetchSubjectAreas(),
@@ -772,7 +821,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         supabaseFetchUsers(),
         supabaseFetchPlansLapso(),
         supabaseFetchRegistrationCodes(),
-        supabaseFetchSchoolYearConfig()
+        supabaseFetchSchoolYearConfig(),
+        supabaseFetchPrivileges(),
+        supabaseFetchAllUserSchedules()
       ]);
 
       if (remoteStudents !== null) setStudents(remoteStudents);
@@ -785,6 +836,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (remotePlansLapso !== null) setPlansLapso(remotePlansLapso);
       if (remoteCodes !== null) setRegistrationCodes(remoteCodes);
       if (remoteSchoolYear !== null) setSchoolYearConfig(remoteSchoolYear);
+      if (remotePrivileges !== null) {
+        setSystemPrivileges(remotePrivileges);
+        localStorage.setItem('sisceba_system_privileges_cache', JSON.stringify(remotePrivileges));
+      }
+      if (remoteSchedules !== null && remoteSchedules.length > 0) {
+        setUserSchedules(remoteSchedules);
+        localStorage.setItem('sisceba_user_schedules', JSON.stringify(remoteSchedules));
+      }
       if (remotePasses !== null) setPasses(remotePasses);
       if (remoteAttendance !== null) setDailyAttendance(remoteAttendance);
       if (remoteConducts !== null) setConducts(remoteConducts);
@@ -1558,6 +1617,98 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return newNotice;
   };
 
+  const toggleSystemPrivilege = async (roleName: string, privilegeNro: number): Promise<boolean> => {
+    let nextMatrix: SystemPrivilegesMatrix | null = null;
+
+    setSystemPrivileges(prev => {
+      const nextRoles = prev.roles.map(r => {
+        if (r.nombre !== roleName) return r;
+        const nextPrivs = r.privilegios.map(p => {
+          if (p.nro !== privilegeNro) return p;
+          return { ...p, habilitar: !p.habilitar };
+        });
+        return { ...r, privilegios: nextPrivs };
+      });
+      nextMatrix = { ...prev, roles: nextRoles };
+      return nextMatrix;
+    });
+
+    if (nextMatrix) {
+      localStorage.setItem('sisceba_system_privileges_cache', JSON.stringify(nextMatrix));
+      if (isSupabaseConfigured()) {
+        const res = await syncWithCloud(
+          () => supabaseSavePrivileges(nextMatrix!),
+          `actualizar privilegio #${privilegeNro} para ${roleName}`
+        );
+        return res === true;
+      }
+    }
+    return true;
+  };
+
+  const resetSystemPrivileges = async (): Promise<boolean> => {
+    const defaultMatrix = PRIVILEGIOS_DATA as SystemPrivilegesMatrix;
+    setSystemPrivileges(defaultMatrix);
+    localStorage.setItem('sisceba_system_privileges_cache', JSON.stringify(defaultMatrix));
+    if (isSupabaseConfigured()) {
+      const res = await syncWithCloud(
+        () => supabaseSavePrivileges(defaultMatrix),
+        'restablecer matriz de privilegios CEO a predeterminados'
+      );
+      return res === true;
+    }
+    return true;
+  };
+
+  const getUserSchedule = (userId: string): UserSchedule | null => {
+    const found = userSchedules.find(s => s.userId === userId);
+    if (found) return found;
+
+    // Si es un usuario recién creado o sin horario específico, generar o buscar por rol
+    const targetUser = users.find(u => u.id === userId);
+    if (targetUser) {
+      const roleDefault = userSchedules.find(s => s.userRole === targetUser.role);
+      if (roleDefault) {
+        return {
+          ...roleDefault,
+          userId
+        };
+      }
+    }
+    return null;
+  };
+
+  const currentUserSchedule = currentUser ? getUserSchedule(currentUser.id) : null;
+
+  const saveUserSchedule = async (schedule: UserSchedule): Promise<boolean> => {
+    const updatedWithTimestamp: UserSchedule = {
+      ...schedule,
+      updatedAt: new Date().toISOString()
+    };
+
+    setUserSchedules(prev => {
+      const idx = prev.findIndex(s => s.userId === schedule.userId);
+      let next: UserSchedule[];
+      if (idx >= 0) {
+        next = [...prev];
+        next[idx] = updatedWithTimestamp;
+      } else {
+        next = [updatedWithTimestamp, ...prev];
+      }
+      localStorage.setItem('sisceba_user_schedules', JSON.stringify(next));
+      return next;
+    });
+
+    if (isSupabaseConfigured()) {
+      const res = await syncWithCloud(
+        () => supabaseSaveUserSchedule(updatedWithTimestamp),
+        `guardar horario institucional de ${schedule.userId}`
+      );
+      return res === true;
+    }
+    return true;
+  };
+
   const resetToSeedData = () => {
     localStorage.clear();
     setCompetencies(INITIAL_COMPETENCIES);
@@ -1579,6 +1730,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setTitles(INITIAL_TITLES);
     setSchoolYearConfig(INITIAL_SCHOOL_YEAR_CONFIG);
     setCommunityNotices(INITIAL_COMMUNITY_NOTICES);
+    setSystemPrivileges(PRIVILEGIOS_DATA as SystemPrivilegesMatrix);
     localStorage.removeItem('sisceba_system_notifications');
     setNotifications(INITIAL_SYSTEM_NOTIFICATIONS);
   };
@@ -1663,6 +1815,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         markNotificationAsRead,
         markAllNotificationsAsRead,
         clearNotifications,
+        systemPrivileges,
+        toggleSystemPrivilege,
+        resetSystemPrivileges,
+        userSchedules,
+        currentUserSchedule,
+        saveUserSchedule,
+        getUserSchedule,
         resetToSeedData,
         isSupabaseActive,
         supabaseStatusText,

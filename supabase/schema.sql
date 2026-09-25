@@ -444,4 +444,32 @@ DROP POLICY IF EXISTS "Permitir escritura general a school_year_config" ON schoo
 CREATE POLICY "Permitir lectura general a school_year_config" ON school_year_config FOR SELECT USING (true);
 CREATE POLICY "Permitir escritura general a school_year_config" ON school_year_config FOR ALL USING (true);
 
+-- 18. TABLA DE PRIVILEGIOS DEL SISTEMA CEO (system_privileges)
+CREATE TABLE IF NOT EXISTS system_privileges (
+    id VARCHAR(60) PRIMARY KEY DEFAULT 'ceo_matrix_v1',
+    matrix JSONB NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE system_privileges ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Permitir lectura general a system_privileges" ON system_privileges;
+DROP POLICY IF EXISTS "Permitir escritura general a system_privileges" ON system_privileges;
+CREATE POLICY "Permitir lectura general a system_privileges" ON system_privileges FOR SELECT USING (true);
+CREATE POLICY "Permitir escritura general a system_privileges" ON system_privileges FOR ALL USING (true);
+
+-- 19. TABLA DE HORARIOS DE USUARIOS / PERSONAL (user_schedules)
+CREATE TABLE IF NOT EXISTS user_schedules (
+    user_id VARCHAR(60) PRIMARY KEY,
+    user_role VARCHAR(30),
+    school_year VARCHAR(20) DEFAULT '2026 - 2027',
+    blocks JSONB NOT NULL DEFAULT '[]',
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE user_schedules ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Permitir lectura general a user_schedules" ON user_schedules;
+DROP POLICY IF EXISTS "Permitir escritura general a user_schedules" ON user_schedules;
+CREATE POLICY "Permitir lectura general a user_schedules" ON user_schedules FOR SELECT USING (true);
+CREATE POLICY "Permitir escritura general a user_schedules" ON user_schedules FOR ALL USING (true);
+
 

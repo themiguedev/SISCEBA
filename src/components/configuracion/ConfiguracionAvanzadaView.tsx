@@ -34,7 +34,8 @@ import {
   Lock,
   CheckSquare,
   Square,
-  Filter
+  Filter,
+  RotateCcw
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import PRIVILEGIOS_DATA from '../../data/privilegiosCEO.json';
@@ -88,7 +89,17 @@ const MENU_ITEMS: SectionMenuItem[] = [
 ];
 
 export const ConfiguracionAvanzadaView: React.FC = () => {
-  const { currentRole, schoolYearConfig, students, users } = useApp();
+  const {
+    currentRole,
+    schoolYearConfig,
+    students,
+    users,
+    systemPrivileges,
+    toggleSystemPrivilege,
+    resetSystemPrivileges,
+    isSavingCloud,
+    isSupabaseActive
+  } = useApp();
   const [activeSection, setActiveSection] = useState<AvanzadaSection>('MODULOS');
   const [searchTerm, setSearchTerm] = useState('');
   const [saveToast, setSaveToast] = useState(false);
@@ -97,7 +108,7 @@ export const ConfiguracionAvanzadaView: React.FC = () => {
   const [selectedRolePrivilegios, setSelectedRolePrivilegios] = useState<string>('Administrador del Sistema');
   const [privSearchTerm, setPrivSearchTerm] = useState<string>('');
   const [privCategoryFilter, setPrivCategoryFilter] = useState<string>('TODAS');
-  const [privilegiosMatrix, setPrivilegiosMatrix] = useState(() => PRIVILEGIOS_DATA);
+  const [isResettingPrivs, setIsResettingPrivs] = useState(false);
 
   // Initial catalogs state (persisted locally / editable)
   const [parentescos, setParentescos] = useState<string[]>([
@@ -455,11 +466,11 @@ export const ConfiguracionAvanzadaView: React.FC = () => {
             </div>
           )}
 
-          {/* DETAIL 6: PRIVILEGIOS (MATRIZ CEO - 13 ROLES x 142 PRIVILEGIOS EXACTOS) */}
+          {/* DETAIL 6: PRIVILEGIOS (MATRIZ CEO - 13 ROLES x 142 PRIVILEGIOS EXACTOS - CONEXIÓN CON BD) */}
           {activeSection === 'PRIVILEGIOS' && (() => {
-            const currentRoleObj = privilegiosMatrix.roles.find(
+            const currentRoleObj = systemPrivileges.roles.find(
               (r) => r.nombre === selectedRolePrivilegios
-            ) || privilegiosMatrix.roles[0];
+            ) || systemPrivileges.roles[0];
 
             const categories = [
               'TODAS',
@@ -485,19 +496,18 @@ export const ConfiguracionAvanzadaView: React.FC = () => {
 
             const enabledCount = currentRoleObj.privilegios.filter((p) => p.habilitar).length;
 
-            const togglePrivilege = (nro: number) => {
-              setPrivilegiosMatrix((prev) => {
-                const nextRoles = prev.roles.map((r) => {
-                  if (r.nombre !== selectedRolePrivilegios) return r;
-                  const nextPrivs = r.privilegios.map((p) => {
-                    if (p.nro !== nro) return p;
-                    return { ...p, habilitar: !p.habilitar };
-                  });
-                  return { ...r, privilegios: nextPrivs };
-                });
-                return { ...prev, roles: nextRoles };
-              });
+            const handleToggle = async (nro: number) => {
+              await toggleSystemPrivilege(selectedRolePrivilegios, nro);
               triggerToast();
+            };
+
+            const handleReset = async () => {
+              if (window.confirm('¿Está seguro de restablecer todos los privilegios de los 13 roles a los valores predeterminados del CEO y sincronizar con la Base de Datos?')) {
+                setIsResettingPrivs(true);
+                await resetSystemPrivileges();
+                setIsResettingPrivs(false);
+                triggerToast();
+              }
             };
 
             return (
@@ -511,6 +521,13 @@ export const ConfiguracionAvanzadaView: React.FC = () => {
                       </span>
                       <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-violet-200/80 text-violet-900 font-bold">
                         142 Registros Consecutivos
+                      </span>
+                      <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold ${
+                        isSupabaseActive
+                          ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                          : 'bg-amber-100 text-amber-800 border border-amber-300'
+                      }`}>
+                        {isSavingCloud ? 'Sincronizando con BD...' : (isSupabaseActive ? '● Conectado a BD' : '● Caché Local')}
                       </span>
                     </div>
                     <p className="text-xs font-bold text-slate-800 mt-1">
@@ -526,12 +543,22 @@ export const ConfiguracionAvanzadaView: React.FC = () => {
                   </div>
 
                   <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <button
+                      type="button"
+                      onClick={handleReset}
+                      disabled={isResettingPrivs}
+                      className="px-2.5 py-2 text-xs rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-600 font-bold flex items-center gap-1.5 transition shadow-sm shrink-0"
+                      title="Restablecer privilegios de los 13 roles a los valores originales"
+                    >
+                      <RotateCcw className={`w-3.5 h-3.5 ${isResettingPrivs ? 'animate-spin' : ''}`} />
+                      <span className="hidden sm:inline">Restablecer</span>
+                    </button>
                     <select
                       value={selectedRolePrivilegios}
                       onChange={(e) => setSelectedRolePrivilegios(e.target.value)}
                       className="px-3 py-2 text-xs rounded-xl border border-violet-300 bg-white font-black text-violet-950 focus:outline-none focus:ring-2 focus:ring-violet-500 w-full sm:w-auto shadow-sm"
                     >
-                      {privilegiosMatrix.roles.map((r) => (
+                      {systemPrivileges.roles.map((r) => (
                         <option key={r.nombre} value={r.nombre}>
                           Rol: {r.nombre} ({r.privilegios.filter(p => p.habilitar).length}/142 ☑)
                         </option>
@@ -541,39 +568,73 @@ export const ConfiguracionAvanzadaView: React.FC = () => {
                 </div>
 
                 {/* Filters toolbar */}
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
-                  {/* Category Filter */}
-                  <div className="md:col-span-6 flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
-                    <Filter className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <div className="flex gap-1">
-                      {categories.map((cat) => (
-                        <button
-                          key={cat}
-                          onClick={() => setPrivCategoryFilter(cat)}
-                          className={`px-2 py-1 rounded-md text-[10px] font-bold shrink-0 transition-colors ${
-                            privCategoryFilter === cat
-                              ? 'bg-violet-600 text-white'
-                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                          }`}
-                        >
-                          {cat}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Search in Options / Descriptions */}
-                  <div className="md:col-span-6">
-                    <div className="relative">
+                <div className="space-y-2.5 bg-slate-50/80 p-3 rounded-xl border border-slate-200">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                    {/* Search in Options / Descriptions */}
+                    <div className="relative flex-1">
                       <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400" />
                       <input
                         type="text"
-                        placeholder="Buscar por opción, descripción o número..."
+                        placeholder="Buscar por opción, descripción o número (ej. 1, Mensajeria, ADM)..."
                         value={privSearchTerm}
                         onChange={(e) => setPrivSearchTerm(e.target.value)}
-                        className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-violet-500 bg-white"
+                        className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500 bg-white text-slate-800 shadow-2xs font-medium"
                       />
+                      {privSearchTerm && (
+                        <button
+                          type="button"
+                          onClick={() => setPrivSearchTerm('')}
+                          className="absolute right-2.5 top-2 text-xs text-slate-400 hover:text-slate-600 font-bold"
+                        >
+                          ✕
+                        </button>
+                      )}
                     </div>
+
+                    <div className="text-[11px] text-slate-500 font-medium shrink-0 flex items-center gap-1.5">
+                      <span className="font-bold text-slate-700">Coincidencias:</span>
+                      <span className="px-2 py-0.5 rounded bg-white border border-slate-200 font-mono font-bold text-violet-700">
+                        {filteredPrivs.length} de 142
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Category Filter Pills (Wrap multilinea limpio para ver todas las categorías sin cortes) */}
+                  <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-slate-200/60">
+                    <div className="flex items-center gap-1 text-[11px] font-bold text-slate-500 mr-1 shrink-0">
+                      <Filter className="w-3.5 h-3.5 text-slate-400" />
+                      <span>Categorías:</span>
+                    </div>
+                    {categories.map((cat) => {
+                      const isSelected = privCategoryFilter === cat;
+                      const countInCat = cat === 'TODAS'
+                        ? currentRoleObj.privilegios.length
+                        : currentRoleObj.privilegios.filter(p => p.categoria === cat).length;
+
+                      return (
+                        <button
+                          key={cat}
+                          type="button"
+                          onClick={() => setPrivCategoryFilter(cat)}
+                          className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold transition-all cursor-pointer flex items-center gap-1.5 ${
+                            isSelected
+                              ? 'bg-violet-700 text-white shadow-xs scale-102 ring-1 ring-violet-700'
+                              : 'bg-white text-slate-700 hover:bg-slate-100 hover:text-slate-900 border border-slate-200/80 shadow-2xs'
+                          }`}
+                        >
+                          <span>{cat}</span>
+                          <span
+                            className={`text-[9px] px-1 py-0.2 rounded-full font-mono font-bold ${
+                              isSelected
+                                ? 'bg-violet-900/60 text-violet-100'
+                                : 'bg-slate-100 text-slate-500'
+                            }`}
+                          >
+                            {countInCat}
+                          </span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -642,9 +703,9 @@ export const ConfiguracionAvanzadaView: React.FC = () => {
                               <td className="py-2 px-3 text-center">
                                 <button
                                   type="button"
-                                  onClick={() => togglePrivilege(priv.nro)}
+                                  onClick={() => handleToggle(priv.nro)}
                                   className="inline-flex items-center justify-center p-1 rounded hover:bg-slate-100 transition"
-                                  title={priv.habilitar ? 'Habilitado (Click para alternar)' : 'Deshabilitado (Click para alternar)'}
+                                  title={priv.habilitar ? 'Habilitado (Click para alternar y guardar en BD)' : 'Deshabilitado (Click para alternar y guardar en BD)'}
                                 >
                                   {priv.habilitar ? (
                                     <span className="inline-flex items-center justify-center w-5 h-5 rounded bg-violet-600 text-white shadow-sm font-bold text-xs">

@@ -29,14 +29,22 @@ import {
   EyeOff,
   AlertCircle,
   BookOpen,
-  GraduationCap
+  GraduationCap,
+  Plus,
+  Edit2,
+  Download,
+  Printer,
+  MapPin,
+  CalendarCheck,
+  ChevronRight,
+  Filter
 } from 'lucide-react';
-import { EducationalLevel } from '../../types';
+import { EducationalLevel, UserSchedule, ScheduleBlock, ScheduleDay } from '../../types';
 import { OFFICIAL_AVATARS, getDefaultAvatarForUser } from '../../utils/avatarCatalog';
 import { PasswordStrengthBar } from '../common/PasswordStrengthBar';
 import { ROLE_METADATA } from '../../utils/rbac';
 
-export type EscritorioTab = 'DASHBOARD' | 'PERFIL' | 'SUGERENCIAS';
+export type EscritorioTab = 'DASHBOARD' | 'PERFIL' | 'HORARIO' | 'SUGERENCIAS';
 
 interface EscritorioViewProps {
   activeSubTab?: EscritorioTab;
@@ -47,8 +55,35 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
   activeSubTab,
   setActiveSubTab
 }) => {
-  const { currentRole, birthdays, currentUser, updateUser } = useApp();
+  const {
+    currentRole,
+    birthdays,
+    currentUser,
+    updateUser,
+    userSchedules,
+    currentUserSchedule,
+    saveUserSchedule,
+    isSupabaseActive,
+    isSavingCloud
+  } = useApp();
   const [internalActiveTab, setInternalActiveTab] = useState<EscritorioTab>('DASHBOARD');
+
+  // Estados para el Horario Institucional del Usuario
+  const [scheduleDayFilter, setScheduleDayFilter] = useState<'TODOS' | ScheduleDay>('TODOS');
+  const [isEditingSchedule, setIsEditingSchedule] = useState(false);
+  const [showAddBlockModal, setShowAddBlockModal] = useState(false);
+  const [scheduleSavedToast, setScheduleSavedToast] = useState(false);
+
+  // Formulario de nuevo bloque de clase / labor
+  const [blockDay, setBlockDay] = useState<ScheduleDay>('LUNES');
+  const [blockStartTime, setBlockStartTime] = useState('07:00');
+  const [blockEndTime, setBlockEndTime] = useState('07:45');
+  const [blockPeriod, setBlockPeriod] = useState(1);
+  const [blockSubject, setBlockSubject] = useState('');
+  const [blockGradeSection, setBlockGradeSection] = useState('4to Año A');
+  const [blockLevel, setBlockLevel] = useState<EducationalLevel>('MEDIA_GENERAL');
+  const [blockClassroom, setBlockClassroom] = useState('Aula 1');
+  const [blockColor, setBlockColor] = useState('blue');
 
   const activeTab = activeSubTab || internalActiveTab;
   const setActiveTab = (tab: EscritorioTab) => {
@@ -336,6 +371,17 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
           >
             <User className={`w-3.5 h-3.5 ${activeTab === 'PERFIL' ? 'text-sky-400' : 'text-slate-500'}`} />
             Mi Perfil
+          </button>
+          <button
+            onClick={() => setActiveTab('HORARIO')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              activeTab === 'HORARIO'
+                ? 'bg-[#1B1C33] text-amber-300 shadow-sm border border-amber-400/40'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/60'
+            }`}
+          >
+            <Clock className={`w-3.5 h-3.5 ${activeTab === 'HORARIO' ? 'text-amber-400' : 'text-slate-500'}`} />
+            Mi Horario
           </button>
           <button
             onClick={() => setActiveTab('SUGERENCIAS')}
@@ -1192,6 +1238,445 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
           </div>
         </div>
       )}
+
+      {/* VIEW: MI HORARIO DE CLASES / LABORES (CONEXIÓN DIRECTA CON BASE DE DATOS) */}
+      {activeTab === 'HORARIO' && (() => {
+        const schedule = currentUserSchedule || {
+          userId: currentUser?.id || 'usr-default',
+          userRole: currentRole,
+          schoolYear: '2026 - 2027',
+          blocks: []
+        };
+
+        const days: ScheduleDay[] = ['LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES'];
+
+        const filteredBlocks = scheduleDayFilter === 'TODOS'
+          ? schedule.blocks
+          : schedule.blocks.filter(b => b.day === scheduleDayFilter);
+
+        // Agrupar bloques por día para la vista de cronograma
+        const blocksByDay = days.reduce((acc, day) => {
+          acc[day] = schedule.blocks
+            .filter(b => b.day === day)
+            .sort((a, b) => a.periodIndex - b.periodIndex || a.startTime.localeCompare(b.startTime));
+          return acc;
+        }, {} as Record<ScheduleDay, ScheduleBlock[]>);
+
+        const handleAddBlockSubmit = async (e: React.FormEvent) => {
+          e.preventDefault();
+          if (!blockSubject.trim() || !currentUser) return;
+
+          const newBlock: ScheduleBlock = {
+            id: `blk-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+            day: blockDay,
+            startTime: blockStartTime,
+            endTime: blockEndTime,
+            periodIndex: Number(blockPeriod) || 1,
+            subjectName: blockSubject.trim(),
+            level: blockLevel,
+            gradeSection: blockGradeSection.trim(),
+            classroom: blockClassroom.trim() || 'Aula General',
+            color: blockColor
+          };
+
+          const updatedSchedule: UserSchedule = {
+            ...schedule,
+            userId: currentUser.id,
+            userRole: currentRole,
+            blocks: [...schedule.blocks, newBlock]
+          };
+
+          const saved = await saveUserSchedule(updatedSchedule);
+          if (saved) {
+            setScheduleSavedToast(true);
+            setTimeout(() => setScheduleSavedToast(false), 3000);
+            setShowAddBlockModal(false);
+            setBlockSubject('');
+          }
+        };
+
+        const handleDeleteBlock = async (blockId: string) => {
+          if (!currentUser) return;
+          if (window.confirm('¿Desea eliminar esta sesión / hora de su horario?')) {
+            const updatedSchedule: UserSchedule = {
+              ...schedule,
+              userId: currentUser.id,
+              userRole: currentRole,
+              blocks: schedule.blocks.filter(b => b.id !== blockId)
+            };
+            await saveUserSchedule(updatedSchedule);
+            setScheduleSavedToast(true);
+            setTimeout(() => setScheduleSavedToast(false), 3000);
+          }
+        };
+
+        const totalHours = schedule.blocks.length;
+
+        return (
+          <div className="space-y-6">
+            {/* Header de Mi Horario */}
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-cba-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                    Cronograma Personal & Académico
+                  </span>
+                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold ${
+                    isSupabaseActive
+                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                      : 'bg-amber-100 text-amber-800 border border-amber-300'
+                  }`}>
+                    {isSavingCloud ? 'Sincronizando con BD...' : (isSupabaseActive ? '● Conectado a BD' : '● Caché Local')}
+                  </span>
+                  <span className="text-[10px] font-mono text-slate-400">
+                    Año: {schedule.schoolYear}
+                  </span>
+                </div>
+                <h3 className="text-lg font-black text-[#2C2E53] mt-1 flex items-center gap-2">
+                  <span>Horario de: {currentUser?.fullName || 'Personal CBA'}</span>
+                  <span className="text-xs font-bold text-slate-500 font-normal">
+                    (@{currentUser?.username || 'usuario'} • {currentRole})
+                  </span>
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Visualice y gestione sus bloques de clase, horas de atención o labores asignadas con sincronización en tiempo real.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={() => setShowAddBlockModal(true)}
+                  className="px-3.5 py-2 rounded-xl bg-[#2C2E53] hover:bg-[#1B1C33] text-[#D4AF37] font-bold text-xs shadow-sm transition flex items-center gap-1.5 cursor-pointer shrink-0"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Añadir Bloque</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-xs transition flex items-center gap-1.5"
+                  title="Imprimir copia de mi horario"
+                >
+                  <Printer className="w-4 h-4 text-slate-500" />
+                  <span className="hidden sm:inline">Imprimir</span>
+                </button>
+              </div>
+            </div>
+
+            {scheduleSavedToast && (
+              <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2 animate-in fade-in">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>¡Horario sincronizado exitosamente con la base de datos!</span>
+              </div>
+            )}
+
+            {/* Toolbar de Filtro por Día y Resumen */}
+            <div className="bg-white p-3 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-3 shadow-sm">
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+                <Filter className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <span className="text-xs font-bold text-slate-600 mr-1">Filtrar Día:</span>
+                <button
+                  type="button"
+                  onClick={() => setScheduleDayFilter('TODOS')}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${
+                    scheduleDayFilter === 'TODOS'
+                      ? 'bg-[#2C2E53] text-[#D4AF37]'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  Semana Completa ({totalHours} Horas)
+                </button>
+                {days.map(d => {
+                  const dayCount = schedule.blocks.filter(b => b.day === d).length;
+                  return (
+                    <button
+                      key={d}
+                      type="button"
+                      onClick={() => setScheduleDayFilter(d)}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${
+                        scheduleDayFilter === d
+                          ? 'bg-[#2C2E53] text-[#D4AF37]'
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
+                    >
+                      {d} ({dayCount})
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="text-xs text-slate-500 font-medium">
+                Total de sesiones registradas: <strong className="text-slate-800 font-black">{totalHours}</strong>
+              </div>
+            </div>
+
+            {/* Grilla Semanal Visual Oficial (Lunes a Viernes) */}
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+              {days.map(day => {
+                const dayBlocks = blocksByDay[day] || [];
+                const isFilteredOut = scheduleDayFilter !== 'TODOS' && scheduleDayFilter !== day;
+                if (isFilteredOut) return null;
+
+                return (
+                  <div
+                    key={day}
+                    className={`bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col overflow-hidden transition-all ${
+                      scheduleDayFilter === day ? 'md:col-span-5' : ''
+                    }`}
+                  >
+                    {/* Encabezado del Día */}
+                    <div className="p-3 bg-gradient-to-r from-slate-50 to-slate-100/60 border-b border-slate-200 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <CalendarCheck className="w-4 h-4 text-[#D4AF37]" />
+                        <h4 className="font-extrabold text-xs text-slate-800 tracking-wide">
+                          {day}
+                        </h4>
+                      </div>
+                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">
+                        {dayBlocks.length} {dayBlocks.length === 1 ? 'bloque' : 'bloques'}
+                      </span>
+                    </div>
+
+                    {/* Bloques de Clase / Labor en el Día */}
+                    <div className="p-3 space-y-2.5 flex-1 min-h-[140px] bg-slate-50/30">
+                      {dayBlocks.length === 0 ? (
+                        <div className="h-full flex flex-col items-center justify-center text-center p-4 text-slate-400">
+                          <Clock className="w-6 h-6 text-slate-300 mb-1 stroke-1" />
+                          <p className="text-[11px] italic">Sin actividades asignadas</p>
+                        </div>
+                      ) : (
+                        dayBlocks.map(block => {
+                          const colorClasses =
+                            block.color === 'emerald'
+                              ? 'border-emerald-300 bg-emerald-50/60 text-emerald-950'
+                              : block.color === 'indigo'
+                              ? 'border-indigo-300 bg-indigo-50/60 text-indigo-950'
+                              : block.color === 'violet'
+                              ? 'border-violet-300 bg-violet-50/60 text-violet-950'
+                              : block.color === 'amber'
+                              ? 'border-amber-300 bg-amber-50/60 text-amber-950'
+                              : block.color === 'rose'
+                              ? 'border-rose-300 bg-rose-50/60 text-rose-950'
+                              : block.color === 'teal'
+                              ? 'border-teal-300 bg-teal-50/60 text-teal-950'
+                              : 'border-blue-300 bg-blue-50/60 text-blue-950';
+
+                          return (
+                            <div
+                              key={block.id}
+                              className={`p-3 rounded-xl border ${colorClasses} shadow-xs relative group transition hover:shadow-md`}
+                            >
+                              <div className="flex items-start justify-between gap-1 mb-1">
+                                <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-white/80 shadow-2xs">
+                                  {block.startTime} - {block.endTime}
+                                </span>
+                                <span className="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-white/70">
+                                  Hora {block.periodIndex}
+                                </span>
+                              </div>
+
+                              <h5 className="font-extrabold text-xs leading-tight mb-1 text-slate-900">
+                                {block.subjectName}
+                              </h5>
+
+                              <div className="space-y-0.5 text-[11px] text-slate-600 font-medium">
+                                <div className="flex items-center gap-1">
+                                  <GraduationCap className="w-3 h-3 text-slate-400 shrink-0" />
+                                  <span className="truncate">{block.gradeSection} ({block.level.replace('_', ' ')})</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+                                  <span className="truncate">{block.classroom || 'Aula General'}</span>
+                                </div>
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteBlock(block.id)}
+                                className="absolute top-2 right-2 p-1 text-slate-400 hover:text-rose-600 rounded bg-white/80 hover:bg-white transition opacity-0 group-hover:opacity-100 shadow-2xs"
+                                title="Eliminar este bloque"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* MODAL: AÑADIR NUEVO BLOQUE AL HORARIO */}
+            {showAddBlockModal && (
+              <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-2xl max-w-lg w-full p-6 border border-slate-200 shadow-2xl animate-in fade-in zoom-in-95">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-lg bg-[#2C2E53] text-[#D4AF37] flex items-center justify-center font-bold">
+                        <Clock className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-sm text-[#2C2E53]">Añadir Sesión al Horario</h4>
+                        <p className="text-[10px] text-slate-400">Guardado directo en la base de datos de Supabase</p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowAddBlockModal(false)}
+                      className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleAddBlockSubmit} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Día de la Semana:</label>
+                        <select
+                          value={blockDay}
+                          onChange={(e) => setBlockDay(e.target.value as ScheduleDay)}
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2C2E53]"
+                        >
+                          {days.map(d => (
+                            <option key={d} value={d}>{d}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Número de Bloque / Hora:</label>
+                        <select
+                          value={blockPeriod}
+                          onChange={(e) => setBlockPeriod(Number(e.target.value))}
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2C2E53]"
+                        >
+                          {[1, 2, 3, 4, 5, 6, 7, 8].map(p => (
+                            <option key={p} value={p}>Hora {p}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Hora Inicio:</label>
+                        <input
+                          type="time"
+                          required
+                          value={blockStartTime}
+                          onChange={(e) => setBlockStartTime(e.target.value)}
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2C2E53]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Hora Fin:</label>
+                        <input
+                          type="time"
+                          required
+                          value={blockEndTime}
+                          onChange={(e) => setBlockEndTime(e.target.value)}
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2C2E53]"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Materia / Asignatura / Labor:</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Ej. Física, Matemáticas, Atención UCE, Portería..."
+                        value={blockSubject}
+                        onChange={(e) => setBlockSubject(e.target.value)}
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2C2E53]"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Subsistema / Nivel:</label>
+                        <select
+                          value={blockLevel}
+                          onChange={(e) => setBlockLevel(e.target.value as EducationalLevel)}
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2C2E53]"
+                        >
+                          <option value="MEDIA_GENERAL">Media General</option>
+                          <option value="PRIMARIA">Primaria</option>
+                          <option value="INICIAL">Inicial</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Grado / Sección / Área:</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="Ej. 4to Año A, Sala 5 Años B..."
+                          value={blockGradeSection}
+                          onChange={(e) => setBlockGradeSection(e.target.value)}
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2C2E53]"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Aula / Espacio Físico:</label>
+                        <input
+                          type="text"
+                          placeholder="Ej. Aula 14, Lab de Informática, Cancha..."
+                          value={blockClassroom}
+                          onChange={(e) => setBlockClassroom(e.target.value)}
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2C2E53]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Color de Identificación:</label>
+                        <select
+                          value={blockColor}
+                          onChange={(e) => setBlockColor(e.target.value)}
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2C2E53]"
+                        >
+                          <option value="blue">Azul (Ciencias / Regular)</option>
+                          <option value="emerald">Verde (Prácticas / Recreo)</option>
+                          <option value="indigo">Índigo (Teoría)</option>
+                          <option value="violet">Violeta (Especialidad)</option>
+                          <option value="amber">Ámbar (Atención / Reunión)</option>
+                          <option value="rose">Rosa / Rojo (Control / Guardia)</option>
+                          <option value="teal">Turquesa (Tutoría)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setShowAddBlockModal(false)}
+                        className="px-4 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs transition"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={isSavingCloud}
+                        className="px-5 py-2 rounded-xl bg-[#2C2E53] hover:bg-[#1B1C33] text-[#D4AF37] font-bold text-xs shadow-md transition flex items-center gap-1.5"
+                      >
+                        <Check className="w-4 h-4 text-[#D4AF37]" />
+                        <span>{isSavingCloud ? 'Guardando...' : 'Guardar Bloque en BD'}</span>
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* VIEW: IDEAS Y SUGERENCIAS */}
       {activeTab === 'SUGERENCIAS' && (

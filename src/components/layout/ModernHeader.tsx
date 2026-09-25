@@ -403,8 +403,8 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
                     </div>
                   </div>
 
-                  {/* Acceso Directo a Mi Perfil */}
-                  <div className="mb-1.5">
+                  {/* Acceso Directo a Mi Perfil y Mi Horario */}
+                  <div className="space-y-1 mb-1.5">
                     <button
                       onClick={() => {
                         setRoleMenuOpen(false);
@@ -417,6 +417,19 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
                         <span>Mi Perfil y Foto</span>
                       </span>
                       <span className="text-[10px] text-sky-400 font-mono">Editar →</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setRoleMenuOpen(false);
+                        onNavigate?.('ESCRITORIO', 'HORARIO');
+                      }}
+                      className="w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs font-bold text-amber-300 hover:bg-amber-500/15 transition border border-transparent hover:border-amber-500/30"
+                    >
+                      <span className="flex items-center gap-2">
+                        <Clock className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Mi Horario de Clases / Labores</span>
+                      </span>
+                      <span className="text-[10px] text-amber-400 font-mono">Ver →</span>
                     </button>
                   </div>
 

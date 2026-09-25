@@ -45,7 +45,7 @@ const SiscebaMainApp: React.FC = () => {
   const [activeTab, setActiveTab] = useState<MainNavigationTab>('ESCRITORIO');
 
   // Subtab States for each domain
-  const [escritorioSubTab, setEscritorioSubTab] = useState<'DASHBOARD' | 'PERFIL' | 'SUGERENCIAS'>('DASHBOARD');
+  const [escritorioSubTab, setEscritorioSubTab] = useState<'DASHBOARD' | 'PERFIL' | 'HORARIO' | 'SUGERENCIAS'>('DASHBOARD');
   const [gestionSubTab, setGestionSubTab] = useState<string>('INSCRIPCIONES');
   const [consultasSubTab, setConsultasSubTab] = useState<ConsultasSubTab>('RENDIMIENTO');
   const [comunidadSubTab, setComunidadSubTab] = useState<'NOTICIAS' | 'CUMPLEANOS' | 'COMUNICADOS'>('NOTICIAS');
@@ -128,8 +128,8 @@ const SiscebaMainApp: React.FC = () => {
       );
       return;
     }
-    if (sub === 'DASHBOARD' || sub === 'PERFIL' || sub === 'SUGERENCIAS') {
-      setEscritorioSubTab(sub as 'DASHBOARD' | 'PERFIL' | 'SUGERENCIAS');
+    if (sub === 'DASHBOARD' || sub === 'PERFIL' || sub === 'HORARIO' || sub === 'SUGERENCIAS') {
+      setEscritorioSubTab(sub as 'DASHBOARD' | 'PERFIL' | 'HORARIO' | 'SUGERENCIAS');
     } else if (['INSCRIPCIONES', 'PASES', 'INASISTENCIAS', 'CONDUCTAS', 'DOCUMENTOS', 'BLOQUEO', 'TITULOS', 'MATRICULA'].includes(sub)) {
       setGestionSubTab(sub);
     } else if (['RENDIMIENTO', 'BOLETIN', 'ASISTENCIA', 'ESTADISTICAS', 'NOMINAS'].includes(sub)) {
