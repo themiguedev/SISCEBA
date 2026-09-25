@@ -352,11 +352,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [activeLapso, setActiveLapso] = useState<1 | 2 | 3>(1);
   const [currentSection, setCurrentSection] = useState<string>('4to Año A');
 
-  // Authentication & Session States
+  // Authentication & Session States with 15-minute inactivity timeout (900,000 ms)
+  const SESSION_INACTIVITY_LIMIT_MS = 15 * 60 * 1000;
+
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     const saved = localStorage.getItem('sisceba_auth_session');
     const user = localStorage.getItem('sisceba_current_user');
-    return saved === 'true' && !!user;
+    const lastActiveStr = localStorage.getItem('sisceba_last_activity');
+
+    if (saved === 'true' && !!user) {
+      if (lastActiveStr) {
+        const lastActiveTime = parseInt(lastActiveStr, 10);
+        if (!isNaN(lastActiveTime) && Date.now() - lastActiveTime > SESSION_INACTIVITY_LIMIT_MS) {
+          // Sesión expirada por inactividad previa
+          localStorage.setItem('sisceba_auth_session', 'false');
+          localStorage.removeItem('sisceba_current_user');
+          localStorage.removeItem('sisceba_last_activity');
+          sessionStorage.setItem('sisceba_inactivity_logout', 'true');
+          return false;
+        }
+      }
+      return true;
+    }
+    return false;
   });
 
   useEffect(() => {
@@ -711,8 +729,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCurrentRole(matched.role);
     setCurrentLevel(matched.defaultLevel);
     setIsAuthenticated(true);
+    const now = Date.now().toString();
     localStorage.setItem('sisceba_auth_session', 'true');
     localStorage.setItem('sisceba_current_user', JSON.stringify(matched));
+    localStorage.setItem('sisceba_last_activity', now);
+    sessionStorage.removeItem('sisceba_inactivity_logout');
     return { success: true };
   };
 
@@ -721,7 +742,50 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCurrentUser(null);
     localStorage.setItem('sisceba_auth_session', 'false');
     localStorage.removeItem('sisceba_current_user');
+    localStorage.removeItem('sisceba_last_activity');
   };
+
+  // Monitor de Inactividad de Sesión (Cierre automático tras 15 minutos sin interacción)
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    // Actualiza la marca de tiempo de última interacción
+    const updateActivity = () => {
+      localStorage.setItem('sisceba_last_activity', Date.now().toString());
+    };
+
+    // Registrar eventos comunes de interacción del usuario (con throttle)
+    let lastRecorded = 0;
+    const handleUserInteraction = () => {
+      const now = Date.now();
+      // Registrar como máximo una vez cada 10 segundos para preservar rendimiento 60 FPS
+      if (now - lastRecorded > 10000) {
+        lastRecorded = now;
+        updateActivity();
+      }
+    };
+
+    const events = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart', 'click'];
+    events.forEach(evt => window.addEventListener(evt, handleUserInteraction, { passive: true }));
+
+    // Verificación periódica cada 15 segundos para comprobar si transcurrieron los 15 minutos
+    const intervalId = setInterval(() => {
+      const lastActiveStr = localStorage.getItem('sisceba_last_activity');
+      if (lastActiveStr) {
+        const lastActiveTime = parseInt(lastActiveStr, 10);
+        if (!isNaN(lastActiveTime) && Date.now() - lastActiveTime >= SESSION_INACTIVITY_LIMIT_MS) {
+          console.warn('[Seguridad SICE-CBA] Sesión cerrada automáticamente por inactividad (15 minutos sin interacción).');
+          sessionStorage.setItem('sisceba_inactivity_logout', 'true');
+          logout();
+        }
+      }
+    }, 15000);
+
+    return () => {
+      events.forEach(evt => window.removeEventListener(evt, handleUserInteraction));
+      clearInterval(intervalId);
+    };
+  }, [isAuthenticated]);
 
   // Synchronize section when level changes
   useEffect(() => {
