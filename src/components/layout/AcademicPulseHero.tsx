@@ -66,28 +66,28 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
           </div>
 
           {/* Quick Shortcuts Adaptados por Rol */}
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-2.5 w-full md:w-auto">
             {currentRole === 'ASISTENTE' ? (
               <>
                 <button
                   onClick={() => onQuickAction('GESTION', 'PASES')}
-                  className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#b89327] text-slate-950 text-xs font-black transition shadow-lg shadow-[#D4AF37]/20"
+                  className="flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#b89327] text-slate-950 text-xs font-black transition shadow-lg shadow-[#D4AF37]/20 active:scale-95 cursor-pointer"
                 >
-                  <Clock className="w-4 h-4" />
+                  <Clock className="w-4 h-4 shrink-0" />
                   <span>Emitir Pase</span>
                 </button>
                 <button
                   onClick={() => onQuickAction('GESTION', 'INASISTENCIAS')}
-                  className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold transition border border-white/10"
+                  className="flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold transition border border-white/10 active:scale-95 cursor-pointer"
                 >
-                  <Users className="w-4 h-4 text-[#D4AF37]" />
+                  <Users className="w-4 h-4 text-[#D4AF37] shrink-0" />
                   <span>Pase de Lista</span>
                 </button>
                 <button
                   onClick={() => onQuickAction('GESTION', 'CONDUCTAS')}
-                  className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white text-xs font-black transition shadow-md"
+                  className="col-span-2 sm:col-span-1 flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white text-xs font-black transition shadow-md active:scale-95 cursor-pointer"
                 >
-                  <ShieldCheck className="w-4 h-4 text-white" />
+                  <ShieldCheck className="w-4 h-4 text-white shrink-0" />
                   <span>Registrar Conducta</span>
                 </button>
               </>
@@ -95,23 +95,23 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
               <>
                 <button
                   onClick={() => onQuickAction('GESTION', 'INSCRIPCIONES')}
-                  className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#b89327] text-slate-950 text-xs font-black transition shadow-lg shadow-[#D4AF37]/20"
+                  className="flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#b89327] text-slate-950 text-xs font-black transition shadow-lg shadow-[#D4AF37]/20 active:scale-95 cursor-pointer"
                 >
-                  <Users className="w-4 h-4" />
-                  <span>Nueva Inscripción</span>
+                  <Users className="w-4 h-4 shrink-0" />
+                  <span>Inscripción</span>
                 </button>
                 <button
                   onClick={() => onQuickAction('GESTION', 'DOCUMENTOS')}
-                  className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold transition border border-white/10"
+                  className="flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold transition border border-white/10 active:scale-95 cursor-pointer"
                 >
-                  <FileText className="w-4 h-4 text-[#D4AF37]" />
-                  <span>Bandeja de Trámites</span>
+                  <FileText className="w-4 h-4 text-[#D4AF37] shrink-0" />
+                  <span>Trámites</span>
                 </button>
                 <button
                   onClick={() => onQuickAction('GESTION', 'MATRICULA')}
-                  className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-black transition shadow-md"
+                  className="col-span-2 sm:col-span-1 flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-black transition shadow-md active:scale-95 cursor-pointer"
                 >
-                  <ClipboardList className="w-4 h-4 text-[#D4AF37]" />
+                  <ClipboardList className="w-4 h-4 text-[#D4AF37] shrink-0" />
                   <span>Padrón Estudiantil</span>
                 </button>
               </>
@@ -119,36 +119,36 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
               <>
                 <button
                   onClick={() => onQuickAction('PLANIFICACION', 'AREAS_PERFILES')}
-                  className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold transition border border-white/10"
+                  className="flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold transition border border-white/10 active:scale-95 cursor-pointer"
                 >
-                  <BookOpen className="w-4 h-4 text-[#D4AF37]" />
+                  <BookOpen className="w-4 h-4 text-[#D4AF37] shrink-0" />
                   <span>Pensum</span>
                 </button>
 
                 {canEditGrades(currentRole) && (
                   <button
                     onClick={() => onQuickAction('EVALUACION', 'PROCESAL')}
-                    className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#b89327] text-slate-950 text-xs font-black transition shadow-lg shadow-[#D4AF37]/20"
+                    className="flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#b89327] text-slate-950 text-xs font-black transition shadow-lg shadow-[#D4AF37]/20 active:scale-95 cursor-pointer"
                   >
-                    <TrendingUp className="w-4 h-4" />
+                    <TrendingUp className="w-4 h-4 shrink-0" />
                     <span>Calificar</span>
                   </button>
                 )}
 
                 <button
                   onClick={() => onQuickAction('COMUNICACION', 'IA_ACTION_PLANS')}
-                  className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-black transition shadow-md"
+                  className={`${canEditGrades(currentRole) ? 'col-span-2 sm:col-span-1' : ''} flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-black transition shadow-md active:scale-95 cursor-pointer`}
                 >
-                  <ClipboardList className="w-4 h-4 text-[#D4AF37]" />
+                  <ClipboardList className="w-4 h-4 text-[#D4AF37] shrink-0" />
                   <span>Planes de Acción</span>
                 </button>
               </>
             ) : (
               <button
                 onClick={() => onQuickAction('CONSULTAS', 'RENDIMIENTO')}
-                className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#b89327] text-slate-950 text-xs font-black transition shadow-lg shadow-[#D4AF37]/20"
+                className="col-span-2 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#b89327] text-slate-950 text-xs font-black transition shadow-lg shadow-[#D4AF37]/20 active:scale-95 cursor-pointer"
               >
-                <ClipboardList className="w-4 h-4" />
+                <ClipboardList className="w-4 h-4 shrink-0" />
                 <span>Consultar Rendimiento</span>
               </button>
             )}
@@ -161,24 +161,24 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
         {/* Card 1: Students */}
         <div className="bg-white dark:bg-slate-900/60 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition group">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Estudiantes</span>
-            <div className="w-8 h-8 rounded-xl bg-blue-50 text-[#2C2E53] flex items-center justify-center group-hover:scale-110 transition">
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Estudiantes</span>
+            <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-[#2C2E53] dark:text-sky-300 flex items-center justify-center group-hover:scale-110 transition">
               <Users className="w-4 h-4" />
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-black text-slate-900">{levelStudents.length}</span>
-            <span className="text-[11px] text-emerald-600 font-bold flex items-center">
-              100% activos
+            <span className="text-2xl font-black text-slate-900 dark:text-white">{levelStudents.length}</span>
+            <span className={`text-[11px] font-bold flex items-center ${levelStudents.length > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500'}`}>
+              {levelStudents.length > 0 ? '100% activos' : 'Sin matrícula'}
             </span>
           </div>
-          <p className="text-[11px] text-slate-400 mt-1 truncate">{currentInfo.cycle}</p>
+          <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1 truncate">{currentInfo.cycle}</p>
         </div>
 
         {/* Card 2: Áreas de Formación */}
         <div className="bg-white dark:bg-slate-900/60 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition group">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Áreas / Pensum</span>
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Áreas / Pensum</span>
             <div className="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-[#D4AF37] flex items-center justify-center group-hover:scale-110 transition">
               <BookOpen className="w-4 h-4" />
             </div>
@@ -187,26 +187,28 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
             <span className="text-2xl font-black text-slate-900 dark:text-white">{levelAreas.length}</span>
             <span className="text-[11px] text-[#2C2E53] dark:text-[#F5C842] font-bold">Asignaturas</span>
           </div>
-          <p className="text-[11px] text-slate-400 mt-1 truncate">Incluye Robótica y Bellas Artes</p>
+          <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1 truncate">Incluye Robótica y Bellas Artes</p>
         </div>
 
         {/* Card 3: Evaluaciones Registradas */}
         <div className="bg-white dark:bg-slate-900/60 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition group">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Evaluación</span>
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Evaluación</span>
             <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-110 transition">
               <Award className="w-4 h-4" />
             </div>
           </div>
           <div className="flex items-baseline gap-2">
             <span className="text-2xl font-black text-slate-900 dark:text-white">
-              {currentLevel === 'MEDIA_GENERAL' ? '18.4' : currentLevel === 'INICIAL' ? 'A' : '96%'}
+              {levelRecords.length > 0 ? (currentLevel === 'MEDIA_GENERAL' ? '18.4' : currentLevel === 'INICIAL' ? 'L' : 'L') : '—'}
             </span>
             <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold">
-              {currentLevel === 'MEDIA_GENERAL' ? '/ 20 Promedio' : currentLevel === 'INICIAL' ? 'Escala Literal (A-E)' : 'Logrado (L)'}
+              {levelRecords.length > 0
+                ? (currentLevel === 'MEDIA_GENERAL' ? '/ 20 Promedio' : currentLevel === 'INICIAL' ? 'Logrado (L)' : 'Logrado (L)')
+                : 'Sin registros'}
             </span>
           </div>
-          <p className="text-[11px] text-slate-400 mt-1 truncate">{currentInfo.scale}</p>
+          <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1 truncate">{currentInfo.scale}</p>
         </div>
       </div>
     </section>

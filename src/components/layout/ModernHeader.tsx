@@ -110,7 +110,7 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
           <button
             type="button"
             onClick={onGoHome}
-            className="relative flex items-center justify-center shrink-0 group focus:outline-none transition-all duration-200 cursor-pointer p-1 -ml-1 rounded-xl hover:bg-white/5"
+            className="relative flex items-center justify-center shrink-0 group focus:outline-none transition-all duration-200 cursor-pointer p-1 rounded-xl hover:bg-white/5"
             title="Ir a la página principal (Inicio)"
           >
             <div className="relative flex items-center justify-center shrink-0 group-hover:scale-105 transition-all duration-200">
@@ -119,7 +119,6 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
                 alt="Colegio Bellas Artes"
                 className="h-8 sm:h-9 w-auto object-contain brightness-0 invert drop-shadow-[0_2px_8px_rgba(212,175,55,0.3)]"
               />
-              <SeasonalAccessoryIcon sizeClass="w-4 sm:w-5 h-4 sm:h-5" className="-top-1.5 -right-1" />
               <span className="absolute -bottom-0.5 -right-0.5 flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#D4AF37] opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-[#D4AF37]"></span>
@@ -499,7 +498,7 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
         if (userLevels.length <= 1) return null;
 
         return (
-          <div className="lg:hidden px-2 py-1.5 border-t border-[#2C2E53] bg-[#141525] flex items-center justify-between gap-1 overflow-x-auto no-scrollbar">
+          <div className="lg:hidden px-3 py-1.5 border-t border-[#2C2E53] bg-[#141525]/95 backdrop-blur-md flex items-center justify-between gap-1.5 overflow-x-auto no-scrollbar shadow-inner">
             {userLevels.map((lvl) => {
               const isCurrentModule = activeTab === lvl;
               const isContextLevel = currentLevel === lvl;
@@ -514,14 +513,14 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
                       onSelectLevel(lvl);
                     }
                   }}
-                  className={`flex-1 flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition active:scale-95 ${
+                  className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap transition-all duration-150 active:scale-95 cursor-pointer ${
                     isSelected
-                      ? 'bg-[#2C2E53] text-[#D4AF37] border border-[#D4AF37]/40 shadow-sm'
-                      : 'text-slate-400 hover:text-slate-200'
+                      ? 'bg-[#2C2E53] text-[#F5C842] border border-[#D4AF37]/50 shadow-md ring-1 ring-[#D4AF37]/20'
+                      : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'
                   }`}
                 >
-                  <span>{data.icon}</span>
-                  <span>{lvl === 'MEDIA_GENERAL' ? 'Media Gen.' : lvl.replace('_', ' ')}</span>
+                  <span className="text-sm">{data.icon}</span>
+                  <span className="tracking-wide">{lvl === 'MEDIA_GENERAL' ? 'Media Gen.' : lvl.replace('_', ' ')}</span>
                 </button>
               );
             })}
