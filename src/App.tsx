@@ -13,6 +13,7 @@ import { KeyboardShortcutsModal } from './components/layout/KeyboardShortcutsMod
 import { DeveloperConsoleHUD } from './components/dev/DeveloperConsoleHUD';
 import { ShortcutToast, ShortcutToastMessage } from './components/common/ShortcutToast';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+import { useDevice } from './hooks/useDevice';
 import { LoginView } from './components/auth/LoginView';
 import { SeasonalAccessoryIcon } from './components/auth/LogoSeasonalAccessory';
 import { hasTabAccess, hasSubTabAccess, getDefaultTabForRole, getUserAllowedLevels, ROLE_METADATA } from './utils/rbac';
@@ -72,6 +73,23 @@ const SiscebaMainApp: React.FC = () => {
   } = useApp();
 
   const { mode, palette, isDark, toggleMode, setPalette } = useTheme();
+  const device = useDevice();
+
+  // Set html data attributes for CSS targeting and auto-collapse/open sidebar depending on device
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.setAttribute('data-device', device.deviceType);
+      document.documentElement.setAttribute('data-orientation', device.orientation);
+      document.documentElement.setAttribute('data-touch', String(device.isTouch));
+    }
+
+    // Auto-adapt sidebar state when changing between mobile/tablet and desktop
+    if (device.isMobile) {
+      setSidebarOpen(false);
+    } else if (device.isDesktop) {
+      setSidebarOpen(true);
+    }
+  }, [device.deviceType, device.orientation, device.isTouch, device.isMobile, device.isDesktop]);
 
   // Keep activeTab and currentLevel synchronized with RBAC hierarchy and user allowed educational levels
   useEffect(() => {

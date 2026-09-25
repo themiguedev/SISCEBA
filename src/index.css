@@ -143,6 +143,38 @@ body {
   }
 }
 
+/* ============================================================
+   DEVICE ADAPTIVE ENGINE RULES (data-device / data-touch)
+   ============================================================ */
+
+/* Touch-optimized target margins and tap state */
+html[data-touch="true"] button,
+html[data-touch="true"] a,
+html[data-touch="true"] input[type="button"],
+html[data-touch="true"] input[type="submit"] {
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Mobile viewport ergonomics */
+html[data-device="mobile"] {
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Tablet viewport optimizations */
+html[data-device="tablet"] .responsive-table {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Ultra-wide / Large Screen Displays (TV / Projectors) */
+html[data-device="tv"] {
+  font-size: 17px;
+}
+html[data-device="tv"] main {
+  max-width: 1920px;
+}
+
 /* Scrollbars inside dark cards/banners have transparent tracks */
 [class*="bg-[#2C2E53]"] ::-webkit-scrollbar-track,
 [class*="from-[#2C2E53]"] ::-webkit-scrollbar-track,
