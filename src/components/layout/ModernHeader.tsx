@@ -95,7 +95,7 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
         <div className="flex items-center gap-1 sm:gap-2 shrink-0">
           <button
             onClick={() => setSidebarOpen((prev) => !prev)}
-            className="min-h-[36px] min-w-[36px] sm:min-h-[42px] sm:min-w-[42px] p-1.5 sm:p-2.5 rounded-xl bg-[#2C2E53]/70 hover:bg-[#2C2E53] active:scale-95 text-slate-300 hover:text-white transition-all border border-[#414474]/50 focus:outline-none flex items-center justify-center shrink-0 cursor-pointer"
+            className="min-h-[34px] min-w-[34px] sm:min-h-[42px] sm:min-w-[42px] p-1.5 sm:p-2.5 rounded-xl bg-[#2C2E53]/70 hover:bg-[#2C2E53] active:scale-95 text-slate-300 hover:text-white transition-all border border-[#414474]/50 focus:outline-none flex items-center justify-center shrink-0 cursor-pointer"
             title="Alternar Menú Lateral"
             aria-label="Abrir menú de navegación"
           >
@@ -241,12 +241,12 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
         </button>
 
         {/* Right: Controls */}
-        <div className="flex items-center gap-0.5 xs:gap-1 sm:gap-1.5 lg:gap-2 shrink-0">
+        <div className="flex items-center gap-1 sm:gap-1.5 lg:gap-2 shrink-0">
           {/* Mobile Search Button (<md) */}
           <button
             type="button"
             onClick={onOpenSearch}
-            className="md:hidden min-h-[36px] min-w-[36px] p-1.5 rounded-xl bg-[#141525] hover:bg-[#2C2E53] active:scale-95 text-[#D4AF37] border border-[#2C2E53] transition-all shadow-inner flex items-center justify-center shrink-0 cursor-pointer"
+            className="md:hidden min-h-[32px] min-w-[32px] p-1.5 rounded-xl bg-[#141525] hover:bg-[#2C2E53] active:scale-95 text-[#D4AF37] border border-[#2C2E53] transition-all shadow-inner flex items-center justify-center shrink-0 cursor-pointer"
             title="Buscar en todo el sistema (Ctrl+K)"
             aria-label="Buscar"
           >
@@ -276,7 +276,7 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
           <div className="relative shrink-0">
             <button
               onClick={() => setLapsoMenuOpen(!lapsoMenuOpen)}
-              className="min-h-[36px] sm:min-h-[40px] flex items-center gap-1 sm:gap-1.5 bg-[#2C2E53] hover:bg-[#353866] active:scale-95 text-white px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-xl border border-[#414474] text-xs font-bold transition-all whitespace-nowrap cursor-pointer"
+              className="min-h-[32px] sm:min-h-[40px] flex items-center gap-1 sm:gap-1.5 bg-[#2C2E53] hover:bg-[#353866] active:scale-95 text-white px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl border border-[#414474] text-xs font-bold transition-all whitespace-nowrap cursor-pointer"
               aria-label="Selector de Lapso"
             >
               <Calendar className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#D4AF37] shrink-0" />
@@ -319,7 +319,7 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
           <div className="relative shrink-0">
             <button
               onClick={() => setRoleMenuOpen(!roleMenuOpen)}
-              className="min-h-[36px] sm:min-h-[40px] flex items-center gap-1 sm:gap-1.5 bg-[#2C2E53] hover:bg-[#353866] active:scale-95 text-white px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-xl border border-[#414474] text-xs font-bold transition-all whitespace-nowrap cursor-pointer"
+              className="min-h-[32px] sm:min-h-[40px] flex items-center gap-1 sm:gap-1.5 bg-[#2C2E53] hover:bg-[#353866] active:scale-95 text-white px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-xl border border-[#414474] text-xs font-bold transition-all whitespace-nowrap cursor-pointer"
               title={`Usuario: ${currentUser?.fullName || currentUser?.username || 'Usuario'} • Rol: ${currentRole}`}
               aria-label="Menú de Usuario y Rol"
             >
