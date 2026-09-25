@@ -1360,7 +1360,7 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
             {scheduleSavedToast && (
               <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2 animate-in fade-in">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>¡Horario sincronizado exitosamente con la base de datos!</span>
+                <span>¡Horario guardado y sincronizado exitosamente!</span>
               </div>
             )}
 
@@ -1660,7 +1660,7 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
                         className="px-5 py-2 rounded-xl bg-[#2C2E53] hover:bg-[#1B1C33] text-[#D4AF37] font-bold text-xs shadow-md transition flex items-center gap-1.5"
                       >
                         <Check className="w-4 h-4 text-[#D4AF37]" />
-                        <span>{isSavingCloud ? 'Guardando...' : 'Guardar Bloque en BD'}</span>
+                        <span>{isSavingCloud ? 'Guardando...' : 'Guardar Bloque'}</span>
                       </button>
                     </div>
                   </form>

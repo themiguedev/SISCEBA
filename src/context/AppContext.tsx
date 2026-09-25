@@ -924,9 +924,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setSystemPrivileges(remotePrivileges);
         localStorage.setItem('sisceba_system_privileges_cache', JSON.stringify(remotePrivileges));
       }
-      if (remoteSchedules !== null && remoteSchedules.length > 0) {
-        setUserSchedules(remoteSchedules);
-        localStorage.setItem('sisceba_user_schedules', JSON.stringify(remoteSchedules));
+      if (remoteSchedules !== null) {
+        setUserSchedules(prev => {
+          if (remoteSchedules.length === 0) return prev;
+          // Merge remote schedules by userId
+          const map = new Map<string, UserSchedule>();
+          prev.forEach(s => map.set(s.userId, s));
+          remoteSchedules.forEach(s => map.set(s.userId, s));
+          const merged = Array.from(map.values());
+          localStorage.setItem('sisceba_user_schedules', JSON.stringify(merged));
+          return merged;
+        });
       }
       if (remoteSchoolData !== null) {
         setSchoolData(remoteSchoolData);
