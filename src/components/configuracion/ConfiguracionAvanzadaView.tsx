@@ -477,13 +477,6 @@ export const ConfiguracionAvanzadaView: React.FC = () => {
                   <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Bitácora Oficial de Seguridad y Eventos del Sistema:</p>
                   <p className="text-[11px] text-slate-500">Sincronizado en tiempo real con la tabla <code className="font-mono text-violet-600 dark:text-violet-400">system_audit_logs</code></p>
                 </div>
-                <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold border ${
-                  isSupabaseActive
-                    ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800'
-                    : 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-800'
-                }`}>
-                  {isSupabaseActive ? '● Conectado a BD Supabase' : '● Caché Local'}
-                </span>
               </div>
               <div className="divide-y divide-slate-100 dark:divide-slate-800 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden bg-white dark:bg-slate-900 max-h-[480px] overflow-y-auto custom-comfortable-scrollbar">
                 {auditLogs.map((log) => (
@@ -598,14 +591,6 @@ export const ConfiguracionAvanzadaView: React.FC = () => {
                       </span>
                       <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold border border-slate-200 dark:border-slate-700">
                         142 Registros Consecutivos
-                      </span>
-                      <span className={`text-[10px] font-mono px-2 py-0.5 rounded-md font-bold flex items-center gap-1.5 shadow-2xs ${
-                        isSupabaseActive
-                          ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
-                          : 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
-                      }`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${isSupabaseActive ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
-                        {isSavingCloud ? 'Sincronizando con BD...' : (isSupabaseActive ? 'Conectado a Base de Datos' : 'Caché Local Offline')}
                       </span>
                     </div>
 
@@ -1052,13 +1037,6 @@ export const ConfiguracionAvanzadaView: React.FC = () => {
                   <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Modalidades y turnos escolares administrados:</p>
                   <p className="text-[11px] text-slate-500">Sincronizado con tabla <code className="font-mono text-violet-600 dark:text-violet-400">schedule_types</code></p>
                 </div>
-                <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold border ${
-                  isSupabaseActive
-                    ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800'
-                    : 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-800'
-                }`}>
-                  {isSupabaseActive ? '● Conectado a BD Supabase' : '● Caché Local'}
-                </span>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {scheduleTypes.map((item) => (
@@ -1331,13 +1309,6 @@ export const ConfiguracionAvanzadaView: React.FC = () => {
                   </p>
                   <p className="text-[11px] text-slate-500">Sincronizado con tabla <code className="font-mono text-violet-600 dark:text-violet-400">institutional_school_data</code></p>
                 </div>
-                <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold border ${
-                  isSupabaseActive
-                    ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800'
-                    : 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-800'
-                }`}>
-                  {isSavingCloud ? 'Sincronizando...' : (isSupabaseActive ? '● Conectado a BD Supabase' : '● Caché Local')}
-                </span>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>

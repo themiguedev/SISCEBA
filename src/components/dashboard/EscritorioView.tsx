@@ -1321,13 +1321,6 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
                   <span className="text-[10px] font-black uppercase tracking-wider text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
                     Cronograma Personal & Académico
                   </span>
-                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold ${
-                    isSupabaseActive
-                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                      : 'bg-amber-100 text-amber-800 border border-amber-300'
-                  }`}>
-                    {isSavingCloud ? 'Sincronizando con BD...' : (isSupabaseActive ? '● Conectado a BD' : '● Caché Local')}
-                  </span>
                   <span className="text-[10px] font-mono text-slate-400">
                     Año: {schedule.schoolYear}
                   </span>
@@ -1520,7 +1513,7 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
                       </div>
                       <div>
                         <h4 className="font-bold text-sm text-[#2C2E53]">Añadir Sesión al Horario</h4>
-                        <p className="text-[10px] text-slate-400">Guardado directo en la base de datos de Supabase</p>
+                        <p className="text-[10px] text-slate-400">Complete los datos de la clase o bloque</p>
                       </div>
                     </div>
                     <button
