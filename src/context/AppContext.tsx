@@ -846,7 +846,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Horarios de Usuarios (Conexión Directa con la BD)
   const [userSchedules, setUserSchedules] = useState<UserSchedule[]>(() => {
-    const saved = localStorage.getItem('sisceba_user_schedules');
+    const saved = localStorage.getItem('sisceba_user_schedules_v2');
     if (saved) {
       try {
         return JSON.parse(saved);
@@ -996,7 +996,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           prev.forEach(s => map.set(s.userId, s));
           remoteSchedules.forEach(s => map.set(s.userId, s));
           const merged = Array.from(map.values());
-          localStorage.setItem('sisceba_user_schedules', JSON.stringify(merged));
+          localStorage.setItem('sisceba_user_schedules_v2', JSON.stringify(merged));
           return merged;
         });
       }
@@ -1867,7 +1867,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       } else {
         next = [updatedWithTimestamp, ...prev];
       }
-      localStorage.setItem('sisceba_user_schedules', JSON.stringify(next));
+      localStorage.setItem('sisceba_user_schedules_v2', JSON.stringify(next));
       return next;
     });
 
@@ -1909,6 +1909,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setSystemCatalogs(INITIAL_SYSTEM_CATALOGS);
     setAuditLogs(INITIAL_AUDIT_LOGS);
     setScheduleTypes(INITIAL_SCHEDULE_TYPES);
+    setUserSchedules(INITIAL_USER_SCHEDULES);
+    localStorage.removeItem('sisceba_user_schedules');
+    localStorage.removeItem('sisceba_user_schedules_v2');
   };
 
   const saveSchoolData = async (data: InstitutionalSchoolData): Promise<boolean> => {
