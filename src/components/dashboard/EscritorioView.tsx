@@ -349,49 +349,49 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
         </div>
 
         {/* Subtabs Pill Switcher - Con scroll horizontal en móviles */}
-        <div className="w-full sm:w-auto overflow-x-auto no-scrollbar flex items-center bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200 dark:border-slate-700/60 shadow-inner shrink-0">
+        <div className="w-full sm:w-auto overflow-x-auto no-scrollbar flex items-center bg-slate-100/90 dark:bg-slate-800/80 p-1.5 rounded-xl border border-slate-200 dark:border-slate-700/60 shadow-inner shrink-0">
           <button
             onClick={() => setActiveTab('DASHBOARD')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
               activeTab === 'DASHBOARD'
-                ? 'bg-[#1B1C33] text-sky-300 shadow-sm border border-sky-400/40'
+                ? 'bg-white dark:bg-[#1B1C33] text-[#2C2E53] dark:text-sky-300 shadow-sm border border-slate-200 dark:border-sky-400/40 ring-1 ring-slate-900/5'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/60'
             }`}
           >
-            <Monitor className={`w-3.5 h-3.5 ${activeTab === 'DASHBOARD' ? 'text-sky-400' : 'text-slate-500'}`} />
+            <Monitor className={`w-3.5 h-3.5 ${activeTab === 'DASHBOARD' ? 'text-[#2C2E53] dark:text-sky-400' : 'text-slate-500'}`} />
             Tablero Principal
           </button>
           <button
             onClick={() => setActiveTab('PERFIL')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
               activeTab === 'PERFIL'
-                ? 'bg-[#1B1C33] text-sky-300 shadow-sm border border-sky-400/40'
+                ? 'bg-white dark:bg-[#1B1C33] text-[#2C2E53] dark:text-sky-300 shadow-sm border border-slate-200 dark:border-sky-400/40 ring-1 ring-slate-900/5'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/60'
             }`}
           >
-            <User className={`w-3.5 h-3.5 ${activeTab === 'PERFIL' ? 'text-sky-400' : 'text-slate-500'}`} />
+            <User className={`w-3.5 h-3.5 ${activeTab === 'PERFIL' ? 'text-[#2C2E53] dark:text-sky-400' : 'text-slate-500'}`} />
             Mi Perfil
           </button>
           <button
             onClick={() => setActiveTab('HORARIO')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
               activeTab === 'HORARIO'
-                ? 'bg-[#1B1C33] text-amber-300 shadow-sm border border-amber-400/40'
+                ? 'bg-white dark:bg-[#1B1C33] text-[#2C2E53] dark:text-amber-300 shadow-sm border border-[#D4AF37]/50 dark:border-amber-400/40 ring-1 ring-amber-500/10'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/60'
             }`}
           >
-            <Clock className={`w-3.5 h-3.5 ${activeTab === 'HORARIO' ? 'text-amber-400' : 'text-slate-500'}`} />
+            <Clock className={`w-3.5 h-3.5 ${activeTab === 'HORARIO' ? 'text-[#D4AF37] dark:text-amber-400' : 'text-slate-500'}`} />
             Mi Horario
           </button>
           <button
             onClick={() => setActiveTab('SUGERENCIAS')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
               activeTab === 'SUGERENCIAS'
-                ? 'bg-[#1B1C33] text-sky-300 shadow-sm border border-sky-400/40'
+                ? 'bg-white dark:bg-[#1B1C33] text-[#2C2E53] dark:text-sky-300 shadow-sm border border-slate-200 dark:border-sky-400/40 ring-1 ring-slate-900/5'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/60'
             }`}
           >
-            <Lightbulb className={`w-3.5 h-3.5 ${activeTab === 'SUGERENCIAS' ? 'text-sky-400' : 'text-slate-500'}`} />
+            <Lightbulb className={`w-3.5 h-3.5 ${activeTab === 'SUGERENCIAS' ? 'text-amber-500 dark:text-sky-400' : 'text-slate-500'}`} />
             Ideas y Sugerencias
           </button>
         </div>
@@ -416,23 +416,23 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Última Visita</span>
-                  <p className="text-xs font-extrabold text-slate-800 mt-1">Hoy</p>
-                  <p className="text-[10px] text-slate-500">{new Date().toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' })}</p>
+                <div className="p-4 rounded-xl bg-slate-50/90 border border-slate-200/80 shadow-2xs hover:border-slate-300 transition">
+                  <span className="text-[10px] uppercase font-bold text-slate-500 block tracking-wider">Última Visita</span>
+                  <p className="text-sm font-extrabold text-slate-900 mt-1">Hoy</p>
+                  <p className="text-[11px] text-slate-500 font-medium">{new Date().toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' })}</p>
                 </div>
-                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Sesión Actual</span>
-                  <p className="text-sm font-black text-emerald-600 mt-1 flex items-center gap-1">
+                <div className="p-4 rounded-xl bg-slate-50/90 border border-slate-200/80 shadow-2xs hover:border-slate-300 transition">
+                  <span className="text-[10px] uppercase font-bold text-slate-500 block tracking-wider">Sesión Actual</span>
+                  <p className="text-sm font-black text-emerald-600 mt-1 flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                     Activa
                   </p>
-                  <p className="text-[10px] text-slate-500">En línea</p>
+                  <p className="text-[11px] text-slate-500 font-medium">En línea</p>
                 </div>
-                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Año Escolar</span>
-                  <p className="text-xs font-black text-[#2C2E53] mt-1">2026 - 2027</p>
-                  <p className="text-[10px] text-slate-400 font-medium">Ciclo Oficial</p>
+                <div className="p-4 rounded-xl bg-slate-50/90 border border-slate-200/80 shadow-2xs hover:border-slate-300 transition">
+                  <span className="text-[10px] uppercase font-bold text-slate-500 block tracking-wider">Año Escolar</span>
+                  <p className="text-sm font-black text-[#2C2E53] mt-1">2026 - 2027</p>
+                  <p className="text-[11px] text-slate-500 font-medium">Ciclo Oficial CBA</p>
                 </div>
               </div>
 
