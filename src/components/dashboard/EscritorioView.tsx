@@ -402,37 +402,50 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left 2 Cols: Session Audit & System Health */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Audit Card */}
-            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-cba-card">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-5 h-5 text-[#D4AF37]" />
-                  <h3 className="font-bold text-[#2C2E53] text-sm">Información de Auditoría y Sesión Activa</h3>
+            {/* Audit Card con Glassmorphism y Live Inactivity Indicator */}
+            <div className="bg-white/95 backdrop-blur-md rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-all">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-4 mb-5 gap-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-[#2C2E53]/10 text-[#2C2E53] flex items-center justify-center">
+                    <ShieldCheck className="w-5 h-5 text-[#D4AF37]" />
+                  </div>
+                  <div>
+                    <h3 className="font-extrabold text-[#2C2E53] text-sm leading-tight">Seguridad de Sesión y Auditoría</h3>
+                    <p className="text-[11px] text-slate-400">Protección perimetral con auto-bloqueo tras 15 min de inactividad</p>
+                  </div>
                 </div>
-                <span className="text-[11px] font-mono font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                  Conectado
-                </span>
+                <div className="flex items-center gap-2 self-start sm:self-auto">
+                  <span className="text-[11px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200/80 flex items-center gap-1.5 shadow-2xs">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    Conexión Enlazada
+                  </span>
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Última Visita</span>
-                  <p className="text-xs font-extrabold text-slate-800 mt-1">Hoy</p>
-                  <p className="text-[10px] text-slate-500">{new Date().toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' })}</p>
-                </div>
-                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Sesión Actual</span>
-                  <p className="text-sm font-black text-emerald-600 mt-1 flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    Activa
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-6">
+                <div className="p-4 rounded-xl bg-slate-50/80 border border-slate-100/90 hover:border-slate-200 transition">
+                  <span className="text-[10px] uppercase font-extrabold text-slate-400 block tracking-wider">Última Actividad</span>
+                  <p className="text-xs font-black text-slate-800 mt-1">Registrada en Tiempo Real</p>
+                  <p className="text-[10px] text-emerald-600 font-semibold mt-0.5 flex items-center gap-1">
+                    <Clock className="w-3 h-3 text-emerald-500" />
+                    Interactuando ahora
                   </p>
-                  <p className="text-[10px] text-slate-500">En línea</p>
                 </div>
-                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Año Escolar</span>
+                <div className="p-4 rounded-xl bg-gradient-to-br from-emerald-50/60 to-teal-50/40 border border-emerald-100/80">
+                  <span className="text-[10px] uppercase font-extrabold text-emerald-700 block tracking-wider">Sesión Institucional</span>
+                  <p className="text-sm font-black text-emerald-800 mt-1 flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    Activa y Cifrada
+                  </p>
+                  <p className="text-[10px] text-slate-500 mt-0.5">Expira a los 15 min de reposo</p>
+                </div>
+                <div className="p-4 rounded-xl bg-slate-50/80 border border-slate-100/90 hover:border-slate-200 transition">
+                  <span className="text-[10px] uppercase font-extrabold text-slate-400 block tracking-wider">Año Escolar</span>
                   <p className="text-xs font-black text-[#2C2E53] mt-1">2026 - 2027</p>
-                  <p className="text-[10px] text-slate-400 font-medium">Ciclo Oficial</p>
+                  <p className="text-[10px] text-[#D4AF37] font-bold">Colegio Bellas Artes</p>
                 </div>
               </div>
 
@@ -657,22 +670,23 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
           <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-cba-card">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5 mb-6">
               <div className="flex items-center gap-4">
-                {/* Avatar Preview Grande */}
+                {/* Avatar Preview Grande con Aura Institucional y Micro-Zoom */}
                 <div className="relative group shrink-0">
+                  <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-[#D4AF37] via-amber-300 to-[#2C2E53] opacity-35 blur-sm group-hover:opacity-75 transition duration-300 pointer-events-none" />
                   {selectedAvatarUrl ? (
                     <img
                       src={selectedAvatarUrl}
                       alt={currentUser?.fullName || 'Usuario'}
-                      className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-contain bg-white border-2 border-[#D4AF37] shadow-md p-0.5"
+                      className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-contain bg-white border-2 border-[#D4AF37] shadow-xl p-0.5 group-hover:scale-105 transition-transform duration-300"
                     />
                   ) : (
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-[#2C2E53] to-[#1B1C33] text-[#D4AF37] border-2 border-[#D4AF37]/50 flex items-center justify-center font-black text-2xl sm:text-3xl shadow-md">
+                    <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-[#2C2E53] to-[#1B1C33] text-[#D4AF37] border-2 border-[#D4AF37]/50 flex items-center justify-center font-black text-2xl sm:text-3xl shadow-xl group-hover:scale-105 transition-transform duration-300">
                       {(currentUser?.fullName?.[0] || currentRole[0] || 'U').toUpperCase()}
                     </div>
                   )}
                   <label
                     htmlFor="avatar-file-input"
-                    className="absolute -bottom-1.5 -right-1.5 p-1.5 bg-[#2C2E53] hover:bg-[#1B1C33] text-[#D4AF37] border border-[#D4AF37]/60 rounded-xl shadow-lg cursor-pointer transition transform hover:scale-110"
+                    className="absolute -bottom-1.5 -right-1.5 p-1.5 bg-[#2C2E53] hover:bg-[#1B1C33] text-[#D4AF37] border border-[#D4AF37]/80 rounded-xl shadow-lg cursor-pointer transition-all duration-200 transform hover:scale-115 active:scale-95 z-10"
                     title="Subir foto desde su equipo"
                   >
                     <Camera className="w-3.5 h-3.5" />
@@ -1440,6 +1454,20 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
                         </div>
                       ) : (
                         dayBlocks.map(block => {
+                          const now = new Date();
+                          const currentDayStr = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'][now.getDay()];
+                          const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+                          const [startH, startM] = (block.startTime || '00:00').split(':').map(Number);
+                          const [endH, endM] = (block.endTime || '23:59').split(':').map(Number);
+                          const blockStartMin = (startH || 0) * 60 + (startM || 0);
+                          const blockEndMin = (endH || 0) * 60 + (endM || 0);
+
+                          const isCurrentBlock =
+                            currentDayStr === day &&
+                            currentMinutes >= blockStartMin &&
+                            currentMinutes <= blockEndMin;
+
                           const colorClasses =
                             block.color === 'emerald'
                               ? 'border-emerald-300 bg-emerald-50/60 text-emerald-950'
@@ -1458,12 +1486,24 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
                           return (
                             <div
                               key={block.id}
-                              className={`p-3 rounded-xl border ${colorClasses} shadow-xs relative group transition hover:shadow-md`}
+                              className={`p-3 rounded-xl border ${colorClasses} shadow-xs relative group transition-all duration-200 hover:shadow-md ${
+                                isCurrentBlock
+                                  ? 'ring-2 ring-[#D4AF37] ring-offset-1 shadow-md bg-amber-50/90'
+                                  : ''
+                              }`}
                             >
                               <div className="flex items-start justify-between gap-1 mb-1">
-                                <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-white/80 shadow-2xs">
-                                  {block.startTime} - {block.endTime}
-                                </span>
+                                <div className="flex items-center gap-1">
+                                  <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-white/90 shadow-2xs">
+                                    {block.startTime} - {block.endTime}
+                                  </span>
+                                  {isCurrentBlock && (
+                                    <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-[#D4AF37] text-slate-950 flex items-center gap-0.5 animate-pulse shadow-2xs">
+                                      <Sparkles className="w-2.5 h-2.5" />
+                                      En Curso
+                                    </span>
+                                  )}
+                                </div>
                                 <span className="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-white/70">
                                   Hora {block.periodIndex}
                                 </span>

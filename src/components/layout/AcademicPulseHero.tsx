@@ -62,27 +62,27 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
             </h1>
           </div>
 
-          {/* Quick Shortcuts Adaptados por Rol */}
-          <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-2.5 w-full md:w-auto">
+          {/* Quick Shortcuts Flotantes con Glassmorphism y Micro-Resplandor (60 FPS) */}
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto">
             {currentRole === 'ASISTENTE' ? (
               <>
                 <button
                   onClick={() => onQuickAction('GESTION', 'PASES')}
-                  className="min-h-[48px] flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#b89327] text-slate-950 text-xs font-black transition shadow-lg shadow-[#D4AF37]/20 active:scale-95 cursor-pointer"
+                  className="min-h-[46px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 via-[#D4AF37] to-amber-500 hover:brightness-110 text-slate-950 text-xs font-black transition-all duration-200 shadow-md shadow-[#D4AF37]/25 hover:shadow-lg hover:shadow-[#D4AF37]/40 hover:-translate-y-0.5 active:scale-95 cursor-pointer ring-1 ring-white/20"
                 >
                   <Clock className="w-4 h-4 shrink-0" />
                   <span>Emitir Pase</span>
                 </button>
                 <button
                   onClick={() => onQuickAction('GESTION', 'INASISTENCIAS')}
-                  className="min-h-[48px] flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold transition border border-white/10 active:scale-95 cursor-pointer"
+                  className="min-h-[46px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all duration-200 border border-white/15 backdrop-blur-md hover:-translate-y-0.5 active:scale-95 cursor-pointer shadow-xs"
                 >
                   <Users className="w-4 h-4 text-[#D4AF37] shrink-0" />
                   <span>Pase de Lista</span>
                 </button>
                 <button
                   onClick={() => onQuickAction('GESTION', 'CONDUCTAS')}
-                  className="col-span-2 sm:col-span-1 min-h-[48px] flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white text-xs font-black transition shadow-md active:scale-95 cursor-pointer"
+                  className="col-span-2 sm:col-span-1 min-h-[46px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white text-xs font-black transition-all duration-200 shadow-md hover:-translate-y-0.5 active:scale-95 cursor-pointer border border-amber-400/30"
                 >
                   <ShieldCheck className="w-4 h-4 text-white shrink-0" />
                   <span>Registrar Conducta</span>
@@ -92,21 +92,21 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
               <>
                 <button
                   onClick={() => onQuickAction('GESTION', 'INSCRIPCIONES')}
-                  className="min-h-[48px] flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#b89327] text-slate-950 text-xs font-black transition shadow-lg shadow-[#D4AF37]/20 active:scale-95 cursor-pointer"
+                  className="min-h-[46px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 via-[#D4AF37] to-amber-500 hover:brightness-110 text-slate-950 text-xs font-black transition-all duration-200 shadow-md shadow-[#D4AF37]/25 hover:shadow-lg hover:shadow-[#D4AF37]/40 hover:-translate-y-0.5 active:scale-95 cursor-pointer ring-1 ring-white/20"
                 >
                   <Users className="w-4 h-4 shrink-0" />
                   <span>Inscripción</span>
                 </button>
                 <button
                   onClick={() => onQuickAction('GESTION', 'DOCUMENTOS')}
-                  className="min-h-[48px] flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold transition border border-white/10 active:scale-95 cursor-pointer"
+                  className="min-h-[46px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all duration-200 border border-white/15 backdrop-blur-md hover:-translate-y-0.5 active:scale-95 cursor-pointer shadow-xs"
                 >
                   <FileText className="w-4 h-4 text-[#D4AF37] shrink-0" />
                   <span>Trámites</span>
                 </button>
                 <button
                   onClick={() => onQuickAction('GESTION', 'MATRICULA')}
-                  className="col-span-2 sm:col-span-1 min-h-[48px] flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-black transition shadow-md active:scale-95 cursor-pointer"
+                  className="col-span-2 sm:col-span-1 min-h-[46px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-black transition-all duration-200 shadow-md hover:-translate-y-0.5 active:scale-95 cursor-pointer border border-indigo-400/30"
                 >
                   <ClipboardList className="w-4 h-4 text-[#D4AF37] shrink-0" />
                   <span>Padrón Estudiantil</span>
@@ -116,7 +116,7 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
               <>
                 <button
                   onClick={() => onQuickAction('PLANIFICACION', 'AREAS_PERFILES')}
-                  className="min-h-[48px] flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold transition border border-white/10 active:scale-95 cursor-pointer"
+                  className="min-h-[46px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all duration-200 border border-white/15 backdrop-blur-md hover:-translate-y-0.5 active:scale-95 cursor-pointer shadow-xs"
                 >
                   <BookOpen className="w-4 h-4 text-[#D4AF37] shrink-0" />
                   <span>Pensum</span>
@@ -125,7 +125,7 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
                 {canEditGrades(currentRole) && (
                   <button
                     onClick={() => onQuickAction('EVALUACION', 'PROCESAL')}
-                    className="min-h-[48px] flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#b89327] text-slate-950 text-xs font-black transition shadow-lg shadow-[#D4AF37]/20 active:scale-95 cursor-pointer"
+                    className="min-h-[46px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 via-[#D4AF37] to-amber-500 hover:brightness-110 text-slate-950 text-xs font-black transition-all duration-200 shadow-md shadow-[#D4AF37]/25 hover:shadow-lg hover:shadow-[#D4AF37]/40 hover:-translate-y-0.5 active:scale-95 cursor-pointer ring-1 ring-white/20"
                   >
                     <TrendingUp className="w-4 h-4 shrink-0" />
                     <span>Calificar</span>
@@ -134,7 +134,7 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
 
                 <button
                   onClick={() => onQuickAction('COMUNICACION', 'IA_ACTION_PLANS')}
-                  className={`${canEditGrades(currentRole) ? 'col-span-2 sm:col-span-1' : ''} min-h-[48px] flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-black transition shadow-md active:scale-95 cursor-pointer`}
+                  className={`${canEditGrades(currentRole) ? 'col-span-2 sm:col-span-1' : ''} min-h-[46px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-black transition-all duration-200 shadow-md hover:-translate-y-0.5 active:scale-95 cursor-pointer border border-indigo-400/30`}
                 >
                   <ClipboardList className="w-4 h-4 text-[#D4AF37] shrink-0" />
                   <span>Planes de Acción</span>
@@ -143,7 +143,7 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
             ) : (
               <button
                 onClick={() => onQuickAction('CONSULTAS', 'RENDIMIENTO')}
-                className="col-span-2 min-h-[48px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#b89327] text-slate-950 text-xs font-black transition shadow-lg shadow-[#D4AF37]/20 active:scale-95 cursor-pointer"
+                className="col-span-2 min-h-[46px] flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 via-[#D4AF37] to-amber-500 hover:brightness-110 text-slate-950 text-xs font-black transition-all duration-200 shadow-md shadow-[#D4AF37]/25 hover:shadow-lg hover:shadow-[#D4AF37]/40 hover:-translate-y-0.5 active:scale-95 cursor-pointer ring-1 ring-white/20"
               >
                 <ClipboardList className="w-4 h-4 shrink-0" />
                 <span>Consultar Rendimiento</span>
@@ -153,59 +153,92 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
         </div>
       </div>
 
-      {/* Bento Grid Telemetry Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-        {/* Card 1: Students */}
-        <div className="bg-white dark:bg-slate-900/60 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition group">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Estudiantes</span>
-            <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-[#2C2E53] dark:text-sky-300 flex items-center justify-center group-hover:scale-110 transition">
-              <Users className="w-4 h-4" />
+      {/* Bento Grid Telemetry Cards con Glassmorphism Acelerado por GPU (60 FPS) */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-5">
+        {/* Card 1: Contextual por Rol (Estudiantes / Matrícula o Pases) */}
+        <div className="relative overflow-hidden bg-white/95 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group ring-1 ring-slate-900/5">
+          <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-blue-500 to-indigo-600 opacity-80 group-hover:opacity-100 transition-opacity" />
+          <div className="flex items-center justify-between mb-2.5">
+            <span className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">
+              {currentRole === 'ASISTENTE' ? 'Pases Emitidos' : 'Estudiantes Registrados'}
+            </span>
+            <div className="w-9 h-9 rounded-xl bg-blue-50 text-[#2C2E53] flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-xs">
+              {currentRole === 'ASISTENTE' ? <Clock className="w-4 h-4 text-[#D4AF37]" /> : <Users className="w-4 h-4" />}
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-black text-slate-900 dark:text-white">{levelStudents.length}</span>
-            <span className={`text-[11px] font-bold flex items-center ${levelStudents.length > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500'}`}>
-              {levelStudents.length > 0 ? '100% activos' : 'Sin matrícula'}
+            <span className="text-2xl sm:text-3xl font-black text-slate-900">
+              {currentRole === 'ASISTENTE' ? passes.length : levelStudents.length}
+            </span>
+            <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
+              (currentRole === 'ASISTENTE' ? passes.length > 0 : levelStudents.length > 0)
+                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60'
+                : 'bg-slate-100 text-slate-500'
+            }`}>
+              {currentRole === 'ASISTENTE'
+                ? (passes.length > 0 ? 'Registros activos' : 'Al día')
+                : (levelStudents.length > 0 ? 'Matrícula activa' : 'Sin matrícula')}
             </span>
           </div>
-          <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1 truncate">{currentInfo.cycle}</p>
+          <p className="text-[11px] text-slate-400 mt-2 truncate font-medium">
+            {currentRole === 'ASISTENTE' ? 'Pases de retraso y salida institucional' : currentInfo.cycle}
+          </p>
         </div>
 
-        {/* Card 2: Áreas de Formación */}
-        <div className="bg-white dark:bg-slate-900/60 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition group">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Áreas / Pensum</span>
-            <div className="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-[#D4AF37] flex items-center justify-center group-hover:scale-110 transition">
-              <BookOpen className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-black text-slate-900 dark:text-white">{levelAreas.length}</span>
-            <span className="text-[11px] text-[#2C2E53] dark:text-[#F5C842] font-bold">Asignaturas</span>
-          </div>
-          <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1 truncate">Incluye Robótica y Bellas Artes</p>
-        </div>
-
-        {/* Card 3: Evaluaciones Registradas */}
-        <div className="bg-white dark:bg-slate-900/60 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition group">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Evaluación</span>
-            <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-110 transition">
-              <Award className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-black text-slate-900 dark:text-white">
-              {levelRecords.length > 0 ? (currentLevel === 'MEDIA_GENERAL' ? '18.4' : currentLevel === 'INICIAL' ? 'L' : 'L') : '—'}
+        {/* Card 2: Áreas / Trámites / Padrón según Rol */}
+        <div className="relative overflow-hidden bg-white/95 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group ring-1 ring-slate-900/5">
+          <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-amber-400 to-[#D4AF37] opacity-80 group-hover:opacity-100 transition-opacity" />
+          <div className="flex items-center justify-between mb-2.5">
+            <span className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">
+              {currentRole === 'SECRETARIA' ? 'Trámites y Constancias' : 'Malla Curricular'}
             </span>
-            <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold">
-              {levelRecords.length > 0
-                ? (currentLevel === 'MEDIA_GENERAL' ? '/ 20 Promedio' : currentLevel === 'INICIAL' ? 'Logrado (L)' : 'Logrado (L)')
+            <div className="w-9 h-9 rounded-xl bg-amber-50 text-[#D4AF37] flex items-center justify-center group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300 shadow-xs">
+              {currentRole === 'SECRETARIA' ? <FileText className="w-4 h-4" /> : <BookOpen className="w-4 h-4" />}
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className="text-2xl sm:text-3xl font-black text-slate-900">
+              {currentRole === 'SECRETARIA' ? documentRequests.length : levelAreas.length}
+            </span>
+            <span className="text-[11px] font-bold text-[#2C2E53] bg-amber-50/80 px-2 py-0.5 rounded-full border border-amber-200/50">
+              {currentRole === 'SECRETARIA' ? 'Solicitudes' : 'Asignaturas'}
+            </span>
+          </div>
+          <p className="text-[11px] text-slate-400 mt-2 truncate font-medium">
+            {currentRole === 'SECRETARIA' ? 'Gestión y emisión de documentos' : 'Incluye Robótica y Bellas Artes'}
+          </p>
+        </div>
+
+        {/* Card 3: Calificaciones / Disciplina / Seguimiento */}
+        <div className="relative overflow-hidden bg-white/95 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group ring-1 ring-slate-900/5">
+          <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-emerald-500 to-teal-600 opacity-80 group-hover:opacity-100 transition-opacity" />
+          <div className="flex items-center justify-between mb-2.5">
+            <span className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">
+              {currentRole === 'ASISTENTE' ? 'Disciplina y Asistencia' : 'Evaluación Pedagógica'}
+            </span>
+            <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-xs">
+              {currentRole === 'ASISTENTE' ? <ShieldCheck className="w-4 h-4" /> : <Award className="w-4 h-4" />}
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className="text-2xl sm:text-3xl font-black text-slate-900">
+              {currentRole === 'ASISTENTE'
+                ? '100%'
+                : levelRecords.length > 0
+                ? (currentLevel === 'MEDIA_GENERAL' ? '18.4' : 'L')
+                : '—'}
+            </span>
+            <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60">
+              {currentRole === 'ASISTENTE'
+                ? 'Control Activo'
+                : levelRecords.length > 0
+                ? (currentLevel === 'MEDIA_GENERAL' ? '/ 20 Promedio' : 'Logrado (L)')
                 : 'Sin registros'}
             </span>
           </div>
-          <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1 truncate">{currentInfo.scale}</p>
+          <p className="text-[11px] text-slate-400 mt-2 truncate font-medium">
+            {currentRole === 'ASISTENTE' ? 'Seguimiento formativo y de conducta' : currentInfo.scale}
+          </p>
         </div>
       </div>
     </section>
