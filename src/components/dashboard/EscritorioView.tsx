@@ -402,50 +402,37 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left 2 Cols: Session Audit & System Health */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Audit Card con Glassmorphism y Live Inactivity Indicator */}
-            <div className="bg-white/95 backdrop-blur-md rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-all">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-4 mb-5 gap-3">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-[#2C2E53]/10 text-[#2C2E53] flex items-center justify-center">
-                    <ShieldCheck className="w-5 h-5 text-[#D4AF37]" />
-                  </div>
-                  <div>
-                    <h3 className="font-extrabold text-[#2C2E53] text-sm leading-tight">Seguridad de Sesión y Auditoría</h3>
-                    <p className="text-[11px] text-slate-400">Protección perimetral con auto-bloqueo tras 15 min de inactividad</p>
-                  </div>
+            {/* Audit Card */}
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-cba-card">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-5 h-5 text-[#D4AF37]" />
+                  <h3 className="font-bold text-[#2C2E53] text-sm">Información de Auditoría y Sesión Activa</h3>
                 </div>
-                <div className="flex items-center gap-2 self-start sm:self-auto">
-                  <span className="text-[11px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200/80 flex items-center gap-1.5 shadow-2xs">
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                    </span>
-                    Conexión Enlazada
-                  </span>
-                </div>
+                <span className="text-[11px] font-mono font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  Conectado
+                </span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-6">
-                <div className="p-4 rounded-xl bg-slate-50/80 border border-slate-100/90 hover:border-slate-200 transition">
-                  <span className="text-[10px] uppercase font-extrabold text-slate-400 block tracking-wider">Última Actividad</span>
-                  <p className="text-xs font-black text-slate-800 mt-1">Registrada en Tiempo Real</p>
-                  <p className="text-[10px] text-emerald-600 font-semibold mt-0.5 flex items-center gap-1">
-                    <Clock className="w-3 h-3 text-emerald-500" />
-                    Interactuando ahora
-                  </p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Última Visita</span>
+                  <p className="text-xs font-extrabold text-slate-800 mt-1">Hoy</p>
+                  <p className="text-[10px] text-slate-500">{new Date().toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' })}</p>
                 </div>
-                <div className="p-4 rounded-xl bg-gradient-to-br from-emerald-50/60 to-teal-50/40 border border-emerald-100/80">
-                  <span className="text-[10px] uppercase font-extrabold text-emerald-700 block tracking-wider">Sesión Institucional</span>
-                  <p className="text-sm font-black text-emerald-800 mt-1 flex items-center gap-1.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                    Activa y Cifrada
+                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Sesión Actual</span>
+                  <p className="text-sm font-black text-emerald-600 mt-1 flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Activa
                   </p>
-                  <p className="text-[10px] text-slate-500 mt-0.5">Expira a los 15 min de reposo</p>
+                  <p className="text-[10px] text-slate-500">En línea</p>
                 </div>
-                <div className="p-4 rounded-xl bg-slate-50/80 border border-slate-100/90 hover:border-slate-200 transition">
-                  <span className="text-[10px] uppercase font-extrabold text-slate-400 block tracking-wider">Año Escolar</span>
+                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Año Escolar</span>
                   <p className="text-xs font-black text-[#2C2E53] mt-1">2026 - 2027</p>
-                  <p className="text-[10px] text-[#D4AF37] font-bold">Colegio Bellas Artes</p>
+                  <p className="text-[10px] text-slate-400 font-medium">Ciclo Oficial</p>
                 </div>
               </div>
 
