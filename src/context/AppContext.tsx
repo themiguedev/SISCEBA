@@ -119,6 +119,8 @@ import {
   supabaseSaveTitleRecord,
   supabaseSaveCommunityNotice,
   supabaseSaveNotification,
+  supabaseMarkNotificationAsRead,
+  supabaseMarkAllNotificationsAsRead,
   supabaseClearNotifications,
   supabaseSaveUser,
   supabaseFetchPrivileges,
@@ -1198,10 +1200,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const markNotificationAsRead = (id: string) => {
     setNotifications(prev => prev.map(n => (n.id === id ? { ...n, read: true } : n)));
+    syncWithCloud(() => supabaseMarkNotificationAsRead(id), 'marcar notificación leída');
   };
 
   const markAllNotificationsAsRead = () => {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    syncWithCloud(() => supabaseMarkAllNotificationsAsRead(), 'marcar todas las notificaciones leídas');
   };
 
   const clearNotifications = () => {
@@ -1558,7 +1562,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
 
     setEvaluations(prev => [newRecord, ...prev]);
-    supabaseSaveEvaluation(newRecord).catch(err => console.warn('Supabase save eval adjust err:', err));
+    syncWithCloud(() => supabaseSaveEvaluation(newRecord), 'guardar ajuste de calificación en consejo');
 
     // Append to council minute if available
     setCouncilMinutes(prev => {
@@ -1659,14 +1663,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const isLapsoOpenForGrading = schoolYearConfig.lapsos.find(l => l.lapso === activeLapso)?.isGradingOpen ?? true;
 
   const toggleLapsoGrading = (lapso: 1 | 2 | 3) => {
+    let nextConfig: SchoolYearConfig | null = null;
     setSchoolYearConfig(prev => {
-      const updated: SchoolYearConfig = {
+      nextConfig = {
         ...prev,
         lapsos: prev.lapsos.map(l => (l.lapso === lapso ? { ...l, isGradingOpen: !l.isGradingOpen } : l))
       };
-      supabaseSaveSchoolYearConfig(updated).catch(err => console.warn('Supabase save school year config err:', err));
-      return updated;
+      return nextConfig;
     });
+    if (nextConfig) {
+      syncWithCloud(() => supabaseSaveSchoolYearConfig(nextConfig!), `conmutar carga de notas para Lapso ${lapso}`);
+    }
   };
 
   const addPass = (pass: Omit<PassRecord, 'id' | 'ticketNumber'>): PassRecord => {

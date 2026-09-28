@@ -109,6 +109,16 @@ export const supabaseSaveStudent = async (student: Student): Promise<boolean> =>
   }
 };
 
+export const supabaseDeleteStudent = async (id: string): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('students').delete().eq('id', id);
+    return !error;
+  } catch {
+    return false;
+  }
+};
+
 // ==========================================
 // 2. MATERIAS / ASIGNATURAS (subject_areas)
 // ==========================================
@@ -135,6 +145,36 @@ export const supabaseFetchSubjectAreas = async (): Promise<SubjectArea[] | null>
   } catch (e) {
     console.error('Error en supabaseFetchSubjectAreas:', e);
     return null;
+  }
+};
+
+export const supabaseSaveSubjectArea = async (area: SubjectArea): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('subject_areas').upsert({
+      id: area.id,
+      code: area.code,
+      name: area.name,
+      level: area.level,
+      type: area.type,
+      area_profile: area.areaProfile || '',
+      teacher_profile: area.teacherProfile || '',
+      weekly_hours: area.weeklyHours || 4,
+      icon_name: area.iconName || 'BookOpen'
+    });
+    return !error;
+  } catch {
+    return false;
+  }
+};
+
+export const supabaseDeleteSubjectArea = async (id: string): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('subject_areas').delete().eq('id', id);
+    return !error;
+  } catch {
+    return false;
   }
 };
 
@@ -177,6 +217,16 @@ export const supabaseSaveCompetency = async (comp: Competency): Promise<boolean>
       level: comp.level,
       lapso: comp.lapso
     });
+    return !error;
+  } catch {
+    return false;
+  }
+};
+
+export const supabaseDeleteCompetency = async (id: string): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('competencies').delete().eq('id', id);
     return !error;
   } catch {
     return false;
@@ -229,6 +279,16 @@ export const supabaseSaveIndicator = async (ind: Indicator): Promise<boolean> =>
   }
 };
 
+export const supabaseDeleteIndicator = async (id: string): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('indicators').delete().eq('id', id);
+    return !error;
+  } catch {
+    return false;
+  }
+};
+
 export const supabaseFetchStrategies = async (): Promise<Strategy[] | null> => {
   if (!isSupabaseConfigured()) return null;
   try {
@@ -267,6 +327,16 @@ export const supabaseSaveStrategy = async (strat: Strategy): Promise<boolean> =>
       resources: strat.resources,
       level: strat.level
     });
+    return !error;
+  } catch {
+    return false;
+  }
+};
+
+export const supabaseDeleteStrategy = async (id: string): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('strategies').delete().eq('id', id);
     return !error;
   } catch {
     return false;
@@ -449,6 +519,16 @@ export const supabaseSaveDidacticPlan = async (plan: PlanQuincenal): Promise<boo
     return !error;
   } catch (e) {
     console.error('Error en supabaseSaveDidacticPlan:', e);
+    return false;
+  }
+};
+
+export const supabaseDeleteDidacticPlan = async (id: string): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('didactic_plans').delete().eq('id', id);
+    return !error;
+  } catch {
     return false;
   }
 };
@@ -772,6 +852,16 @@ export const supabaseSaveTitleRecord = async (title: TitleRecord): Promise<boole
   }
 };
 
+export const supabaseDeleteTitleRecord = async (id: string): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('title_records').delete().eq('id', id);
+    return !error;
+  } catch {
+    return false;
+  }
+};
+
 // ==========================================
 // 12. CARTELERA Y NOTICIAS (community_notices)
 // ==========================================
@@ -813,6 +903,16 @@ export const supabaseSaveCommunityNotice = async (notice: CommunityNotice): Prom
       author: notice.author,
       pinned: notice.pinned ?? false
     });
+    return !error;
+  } catch {
+    return false;
+  }
+};
+
+export const supabaseDeleteCommunityNotice = async (id: string): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('community_notices').delete().eq('id', id);
     return !error;
   } catch {
     return false;
@@ -893,6 +993,26 @@ export const supabaseDeleteNotification = async (id: string): Promise<boolean> =
   if (!isSupabaseConfigured()) return false;
   try {
     const { error } = await supabase.from('system_notifications').delete().eq('id', id);
+    return !error;
+  } catch {
+    return false;
+  }
+};
+
+export const supabaseMarkNotificationAsRead = async (id: string): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('system_notifications').update({ read: true }).eq('id', id);
+    return !error;
+  } catch {
+    return false;
+  }
+};
+
+export const supabaseMarkAllNotificationsAsRead = async (): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('system_notifications').update({ read: true }).eq('read', false);
     return !error;
   } catch {
     return false;
@@ -1031,6 +1151,16 @@ export const supabaseSavePlanLapso = async (plan: PlanLapso): Promise<boolean> =
     return !error;
   } catch (e) {
     console.error('Error en supabaseSavePlanLapso:', e);
+    return false;
+  }
+};
+
+export const supabaseDeletePlanLapso = async (id: string): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('plans_lapso').delete().eq('id', id);
+    return !error;
+  } catch {
     return false;
   }
 };
