@@ -22,6 +22,7 @@ import { NotificationCenterPopover } from '../notifications/NotificationCenterPo
 import { MainNavigationTab } from '../../types';
 import { getDefaultAvatarForUser } from '../../utils/avatarCatalog';
 import { hasTabAccess, getUserAllowedLevels } from '../../utils/rbac';
+import { useTheme } from '../../context/ThemeContext';
 
 interface ModernHeaderProps {
   sidebarOpen: boolean;
@@ -56,6 +57,8 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
     logout,
     currentUser
   } = useApp();
+
+  const { currentMonthConfig } = useTheme();
 
   const [roleMenuOpen, setRoleMenuOpen] = useState(false);
   const [lapsoMenuOpen, setLapsoMenuOpen] = useState(false);
@@ -119,6 +122,12 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
                 decoding="async"
                 className="h-6 sm:h-9 w-auto object-contain brightness-0 invert drop-shadow-[0_2px_8px_rgba(212,175,55,0.3)]"
               />
+              {/* Accesorio Estacional / Temático del Mes sincronizado sobre el logo */}
+              <SeasonalAccessoryIcon
+                sizeClass="w-4 h-4 sm:w-5 sm:h-5"
+                className="-top-1.5 -right-2 sm:-top-2 sm:-right-2.5 z-10"
+                monthIndex={currentMonthConfig.month}
+              />
               <span className="absolute -bottom-0.5 -right-0.5 flex h-1.5 w-1.5 sm:h-2 sm:w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#D4AF37] opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 bg-[#D4AF37]"></span>
@@ -126,11 +135,20 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
             </div>
           </button>
 
-          {/* Title SICE-CBA - Visible en pantallas medianas o si hay espacio */}
+          {/* Title SICE-CBA & Seasonal Month Badge */}
           <div className="hidden sm:flex flex-col justify-center shrink-0 select-none cursor-default">
-            <span className="font-extrabold text-xs sm:text-base tracking-wider text-white whitespace-nowrap">
-              SICE-CBA
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="font-extrabold text-xs sm:text-base tracking-wider text-white whitespace-nowrap">
+                SICE-CBA
+              </span>
+              <span
+                className={`hidden xl:inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-black border uppercase tracking-wider ${currentMonthConfig.badgeBg} ${currentMonthConfig.badgeText} ${currentMonthConfig.badgeBorder}`}
+                title={`Temática del Mes: ${currentMonthConfig.name} - ${currentMonthConfig.seasonTitle}`}
+              >
+                <span>{currentMonthConfig.emoji}</span>
+                <span>{currentMonthConfig.name}</span>
+              </span>
+            </div>
           </div>
         </div>
 

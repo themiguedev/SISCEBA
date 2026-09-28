@@ -13,9 +13,9 @@ export type FestiveTheme =
 /**
  * Detecta automáticamente la efeméride o estación festiva según el mes y día del calendario.
  */
-export function getAutoThemeByDate(): FestiveTheme {
+export function getAutoThemeByDate(overrideMonthIndex?: number): FestiveTheme {
   const now = new Date();
-  const month = now.getMonth(); // 0 = Ene, 11 = Dic
+  const month = overrideMonthIndex !== undefined ? overrideMonthIndex : now.getMonth(); // 0 = Ene, 11 = Dic
   const day = now.getDate();
 
   if (month === 11) {
@@ -27,9 +27,18 @@ export function getAutoThemeByDate(): FestiveTheme {
   } else if (month === 1) {
     // Febrero: San Valentín / Amor y Amistad
     return 'san_valentin';
-  } else if (month === 3 || month === 4) {
-    // Abril - Mayo: Día de la Tierra
+  } else if (month === 2) {
+    // Marzo: Día de la Mujer / Primavera
     return 'dia_tierra';
+  } else if (month === 3 || month === 4) {
+    // Abril - Mayo: Día de la Tierra / Libros
+    return 'dia_tierra';
+  } else if (month === 5) {
+    // Junio: Ambiente / Padre
+    return 'dia_tierra';
+  } else if (month === 6 || month === 7) {
+    // Julio - Agosto: Graduación / Birrete
+    return 'regreso_clases';
   } else if (month === 8) {
     // Septiembre: Inicio de año escolar CBA
     return 'regreso_clases';
@@ -47,6 +56,8 @@ export function getAutoThemeByDate(): FestiveTheme {
 interface SeasonalAccessoryIconProps {
   sizeClass?: string;
   className?: string;
+  forcedTheme?: FestiveTheme;
+  monthIndex?: number;
 }
 
 /**
@@ -55,8 +66,10 @@ interface SeasonalAccessoryIconProps {
 export const SeasonalAccessoryIcon: React.FC<SeasonalAccessoryIconProps> = ({
   sizeClass = 'w-9 h-9',
   className = '-top-3.5 -right-3.5',
+  forcedTheme,
+  monthIndex,
 }) => {
-  const currentTheme = getAutoThemeByDate();
+  const currentTheme = forcedTheme || getAutoThemeByDate(monthIndex);
 
   return (
     <div className={`absolute ${className} pointer-events-none select-none z-10`}>

@@ -13,6 +13,7 @@ import {
   FileText
 } from 'lucide-react';
 import { canEditGrades, hasTabAccess } from '../../utils/rbac';
+import { useTheme } from '../../context/ThemeContext';
 
 interface AcademicPulseHeroProps {
   onQuickAction: (tab: MainNavigationTab | 'PLANIFICACION' | 'EVALUACION' | 'COMUNICACION', subTab?: string) => void;
@@ -20,6 +21,7 @@ interface AcademicPulseHeroProps {
 
 export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAction }) => {
   const { currentLevel, students, areas, evaluations, activeLapso, currentRole, passes, documentRequests } = useApp();
+  const { currentMonthConfig } = useTheme();
 
   const levelStudents = students.filter(s => s.level === currentLevel);
   const levelAreas = areas.filter(a => a.level === currentLevel);
@@ -40,17 +42,37 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
     <section aria-label="Resumen ejecutivo institucional" className="space-y-4 mb-6">
       {/* Top Banner with Actions */}
       <div className="bg-gradient-to-r from-[#2C2E53] via-[#242646] to-[#1B1C33] rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-7 text-white shadow-xl border border-[#414474]/50 relative overflow-hidden">
-        {/* Subtle Background Pattern */}
+        {/* Subtle Background Pattern & Seasonal Ambient Glow */}
         <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 rounded-full bg-[#D4AF37]/5 blur-3xl pointer-events-none" />
+        <div
+          className={`absolute -bottom-16 -left-16 w-56 h-56 rounded-full bg-gradient-to-tr ${currentMonthConfig.bannerGradient} opacity-20 blur-3xl pointer-events-none`}
+        />
+
+        {/* Floating Seasonal Decorations (Subtle) */}
+        <div className="absolute top-2 right-12 sm:right-28 text-white/10 text-2xl sm:text-3xl select-none pointer-events-none animate-pulse">
+          {currentMonthConfig.floatingDecorations[0]?.icon || currentMonthConfig.emoji}
+        </div>
+        <div className="hidden sm:block absolute bottom-2 right-48 text-white/10 text-xl select-none pointer-events-none">
+          {currentMonthConfig.floatingDecorations[1]?.icon || ''}
+        </div>
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6">
           <div>
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex flex-wrap items-center gap-2 mb-2">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-400/15 text-amber-200 border border-amber-400/30 text-[11px] font-extrabold tracking-widest uppercase shadow-xs">
                 <Sparkles className="w-3.5 h-3.5 text-amber-300" />
                 Año Escolar 2026 - 2027
               </span>
               <span className="text-slate-300 text-xs font-semibold">• Lapso {activeLapso}</span>
+
+              {/* Seasonal Pill Tag */}
+              <span
+                className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold border shadow-xs ${currentMonthConfig.badgeBg} ${currentMonthConfig.badgeText} ${currentMonthConfig.badgeBorder}`}
+                title={`${currentMonthConfig.ephemeris} - ${currentMonthConfig.greetingMessage}`}
+              >
+                <span>{currentMonthConfig.emoji}</span>
+                <span>{currentMonthConfig.seasonTitle}</span>
+              </span>
             </div>
 
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight">
@@ -60,6 +82,9 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
                 ? 'Panel de Control de Estudios y Trámites'
                 : 'Panel Académico'}
             </h1>
+            <p className="text-xs sm:text-sm text-slate-300/90 mt-1 max-w-xl font-medium">
+              {currentMonthConfig.greetingMessage}
+            </p>
           </div>
 
           {/* Quick Shortcuts Flotantes con Glassmorphism y Micro-Resplandor (60 FPS) */}

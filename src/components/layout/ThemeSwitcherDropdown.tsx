@@ -24,7 +24,11 @@ export const ThemeSwitcherDropdown: React.FC<ThemeSwitcherDropdownProps> = ({
     setPalette,
     isDark,
     themesCatalog,
-    currentTheme
+    currentTheme,
+    currentMonthConfig,
+    activeMonthOverride,
+    setMonthOverride,
+    allMonthConfigs
   } = useTheme();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -152,12 +156,73 @@ export const ThemeSwitcherDropdown: React.FC<ThemeSwitcherDropdownProps> = ({
             </div>
           </div>
 
-          {/* 2. SECCIÓN: OTROS TEMAS / PALETAS DE COLOR */}
-          <div className="space-y-1.5">
+          {/* 2. SECCIÓN: TEMÁTICA ESTACIONAL POR MES */}
+          <div className="space-y-1.5 pt-1 border-t border-white/10">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold text-[#D4AF37] uppercase tracking-widest block">
+                Temática del Mes:
+              </span>
+              <span className="text-[10px] font-bold text-slate-300">
+                {activeMonthOverride === null ? 'Modo Automático' : 'Manual'}
+              </span>
+            </div>
+
+            {/* Current Active Seasonal Card */}
+            <div className="p-2 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-xl shrink-0">{currentMonthConfig.emoji}</span>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-black text-white truncate">{currentMonthConfig.name}</span>
+                    <span className={`text-[9px] font-extrabold px-1.5 py-0.2 rounded border ${currentMonthConfig.badgeBg} ${currentMonthConfig.badgeText} ${currentMonthConfig.badgeBorder}`}>
+                      {currentMonthConfig.seasonTitle}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-400 truncate">{currentMonthConfig.ephemeris}</p>
+                </div>
+              </div>
+              {activeMonthOverride !== null && (
+                <button
+                  type="button"
+                  onClick={() => setMonthOverride(null)}
+                  className="px-2 py-0.5 rounded-lg bg-amber-400/20 hover:bg-amber-400/30 text-amber-300 text-[10px] font-bold shrink-0 transition"
+                  title="Volver a detección automática del mes actual"
+                >
+                  Auto
+                </button>
+              )}
+            </div>
+
+            {/* Quick Month Chips Carousel/Grid */}
+            <div className="grid grid-cols-4 gap-1 pt-1">
+              {allMonthConfigs.map((m) => {
+                const isSelected = (activeMonthOverride === null && currentMonthConfig.month === m.month) || activeMonthOverride === m.month;
+                return (
+                  <button
+                    key={m.key}
+                    type="button"
+                    onClick={() => setMonthOverride(m.month)}
+                    className={`p-1.5 rounded-lg border text-center transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
+                      isSelected
+                        ? 'bg-[#2C2E53] border-[#D4AF37] text-white shadow-xs ring-1 ring-[#D4AF37]'
+                        : 'bg-[#141525]/60 hover:bg-[#141525] border-white/5 text-slate-400 hover:text-white'
+                    }`}
+                    title={`${m.name}: ${m.seasonTitle}`}
+                  >
+                    <span className="text-xs">{m.emoji}</span>
+                    <span className="text-[9px] font-bold truncate max-w-full">{m.name.slice(0, 3)}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 3. SECCIÓN: OTROS TEMAS / PALETAS DE COLOR */}
+          <div className="space-y-1.5 pt-1 border-t border-white/10">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">
               Galería de Temas Estilizados:
             </span>
-            <div className="grid grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1">
+            <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
               {themesCatalog.map((t) => {
                 const isSelected = palette === t.id;
                 return (

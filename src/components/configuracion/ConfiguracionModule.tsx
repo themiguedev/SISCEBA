@@ -60,7 +60,18 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
     createRegistrationCode,
     deleteRegistrationCode
   } = useApp();
-  const { mode, setMode, palette, setPalette, isDark, themesCatalog } = useTheme();
+  const {
+    mode,
+    setMode,
+    palette,
+    setPalette,
+    isDark,
+    themesCatalog,
+    currentMonthConfig,
+    activeMonthOverride,
+    setMonthOverride,
+    allMonthConfigs
+  } = useTheme();
 
   // Estados para códigos de registro generados por admin
   const [copiedCodeId, setCopiedCodeId] = useState<string | null>(null);
@@ -1185,6 +1196,102 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
                       </button>
                     </div>
                   </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Section 2.5: Temática Estacional del Mes y Accesorios */}
+          <div className="bg-white rounded-2xl p-6 sm:p-7 border border-slate-200 shadow-cba-card space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">{currentMonthConfig.emoji}</span>
+                  <h3 className="font-extrabold text-base text-[#2C2E53]">
+                    Temática Estacional del Mes y Accesorios del Portal
+                  </h3>
+                </div>
+                <p className="text-xs text-slate-500 mt-1">
+                  SICE-CBA adorna automáticamente el logotipo, la cabecera y los paneles con la efeméride y espíritu cívico/cultural de cada mes. Puedes forzar cualquier mes o dejarlo en automático.
+                </p>
+              </div>
+
+              {activeMonthOverride !== null && (
+                <button
+                  type="button"
+                  onClick={() => setMonthOverride(null)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-amber-700 bg-amber-100 hover:bg-amber-200 rounded-xl transition self-start sm:self-center"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  Volver a Modo Automático
+                </button>
+              )}
+            </div>
+
+            {/* Current Active Seasonal Month Showcase */}
+            <div className={`p-5 rounded-2xl border-2 bg-gradient-to-r ${currentMonthConfig.bannerGradient} text-white shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden`}>
+              <div className="relative z-10 flex items-center gap-3.5">
+                <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-3xl shadow-md shrink-0">
+                  {currentMonthConfig.emoji}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-white/25 text-white">
+                      Mes {currentMonthConfig.month + 1}: {currentMonthConfig.name}
+                    </span>
+                    <span className="text-xs font-bold text-white/90">
+                      • {currentMonthConfig.seasonTitle}
+                    </span>
+                  </div>
+                  <h4 className="text-lg font-black text-white mt-1">
+                    {currentMonthConfig.ephemeris}
+                  </h4>
+                  <p className="text-xs text-white/80 mt-0.5">
+                    {currentMonthConfig.greetingMessage}
+                  </p>
+                </div>
+              </div>
+
+              <div className="relative z-10 flex items-center gap-2 shrink-0">
+                <span className="text-xs font-bold px-3 py-1.5 rounded-xl bg-white/20 backdrop-blur-sm border border-white/25">
+                  {activeMonthOverride === null ? '🌟 Sincronización Automática' : '🔧 Modo Manual Fijado'}
+                </span>
+              </div>
+            </div>
+
+            {/* Grid of All 12 Months */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+              {allMonthConfigs.map((m) => {
+                const isSelected = (activeMonthOverride === null && currentMonthConfig.month === m.month) || activeMonthOverride === m.month;
+                return (
+                  <button
+                    key={m.key}
+                    type="button"
+                    onClick={() => setMonthOverride(m.month)}
+                    className={`p-3 rounded-xl border-2 text-left transition-all duration-200 flex flex-col justify-between gap-2 cursor-pointer ${
+                      isSelected
+                        ? 'border-[#D4AF37] bg-amber-500/10 shadow-md ring-2 ring-[#D4AF37]/25'
+                        : 'border-slate-200 hover:border-slate-300 bg-slate-50/60 hover:bg-slate-100/80'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-1">
+                      <span className="text-2xl">{m.emoji}</span>
+                      {isSelected && (
+                        <span className="w-2 h-2 rounded-full bg-[#D4AF37]"></span>
+                      )}
+                    </div>
+                    <div>
+                      <p className="font-extrabold text-xs text-slate-800 leading-tight">
+                        {m.name}
+                      </p>
+                      <p className="text-[10px] text-slate-500 truncate mt-0.5">
+                        {m.seasonTitle}
+                      </p>
+                    </div>
+                    <div className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded border text-center ${m.badgeBg} ${m.badgeText} ${m.badgeBorder}`}>
+                      {m.floatingDecorations[0]?.icon || '★'} {m.name}
+                    </div>
+                  </button>
                 );
               })}
             </div>
