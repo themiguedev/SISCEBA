@@ -1,24 +1,21 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { EvaluationRecord } from '../../types';
+import { EvaluationRecord, MainNavigationTab } from '../../types';
 import {
   Sparkles,
   Users,
   BookOpen,
   Award,
   ClipboardList,
-  ArrowUpRight,
   ShieldCheck,
   TrendingUp,
-  CheckCircle2,
-  CalendarCheck2,
   Clock,
   FileText
 } from 'lucide-react';
 import { canEditGrades, hasTabAccess } from '../../utils/rbac';
 
 interface AcademicPulseHeroProps {
-  onQuickAction: (tab: any, subTab: string) => void;
+  onQuickAction: (tab: MainNavigationTab | 'PLANIFICACION' | 'EVALUACION' | 'COMUNICACION', subTab?: string) => void;
 }
 
 export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAction }) => {
