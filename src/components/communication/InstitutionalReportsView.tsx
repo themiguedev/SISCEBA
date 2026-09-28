@@ -1,21 +1,15 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import {
-  FileText,
   User,
   Users,
   Award,
   Printer,
-  CheckCircle2,
-  Calendar,
   Sparkles,
-  School,
-  FileCheck,
   BrainCircuit,
   ClipboardList,
   BarChart3,
-  Layers,
-  CheckCircle
+  Layers
 } from 'lucide-react';
 
 type InstitutionalReportType =

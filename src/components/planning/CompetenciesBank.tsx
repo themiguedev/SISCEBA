@@ -6,11 +6,8 @@ import {
   ArrowRightLeft,
   Search,
   BookOpen,
-  Filter,
-  CheckCircle,
   X,
-  Layers,
-  Sparkles
+  Layers
 } from 'lucide-react';
 
 export const CompetenciesBank: React.FC = () => {

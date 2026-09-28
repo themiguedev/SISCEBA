@@ -19,8 +19,7 @@ import {
   AlertTriangle,
   Award,
   Users,
-  CheckCircle2,
-  Sparkles
+  CheckCircle2
 } from 'lucide-react';
 
 export const StatisticsChartsView: React.FC = () => {
@@ -31,7 +30,6 @@ export const StatisticsChartsView: React.FC = () => {
   const GOLD = '#D4AF37';
   const EMERALD = '#10B981';
   const RED = '#EF4444';
-  const AMBER = '#F59E0B';
 
   // Area Performance Mock Data based on currentLevel
   const areaPerformanceData = levelAreas.slice(0, 7).map(area => {

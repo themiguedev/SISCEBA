@@ -27,18 +27,14 @@ import {
   Info,
   Building2,
   Phone,
-  Mail,
-  MapPin,
   Save,
   CheckCircle2,
   Lock,
-  CheckSquare,
   Filter,
   RotateCcw
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { InstitutionalSchoolData } from '../../types';
-import PRIVILEGIOS_DATA from '../../data/privilegiosCEO.json';
 
 // 17 CEO Catalog Options
 export type AvanzadaSection =
@@ -100,9 +96,6 @@ const getMenuItems = (
 export const ConfiguracionAvanzadaView: React.FC = () => {
   const {
     currentRole,
-    schoolYearConfig,
-    students,
-    users,
     systemPrivileges,
     toggleSystemPrivilege,
     resetSystemPrivileges,
@@ -112,10 +105,7 @@ export const ConfiguracionAvanzadaView: React.FC = () => {
     saveSystemCatalogs,
     auditLogs,
     addAuditLog,
-    scheduleTypes,
-    saveScheduleType,
-    isSavingCloud,
-    isSupabaseActive
+    scheduleTypes
   } = useApp();
   const [activeSection, setActiveSection] = useState<AvanzadaSection>('MODULOS');
   const [searchTerm, setSearchTerm] = useState('');
