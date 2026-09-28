@@ -1,10 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import {
-  MonthIndex,
   MonthSeasonalConfig,
-  getCurrentMonthConfig,
-  MONTH_SEASONAL_CONFIGS,
-  ALL_MONTH_SEASONAL_CONFIGS
+  getCurrentMonthConfig
 } from '../utils/seasonalTheme';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
@@ -134,52 +131,19 @@ interface ThemeContextType {
   toggleMode: () => void;
   themesCatalog: ThemeDefinition[];
   currentTheme: ThemeDefinition;
-  // Tematización estacional según el mes
+  // Tematización estacional 100% automática según el mes
   currentMonthConfig: MonthSeasonalConfig;
-  activeMonthOverride: MonthIndex | null;
-  setMonthOverride: (month: MonthIndex | null) => void;
-  allMonthConfigs: MonthSeasonalConfig[];
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 const STORAGE_MODE_KEY = 'sisceba_theme_mode';
 const STORAGE_PALETTE_KEY = 'sisceba_theme_palette';
-const STORAGE_MONTH_KEY = 'sisceba_month_thematic_override';
-
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Estado de personalización de mes (null = automático según la fecha del calendario)
-  const [activeMonthOverride, setActiveMonthOverrideState] = useState<MonthIndex | null>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_MONTH_KEY);
-      if (saved !== null && saved !== undefined && saved !== '') {
-        const parsed = parseInt(saved, 10);
-        if (!isNaN(parsed) && parsed >= 0 && parsed <= 11) {
-          return parsed as MonthIndex;
-        }
-      }
-    } catch {
-      // Ignorar error de storage
-    }
-    return null;
-  });
-
-  const setMonthOverride = (month: MonthIndex | null) => {
-    setActiveMonthOverrideState(month);
-    try {
-      if (month === null) {
-        localStorage.removeItem(STORAGE_MONTH_KEY);
-      } else {
-        localStorage.setItem(STORAGE_MONTH_KEY, month.toString());
-      }
-    } catch {
-      // Ignorar
-    }
-  };
-
+  // Tematización estacional 100% automática según la fecha real del calendario
   const currentMonthConfig = useMemo(() => {
-    return getCurrentMonthConfig(activeMonthOverride !== null ? activeMonthOverride : undefined);
-  }, [activeMonthOverride]);
+    return getCurrentMonthConfig();
+  }, []);
   // 1. Estado inicial del Modo (Claro / Oscuro / Sistema)
   const [mode, setModeState] = useState<ThemeMode>(() => {
     try {
@@ -306,10 +270,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         toggleMode,
         themesCatalog: THEMES_CATALOG,
         currentTheme,
-        currentMonthConfig,
-        activeMonthOverride,
-        setMonthOverride,
-        allMonthConfigs: ALL_MONTH_SEASONAL_CONFIGS
+        currentMonthConfig
       }}
     >
       {children}
