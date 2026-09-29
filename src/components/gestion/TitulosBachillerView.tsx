@@ -35,13 +35,13 @@ const DEFAULT_TITLE_BLOCKS: TitleBlockLayout[] = [
     id: 'serialNumber',
     label: 'Serial de Seguridad (Superior Derecho)',
     enabled: true,
-    xMm: 215,
-    yMm: 22,
+    xMm: 222,
+    yMm: 18,
     fontSizePt: 13,
     fontWeight: 'bold',
     letterSpacingMm: 2.2,
     lineHeight: 1.1,
-    textAlign: 'right',
+    textAlign: 'left',
     fontFamily: 'mono',
     color: '#0f172a',
     sampleTemplate: '{{serialNumber}}'
@@ -50,11 +50,11 @@ const DEFAULT_TITLE_BLOCKS: TitleBlockLayout[] = [
     id: 'zonaPlantel',
     label: 'Zona Educativa / Plantel',
     enabled: true,
-    xMm: 45,
-    yMm: 72,
-    fontSizePt: 10,
+    xMm: 46,
+    yMm: 68,
+    fontSizePt: 9.8,
     fontWeight: 'normal',
-    letterSpacingMm: 0.2,
+    letterSpacingMm: 0.1,
     lineHeight: 1.25,
     textAlign: 'left',
     fontFamily: 'sans-serif',
@@ -65,11 +65,11 @@ const DEFAULT_TITLE_BLOCKS: TitleBlockLayout[] = [
     id: 'codigoPlantel',
     label: 'Código DEA del Plantel',
     enabled: true,
-    xMm: 45,
-    yMm: 78,
-    fontSizePt: 10,
+    xMm: 46,
+    yMm: 74,
+    fontSizePt: 9.8,
     fontWeight: 'normal',
-    letterSpacingMm: 0.2,
+    letterSpacingMm: 0.1,
     lineHeight: 1.25,
     textAlign: 'left',
     fontFamily: 'sans-serif',
@@ -80,11 +80,11 @@ const DEFAULT_TITLE_BLOCKS: TitleBlockLayout[] = [
     id: 'tituloMencion',
     label: 'Título de (Mención)',
     enabled: true,
-    xMm: 45,
-    yMm: 85,
-    fontSizePt: 11,
+    xMm: 46,
+    yMm: 80,
+    fontSizePt: 10.5,
     fontWeight: 'bold',
-    letterSpacingMm: 0.5,
+    letterSpacingMm: 0.4,
     lineHeight: 1.2,
     textAlign: 'left',
     fontFamily: 'sans-serif',
@@ -95,11 +95,11 @@ const DEFAULT_TITLE_BLOCKS: TitleBlockLayout[] = [
     id: 'planEstudio',
     label: 'Plan de Estudio y Código',
     enabled: true,
-    xMm: 45,
-    yMm: 92,
-    fontSizePt: 10,
+    xMm: 46,
+    yMm: 86,
+    fontSizePt: 9.8,
     fontWeight: 'normal',
-    letterSpacingMm: 0.3,
+    letterSpacingMm: 0.2,
     lineHeight: 1.25,
     textAlign: 'left',
     fontFamily: 'sans-serif',
@@ -110,11 +110,11 @@ const DEFAULT_TITLE_BLOCKS: TitleBlockLayout[] = [
     id: 'otorgadoA',
     label: 'Que se otorga a (Estudiante)',
     enabled: true,
-    xMm: 45,
-    yMm: 99,
+    xMm: 46,
+    yMm: 92,
     fontSizePt: 10.5,
     fontWeight: 'normal',
-    letterSpacingMm: 0.4,
+    letterSpacingMm: 0.3,
     lineHeight: 1.25,
     textAlign: 'left',
     fontFamily: 'sans-serif',
@@ -125,11 +125,11 @@ const DEFAULT_TITLE_BLOCKS: TitleBlockLayout[] = [
     id: 'cedulaIdentidad',
     label: 'Cédula de Identidad',
     enabled: true,
-    xMm: 45,
-    yMm: 106,
-    fontSizePt: 10,
+    xMm: 46,
+    yMm: 98,
+    fontSizePt: 9.8,
     fontWeight: 'normal',
-    letterSpacingMm: 0.3,
+    letterSpacingMm: 0.2,
     lineHeight: 1.25,
     textAlign: 'left',
     fontFamily: 'sans-serif',
@@ -140,11 +140,11 @@ const DEFAULT_TITLE_BLOCKS: TitleBlockLayout[] = [
     id: 'nacidoEn',
     label: 'Nacido(a) en',
     enabled: true,
-    xMm: 45,
-    yMm: 113,
-    fontSizePt: 10,
+    xMm: 46,
+    yMm: 104,
+    fontSizePt: 9.8,
     fontWeight: 'normal',
-    letterSpacingMm: 0.2,
+    letterSpacingMm: 0.1,
     lineHeight: 1.25,
     textAlign: 'left',
     fontFamily: 'sans-serif',
@@ -155,11 +155,11 @@ const DEFAULT_TITLE_BLOCKS: TitleBlockLayout[] = [
     id: 'fechaNacimiento',
     label: 'Fecha de Nacimiento',
     enabled: true,
-    xMm: 45,
-    yMm: 120,
-    fontSizePt: 10,
+    xMm: 46,
+    yMm: 110,
+    fontSizePt: 9.8,
     fontWeight: 'normal',
-    letterSpacingMm: 0.2,
+    letterSpacingMm: 0.1,
     lineHeight: 1.25,
     textAlign: 'left',
     fontFamily: 'sans-serif',
@@ -170,11 +170,11 @@ const DEFAULT_TITLE_BLOCKS: TitleBlockLayout[] = [
     id: 'requisitosLey',
     label: 'Cláusula Legal Ministerial',
     enabled: true,
-    xMm: 45,
-    yMm: 127,
+    xMm: 46,
+    yMm: 116,
     fontSizePt: 9.5,
     fontWeight: 'normal',
-    letterSpacingMm: 0.2,
+    letterSpacingMm: 0.1,
     lineHeight: 1.2,
     textAlign: 'left',
     fontFamily: 'sans-serif',
@@ -185,11 +185,11 @@ const DEFAULT_TITLE_BLOCKS: TitleBlockLayout[] = [
     id: 'expedicion',
     label: 'Lugar y Fecha de Expedición',
     enabled: true,
-    xMm: 45,
-    yMm: 134,
-    fontSizePt: 10,
+    xMm: 46,
+    yMm: 122,
+    fontSizePt: 9.8,
     fontWeight: 'normal',
-    letterSpacingMm: 0.2,
+    letterSpacingMm: 0.1,
     lineHeight: 1.25,
     textAlign: 'left',
     fontFamily: 'sans-serif',
@@ -200,11 +200,11 @@ const DEFAULT_TITLE_BLOCKS: TitleBlockLayout[] = [
     id: 'anoEgreso',
     label: 'Año de Egreso',
     enabled: true,
-    xMm: 45,
-    yMm: 141,
-    fontSizePt: 10,
+    xMm: 46,
+    yMm: 128,
+    fontSizePt: 9.8,
     fontWeight: 'normal',
-    letterSpacingMm: 0.3,
+    letterSpacingMm: 0.2,
     lineHeight: 1.25,
     textAlign: 'left',
     fontFamily: 'sans-serif',
@@ -215,56 +215,56 @@ const DEFAULT_TITLE_BLOCKS: TitleBlockLayout[] = [
     id: 'firmaDirector',
     label: 'Firma: Director(a) Plantel',
     enabled: true,
-    xMm: 50,
-    yMm: 168,
-    fontSizePt: 7.5,
+    xMm: 46,
+    yMm: 153,
+    fontSizePt: 7.2,
     fontWeight: 'normal',
-    letterSpacingMm: 0.2,
+    letterSpacingMm: 0.1,
     lineHeight: 1.2,
-    textAlign: 'center',
+    textAlign: 'left',
     fontFamily: 'sans-serif',
     color: '#1e293b',
-    sampleTemplate: '<div style="border-top: 1px solid #333; width: 140px; margin: 0 auto; padding-top: 2px;">Director(a) Plantel<br><strong>{{directorNombre}}</strong><br>C.I. {{directorCedula}}</div>'
+    sampleTemplate: '<div style="width: 145px; text-align: left;">Director(a) Plantel<br>Nombre: <strong>{{directorNombre}}</strong><br>C.I. {{directorCedula}}</div>'
   },
   {
     id: 'firmaControlEstudios',
     label: 'Firma: Control de Estudios / Consejo',
     enabled: true,
-    xMm: 125,
-    yMm: 168,
-    fontSizePt: 7.5,
+    xMm: 118,
+    yMm: 153,
+    fontSizePt: 7.2,
     fontWeight: 'normal',
-    letterSpacingMm: 0.2,
+    letterSpacingMm: 0.1,
     lineHeight: 1.2,
-    textAlign: 'center',
+    textAlign: 'left',
     fontFamily: 'sans-serif',
     color: '#1e293b',
-    sampleTemplate: '<div style="border-top: 1px solid #333; width: 155px; margin: 0 auto; padding-top: 2px;">Coordinador de Control de Estudio<br>Representante Consejo Docentes<br><strong>{{coordinadorControlEstudio}}</strong><br>C.I. {{coordinadorCedula}}</div>'
+    sampleTemplate: '<div style="width: 165px; text-align: left;">Coordinador de Control de Estudio<br>Representante del Consejo General de Docentes<br>Nombre: <strong>{{coordinadorControlEstudio}}</strong><br>C.I. {{coordinadorCedula}}</div>'
   },
   {
     id: 'firmaFuncionarioMppe',
     label: 'Firma: Funcionario MPPE',
     enabled: true,
-    xMm: 195,
-    yMm: 168,
-    fontSizePt: 7.5,
+    xMm: 198,
+    yMm: 153,
+    fontSizePt: 7.2,
     fontWeight: 'normal',
-    letterSpacingMm: 0.2,
+    letterSpacingMm: 0.1,
     lineHeight: 1.2,
-    textAlign: 'center',
+    textAlign: 'left',
     fontFamily: 'sans-serif',
     color: '#1e293b',
-    sampleTemplate: '<div style="border-top: 1px solid #333; width: 145px; margin: 0 auto; padding-top: 2px;">Funcionario Designado por el MPPE<br><strong>{{funcionarioMppeNombre}}</strong><br>C.I. {{funcionarioMppeCedula}}</div>'
+    sampleTemplate: '<div style="width: 145px; text-align: left;">Funcionario Designado por el<br>Ministerio del Poder Popular para la Educación<br>Nombre: <strong>{{funcionarioMppeNombre}}</strong><br>C.I. {{funcionarioMppeCedula}}</div>'
   },
   {
     id: 'folioTomoInfo',
     label: 'Folio y Tomo UCE (Pie de Certificación)',
     enabled: true,
-    xMm: 45,
-    yMm: 198,
-    fontSizePt: 7,
+    xMm: 46,
+    yMm: 196,
+    fontSizePt: 6.8,
     fontWeight: 'bold',
-    letterSpacingMm: 0.3,
+    letterSpacingMm: 0.2,
     lineHeight: 1.1,
     textAlign: 'left',
     fontFamily: 'mono',
@@ -293,7 +293,7 @@ export const TitulosBachillerView: React.FC = () => {
   const [selectedTitleId, setSelectedTitleId] = useState<string>(titles[0]?.id || '');
   const [searchTerm, setSearchTerm] = useState('');
   const [saveBanner, setSaveBanner] = useState(false);
-  const [activeTab, setActiveTab] = useState<'EDITOR_DISENO' | 'DATOS_ALUMNO' | 'CONFIG_IMPRESION'>('EDITOR_DISENO');
+  const [activeTab, setActiveTab] = useState<'EDITOR_DISENO' | 'DATOS_ALUMNO' | 'CONFIG_IMPRESION' | 'VISTA_DIGITALIZADA'>('EDITOR_DISENO');
 
   // Interactive Calibrator / Designer states
   const [selectedBlockId, setSelectedBlockId] = useState<string>('otorgadoA');
@@ -679,6 +679,18 @@ export const TitulosBachillerView: React.FC = () => {
               >
                 <Settings className="w-3.5 h-3.5" />
                 Ajustes de Impresión / Margen
+              </button>
+
+              <button
+                onClick={() => setActiveTab('VISTA_DIGITALIZADA')}
+                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-black transition-all ${
+                  activeTab === 'VISTA_DIGITALIZADA'
+                    ? 'bg-gradient-to-r from-amber-600 to-[#2C2E53] text-white shadow-md ring-2 ring-[#D4AF37]/50'
+                    : 'bg-[#D4AF37]/15 text-[#92711d] dark:text-[#D4AF37] hover:bg-[#D4AF37]/25 font-bold border border-[#D4AF37]/30'
+                }`}
+              >
+                <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
+                Título Digitalizado Completo
               </button>
             </div>
 
@@ -1198,6 +1210,185 @@ export const TitulosBachillerView: React.FC = () => {
 
                   <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 text-[11px] text-slate-500 leading-relaxed">
                     Ajuste los offsets si su impresora física desplaza la hoja ligeramente al momento de alimentarla desde la bandeja.
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 4: VISTA DIGITALIZADA COMPLETA (Diploma Digital Oficial con Arte Completo) */}
+          {activeTab === 'VISTA_DIGITALIZADA' && (
+            <div className="space-y-4">
+              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 shadow-sm flex items-center justify-between">
+                <div>
+                  <h3 className="font-black text-sm text-[#2C2E53] dark:text-white flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-[#D4AF37]" />
+                    Título Digitalizado Oficial (Emisión Digital / Certificado Completo)
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Reproducción digital fiel del pergamino ministerial con escudo de armas, efigie de Simón Rodríguez, tramas de seguridad y sellos oficiales listos para consulta o descarga PDF.
+                  </p>
+                </div>
+                <button
+                  onClick={() => window.print()}
+                  className="flex items-center gap-2 px-4 py-2 bg-[#2C2E53] text-[#D4AF37] font-bold rounded-xl text-xs shadow hover:bg-[#1a1c33] transition"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  Imprimir Certificado Completo
+                </button>
+              </div>
+
+              {/* Digital Pergamino Sheet */}
+              <div className="overflow-x-auto pb-4 bg-slate-300 dark:bg-slate-950 p-6 rounded-2xl border border-slate-400 dark:border-slate-800 flex justify-center">
+                <div
+                  className="relative bg-[#fcfbfa] text-slate-900 shadow-2xl overflow-hidden border border-slate-300"
+                  style={{
+                    width: '279.4mm',
+                    height: '215.9mm',
+                    minWidth: '279.4mm',
+                    minHeight: '215.9mm',
+                    boxSizing: 'border-box',
+                    padding: '12mm 18mm 10mm 18mm',
+                    fontFamily: 'Arial, Helvetica, sans-serif'
+                  }}
+                >
+                  {/* Background Security Guilloché & Watermark */}
+                  <img
+                    src={`${import.meta.env.BASE_URL}plantilla-titulo-mppe.jpg`}
+                    alt="Pergamino de Seguridad"
+                    className="absolute inset-0 w-full h-full object-fill pointer-events-none opacity-30 mix-blend-multiply"
+                  />
+
+                  {/* Header Row: Simón Rodríguez Portrait, Coat of Arms and Serial */}
+                  <div className="relative z-10 flex items-start justify-between">
+                    {/* Simón Rodríguez Portrait Box (Left) */}
+                    <div className="w-24 text-center">
+                      <div className="w-16 h-20 mx-auto rounded overflow-hidden border border-slate-300 shadow-xs bg-white/60 p-0.5">
+                        <img
+                          src={`${import.meta.env.BASE_URL}logo-cba.png`}
+                          alt="Insignia Institucional"
+                          className="w-full h-full object-contain filter grayscale contrast-125"
+                        />
+                      </div>
+                      <span className="text-[7pt] tracking-widest text-slate-600 font-bold uppercase block mt-1">
+                        Simón Rodríguez
+                      </span>
+                    </div>
+
+                    {/* Central National Header with Coat of Arms */}
+                    <div className="text-center flex-1 px-4 pt-1">
+                      <div className="h-14 flex items-center justify-center mb-1">
+                        <img
+                          src={`${import.meta.env.BASE_URL}logo-cba.png`}
+                          alt="Escudo Nacional"
+                          className="h-12 w-auto object-contain"
+                        />
+                      </div>
+                      <h1 className="text-[13pt] font-black tracking-wide text-slate-900 leading-tight uppercase font-serif">
+                        República Bolivariana de Venezuela
+                      </h1>
+                      <h2 className="text-[9.5pt] font-bold tracking-wider text-slate-700 uppercase mt-0.5">
+                        Ministerio del Poder Popular para la Educación
+                      </h2>
+                    </div>
+
+                    {/* Serial Number (Right) */}
+                    <div className="w-28 text-right pt-2">
+                      <span className="font-mono text-[12pt] font-black tracking-widest text-slate-900 block">
+                        {currentTitleData.serialNumber}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Legal Data Body */}
+                  <div className="relative z-10 mt-6 pl-10 pr-6 space-y-1.5 text-[9.5pt] text-slate-800 leading-snug">
+                    <div>
+                      <span>Zona Educativa / Plantel: </span>
+                      <strong className="text-slate-950 font-black">{currentTitleData.plantel}</strong>
+                    </div>
+                    <div>
+                      <span>Código: </span>
+                      <strong className="text-slate-950 font-black">{currentTitleData.codigoPlantel}</strong>
+                    </div>
+                    <div>
+                      <span>Título de: </span>
+                      <strong className="text-slate-950 font-black">{currentTitleData.tituloMencion}</strong>
+                    </div>
+                    <div>
+                      <span>Plan de estudio, Código Nro.: </span>
+                      <strong className="text-slate-950 font-black">{currentTitleData.planEstudio}, {currentTitleData.planCodigo}</strong>
+                    </div>
+                    <div className="pt-0.5">
+                      <span>Que se otorga a: </span>
+                      <strong className="text-slate-950 text-[10.5pt] font-black tracking-wide">{currentTitleData.studentName}</strong>
+                    </div>
+                    <div>
+                      <span>Cédula de Identidad Nro.: </span>
+                      <strong className="text-slate-950 font-black">{currentTitleData.cedula}</strong>
+                    </div>
+                    <div>
+                      <span>Nacido (a) en: </span>
+                      <strong className="text-slate-950 font-black">{currentTitleData.lugarNacimiento}</strong>
+                    </div>
+                    <div>
+                      <span>En Fecha: </span>
+                      <strong className="text-slate-950 font-black">{currentTitleData.fechaNacimiento}</strong>
+                    </div>
+                    <div className="text-slate-600 font-semibold text-[9pt] pt-0.5">
+                      Previo el cumplimiento de los requisitos exigidos por la ley
+                    </div>
+                    <div>
+                      <span>Lugar y Fecha de expedición: </span>
+                      <strong className="text-slate-950 font-black">{currentTitleData.lugarExpedicion}, {currentTitleData.fechaExpedicion}</strong>
+                    </div>
+                    <div>
+                      <span>Año de Egreso: </span>
+                      <strong className="text-slate-950 font-black">{currentTitleData.graduationYear}</strong>
+                    </div>
+                  </div>
+
+                  {/* Signatures & Official Seals Row */}
+                  <div className="relative z-10 mt-8 grid grid-cols-3 gap-6 items-end text-center text-[7.5pt]">
+                    {/* Director */}
+                    <div className="text-left pl-6">
+                      <div className="h-9 flex items-end">
+                        <div className="w-24 border-b border-slate-600 border-dashed"></div>
+                      </div>
+                      <div className="text-slate-700">Director(a) Zona Educativa / Plantel</div>
+                      <div>Nombre: <strong className="text-slate-950">{currentTitleData.directorNombre}</strong></div>
+                      <div>C.I. <strong className="font-mono text-slate-950">{currentTitleData.directorCedula}</strong></div>
+                    </div>
+
+                    {/* Coordinador Control de Estudio */}
+                    <div className="text-left">
+                      <div className="h-9 flex items-end">
+                        <div className="w-24 border-b border-slate-600 border-dashed"></div>
+                      </div>
+                      <div className="text-slate-700">Coordinador de Control de Estudio<br />Representante del Consejo General de Docentes</div>
+                      <div>Nombre: <strong className="text-slate-950">{currentTitleData.coordinadorControlEstudio}</strong></div>
+                      <div>C.I. <strong className="font-mono text-slate-950">{currentTitleData.coordinadorCedula}</strong></div>
+                    </div>
+
+                    {/* Funcionario MPPE */}
+                    <div className="text-left pr-4">
+                      <div className="h-9 flex items-end">
+                        <div className="w-24 border-b border-slate-600 border-dashed"></div>
+                      </div>
+                      <div className="text-slate-700">Funcionario Designado por el<br />Ministerio del Poder Popular para la Educación</div>
+                      <div>Nombre: <strong className="text-slate-950">{currentTitleData.funcionarioMppeNombre}</strong></div>
+                      <div>C.I. <strong className="font-mono text-slate-950">{currentTitleData.funcionarioMppeCedula}</strong></div>
+                    </div>
+                  </div>
+
+                  {/* Institutional Stamps & Gov Footer */}
+                  <div className="relative z-10 mt-6 pt-3 flex items-center justify-between border-t border-slate-300 text-[6.5pt] text-slate-500 font-mono">
+                    <div>
+                      Casa de la Moneda - Venezuela • CERTIFICACIÓN SICE-CBA: TOMO {currentTitleData.tomo} • FOLIO {currentTitleData.folio} • {currentTitleData.registeredCode}
+                    </div>
+                    <div className="flex items-center gap-2 text-right">
+                      <span className="font-bold text-slate-700">Gobierno Bolivariano de Venezuela</span>
+                      <span>| Ministerio del Poder Popular para la Educación</span>
+                    </div>
                   </div>
                 </div>
               </div>
