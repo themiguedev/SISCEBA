@@ -283,7 +283,7 @@ const DEFAULT_PRINT_SETTINGS: TitlePrintSettings = {
   marginBottomMm: 0,
   globalFontScale: 100,
   showGuidelines: false,
-  showBackgroundTemplate: true
+  showBackgroundTemplate: false
 };
 
 export const TitulosBachillerView: React.FC = () => {
@@ -854,12 +854,12 @@ export const TitulosBachillerView: React.FC = () => {
                     transformOrigin: 'top center'
                   }}
                 >
-                  {/* Optional Background: Authentic MPPE Scanned Security Paper */}
+                  {/* Optional Background: Fondo Blanco Limpio */}
                   {printSettings.showBackgroundTemplate && (
                     <img
-                      src={`${import.meta.env.BASE_URL}plantilla-titulo-mppe.jpg`}
-                      alt="Fondo Papel Seguridad Título"
-                      className="title-template-bg absolute inset-0 w-full h-full object-fill pointer-events-none opacity-40 mix-blend-multiply"
+                      src={`${import.meta.env.BASE_URL}fondo-titulo-blanco.png`}
+                      alt="Fondo Blanco Título"
+                      className="title-template-bg absolute inset-0 w-full h-full object-fill pointer-events-none"
                     />
                   )}
 
@@ -1252,11 +1252,11 @@ export const TitulosBachillerView: React.FC = () => {
                     fontFamily: 'Arial, Helvetica, sans-serif'
                   }}
                 >
-                  {/* Orla de Seguridad Guilloché Esquina Inferior Izquierda */}
+                  {/* Imagen de Fondo Blanca Limpia */}
                   <img
-                    src={`${import.meta.env.BASE_URL}titulo-guilloche-esquina.png`}
-                    alt="Guilloché de Seguridad"
-                    className="absolute bottom-0 left-0 w-[54%] h-auto max-h-[78%] pointer-events-none object-contain object-bottom opacity-85 z-0"
+                    src={`${import.meta.env.BASE_URL}fondo-titulo-blanco.png`}
+                    alt="Fondo Blanco"
+                    className="absolute inset-0 w-full h-full object-fill pointer-events-none z-0"
                   />
 
                   {/* Header: Simón Rodríguez Portrait, Escudo Nacional y Membrete */}
@@ -1401,34 +1401,18 @@ export const TitulosBachillerView: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Fila de Sellos Circulares (Sello Plantel y Sello Zona Educativa) */}
-                  <div className="relative z-10 mt-1 flex items-center justify-between px-20 pointer-events-none">
-                    {/* Sello Plantel */}
-                    <div className="w-28 h-28 -mt-2">
-                      <img
-                        src={`${import.meta.env.BASE_URL}titulo-sello-plantel.png`}
-                        alt="Sello Oficial Plantel CBA"
-                        className="w-full h-full object-contain mix-blend-multiply opacity-90"
-                      />
+                  {/* Fila de Sellos: Dejada en blanco con guías de texto formal según solicitud */}
+                  <div className="relative z-10 mt-6 flex items-center justify-between px-20">
+                    <div className="text-center text-[7pt] text-slate-400 font-semibold uppercase">
+                      [ Espacio para Sello del Plantel ]
                     </div>
-
-                    {/* Leyenda central Sello de la Zona Educativa */}
-                    <div className="text-center text-[7pt] text-slate-600 font-bold uppercase">
+                    <div className="text-center text-[7pt] text-slate-400 font-semibold uppercase">
                       Sello de la<br />Zona Educativa
-                    </div>
-
-                    {/* Sello Zona Educativa Zulia CDCE */}
-                    <div className="w-28 h-28 -mt-2">
-                      <img
-                        src={`${import.meta.env.BASE_URL}titulo-sello-zona.png`}
-                        alt="Sello Zona Educativa Zulia"
-                        className="w-full h-full object-contain mix-blend-multiply opacity-90"
-                      />
                     </div>
                   </div>
 
                   {/* Pie Oficial con Casa de la Moneda y Logo Gobierno Bolivariano */}
-                  <div className="relative z-10 flex items-center justify-between pt-1 border-t border-slate-300 text-[6.8pt] text-slate-600">
+                  <div className="relative z-10 mt-4 flex items-center justify-between pt-2 border-t border-slate-300 text-[6.8pt] text-slate-600">
                     <div className="font-mono">
                       Casa de la Moneda - Venezuela
                     </div>
