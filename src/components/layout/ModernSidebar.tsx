@@ -149,7 +149,8 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
         { id: 'DOCUMENTOS', label: `Documentos Solicitados (${pendingDocsCount})`, icon: FileText },
         { id: 'BLOQUEO', label: 'Bloqueo Administrativo', icon: Lock },
         { id: 'TITULOS', label: 'Títulos de Bachiller', icon: GraduationCap },
-        { id: 'MATRICULA', label: 'Matrícula y Prosecución', icon: Layers }
+        { id: 'MATRICULA', label: 'Matrícula y Prosecución', icon: Layers },
+        { id: 'TALLERES_CRP', label: 'Talleres CRP', icon: Palette }
       ]
     },
 
