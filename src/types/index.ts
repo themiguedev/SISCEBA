@@ -9,6 +9,7 @@ export interface AppUser {
   fullName: string;
   email: string;
   role: UserRole;
+  roles?: UserRole[];
   defaultLevel: EducationalLevel;
   allowedLevels?: EducationalLevel[];
   active: boolean;

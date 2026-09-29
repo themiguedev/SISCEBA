@@ -21,7 +21,7 @@ import { ThemeSwitcherDropdown } from './ThemeSwitcherDropdown';
 import { NotificationCenterPopover } from '../notifications/NotificationCenterPopover';
 import { MainNavigationTab } from '../../types';
 import { getDefaultAvatarForUser } from '../../utils/avatarCatalog';
-import { hasTabAccess, getUserAllowedLevels } from '../../utils/rbac';
+import { hasTabAccess, getUserAllowedLevels, getUserEffectiveRoles } from '../../utils/rbac';
 import { useTheme } from '../../context/ThemeContext';
 
 interface ModernHeaderProps {
@@ -395,6 +395,18 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
                       <p className="text-[10px] font-mono text-[#D4AF37] truncate">
                         @{currentUser?.username || 'usuario'} • {currentRole}
                       </p>
+                      {currentUser?.roles && currentUser.roles.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          <span className="text-[9px] px-1.5 py-0.2 rounded bg-amber-400/20 text-amber-300 font-bold border border-amber-400/30">
+                            Rol Principal: {currentUser.role}
+                          </span>
+                          {currentUser.roles.map(r => (
+                            <span key={r} className="text-[9px] px-1.5 py-0.2 rounded bg-sky-400/20 text-sky-300 font-bold border border-sky-400/30">
+                              + {r}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -453,6 +465,32 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
                         </button>
                       ))}
                     </>
+                  ) : currentUser?.roles && currentUser.roles.length > 0 ? (
+                    <div className="space-y-1 mb-1.5">
+                      <div className="px-3 py-1">
+                        <span className="text-[10px] font-bold text-amber-300 uppercase tracking-wider block">
+                          Roles Asignados (Privilegios Agrupados)
+                        </span>
+                      </div>
+                      {getUserEffectiveRoles(currentUser).map((r) => (
+                        <button
+                          key={r}
+                          onClick={() => {
+                            setCurrentRole(r);
+                            setRoleMenuOpen(false);
+                          }}
+                          className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                            currentRole === r
+                              ? 'bg-[#2C2E53] text-[#D4AF37]'
+                              : 'text-slate-300 hover:bg-[#2C2E53]/50'
+                          }`}
+                          title={`Enfocar vista activa en rol ${r}`}
+                        >
+                          <span>{r}</span>
+                          {currentRole === r && <ShieldCheck className="w-3.5 h-3.5 text-[#D4AF37]" />}
+                        </button>
+                      ))}
+                    </div>
                   ) : (
                     <div className="px-3 py-2 bg-[#2C2E53]/40 rounded-lg text-[11px] text-slate-300 mb-1.5">
                       <span className="text-[#D4AF37] font-semibold block mb-0.5">Acceso Verificado</span>

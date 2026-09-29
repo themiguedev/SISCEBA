@@ -1041,6 +1041,7 @@ export const supabaseFetchUsers = async (): Promise<AppUser[] | null> => {
         fullName: row.full_name,
         email: row.email,
         role: effectiveRole,
+        roles: (meta.roles as UserRole[]) || undefined,
         defaultLevel: row.default_level || 'MEDIA_GENERAL',
         allowedLevels: (meta.allowedLevels as EducationalLevel[]) || undefined,
         active: row.active ?? true,
@@ -1069,6 +1070,7 @@ export const supabaseSaveUser = async (user: AppUser): Promise<boolean> => {
       receiveEmails: user.receiveEmails,
       receiveMessages: user.receiveMessages,
       role: user.role,
+      roles: user.roles,
       allowedLevels: user.allowedLevels
     });
 

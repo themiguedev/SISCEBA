@@ -353,6 +353,7 @@ export function encodeUserAvatarWithMetadata(data: {
   receiveEmails?: boolean;
   receiveMessages?: boolean;
   role?: string;
+  roles?: string[];
   allowedLevels?: string[];
 }): string {
   // Encontrar si coincide con un preset oficial para guardarlo como ID liviano
@@ -371,6 +372,7 @@ export function encodeUserAvatarWithMetadata(data: {
     re: data.receiveEmails ?? true,
     rm: data.receiveMessages ?? true,
     r: data.role || null,
+    rs: data.roles && data.roles.length > 0 ? data.roles : null,
     al: data.allowedLevels || null,
     a: avatarRef
   };
@@ -390,6 +392,7 @@ export function decodeUserAvatarMetadata(rawAvatarUrl?: string | null): {
   receiveEmails?: boolean;
   receiveMessages?: boolean;
   role?: string;
+  roles?: string[];
   allowedLevels?: string[];
 } {
   if (!rawAvatarUrl) {
@@ -415,6 +418,7 @@ export function decodeUserAvatarMetadata(rawAvatarUrl?: string | null): {
         receiveEmails: meta.re ?? true,
         receiveMessages: meta.rm ?? true,
         role: meta.r || undefined,
+        roles: Array.isArray(meta.rs) ? meta.rs : undefined,
         allowedLevels: meta.al || undefined
       };
     } catch {

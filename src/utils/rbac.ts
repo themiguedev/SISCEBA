@@ -1,4 +1,20 @@
-import { UserRole, MainNavigationTab, EducationalLevel } from '../types';
+import { UserRole, MainNavigationTab, EducationalLevel, AppUser } from '../types';
+
+/**
+ * Obtiene todos los roles efectivos acumulados de un usuario o rol.
+ * Si el usuario posee `roles` definidos, agrupa su rol primario y los roles adicionales sin duplicados.
+ */
+export const getUserEffectiveRoles = (
+  roleOrUser: UserRole | (Partial<AppUser> & { role?: UserRole }) | null | undefined
+): UserRole[] => {
+  if (!roleOrUser) return ['DOCENTE'];
+  if (typeof roleOrUser === 'string') return [roleOrUser];
+  
+  const primaryRole = roleOrUser.role || 'DOCENTE';
+  const additional = Array.isArray(roleOrUser.roles) ? roleOrUser.roles : [];
+  const set = new Set<UserRole>([primaryRole, ...additional]);
+  return Array.from(set);
+};
 
 /**
  * Escala jerárquica numérica de roles institucionales SICE-CBA
@@ -308,133 +324,188 @@ export const ROLE_SUBTAB_PERMISSIONS: Record<UserRole, Partial<Record<MainNaviga
 };
 
 /**
- * Valida si un rol tiene acceso a una pestaña principal
+ * Valida si un rol o usuario con roles múltiples tiene acceso a una pestaña principal
  */
-export const hasTabAccess = (role: UserRole, tab: MainNavigationTab): boolean => {
-  if (role === 'ADMINISTRADOR') return true;
-  const allowed = ROLE_TAB_PERMISSIONS[role] || [];
-  return allowed.includes(tab);
+export const hasTabAccess = (
+  roleOrUser: UserRole | (Partial<AppUser> & { role?: UserRole }) | UserRole[],
+  tab: MainNavigationTab
+): boolean => {
+  const roles = Array.isArray(roleOrUser)
+    ? roleOrUser
+    : getUserEffectiveRoles(roleOrUser);
+
+  if (roles.includes('ADMINISTRADOR')) return true;
+
+  return roles.some(r => {
+    const allowed = ROLE_TAB_PERMISSIONS[r] || [];
+    return allowed.includes(tab);
+  });
 };
 
 /**
- * Valida si un rol tiene acceso a una subpestaña específica dentro de un módulo
+ * Valida si un rol o usuario con roles múltiples tiene acceso a una subpestaña específica dentro de un módulo
  */
 export const hasSubTabAccess = (
-  role: UserRole,
+  roleOrUser: UserRole | (Partial<AppUser> & { role?: UserRole }) | UserRole[],
   tab: MainNavigationTab,
   subTabId?: string
 ): boolean => {
-  if (role === 'ADMINISTRADOR') return true;
-  if (!hasTabAccess(role, tab)) return false;
+  const roles = Array.isArray(roleOrUser)
+    ? roleOrUser
+    : getUserEffectiveRoles(roleOrUser);
+
+  if (roles.includes('ADMINISTRADOR')) return true;
+  if (!hasTabAccess(roles, tab)) return false;
   if (!subTabId) return true;
 
-  const roleSubs = ROLE_SUBTAB_PERMISSIONS[role];
-  if (!roleSubs) return false;
-
-  const allowedSubs = roleSubs[tab];
-  if (!allowedSubs) return false;
-
-  return allowedSubs.includes(subTabId);
+  return roles.some(r => {
+    const roleSubs = ROLE_SUBTAB_PERMISSIONS[r];
+    if (!roleSubs) return false;
+    const allowedSubs = roleSubs[tab];
+    return allowedSubs ? allowedSubs.includes(subTabId) : false;
+  });
 };
 
 /**
  * Retorna la pestaña predeterminada a la que debe redirigirse un rol al ingresar
  */
-export const getDefaultTabForRole = (role: UserRole): MainNavigationTab => {
-  if (role === 'REPRESENTANTE' || role === 'ESTUDIANTE') {
-    return 'CONSULTAS';
+export const getDefaultTabForRole = (
+  roleOrUser: UserRole | (Partial<AppUser> & { role?: UserRole }) | UserRole[]
+): MainNavigationTab => {
+  const roles = Array.isArray(roleOrUser)
+    ? roleOrUser
+    : getUserEffectiveRoles(roleOrUser);
+
+  if (roles.includes('ADMINISTRADOR')) return 'ESCRITORIO';
+  if (roles.some(r => r !== 'REPRESENTANTE' && r !== 'ESTUDIANTE')) {
+    return 'ESCRITORIO';
   }
-  return 'ESCRITORIO';
+  return 'CONSULTAS';
 };
 
 /**
  * Verifica si el rol tiene privilegios de aprobación y supervisión de planificaciones didácticas
  */
-export const canApprovePlans = (role: UserRole): boolean => {
-  return role === 'ADMINISTRADOR' || role === 'DIRECTOR' || role === 'COORDINACION' || role === 'COORDINADOR';
+export const canApprovePlans = (
+  roleOrUser: UserRole | (Partial<AppUser> & { role?: UserRole }) | UserRole[]
+): boolean => {
+  const roles = Array.isArray(roleOrUser)
+    ? roleOrUser
+    : getUserEffectiveRoles(roleOrUser);
+  return roles.some(r => r === 'ADMINISTRADOR' || r === 'DIRECTOR' || r === 'COORDINACION' || r === 'COORDINADOR');
 };
 
 /**
  * Verifica si el rol tiene permisos para asentar o modificar calificaciones procesales
  */
-export const canEditGrades = (role: UserRole): boolean => {
-  return (
-    role === 'ADMINISTRADOR' ||
-    role === 'COORDINACION' ||
-    role === 'COORDINADOR' ||
-    role === 'DOCENTE'
-  );
+export const canEditGrades = (
+  roleOrUser: UserRole | (Partial<AppUser> & { role?: UserRole }) | UserRole[]
+): boolean => {
+  const roles = Array.isArray(roleOrUser)
+    ? roleOrUser
+    : getUserEffectiveRoles(roleOrUser);
+  return roles.some(r => r === 'ADMINISTRADOR' || r === 'COORDINACION' || r === 'COORDINADOR' || r === 'DOCENTE');
 };
 
 /**
  * Verifica si el rol puede aplicar o levantar bloqueos administrativos financieros
  */
-export const canManageBlocks = (role: UserRole): boolean => {
-  return role === 'ADMINISTRADOR' || role === 'DIRECTOR';
+export const canManageBlocks = (
+  roleOrUser: UserRole | (Partial<AppUser> & { role?: UserRole }) | UserRole[]
+): boolean => {
+  const roles = Array.isArray(roleOrUser)
+    ? roleOrUser
+    : getUserEffectiveRoles(roleOrUser);
+  return roles.some(r => r === 'ADMINISTRADOR' || r === 'DIRECTOR');
 };
 
 /**
  * Verifica si el rol puede validar, firmar o emitir Títulos de Bachiller oficiales MPPE
  */
-export const canIssueTitles = (role: UserRole): boolean => {
-  return role === 'ADMINISTRADOR' || role === 'DIRECTOR' || role === 'COORDINACION' || role === 'COORDINADOR';
+export const canIssueTitles = (
+  roleOrUser: UserRole | (Partial<AppUser> & { role?: UserRole }) | UserRole[]
+): boolean => {
+  const roles = Array.isArray(roleOrUser)
+    ? roleOrUser
+    : getUserEffectiveRoles(roleOrUser);
+  return roles.some(r => r === 'ADMINISTRADOR' || r === 'DIRECTOR' || r === 'COORDINACION' || r === 'COORDINADOR');
 };
 
 /**
  * Verifica si el rol puede configurar la estructura institucional y apertura de lapsos
  */
-export const canConfigureSchool = (role: UserRole): boolean => {
-  return role === 'ADMINISTRADOR' || role === 'DIRECTOR';
+export const canConfigureSchool = (
+  roleOrUser: UserRole | (Partial<AppUser> & { role?: UserRole }) | UserRole[]
+): boolean => {
+  const roles = Array.isArray(roleOrUser)
+    ? roleOrUser
+    : getUserEffectiveRoles(roleOrUser);
+  return roles.some(r => r === 'ADMINISTRADOR' || r === 'DIRECTOR');
 };
 
 /**
  * Verifica si el rol puede publicar o difundir comunicados oficiales en la cartelera
  */
-export const canPublishCommunity = (role: UserRole): boolean => {
-  return (
-    role === 'ADMINISTRADOR' ||
-    role === 'DIRECTOR' ||
-    role === 'COORDINACION' ||
-    role === 'COORDINADOR' ||
-    role === 'DOCENTE'
-  );
+export const canPublishCommunity = (
+  roleOrUser: UserRole | (Partial<AppUser> & { role?: UserRole }) | UserRole[]
+): boolean => {
+  const roles = Array.isArray(roleOrUser)
+    ? roleOrUser
+    : getUserEffectiveRoles(roleOrUser);
+  return roles.some(r => r === 'ADMINISTRADOR' || r === 'DIRECTOR' || r === 'COORDINACION' || r === 'COORDINADOR' || r === 'DOCENTE');
 };
 
 /**
  * Determina si el rol tiene restricciones de confidencialidad familiar/estudiantil (solo consultas)
  */
-export const isConsultasOnlyRole = (role: UserRole): boolean => {
-  return role === 'REPRESENTANTE' || role === 'ESTUDIANTE';
+export const isConsultasOnlyRole = (
+  roleOrUser: UserRole | (Partial<AppUser> & { role?: UserRole }) | UserRole[]
+): boolean => {
+  const roles = Array.isArray(roleOrUser)
+    ? roleOrUser
+    : getUserEffectiveRoles(roleOrUser);
+  return roles.every(r => r === 'REPRESENTANTE' || r === 'ESTUDIANTE');
 };
 
 /**
  * Retorna los niveles educativos autorizados y visibles según el rol y la cuenta de usuario
  */
 export const getUserAllowedLevels = (
-  role: UserRole,
-  user?: { allowedLevels?: EducationalLevel[]; defaultLevel?: EducationalLevel } | null
+  roleOrUser: UserRole | (Partial<AppUser> & { role?: UserRole }) | UserRole[],
+  user?: { allowedLevels?: EducationalLevel[]; defaultLevel?: EducationalLevel; roles?: UserRole[] } | null
 ): EducationalLevel[] => {
+  const roles = Array.isArray(roleOrUser)
+    ? roleOrUser
+    : getUserEffectiveRoles(typeof roleOrUser === 'string' && user ? { ...user, role: roleOrUser } : roleOrUser);
+
   // 1. Roles directivos y de supervisión general tienen acceso a todos los niveles
-  if (role === 'ADMINISTRADOR' || role === 'DIRECTOR' || role === 'COORDINACION' || role === 'COORDINADOR') {
+  if (roles.some(r => r === 'ADMINISTRADOR' || r === 'DIRECTOR' || r === 'COORDINACION' || r === 'COORDINADOR')) {
     return ['INICIAL', 'PRIMARIA', 'MEDIA_GENERAL'];
   }
 
-  // 2. Roles puramente operativos o de consulta no son docentes de aula
-  if (role === 'ASISTENTE' || role === 'SECRETARIA' || role === 'REPRESENTANTE' || role === 'ESTUDIANTE') {
-    return [];
-  }
-
-  // 3. Usuario con niveles explícitamente configurados
+  // 2. Si el usuario tiene niveles pedagógicos explícitamente configurados (ej: docente)
   if (user?.allowedLevels && user.allowedLevels.length > 0) {
     return user.allowedLevels;
   }
 
-  // 4. Docente con defaultLevel asignado
+  // 3. Si alguno de los roles es docente pero no tiene allowedLevels especificado
+  if (roles.includes('DOCENTE')) {
+    if (user?.defaultLevel) {
+      return [user.defaultLevel];
+    }
+    return ['MEDIA_GENERAL'];
+  }
+
+  // 4. Roles puramente operativos o de consulta no son docentes de aula
+  if (roles.every(r => r === 'ASISTENTE' || r === 'SECRETARIA' || r === 'REPRESENTANTE' || r === 'ESTUDIANTE')) {
+    return [];
+  }
+
+  // 5. Fallback si tiene defaultLevel
   if (user?.defaultLevel) {
     return [user.defaultLevel];
   }
 
-  // 5. Fallback por defecto si no está especificado
   return ['MEDIA_GENERAL'];
 };
 

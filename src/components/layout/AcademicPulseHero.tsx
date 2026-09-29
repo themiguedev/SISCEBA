@@ -20,7 +20,7 @@ interface AcademicPulseHeroProps {
 }
 
 export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAction }) => {
-  const { currentLevel, students, areas, evaluations, activeLapso, currentRole, passes, documentRequests } = useApp();
+  const { currentLevel, students, areas, evaluations, activeLapso, currentRole, currentUser, passes, documentRequests } = useApp();
   const { currentMonthConfig } = useTheme();
 
   const levelStudents = students.filter(s => s.level === currentLevel);
@@ -36,7 +36,7 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
   const currentInfo = levelLabels[currentLevel];
 
   // Identificar si tiene acceso a módulos pedagógicos o es de gestión operativa
-  const hasAcademicModules = hasTabAccess(currentRole, 'MEDIA_GENERAL');
+  const hasAcademicModules = hasTabAccess(currentUser || currentRole, 'MEDIA_GENERAL');
 
   return (
     <section aria-label="Resumen ejecutivo institucional" className="space-y-4 mb-6">
@@ -147,7 +147,7 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
                   <span>Pensum</span>
                 </button>
 
-                {canEditGrades(currentRole) && (
+                {canEditGrades(currentUser || currentRole) && (
                   <button
                     onClick={() => onQuickAction('EVALUACION', 'PROCESAL')}
                     className="min-h-[46px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 via-[#D4AF37] to-amber-500 hover:brightness-110 text-slate-950 text-xs font-black transition-all duration-200 shadow-md shadow-[#D4AF37]/25 hover:shadow-lg hover:shadow-[#D4AF37]/40 hover:-translate-y-0.5 active:scale-95 cursor-pointer ring-1 ring-white/20"
@@ -159,7 +159,7 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
 
                 <button
                   onClick={() => onQuickAction('COMUNICACION', 'IA_ACTION_PLANS')}
-                  className={`${canEditGrades(currentRole) ? 'col-span-2 sm:col-span-1' : ''} min-h-[46px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-black transition-all duration-200 shadow-md hover:-translate-y-0.5 active:scale-95 cursor-pointer border border-indigo-400/30`}
+                  className={`${canEditGrades(currentUser || currentRole) ? 'col-span-2 sm:col-span-1' : ''} min-h-[46px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-black transition-all duration-200 shadow-md hover:-translate-y-0.5 active:scale-95 cursor-pointer border border-indigo-400/30`}
                 >
                   <ClipboardList className="w-4 h-4 text-[#D4AF37] shrink-0" />
                   <span>Planes de Acción</span>

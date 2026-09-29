@@ -29,7 +29,7 @@ import {
   Palette
 } from 'lucide-react';
 import { SeasonalAccessoryIcon } from '../auth/LogoSeasonalAccessory';
-import { hasTabAccess, hasSubTabAccess, getUserAllowedLevels, ROLE_METADATA } from '../../utils/rbac';
+import { hasTabAccess, hasSubTabAccess, getUserAllowedLevels, isConsultasOnlyRole, ROLE_METADATA } from '../../utils/rbac';
 
 interface ModernSidebarProps {
   isOpen: boolean;
@@ -359,11 +359,12 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
         {/* Navigation Sections */}
         <div className="flex-1 overflow-y-auto no-scrollbar py-4 px-3 space-y-4">
           {(() => {
-            const isConsultasOnly = currentRole === 'REPRESENTANTE' || currentRole === 'ESTUDIANTE';
-            const userLevels = getUserAllowedLevels(currentRole, currentUser);
+            const effectiveUserOrRole = currentUser || currentRole;
+            const isConsultasOnly = isConsultasOnlyRole(effectiveUserOrRole);
+            const userLevels = getUserAllowedLevels(effectiveUserOrRole, currentUser);
             const visibleSections = navigationSections
               .filter((s) => {
-                if (!hasTabAccess(currentRole, s.id)) return false;
+                if (!hasTabAccess(effectiveUserOrRole, s.id)) return false;
                 if (s.id === 'INICIAL' || s.id === 'PRIMARIA' || s.id === 'MEDIA_GENERAL') {
                   return userLevels.includes(s.id as any);
                 }
@@ -371,7 +372,7 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
               })
               .map((section) => ({
                 ...section,
-                subTabs: section.subTabs.filter((sub) => hasSubTabAccess(currentRole, section.id, sub.id))
+                subTabs: section.subTabs.filter((sub) => hasSubTabAccess(effectiveUserOrRole, section.id, sub.id))
               }));
 
             return visibleSections.map((section, index) => {

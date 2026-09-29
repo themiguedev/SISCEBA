@@ -641,6 +641,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             fullName: row.full_name,
             email: row.email,
             role: effectiveRole,
+            roles: (meta.roles as UserRole[]) || undefined,
             defaultLevel: row.default_level || 'MEDIA_GENERAL',
             allowedLevels: (meta.allowedLevels as EducationalLevel[]) || undefined,
             active: row.active ?? true,

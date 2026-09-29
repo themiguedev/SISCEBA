@@ -54,6 +54,7 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
     isLapsoOpenForGrading,
     activeLapso,
     currentRole,
+    currentUser,
     users,
     addUser,
     registrationCodes,
@@ -83,6 +84,16 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
   const [newGender, setNewGender] = useState<'MASCULINO' | 'FEMENINO'>('FEMENINO');
   const [newSelectedLevels, setNewSelectedLevels] = useState<EducationalLevel[]>(['MEDIA_GENERAL']);
   const [newDefaultLevel, setNewDefaultLevel] = useState<EducationalLevel>('MEDIA_GENERAL');
+  const [newAdditionalRoles, setNewAdditionalRoles] = useState<UserRole[]>([]);
+
+  const toggleAdditionalRole = (role: UserRole) => {
+    setNewAdditionalRoles(prev => {
+      if (prev.includes(role)) {
+        return prev.filter(r => r !== role);
+      }
+      return [...prev, role];
+    });
+  };
 
   const toggleNewUserLevel = (lvl: EducationalLevel) => {
     setNewSelectedLevels(prev => {
@@ -123,6 +134,7 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
       email: newEmail.trim().toLowerCase(),
       password: newPassword,
       role: newRole,
+      roles: newAdditionalRoles.filter(r => r !== newRole),
       gender: newGender,
       defaultLevel: newDefaultLevel,
       allowedLevels: newSelectedLevels,
@@ -135,6 +147,7 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
     setNewEmail('');
     setNewPassword('');
     setNewGender('FEMENINO');
+    setNewAdditionalRoles([]);
     setNewSelectedLevels(['MEDIA_GENERAL']);
     setNewDefaultLevel('MEDIA_GENERAL');
     setShowRegisterForm(false);
@@ -358,7 +371,7 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
                       )}
                     </td>
                     <td className="py-3.5 px-4 text-center">
-                      {canConfigureSchool(currentRole) ? (
+                      {canConfigureSchool(currentUser || currentRole) ? (
                         <button
                           onClick={() => toggleLapsoGrading(l.lapso)}
                           className={`px-3 py-1.5 rounded-xl font-bold text-xs transition shadow-sm ${
@@ -442,7 +455,7 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
                 </p>
               </div>
 
-              {canConfigureSchool(currentRole) && (
+              {canConfigureSchool(currentUser || currentRole) && (
                 <button
                   onClick={() => setShowRegisterForm(!showRegisterForm)}
                   className="px-4 py-2 bg-[#2C2E53] hover:bg-[#1B1C33] text-[#D4AF37] font-bold text-xs rounded-xl shadow-md transition flex items-center gap-2 shrink-0"
@@ -454,7 +467,7 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
             </div>
 
             {/* Formulario Desplegable de Registro */}
-            {showRegisterForm && canConfigureSchool(currentRole) && (
+            {showRegisterForm && canConfigureSchool(currentUser || currentRole) && (
               <form onSubmit={handleRegisterUser} className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4 animate-in fade-in duration-200">
                 <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
                   <ShieldCheck className="w-4 h-4 text-emerald-600" />
@@ -524,10 +537,14 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
                   </div>
 
                   <div>
-                    <label className="block font-bold text-slate-700 mb-1">Rol Asignado *</label>
+                    <label className="block font-bold text-slate-700 mb-1">Rol Principal *</label>
                     <select
                       value={newRole}
-                      onChange={(e) => setNewRole(e.target.value as UserRole)}
+                      onChange={(e) => {
+                        const r = e.target.value as UserRole;
+                        setNewRole(r);
+                        setNewAdditionalRoles(prev => prev.filter(ar => ar !== r));
+                      }}
                       className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#2C2E53] focus:border-transparent outline-none font-bold"
                     >
                       <option value="DOCENTE">DOCENTE (Profesor Titular / Guía)</option>
@@ -539,6 +556,67 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
                       <option value="REPRESENTANTE">REPRESENTANTE (Padre / Tutor Legal)</option>
                       <option value="ESTUDIANTE">ESTUDIANTE (Estudiante Regular)</option>
                     </select>
+                  </div>
+
+                  {/* Asignación de Roles Múltiples / Funciones Adicionales */}
+                  <div className="md:col-span-3 space-y-2 bg-amber-500/10 p-3 rounded-xl border border-amber-400/40">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <label className="block font-bold text-slate-900 text-xs sm:text-sm">
+                          Funciones o Roles Adicionales Simultáneos (Agrupación de Privilegios)
+                        </label>
+                        <p className="text-[11px] text-slate-600">
+                          Seleccione si este miembro cumple funciones complementarias (ej. es Docente y a la vez Representante o Secretaria). El sistema agrupará todos sus privilegios automáticamente.
+                        </p>
+                      </div>
+                      <span className="text-[10px] font-bold text-amber-900 bg-amber-200/80 px-2 py-0.5 rounded-full border border-amber-300 shrink-0">
+                        {newAdditionalRoles.length} adicionales
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+                      {(['DOCENTE', 'SECRETARIA', 'ASISTENTE', 'REPRESENTANTE', 'COORDINACION'] as UserRole[])
+                        .filter(r => r !== newRole)
+                        .map(r => {
+                          const isChecked = newAdditionalRoles.includes(r);
+                          return (
+                            <button
+                              type="button"
+                              key={r}
+                              onClick={() => toggleAdditionalRole(r)}
+                              className={`p-2 rounded-xl border text-left transition flex items-center justify-between gap-1.5 cursor-pointer ${
+                                isChecked
+                                  ? 'bg-[#1B1C33] text-[#D4AF37] border-[#D4AF37] shadow-xs'
+                                  : 'bg-white text-slate-700 border-slate-300 hover:border-slate-400'
+                              }`}
+                            >
+                              <div className="min-w-0">
+                                <span className="text-xs font-bold block truncate">{r}</span>
+                                <span className="text-[9px] block text-slate-400 dark:text-slate-400 truncate">
+                                  {r === 'REPRESENTANTE'
+                                    ? 'Acudiente'
+                                    : r === 'SECRETARIA'
+                                    ? 'Estudios'
+                                    : r === 'ASISTENTE'
+                                    ? 'Asistencia'
+                                    : r === 'DOCENTE'
+                                    ? 'Aula'
+                                    : 'Coordinación'}
+                                </span>
+                              </div>
+                              <div
+                                className={`w-4 h-4 rounded-md flex items-center justify-center shrink-0 border ${
+                                  isChecked
+                                    ? 'bg-[#D4AF37] text-slate-950 border-[#D4AF37]'
+                                    : 'border-slate-300 bg-slate-50'
+                                }`}
+                              >
+                                {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
+                              </div>
+                            </button>
+                          );
+                        })}
+                    </div>
                   </div>
 
                   {/* Subsistemas / Niveles Educativos Asignados */}
@@ -734,13 +812,28 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
                         </div>
                       </div>
 
-                      <span
-                        className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider shrink-0 border whitespace-nowrap ${
-                          roleMeta?.badgeBg || 'bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border-slate-300 dark:border-slate-700'
-                        }`}
-                      >
-                        {roleMeta?.badge || u.role}
-                      </span>
+                      <div className="flex flex-col items-end gap-1 shrink-0">
+                        <span
+                          className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border whitespace-nowrap ${
+                            roleMeta?.badgeBg || 'bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border-slate-300 dark:border-slate-700'
+                          }`}
+                        >
+                          {roleMeta?.badge || u.role}
+                        </span>
+                        {u.roles && u.roles.length > 0 && (
+                          <div className="flex flex-wrap gap-1 justify-end max-w-[140px]">
+                            {u.roles.map(r => (
+                              <span
+                                key={r}
+                                className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-400/15 text-amber-900 dark:text-amber-300 border border-amber-400/30"
+                                title={`Función adicional agrupada: ${r}`}
+                              >
+                                + {r}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   );
                 })}
@@ -764,7 +857,7 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
                   </div>
                 </div>
 
-                {canConfigureSchool(currentRole) && (
+                {canConfigureSchool(currentUser || currentRole) && (
                   <div className="flex flex-wrap items-center gap-2.5 self-stretch sm:self-center shrink-0">
                     <div className="relative">
                       <select
@@ -854,7 +947,7 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
                           >
                             {isCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                           </button>
-                          {canConfigureSchool(currentRole) && (
+                          {canConfigureSchool(currentUser || currentRole) && (
                             <button
                               type="button"
                               onClick={() => deleteRegistrationCode(code.id)}

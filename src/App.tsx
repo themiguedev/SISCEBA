@@ -93,13 +93,13 @@ const SiscebaMainApp: React.FC = () => {
 
   // Keep activeTab and currentLevel synchronized with RBAC hierarchy and user allowed educational levels
   useEffect(() => {
-    const userLevels = getUserAllowedLevels(currentRole, currentUser);
+    const userLevels = getUserAllowedLevels(currentUser || currentRole, currentUser);
     if (userLevels.length > 0 && !userLevels.includes(currentLevel)) {
       setCurrentLevel(userLevels[0]);
     }
 
-    if (!hasTabAccess(currentRole, activeTab)) {
-      const defaultTab = getDefaultTabForRole(currentRole);
+    if (!hasTabAccess(currentUser || currentRole, activeTab)) {
+      const defaultTab = getDefaultTabForRole(currentUser || currentRole);
       setActiveTab(defaultTab);
       return;
     }
@@ -113,17 +113,17 @@ const SiscebaMainApp: React.FC = () => {
   }, [currentLevel, currentRole, activeTab, currentUser]);
 
   const handleTabChange = (tab: MainNavigationTab) => {
-    if (!hasTabAccess(currentRole, tab)) {
+    if (!hasTabAccess(currentUser || currentRole, tab)) {
       showToast(
         'Acceso Restringido',
-        `El rol de ${ROLE_METADATA[currentRole]?.label || currentRole} no tiene permisos para acceder a ${tab}.`,
+        `Su cuenta institucional (${ROLE_METADATA[currentRole]?.label || currentRole}) no tiene permisos para acceder a ${tab}.`,
         true
       );
       return;
     }
 
     if (tab === 'INICIAL' || tab === 'PRIMARIA' || tab === 'MEDIA_GENERAL') {
-      const userLevels = getUserAllowedLevels(currentRole, currentUser);
+      const userLevels = getUserAllowedLevels(currentUser || currentRole, currentUser);
       if (userLevels.length > 0 && !userLevels.includes(tab)) {
         showToast(
           'Nivel No Asignado',
@@ -138,10 +138,10 @@ const SiscebaMainApp: React.FC = () => {
   };
 
   const handleSubTabChange = (sub: string) => {
-    if (!hasSubTabAccess(currentRole, activeTab, sub)) {
+    if (!hasSubTabAccess(currentUser || currentRole, activeTab, sub)) {
       showToast(
         'Acceso Restringido',
-        `La función seleccionada no está disponible para el rol de ${ROLE_METADATA[currentRole]?.label || currentRole}.`,
+        `La función seleccionada no está disponible para sus roles asignados (${ROLE_METADATA[currentRole]?.label || currentRole}).`,
         true
       );
       return;
