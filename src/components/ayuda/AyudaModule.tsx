@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useApp } from '../../context/AppContext';
+import { hasSubTabAccess } from '../../utils/rbac';
 import { ManualDeUsoView } from './ManualDeUsoView';
 import { MapaDelSitioView } from './MapaDelSitioView';
 import { BookOpen, Compass, HelpCircle } from 'lucide-react';
@@ -14,10 +16,18 @@ export const AyudaModule: React.FC<AyudaModuleProps> = ({
   setActiveSubTab,
   onNavigate
 }) => {
+  const { currentRole, currentUser } = useApp();
+  const effectiveUserOrRole = currentUser || currentRole;
+  const canAccessMapaSitio = hasSubTabAccess(effectiveUserOrRole, 'AYUDA', 'MAPA_SITIO');
+
   const [internalTab, setInternalTab] = useState<'MANUAL' | 'MAPA_SITIO'>('MANUAL');
 
-  const currentTab = activeSubTab || internalTab;
+  // Fallback seguro: si el rol actual no tiene acceso a MAPA_SITIO, forzar MANUAL
+  const requestedTab = activeSubTab || internalTab;
+  const currentTab = !canAccessMapaSitio && requestedTab === 'MAPA_SITIO' ? 'MANUAL' : requestedTab;
+
   const setTab = (tab: 'MANUAL' | 'MAPA_SITIO') => {
+    if (tab === 'MAPA_SITIO' && !canAccessMapaSitio) return;
     if (setActiveSubTab) {
       setActiveSubTab(tab);
     }
@@ -60,17 +70,19 @@ export const AyudaModule: React.FC<AyudaModuleProps> = ({
             <BookOpen className={`w-3.5 h-3.5 ${currentTab === 'MANUAL' ? 'text-amber-400' : 'text-slate-400'}`} />
             Manual de Uso Interactivo
           </button>
-          <button
-            onClick={() => setTab('MAPA_SITIO')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-              currentTab === 'MAPA_SITIO'
-                ? 'bg-[#1F1E29] text-amber-300 shadow-sm border border-amber-400/40'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/60'
-            }`}
-          >
-            <Compass className={`w-3.5 h-3.5 ${currentTab === 'MAPA_SITIO' ? 'text-amber-400' : 'text-slate-400'}`} />
-            Directorio & Mapa del Sitio
-          </button>
+          {canAccessMapaSitio && (
+            <button
+              onClick={() => setTab('MAPA_SITIO')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                currentTab === 'MAPA_SITIO'
+                  ? 'bg-[#1F1E29] text-amber-300 shadow-sm border border-amber-400/40'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/60'
+              }`}
+            >
+              <Compass className={`w-3.5 h-3.5 ${currentTab === 'MAPA_SITIO' ? 'text-amber-400' : 'text-slate-400'}`} />
+              Directorio & Mapa del Sitio
+            </button>
+          )}
         </div>
       </div>
 
