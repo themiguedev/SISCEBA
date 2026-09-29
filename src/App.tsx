@@ -658,8 +658,8 @@ const SiscebaMainApp: React.FC = () => {
               {/* 3, 4, 5. NIVELES PEDAGÓGICOS (INICIAL, PRIMARIA, MEDIA GENERAL) */}
               {(activeTab === 'INICIAL' || activeTab === 'PRIMARIA' || activeTab === 'MEDIA_GENERAL') && (
                 <div className="space-y-6">
-                  {/* Pedagogical Pillar Switcher */}
-                  <div className="bg-white dark:bg-slate-900 rounded-2xl p-1.5 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+                  {/* Pedagogical Pillar Switcher - Adaptable y visible sin recortes */}
+                  <div className="bg-white dark:bg-slate-900 rounded-2xl p-1.5 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-wrap items-center gap-1.5 sm:gap-2">
                     <button
                       onClick={() => setLevelPillarTab('PLANIFICACION')}
                       className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${

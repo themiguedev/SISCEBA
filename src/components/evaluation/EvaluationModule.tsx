@@ -33,8 +33,8 @@ export const EvaluationModule: React.FC<EvaluationModuleProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Subtabs Bar */}
-      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-2 border-b border-slate-200 dark:border-slate-800">
+      {/* Subtabs Bar - Adaptable y visible completa */}
+      <div className="flex flex-wrap items-center gap-1.5 pb-2 border-b border-slate-200 dark:border-slate-800">
         {subTabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeSubTab === tab.id;

@@ -96,8 +96,8 @@ export const ComunidadModule: React.FC<ComunidadModuleProps> = ({
           </p>
         </div>
 
-        {/* Subtabs Switcher */}
-        <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 overflow-x-auto no-scrollbar">
+        {/* Subtabs Switcher - Adaptable sin recortes */}
+        <div className="flex flex-wrap items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 gap-1">
           <button
             onClick={() => setActiveTab('NOTICIAS')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${

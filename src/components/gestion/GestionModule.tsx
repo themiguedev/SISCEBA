@@ -107,8 +107,8 @@ export const GestionModule: React.FC<GestionModuleProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* Ergonomic Subtabs Bar */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl p-1.5 border border-slate-200/90 dark:border-slate-800 shadow-sm flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+      {/* Ergonomic Subtabs Bar - Adaptativa, completa y sin cortes */}
+      <div className="bg-white dark:bg-slate-900 rounded-2xl p-1.5 border border-slate-200/90 dark:border-slate-800 shadow-sm flex flex-wrap items-center gap-1 sm:gap-1.5">
         {allowedSubTabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeSubTab === tab.id;
@@ -117,23 +117,19 @@ export const GestionModule: React.FC<GestionModuleProps> = ({
             <button
               key={tab.id}
               onClick={() => setActiveSubTab(tab.id)}
-              className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all shrink-0 select-none ${
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl text-xs font-bold transition-all select-none cursor-pointer ${
                 isActive
-                  ? 'bg-[#162721] text-emerald-300 shadow-md border border-emerald-500/40'
+                  ? 'bg-[#162721] text-emerald-300 shadow-md border border-emerald-500/40 ring-1 ring-emerald-500/20'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800'
               }`}
             >
-              <Icon className={`w-4 h-4 ${isActive ? 'text-emerald-400' : 'text-slate-400'}`} />
-              <div className="text-left">
-                <div className="flex items-center gap-1.5">
-                  <span className={isActive ? 'text-white' : ''}>{tab.label}</span>
-                  {tab.badge && (
-                    <span className={`text-[10px] px-1.5 py-0.2 rounded-md ${tab.badgeColor}`}>
-                      {tab.badge}
-                    </span>
-                  )}
-                </div>
-              </div>
+              <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 ${isActive ? 'text-emerald-400' : 'text-slate-400'}`} />
+              <span className={`whitespace-nowrap ${isActive ? 'text-white' : ''}`}>{tab.label}</span>
+              {tab.badge && (
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-md font-extrabold ${tab.badgeColor}`}>
+                  {tab.badge}
+                </span>
+              )}
             </button>
           );
         })}
