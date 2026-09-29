@@ -34,14 +34,14 @@ const ACADEMIC_GRADES_SEQUENCE = [
 export const MatriculaProsecucionView: React.FC = () => {
   const { students, saveStudent, sendNotification } = useApp();
 
-  // Filtros de Grado / Sección de Origen
+  // Filtros de Grado / Sección de Origen (Exclusivamente Secciones A y B)
   const [selectedOriginGrade, setSelectedOriginGrade] = useState('1er Año');
-  const [selectedOriginSection, setSelectedOriginSection] = useState<'TODAS' | 'A' | 'B' | 'C' | 'U'>('TODAS');
+  const [selectedOriginSection, setSelectedOriginSection] = useState<'TODAS' | 'A' | 'B'>('TODAS');
   const [searchFilter, setSearchFilter] = useState('');
 
   // Parámetros de Destino para prosecución masiva o individual
   const [targetGrade, setTargetGrade] = useState('2do Año');
-  const [targetSection, setTargetSection] = useState<'A' | 'B' | 'C' | 'U'>('A');
+  const [targetSection, setTargetSection] = useState<'A' | 'B'>('A');
 
   // Selección de estudiantes promovidos
   const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
@@ -254,11 +254,9 @@ export const MatriculaProsecucionView: React.FC = () => {
               onChange={(e) => setSelectedOriginSection(e.target.value as any)}
               className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-slate-800 font-bold focus:ring-2 focus:ring-[#2C2E53]"
             >
-              <option value="TODAS">Todas las secciones</option>
+              <option value="TODAS">Todas las secciones (A y B)</option>
               <option value="A">Sección A</option>
               <option value="B">Sección B</option>
-              <option value="C">Sección C</option>
-              <option value="U">Sección Única (U)</option>
             </select>
           </div>
 
@@ -288,8 +286,6 @@ export const MatriculaProsecucionView: React.FC = () => {
             >
               <option value="A">Sección A</option>
               <option value="B">Sección B</option>
-              <option value="C">Sección C</option>
-              <option value="U">Sección Única (U)</option>
             </select>
           </div>
         </div>

@@ -21,3 +21,8 @@
 - Conservar únicamente las cuentas institucionales base (`admin`, `director`, `coordinador`, `asistente`, `secretaria`).
 - El Administrador cuenta con un módulo en Configuración para registrar nuevos docentes y personal con correo y contraseña, así como emisión de Códigos de Autorización para auto-registro.
 - Todo componente que consuma estudiantes o registros debe implementar guardas defensivas ante listas vacías para evitar excepciones en tiempo de ejecución.
+
+## 4. Secciones Oficiales Institucionales
+- Por cada grado y año escolar en todos los subsistemas (Educación Inicial, Primaria y Media General), **exclusivamente existen dos secciones: `A` y `B`**.
+- Ningún formulario, selector de matrícula, filtro de prosecución o módulo de asignación debe permitir o mostrar secciones adicionales (`C`, `D`, `U` u otras).
+

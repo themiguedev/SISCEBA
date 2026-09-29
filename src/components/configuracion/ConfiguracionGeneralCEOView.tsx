@@ -439,12 +439,12 @@ export const ConfiguracionGeneralCEOView: React.FC = () => {
           {/* SECTION 4: SECCIONES */}
           {activeSection === 'SECCIONES' && (
             <div className="space-y-4">
-              <p className="text-xs text-slate-500">Secciones activas matriculadas:</p>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                {['Sección "A"', 'Sección "B"', 'Sección "C"', 'Sección Única'].map((sec, i) => (
-                  <div key={i} className="p-3 rounded-xl border border-slate-200 bg-white text-center">
-                    <span className="text-xs font-black text-slate-800">{sec}</span>
-                    <p className="text-[10px] text-slate-400 mt-1">Capacidad estándar: 32</p>
+              <p className="text-xs text-slate-500">Secciones oficiales activas por cada grado y año (A y B exclusivamente):</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-md">
+                {['Sección "A"', 'Sección "B"'].map((sec, i) => (
+                  <div key={i} className="p-4 rounded-2xl border border-emerald-500/30 bg-emerald-50/50 dark:bg-emerald-950/20 text-center">
+                    <span className="text-sm font-black text-slate-900 dark:text-white block">{sec}</span>
+                    <p className="text-[11px] text-emerald-700 dark:text-emerald-400 font-semibold mt-1">Activa en todos los grados y años</p>
                   </div>
                 ))}
               </div>

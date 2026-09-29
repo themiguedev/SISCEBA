@@ -1392,8 +1392,6 @@ export const InscripcionesWizardView: React.FC = () => {
                 >
                   <option value="A">Sección A</option>
                   <option value="B">Sección B</option>
-                  <option value="C">Sección C</option>
-                  <option value="U">Sección Única (U)</option>
                 </select>
               </div>
             </div>
