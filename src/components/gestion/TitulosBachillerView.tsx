@@ -482,32 +482,44 @@ export const TitulosBachillerView: React.FC = () => {
     <div className="space-y-6">
       {/* Print stylesheet for physical certificate printing on blank security paper */}
       <style>{`
+        @page {
+          size: letter landscape;
+          margin: 0;
+        }
         @media print {
-          body {
-            background: none !important;
-            padding: 0 !important;
+          html, body {
+            width: 279.4mm !important;
+            height: 215.9mm !important;
             margin: 0 !important;
+            padding: 0 !important;
+            background: none !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
-          header, nav, aside, .no-print, button {
+          header, nav, aside, .no-print, button, .app-header, .sidebar {
             display: none !important;
           }
-          .title-print-canvas {
-            width: ${printSettings.pageWidthMm}mm !important;
-            height: ${printSettings.pageHeightMm}mm !important;
+          .title-print-isolated-sheet {
+            display: block !important;
             position: absolute !important;
             top: ${printSettings.marginTopMm}mm !important;
             left: ${printSettings.marginLeftMm}mm !important;
+            width: ${printSettings.pageWidthMm}mm !important;
+            height: ${printSettings.pageHeightMm}mm !important;
             margin: 0 !important;
             padding: 0 !important;
+            background: none !important;
             box-shadow: none !important;
             border: none !important;
-            background: none !important;
+            overflow: hidden !important;
           }
-          .title-template-bg {
-            display: none !important; /* Never print template graphics on real pre-printed paper */
+          .title-template-bg, .guideline-grid {
+            display: none !important; /* Never print reference template onto original security paper */
           }
-          .guideline-grid {
-            display: none !important;
+        }
+        @media screen {
+          .title-print-isolated-sheet {
+            display: none;
           }
         }
       `}</style>
@@ -1247,6 +1259,41 @@ export const TitulosBachillerView: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* ISOLATED PRINT CANVAS (Strictly 279.4mm x 215.9mm Landscape - Only visible on window.print()) */}
+      <div
+        className="title-print-isolated-sheet"
+        style={{
+          width: `${printSettings.pageWidthMm}mm`,
+          height: `${printSettings.pageHeightMm}mm`,
+          position: 'relative'
+        }}
+      >
+        {blocks.map((block) => {
+          if (!block.enabled) return null;
+          const renderedHtml = renderTemplateText(block.sampleTemplate);
+
+          return (
+            <div
+              key={`print-${block.id}`}
+              style={{
+                position: 'absolute',
+                left: `${block.xMm}mm`,
+                top: `${block.yMm}mm`,
+                fontSize: `${block.fontSizePt * (printSettings.globalFontScale / 100)}pt`,
+                fontWeight: block.fontWeight,
+                letterSpacing: `${block.letterSpacingMm}mm`,
+                lineHeight: block.lineHeight,
+                textAlign: block.textAlign,
+                fontFamily: block.fontFamily === 'serif' ? 'Times New Roman, serif' : block.fontFamily === 'mono' ? 'Courier New, monospace' : 'Arial, sans-serif',
+                color: '#000000',
+                whiteSpace: 'nowrap'
+              }}
+              dangerouslySetInnerHTML={{ __html: renderedHtml }}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 };
