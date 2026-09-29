@@ -8,6 +8,7 @@ import { DocumentosSolicitadosView } from './DocumentosSolicitadosView';
 import { BloqueoAdministrativoView } from './BloqueoAdministrativoView';
 import { TitulosBachillerView } from './TitulosBachillerView';
 import { MatriculaProsecucionView } from './MatriculaProsecucionView';
+import { TalleresCRPView } from './TalleresCRPView';
 import {
   UserCheck,
   Clock,
@@ -17,7 +18,8 @@ import {
   Lock,
   GraduationCap,
   Users,
-  ShieldX
+  ShieldX,
+  Palette
 } from 'lucide-react';
 import { hasSubTabAccess, ROLE_METADATA } from '../../utils/rbac';
 
@@ -91,6 +93,12 @@ export const GestionModule: React.FC<GestionModuleProps> = ({
       label: 'Matrícula',
       sublabel: 'Prosecución',
       icon: Users
+    },
+    {
+      id: 'TALLERES_CRP',
+      label: 'Talleres CRP',
+      sublabel: '2 Momentos',
+      icon: Palette
     }
   ];
 
@@ -165,6 +173,7 @@ export const GestionModule: React.FC<GestionModuleProps> = ({
             {activeSubTab === 'BLOQUEO' && <BloqueoAdministrativoView />}
             {activeSubTab === 'TITULOS' && <TitulosBachillerView />}
             {activeSubTab === 'MATRICULA' && <MatriculaProsecucionView />}
+            {activeSubTab === 'TALLERES_CRP' && <TalleresCRPView />}
           </>
         )}
       </div>

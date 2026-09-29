@@ -28,7 +28,9 @@ import {
   InstitutionalSchoolData,
   SystemCatalogs,
   AuditLogEntry,
-  ScheduleTypeConfig
+  ScheduleTypeConfig,
+  CRPTaller,
+  CRPEstudianteInscrito
 } from '../types';
 import {
   encodeUserAvatarWithMetadata,
@@ -1084,6 +1086,7 @@ export const supabaseFetchUsers = async (): Promise<AppUser[] | null> => {
       return {
         id: row.id,
         username: row.username,
+        cedula: meta.cedula || undefined,
         password: row.password,
         fullName: row.full_name,
         email: row.email,
@@ -1113,6 +1116,7 @@ export const supabaseSaveUser = async (user: AppUser): Promise<boolean> => {
       avatarUrl: user.avatarUrl,
       gender: user.gender,
       phone: user.phone,
+      cedula: user.cedula,
       bio: user.bio,
       receiveEmails: user.receiveEmails,
       receiveMessages: user.receiveMessages,
@@ -1693,4 +1697,166 @@ export const supabaseSaveScheduleType = async (item: ScheduleTypeConfig): Promis
     return false;
   }
 };
+
+// ==========================================
+// 24. TALLERES CRP Y CALIFICACIONES (crp_workshops / system_catalogs payload)
+// ==========================================
+export const supabaseFetchCRPTalleres = async (): Promise<CRPTaller[] | null> => {
+  if (!isSupabaseConfigured()) return null;
+  try {
+    const { data, error } = await supabase
+      .from('crp_workshops')
+      .select('*')
+      .order('code', { ascending: true });
+
+    if (error || !data) {
+      return null;
+    }
+
+    return data.map(row => ({
+      id: row.id,
+      code: row.code,
+      nombre: row.nombre,
+      area: row.area,
+      docenteResponsable: row.docente_responsable,
+      docenteId: row.docente_id,
+      maxCupos: row.max_cupos || 25,
+      horario: row.horario || '',
+      aulaEspacio: row.aula_espacio || '',
+      descripcion: row.descripcion || '',
+      nivelEducativo: row.nivel_educativo || 'MEDIA_GENERAL',
+      gradosPermitidos: Array.isArray(row.grados_permitidos) ? row.grados_permitidos : [],
+      activo: row.activo ?? true
+    }));
+  } catch (e) {
+    console.error('Error en supabaseFetchCRPTalleres:', e);
+    return null;
+  }
+};
+
+export const supabaseSaveCRPTaller = async (taller: CRPTaller): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('crp_workshops').upsert({
+      id: taller.id,
+      code: taller.code,
+      nombre: taller.nombre,
+      area: taller.area,
+      docente_responsable: taller.docenteResponsable,
+      docente_id: taller.docenteId || null,
+      max_cupos: taller.maxCupos,
+      horario: taller.horario,
+      aula_espacio: taller.aulaEspacio,
+      descripcion: taller.descripcion,
+      nivel_educativo: taller.nivelEducativo,
+      grados_permitidos: taller.gradosPermitidos,
+      activo: taller.activo,
+      updated_at: new Date().toISOString()
+    });
+
+    if (error) {
+      console.warn('Supabase save crp_workshops aviso:', error.message);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error('Excepción al guardar CRP Taller en Supabase:', e);
+    return false;
+  }
+};
+
+export const supabaseFetchCRPInscritos = async (): Promise<CRPEstudianteInscrito[] | null> => {
+  if (!isSupabaseConfigured()) return null;
+  try {
+    const { data, error } = await supabase
+      .from('crp_enrollments')
+      .select('*')
+      .order('fecha_inscripcion', { ascending: false });
+
+    if (error || !data) {
+      return null;
+    }
+
+    return data.map(row => ({
+      id: row.id,
+      tallerId: row.taller_id,
+      studentId: row.student_id,
+      studentCedula: row.student_cedula,
+      studentName: row.student_name,
+      grado: row.grado,
+      seccion: row.seccion,
+      fechaInscripcion: row.fecha_inscripcion,
+      asignacionMetodo: row.asignacion_metodo || 'MANUAL',
+      calificacionMomento1: row.calificacion_momento1 || undefined,
+      calificacionMomento2: row.calificacion_momento2 || undefined,
+      calificacionPrevalente: row.calificacion_prevalente || undefined,
+      observaciones: row.observaciones || undefined
+    }));
+  } catch (e) {
+    console.error('Error en supabaseFetchCRPInscritos:', e);
+    return null;
+  }
+};
+
+export const supabaseSaveCRPInscrito = async (record: CRPEstudianteInscrito): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('crp_enrollments').upsert({
+      id: record.id,
+      taller_id: record.tallerId,
+      student_id: record.studentId,
+      student_cedula: record.studentCedula,
+      student_name: record.studentName,
+      grado: record.grado,
+      seccion: record.seccion,
+      fecha_inscripcion: record.fechaInscripcion,
+      asignacion_metodo: record.asignacionMetodo,
+      calificacion_momento1: record.calificacionMomento1 || null,
+      calificacion_momento2: record.calificacionMomento2 || null,
+      calificacion_prevalente: record.calificacionPrevalente || null,
+      observaciones: record.observaciones || null,
+      updated_at: new Date().toISOString()
+    });
+
+    if (error) {
+      console.warn('Supabase save crp_enrollments aviso:', error.message);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error('Excepción al guardar inscripción CRP en Supabase:', e);
+    return false;
+  }
+};
+
+export const supabaseDeleteCRPTaller = async (tallerId: string): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('crp_workshops').delete().eq('id', tallerId);
+    if (error) {
+      console.warn('Supabase delete crp_workshops aviso:', error.message);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error('Excepción al eliminar taller CRP en Supabase:', e);
+    return false;
+  }
+};
+
+export const supabaseDeleteCRPInscrito = async (id: string): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('crp_enrollments').delete().eq('id', id);
+    if (error) {
+      console.warn('Supabase delete crp_enrollments aviso:', error.message);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error('Excepción al eliminar inscripción CRP en Supabase:', e);
+    return false;
+  }
+};
+
 

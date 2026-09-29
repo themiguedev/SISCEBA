@@ -34,7 +34,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
   const [errorMsg, setErrorMsg] = useState(() => {
     if (sessionStorage.getItem('sisceba_inactivity_logout') === 'true') {
       sessionStorage.removeItem('sisceba_inactivity_logout');
-      return 'Su sesión ha finalizado automáticamente por superar los 15 minutos de inactividad.';
+      return 'Su sesión ha finalizado automáticamente por superar los 10 minutos de inactividad.';
     }
     return '';
   });

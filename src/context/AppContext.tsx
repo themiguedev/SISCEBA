@@ -36,7 +36,9 @@ import {
   InstitutionalSchoolData,
   SystemCatalogs,
   AuditLogEntry,
-  ScheduleTypeConfig
+  ScheduleTypeConfig,
+  CRPTaller,
+  CRPEstudianteInscrito
 } from '../types';
 import {
   hashPassword,
@@ -77,7 +79,9 @@ import {
   INITIAL_SCHOOL_DATA,
   INITIAL_SYSTEM_CATALOGS,
   INITIAL_AUDIT_LOGS,
-  INITIAL_SCHEDULE_TYPES
+  INITIAL_SCHEDULE_TYPES,
+  INITIAL_CRP_TALLERES,
+  INITIAL_CRP_INSCRITOS
 } from '../data/seedData';
 import { supabase, isSupabaseConfigured, checkSupabaseConnection } from '../lib/supabaseClient';
 import {
@@ -135,7 +139,13 @@ import {
   supabaseFetchAuditLogs,
   supabaseSaveAuditLog,
   supabaseFetchScheduleTypes,
-  supabaseSaveScheduleType
+  supabaseSaveScheduleType,
+  supabaseFetchCRPTalleres,
+  supabaseSaveCRPTaller,
+  supabaseDeleteCRPTaller,
+  supabaseFetchCRPInscritos,
+  supabaseSaveCRPInscrito,
+  supabaseDeleteCRPInscrito
 } from '../services/supabaseService';
 
 interface AppContextType {
@@ -282,6 +292,15 @@ interface AppContextType {
   scheduleTypes: ScheduleTypeConfig[];
   saveScheduleType: (item: ScheduleTypeConfig) => Promise<boolean>;
 
+  // Talleres CRP & Calificaciones (Database Connected)
+  crpTalleres: CRPTaller[];
+  crpInscritos: CRPEstudianteInscrito[];
+  saveCRPTaller: (taller: CRPTaller) => Promise<boolean>;
+  deleteCRPTaller: (tallerId: string) => Promise<boolean>;
+  saveCRPInscrito: (record: CRPEstudianteInscrito) => Promise<boolean>;
+  deleteCRPInscrito: (id: string) => Promise<boolean>;
+  autoAssignCRPWorkshops: (tallerIds: string[], gradoFilter?: string) => Promise<number>;
+
   // Helpers
   resetToSeedData: () => void;
 
@@ -355,8 +374,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [activeLapso, setActiveLapso] = useState<1 | 2 | 3>(1);
   const [currentSection, setCurrentSection] = useState<string>('4to Año A');
 
-  // Authentication & Session States with 15-minute inactivity timeout (900,000 ms)
-  const SESSION_INACTIVITY_LIMIT_MS = 15 * 60 * 1000;
+  // Authentication & Session States with 10-minute inactivity timeout (600,000 ms)
+  const SESSION_INACTIVITY_LIMIT_MS = 10 * 60 * 1000;
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     const saved = localStorage.getItem('sisceba_auth_session');
@@ -787,7 +806,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (lastActiveStr) {
         const lastActiveTime = parseInt(lastActiveStr, 10);
         if (!isNaN(lastActiveTime) && Date.now() - lastActiveTime >= SESSION_INACTIVITY_LIMIT_MS) {
-          console.warn('[Seguridad SICE-CBA] Sesión cerrada automáticamente por inactividad (15 minutos sin interacción).');
+          console.warn('[Seguridad SICE-CBA] Sesión cerrada automáticamente por inactividad (10 minutos sin interacción).');
           sessionStorage.setItem('sisceba_inactivity_logout', 'true');
           logout();
         }
@@ -914,6 +933,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return INITIAL_SCHEDULE_TYPES;
   });
 
+  // Talleres CRP & Inscripciones (Conexión Directa con la BD)
+  const [crpTalleres, setCrpTalleres] = useState<CRPTaller[]>(() => {
+    const saved = localStorage.getItem('sisceba_crp_talleres');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch { /* fallback */ }
+    }
+    return INITIAL_CRP_TALLERES;
+  });
+
+  const [crpInscritos, setCrpInscritos] = useState<CRPEstudianteInscrito[]>(() => {
+    const saved = localStorage.getItem('sisceba_crp_inscritos');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch { /* fallback */ }
+    }
+    return INITIAL_CRP_INSCRITOS;
+  });
+
   const refreshFromSupabase = async () => {
     if (!isSupabaseConfigured()) {
       setIsSupabaseActive(false);
@@ -958,7 +998,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         remoteSchoolData,
         remoteCatalogs,
         remoteAuditLogs,
-        remoteScheduleTypes
+        remoteScheduleTypes,
+        remoteTalleres,
+        remoteInscritos
       ] = await Promise.all([
         supabaseFetchStudents(),
         supabaseFetchSubjectAreas(),
@@ -984,7 +1026,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         supabaseFetchSchoolData(),
         supabaseFetchCatalogs(),
         supabaseFetchAuditLogs(),
-        supabaseFetchScheduleTypes()
+        supabaseFetchScheduleTypes(),
+        supabaseFetchCRPTalleres(),
+        supabaseFetchCRPInscritos()
       ]);
 
       if (remoteStudents !== null) setStudents(remoteStudents);
@@ -1028,6 +1072,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (remoteScheduleTypes !== null && remoteScheduleTypes.length > 0) {
         setScheduleTypes(remoteScheduleTypes);
         localStorage.setItem('sisceba_schedule_types', JSON.stringify(remoteScheduleTypes));
+      }
+      if (remoteTalleres !== null) {
+        setCrpTalleres(remoteTalleres);
+        localStorage.setItem('sisceba_crp_talleres', JSON.stringify(remoteTalleres));
+      }
+      if (remoteInscritos !== null) {
+        setCrpInscritos(remoteInscritos);
+        localStorage.setItem('sisceba_crp_inscritos', JSON.stringify(remoteInscritos));
       }
       if (remotePasses !== null) setPasses(remotePasses);
       if (remoteAttendance !== null) setDailyAttendance(remoteAttendance);
@@ -2013,6 +2065,174 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return true;
   };
 
+  // Métodos de Gestión CRP (Talleres y Calificaciones de 2 Momentos)
+  const saveCRPTaller = async (taller: CRPTaller): Promise<boolean> => {
+    setCrpTalleres(prev => {
+      const idx = prev.findIndex(t => t.id === taller.id);
+      let next: CRPTaller[];
+      if (idx >= 0) {
+        next = [...prev];
+        next[idx] = taller;
+      } else {
+        next = [...prev, taller];
+      }
+      localStorage.setItem('sisceba_crp_talleres', JSON.stringify(next));
+      return next;
+    });
+
+    if (isSupabaseConfigured()) {
+      const res = await syncWithCloud(
+        () => supabaseSaveCRPTaller(taller),
+        `guardar taller CRP ${taller.nombre}`
+      );
+      return res === true;
+    }
+    return true;
+  };
+
+  const deleteCRPTaller = async (tallerId: string): Promise<boolean> => {
+    setCrpTalleres(prev => {
+      const next = prev.filter(t => t.id !== tallerId);
+      localStorage.setItem('sisceba_crp_talleres', JSON.stringify(next));
+      return next;
+    });
+    // Eliminar también inscritos huérfanos
+    setCrpInscritos(prev => {
+      const next = prev.filter(i => i.tallerId !== tallerId);
+      localStorage.setItem('sisceba_crp_inscritos', JSON.stringify(next));
+      return next;
+    });
+
+    if (isSupabaseConfigured()) {
+      const res = await syncWithCloud(
+        () => supabaseDeleteCRPTaller(tallerId),
+        `eliminar taller CRP ${tallerId}`
+      );
+      return res === true;
+    }
+    return true;
+  };
+
+  const saveCRPInscrito = async (record: CRPEstudianteInscrito): Promise<boolean> => {
+    setCrpInscritos(prev => {
+      const idx = prev.findIndex(i => i.id === record.id);
+      let next: CRPEstudianteInscrito[];
+      if (idx >= 0) {
+        next = [...prev];
+        next[idx] = record;
+      } else {
+        next = [...prev, record];
+      }
+      localStorage.setItem('sisceba_crp_inscritos', JSON.stringify(next));
+      return next;
+    });
+
+    if (isSupabaseConfigured()) {
+      const res = await syncWithCloud(
+        () => supabaseSaveCRPInscrito(record),
+        `guardar inscripción CRP de ${record.studentName}`
+      );
+      return res === true;
+    }
+    return true;
+  };
+
+  const deleteCRPInscrito = async (id: string): Promise<boolean> => {
+    setCrpInscritos(prev => {
+      const next = prev.filter(i => i.id !== id);
+      localStorage.setItem('sisceba_crp_inscritos', JSON.stringify(next));
+      return next;
+    });
+
+    if (isSupabaseConfigured()) {
+      const res = await syncWithCloud(
+        () => supabaseDeleteCRPInscrito(id),
+        `eliminar inscripción CRP ${id}`
+      );
+      return res === true;
+    }
+    return true;
+  };
+
+  const autoAssignCRPWorkshops = async (tallerIds: string[], gradoFilter?: string): Promise<number> => {
+    // 1. Obtener talleres disponibles seleccionados
+    const selectedWorkshops = crpTalleres.filter(t => tallerIds.includes(t.id) && t.activo);
+    if (selectedWorkshops.length === 0) return 0;
+
+    // 2. Estudiantes de Media General elegibles
+    let elegibles = students.filter(s => s.level === 'MEDIA_GENERAL');
+    if (gradoFilter && gradoFilter !== 'TODOS') {
+      elegibles = elegibles.filter(s => s.grade === gradoFilter);
+    }
+
+    // 3. Filtrar los que ya están inscritos en algún taller
+    const alreadyEnrolledStudentIds = new Set(crpInscritos.map(i => i.studentId));
+    const pendingStudents = elegibles.filter(s => !alreadyEnrolledStudentIds.has(s.id));
+
+    if (pendingStudents.length === 0) return 0;
+
+    // 4. Calcular cupos disponibles por taller
+    const enrollmentCounts: { [tallerId: string]: number } = {};
+    selectedWorkshops.forEach(w => {
+      enrollmentCounts[w.id] = crpInscritos.filter(i => i.tallerId === w.id).length;
+    });
+
+    let assignedCount = 0;
+    const newEnrollments: CRPEstudianteInscrito[] = [];
+
+    // Distribuir equitativamente respetando maxCupos (entre 20 y 25)
+    for (const student of pendingStudents) {
+      // Buscar taller que admita el grado del estudiante y tenga cupo disponible
+      const eligibleWorkshops = selectedWorkshops.filter(w => {
+        const hasCapacity = (enrollmentCounts[w.id] || 0) < w.maxCupos;
+        const matchesGrade = !w.gradosPermitidos || w.gradosPermitidos.length === 0 || w.gradosPermitidos.includes(student.grade);
+        return hasCapacity && matchesGrade;
+      });
+
+      if (eligibleWorkshops.length === 0) continue;
+
+      // Ordenar por el que tenga menor ocupación actual para balancear
+      eligibleWorkshops.sort((a, b) => (enrollmentCounts[a.id] || 0) - (enrollmentCounts[b.id] || 0));
+      const chosen = eligibleWorkshops[0];
+
+      const newRecord: CRPEstudianteInscrito = {
+        id: `crp-enr-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+        tallerId: chosen.id,
+        studentId: student.id,
+        studentCedula: student.cedula || 'S/C',
+        studentName: student.fullName,
+        grado: student.grade,
+        seccion: student.section,
+        fechaInscripcion: new Date().toISOString(),
+        asignacionMetodo: 'AUTOMATICA'
+      };
+
+      newEnrollments.push(newRecord);
+      enrollmentCounts[chosen.id] = (enrollmentCounts[chosen.id] || 0) + 1;
+      assignedCount++;
+    }
+
+    if (newEnrollments.length > 0) {
+      setCrpInscritos(prev => {
+        const next = [...prev, ...newEnrollments];
+        localStorage.setItem('sisceba_crp_inscritos', JSON.stringify(next));
+        return next;
+      });
+
+      // Persistir en paralelo o lote a Supabase
+      if (isSupabaseConfigured()) {
+        syncWithCloud(async () => {
+          for (const item of newEnrollments) {
+            await supabaseSaveCRPInscrito(item);
+          }
+          return true;
+        }, `asignación masiva automatizada de ${assignedCount} estudiantes a CRP`).catch(e => console.warn(e));
+      }
+    }
+
+    return assignedCount;
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -2108,6 +2328,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addAuditLog,
         scheduleTypes,
         saveScheduleType,
+        crpTalleres,
+        crpInscritos,
+        saveCRPTaller,
+        deleteCRPTaller,
+        saveCRPInscrito,
+        deleteCRPInscrito,
+        autoAssignCRPWorkshops,
         resetToSeedData,
         isSupabaseActive,
         supabaseStatusText,

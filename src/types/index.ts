@@ -5,6 +5,7 @@ export type UserRole = 'DOCENTE' | 'COORDINACION' | 'COORDINADOR' | 'DIRECTOR' |
 export interface AppUser {
   id: string;
   username: string;
+  cedula?: string;
   password?: string;
   fullName: string;
   email: string;
@@ -564,5 +565,43 @@ export interface ScheduleTypeConfig {
   totalBloques: number;
   nivelesAplicables: EducationalLevel[];
   activo: boolean;
+}
+
+// ==========================================
+// TALLERES CRP (CREACIÓN, RECREACIÓN Y PRODUCCIÓN)
+// ==========================================
+export type CRPLiteralScore = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M' | 'N';
+
+export interface CRPTaller {
+  id: string;
+  code: string;
+  nombre: string;
+  area: string; // ej. Robótica & Maker, Artes Escénicas, Música Instrumental, Huerto Escolar, etc.
+  docenteResponsable: string;
+  docenteId?: string;
+  maxCupos: number; // Típicamente entre 20 y 25 cupos
+  horario: string;
+  aulaEspacio: string;
+  descripcion: string;
+  nivelEducativo: EducationalLevel;
+  gradosPermitidos: string[]; // ej. ['1er Año', '2do Año', '3er Año', '4to Año', '5to Año']
+  activo: boolean;
+}
+
+export interface CRPEstudianteInscrito {
+  id: string;
+  tallerId: string;
+  studentId: string;
+  studentCedula: string;
+  studentName: string;
+  grado: string;
+  seccion: string;
+  fechaInscripcion: string;
+  asignacionMetodo: 'MANUAL' | 'AUTOMATICA';
+  // Dos momentos pedagógicos en el año escolar
+  calificacionMomento1?: CRPLiteralScore;
+  calificacionMomento2?: CRPLiteralScore;
+  calificacionPrevalente?: CRPLiteralScore;
+  observaciones?: string;
 }
 

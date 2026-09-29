@@ -99,6 +99,7 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
   // Profile Form State synced with currentUser
   const [fullName, setFullName] = useState(currentUser?.fullName || '');
   const [email, setEmail] = useState(currentUser?.email || '');
+  const [cedula, setCedula] = useState(currentUser?.cedula || currentUser?.username || '');
   const [phone, setPhone] = useState(currentUser?.phone || '');
   const [gender, setGender] = useState<'MASCULINO' | 'FEMENINO'>(
     currentUser?.gender || (currentUser ? (getDefaultAvatarForUser(currentUser).includes('female') ? 'FEMENINO' : 'MASCULINO') : 'MASCULINO')
@@ -163,6 +164,7 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
     if (currentUser) {
       setFullName(currentUser.fullName || '');
       setEmail(currentUser.email || '');
+      setCedula(currentUser.cedula || currentUser.username || '');
       setPhone(currentUser.phone || '');
       const userGender = currentUser.gender || (getDefaultAvatarForUser(currentUser).includes('female') ? 'FEMENINO' : 'MASCULINO');
       setGender(userGender);
@@ -264,6 +266,7 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
       await updateUser(currentUser.id, {
         fullName: fullName.trim() || currentUser.fullName,
         email: email.trim() || currentUser.email,
+        cedula: cedula.trim() || currentUser.cedula || currentUser.username,
         phone: phone.trim(),
         gender: gender,
         bio: profileComment.trim(),
@@ -875,10 +878,10 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
 
             {/* SECCIÓN 2: FORMULARIO DE DATOS PERSONALES Y PREFERENCIAS */}
             <form onSubmit={handleProfileSubmit} className="space-y-5">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Nombre Completo:
+                    Nombre Completo (Corregir transcripción):
                   </label>
                   <input
                     type="text"
@@ -887,6 +890,26 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
                     onChange={(e) => setFullName(e.target.value)}
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2C2E53]"
                   />
+                  <span className="text-[10px] text-slate-400 mt-1 block">
+                    Nombres y apellidos institucionales.
+                  </span>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Cédula de Identidad (Editable):
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="V-12345678"
+                    value={cedula}
+                    onChange={(e) => setCedula(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[#2C2E53]"
+                  />
+                  <span className="text-[10px] text-slate-400 mt-1 block">
+                    Permite subsanar errores tipográficos de documento.
+                  </span>
                 </div>
 
                 <div>
@@ -900,13 +923,16 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2C2E53]"
                   />
+                  <span className="text-[10px] text-slate-400 mt-1 block">
+                    Para recuperación de clave y notificaciones.
+                  </span>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Nombre de Usuario (Inmutable):
+                    Nombre de Usuario (Login):
                   </label>
                   <input
                     type="text"
@@ -915,7 +941,7 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-100 text-slate-500 text-xs font-mono font-semibold cursor-not-allowed"
                   />
                   <span className="text-[10px] text-slate-400 mt-1 block">
-                    Identificador oficial de auditoría.
+                    Identificador de cuenta en el sistema.
                   </span>
                 </div>
 

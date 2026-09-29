@@ -25,7 +25,9 @@ import {
   InstitutionalSchoolData,
   SystemCatalogs,
   AuditLogEntry,
-  ScheduleTypeConfig
+  ScheduleTypeConfig,
+  CRPTaller,
+  CRPEstudianteInscrito
 } from '../types';
 import {
   SVG_MALE_CYAN,
@@ -1190,5 +1192,85 @@ export const INITIAL_SCHEDULE_TYPES: ScheduleTypeConfig[] = [
     activo: true
   }
 ];
+
+export const INITIAL_CRP_TALLERES: CRPTaller[] = [
+  {
+    id: 'crp-robotica-maker',
+    code: 'CRP-01',
+    nombre: 'Robótica Aplicada & Cultura Maker',
+    area: 'Ciencia y Tecnología',
+    docenteResponsable: 'Prof. Carlos Mendoza',
+    docenteId: 'usr-carlos',
+    maxCupos: 22,
+    horario: 'Jueves 10:15 - 11:45',
+    aulaEspacio: 'Laboratorio STEAM / Maker Space',
+    descripcion: 'Diseño, prototipado de circuitos electrónicos, programación con microcontroladores e impresión 3D.',
+    nivelEducativo: 'MEDIA_GENERAL',
+    gradosPermitidos: ['1er Año', '2do Año', '3er Año', '4to Año', '5to Año'],
+    activo: true
+  },
+  {
+    id: 'crp-artes-escenicas',
+    code: 'CRP-02',
+    nombre: 'Teatro, Expresión Corporal y Oratoria',
+    area: 'Artes Escénicas',
+    docenteResponsable: 'Lic. Mariana Gómez',
+    docenteId: 'usr-mariana',
+    maxCupos: 25,
+    horario: 'Viernes 08:30 - 10:00',
+    aulaEspacio: 'Auditorio Institucional Bellas Artes',
+    descripcion: 'Dramaturgia, improvisación, técnicas de proyección vocal, manejo escénico y montaje de piezas teatrales.',
+    nivelEducativo: 'MEDIA_GENERAL',
+    gradosPermitidos: ['1er Año', '2do Año', '3er Año', '4to Año', '5to Año'],
+    activo: true
+  },
+  {
+    id: 'crp-ensamble-musical',
+    code: 'CRP-03',
+    nombre: 'Ensamble de Música Experimental y Tradicional',
+    area: 'Música y Folclore',
+    docenteResponsable: 'Prof. Pedro Ramírez',
+    docenteId: 'usr-pedro',
+    maxCupos: 20,
+    horario: 'Miércoles 11:00 - 12:30',
+    aulaEspacio: 'Sala de Música & Acústica',
+    descripcion: 'Ejecución de cuatro venezolano, percusión afrocaribeña, teclado, guitarra y arreglos polifónicos colectivos.',
+    nivelEducativo: 'MEDIA_GENERAL',
+    gradosPermitidos: ['1er Año', '2do Año', '3er Año', '4to Año', '5to Año'],
+    activo: true
+  },
+  {
+    id: 'crp-produccion-audiovisual',
+    code: 'CRP-04',
+    nombre: 'Creación de Medios Digitales y Producción Audiovisual',
+    area: 'Comunicación Digital',
+    docenteResponsable: 'Lic. Mayuli Silva',
+    docenteId: 'usr-mayuli',
+    maxCupos: 24,
+    horario: 'Martes 09:15 - 10:45',
+    aulaEspacio: 'Estudio de Medios & Edición Digital',
+    descripcion: 'Producción de podcasts escolares, fotografía narrativa, edición digital de video y periodismo estudiantil.',
+    nivelEducativo: 'MEDIA_GENERAL',
+    gradosPermitidos: ['1er Año', '2do Año', '3er Año', '4to Año', '5to Año'],
+    activo: true
+  },
+  {
+    id: 'crp-huerto-agroecologia',
+    code: 'CRP-05',
+    nombre: 'Agroecología Escolar y Botánica Sustentable',
+    area: 'Sustentabilidad y Producción',
+    docenteResponsable: 'Ing. Elena Rivas',
+    docenteId: 'usr-elena',
+    maxCupos: 25,
+    horario: 'Lunes 10:15 - 11:45',
+    aulaEspacio: 'Huerto Hidropónico y Vivero Bellas Artes',
+    descripcion: 'Siembra agroecológica, compostaje orgánico, sistemas de riego tecnificado y preservación ambiental.',
+    nivelEducativo: 'MEDIA_GENERAL',
+    gradosPermitidos: ['1er Año', '2do Año', '3er Año', '4to Año', '5to Año'],
+    activo: true
+  }
+];
+
+export const INITIAL_CRP_INSCRITOS: CRPEstudianteInscrito[] = [];
 
 

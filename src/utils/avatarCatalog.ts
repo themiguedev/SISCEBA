@@ -349,6 +349,7 @@ export function encodeUserAvatarWithMetadata(data: {
   avatarUrl?: string;
   gender?: 'MASCULINO' | 'FEMENINO';
   phone?: string;
+  cedula?: string;
   bio?: string;
   receiveEmails?: boolean;
   receiveMessages?: boolean;
@@ -368,6 +369,7 @@ export function encodeUserAvatarWithMetadata(data: {
   const metaObj = {
     g: data.gender || null,
     p: data.phone || null,
+    c: data.cedula || null,
     b: data.bio || null,
     re: data.receiveEmails ?? true,
     rm: data.receiveMessages ?? true,
@@ -382,12 +384,13 @@ export function encodeUserAvatarWithMetadata(data: {
 
 /**
  * Desempaqueta el contenido de `avatar_url` recuperando el avatar original,
- * el género (hombre/mujer), la biografía, el número de teléfono y rol sincronizados en Supabase.
+ * el género (hombre/mujer), la biografía, cédula, el número de teléfono y rol sincronizados en Supabase.
  */
 export function decodeUserAvatarMetadata(rawAvatarUrl?: string | null): {
   avatarUrl: string;
   gender?: 'MASCULINO' | 'FEMENINO';
   phone?: string;
+  cedula?: string;
   bio?: string;
   receiveEmails?: boolean;
   receiveMessages?: boolean;
@@ -414,6 +417,7 @@ export function decodeUserAvatarMetadata(rawAvatarUrl?: string | null): {
         avatarUrl,
         gender: meta.g || undefined,
         phone: meta.p || undefined,
+        cedula: meta.c || undefined,
         bio: meta.b || undefined,
         receiveEmails: meta.re ?? true,
         receiveMessages: meta.rm ?? true,
