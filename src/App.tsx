@@ -148,7 +148,7 @@ const SiscebaMainApp: React.FC = () => {
     }
     if (sub === 'DASHBOARD' || sub === 'PERFIL' || sub === 'HORARIO' || sub === 'SUGERENCIAS') {
       setEscritorioSubTab(sub as 'DASHBOARD' | 'PERFIL' | 'HORARIO' | 'SUGERENCIAS');
-    } else if (['INSCRIPCIONES', 'PASES', 'INASISTENCIAS', 'CONDUCTAS', 'DOCUMENTOS', 'BLOQUEO', 'TITULOS', 'MATRICULA'].includes(sub)) {
+    } else if (['INSCRIPCIONES', 'PASES', 'INASISTENCIAS', 'CONDUCTAS', 'DOCUMENTOS', 'BLOQUEO', 'TITULOS', 'MATRICULA', 'TALLERES_CRP'].includes(sub)) {
       setGestionSubTab(sub);
     } else if (['RENDIMIENTO', 'BOLETIN', 'ASISTENCIA', 'ESTADISTICAS', 'NOMINAS'].includes(sub)) {
       setConsultasSubTab(sub as ConsultasSubTab);
