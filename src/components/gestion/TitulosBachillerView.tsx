@@ -1238,156 +1238,206 @@ export const TitulosBachillerView: React.FC = () => {
                 </button>
               </div>
 
-              {/* Digital Pergamino Sheet */}
-              <div className="overflow-x-auto pb-4 bg-slate-300 dark:bg-slate-950 p-6 rounded-2xl border border-slate-400 dark:border-slate-800 flex justify-center">
+              {/* Digital Pergamino Sheet - Reconstrucción nativa vectorizada y fiel sin foto de fondo */}
+              <div className="overflow-x-auto pb-4 bg-slate-400/30 dark:bg-slate-950 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 flex justify-center">
                 <div
-                  className="relative bg-[#fcfbfa] text-slate-900 shadow-2xl overflow-hidden border border-slate-300"
+                  className="relative bg-white text-slate-900 shadow-2xl overflow-hidden border border-slate-300 select-none"
                   style={{
                     width: '279.4mm',
                     height: '215.9mm',
                     minWidth: '279.4mm',
                     minHeight: '215.9mm',
                     boxSizing: 'border-box',
-                    padding: '12mm 18mm 10mm 18mm',
+                    padding: '8mm 12mm 6mm 12mm',
                     fontFamily: 'Arial, Helvetica, sans-serif'
                   }}
                 >
-                  {/* Background Security Guilloché & Watermark */}
+                  {/* Orla de Seguridad Guilloché Esquina Inferior Izquierda */}
                   <img
-                    src={`${import.meta.env.BASE_URL}plantilla-titulo-mppe.jpg`}
-                    alt="Pergamino de Seguridad"
-                    className="absolute inset-0 w-full h-full object-fill pointer-events-none opacity-30 mix-blend-multiply"
+                    src={`${import.meta.env.BASE_URL}titulo-guilloche-esquina.png`}
+                    alt="Guilloché de Seguridad"
+                    className="absolute bottom-0 left-0 w-[54%] h-auto max-h-[78%] pointer-events-none object-contain object-bottom opacity-85 z-0"
                   />
 
-                  {/* Header Row: Simón Rodríguez Portrait, Coat of Arms and Serial */}
+                  {/* Header: Simón Rodríguez Portrait, Escudo Nacional y Membrete */}
                   <div className="relative z-10 flex items-start justify-between">
-                    {/* Simón Rodríguez Portrait Box (Left) */}
-                    <div className="w-24 text-center">
-                      <div className="w-16 h-20 mx-auto rounded overflow-hidden border border-slate-300 shadow-xs bg-white/60 p-0.5">
+                    {/* Simón Rodríguez Portrait Box (Esquina Superior Izquierda) */}
+                    <div className="w-28 text-left pt-1 pl-1">
+                      <div className="w-[84px] h-[106px] rounded overflow-hidden shadow-xs">
                         <img
-                          src={`${import.meta.env.BASE_URL}logo-cba.png`}
-                          alt="Insignia Institucional"
-                          className="w-full h-full object-contain filter grayscale contrast-125"
+                          src={`${import.meta.env.BASE_URL}titulo-simon-rodriguez.png`}
+                          alt="Simón Rodríguez"
+                          className="w-full h-full object-cover"
                         />
                       </div>
-                      <span className="text-[7pt] tracking-widest text-slate-600 font-bold uppercase block mt-1">
+                      <span className="text-[7.5pt] font-black text-slate-800 tracking-wider block mt-1 pl-1">
                         Simón Rodríguez
                       </span>
                     </div>
 
-                    {/* Central National Header with Coat of Arms */}
-                    <div className="text-center flex-1 px-4 pt-1">
-                      <div className="h-14 flex items-center justify-center mb-1">
+                    {/* Escudo de Armas y Membrete Oficial Central */}
+                    <div className="text-center flex-1 px-2 pt-1">
+                      <div className="h-16 flex items-center justify-center mb-1">
                         <img
-                          src={`${import.meta.env.BASE_URL}logo-cba.png`}
-                          alt="Escudo Nacional"
-                          className="h-12 w-auto object-contain"
+                          src={`${import.meta.env.BASE_URL}titulo-escudo-venezuela.png`}
+                          alt="Escudo de Armas de Venezuela"
+                          className="h-14 w-auto object-contain"
                         />
                       </div>
-                      <h1 className="text-[13pt] font-black tracking-wide text-slate-900 leading-tight uppercase font-serif">
+                      <h1 className="text-[14pt] font-black tracking-wide text-slate-900 leading-tight uppercase font-serif">
                         República Bolivariana de Venezuela
                       </h1>
-                      <h2 className="text-[9.5pt] font-bold tracking-wider text-slate-700 uppercase mt-0.5">
+                      <h2 className="text-[9.5pt] font-black tracking-wider text-slate-800 uppercase mt-0.5">
                         Ministerio del Poder Popular para la Educación
                       </h2>
                     </div>
 
-                    {/* Serial Number (Right) */}
-                    <div className="w-28 text-right pt-2">
-                      <span className="font-mono text-[12pt] font-black tracking-widest text-slate-900 block">
+                    {/* Serial de Seguridad (Esquina Superior Derecha) */}
+                    <div className="w-36 text-right pt-2 pr-2">
+                      <span className="font-mono text-[13pt] font-black tracking-[0.25em] text-slate-900 block">
                         {currentTitleData.serialNumber}
                       </span>
                     </div>
                   </div>
 
-                  {/* Legal Data Body */}
-                  <div className="relative z-10 mt-6 pl-10 pr-6 space-y-1.5 text-[9.5pt] text-slate-800 leading-snug">
-                    <div>
-                      <span>Zona Educativa / Plantel: </span>
-                      <strong className="text-slate-950 font-black">{currentTitleData.plantel}</strong>
+                  {/* Cuerpo del Título con Tipografía Oficial */}
+                  <div className="relative z-10 mt-3 pl-28 pr-6 space-y-1 text-[9.8pt] text-slate-900 leading-snug">
+                    <div className="flex">
+                      <span className="w-48 text-slate-800">Zona Educativa / Plantel:</span>
+                      <strong className="font-black text-slate-950 uppercase">{currentTitleData.plantel}</strong>
                     </div>
-                    <div>
-                      <span>Código: </span>
-                      <strong className="text-slate-950 font-black">{currentTitleData.codigoPlantel}</strong>
+                    <div className="flex">
+                      <span className="w-48 text-slate-800">Código:</span>
+                      <strong className="font-black text-slate-950">{currentTitleData.codigoPlantel}</strong>
                     </div>
-                    <div>
-                      <span>Título de: </span>
-                      <strong className="text-slate-950 font-black">{currentTitleData.tituloMencion}</strong>
+                    <div className="flex">
+                      <span className="w-48 text-slate-800">Título de:</span>
+                      <strong className="font-black text-slate-950 uppercase">{currentTitleData.tituloMencion}</strong>
                     </div>
-                    <div>
-                      <span>Plan de estudio, Código Nro.: </span>
-                      <strong className="text-slate-950 font-black">{currentTitleData.planEstudio}, {currentTitleData.planCodigo}</strong>
+                    <div className="flex">
+                      <span className="w-48 text-slate-800">Plan de estudio, Código Nro.:</span>
+                      <strong className="font-black text-slate-950 uppercase">{currentTitleData.planEstudio}, {currentTitleData.planCodigo}</strong>
                     </div>
-                    <div className="pt-0.5">
-                      <span>Que se otorga a: </span>
-                      <strong className="text-slate-950 text-[10.5pt] font-black tracking-wide">{currentTitleData.studentName}</strong>
+                    <div className="flex pt-0.5">
+                      <span className="w-48 text-slate-800">Que se otorga a:</span>
+                      <strong className="font-black text-[10.8pt] text-slate-950 uppercase tracking-wide">{currentTitleData.studentName}</strong>
                     </div>
-                    <div>
-                      <span>Cédula de Identidad Nro.: </span>
-                      <strong className="text-slate-950 font-black">{currentTitleData.cedula}</strong>
+                    <div className="flex">
+                      <span className="w-48 text-slate-800">Cédula de Identidad Nro.:</span>
+                      <strong className="font-black text-slate-950">{currentTitleData.cedula}</strong>
                     </div>
-                    <div>
-                      <span>Nacido (a) en: </span>
-                      <strong className="text-slate-950 font-black">{currentTitleData.lugarNacimiento}</strong>
+                    <div className="flex">
+                      <span className="w-48 text-slate-800">Nacido (a) en:</span>
+                      <strong className="font-black text-slate-950 uppercase">{currentTitleData.lugarNacimiento}</strong>
                     </div>
-                    <div>
-                      <span>En Fecha: </span>
-                      <strong className="text-slate-950 font-black">{currentTitleData.fechaNacimiento}</strong>
+                    <div className="flex">
+                      <span className="w-48 text-slate-800">En Fecha:</span>
+                      <strong className="font-black text-slate-950 uppercase">{currentTitleData.fechaNacimiento}</strong>
                     </div>
-                    <div className="text-slate-600 font-semibold text-[9pt] pt-0.5">
+                    <div className="text-slate-800 text-[9.5pt] pt-0.5">
                       Previo el cumplimiento de los requisitos exigidos por la ley
                     </div>
-                    <div>
-                      <span>Lugar y Fecha de expedición: </span>
-                      <strong className="text-slate-950 font-black">{currentTitleData.lugarExpedicion}, {currentTitleData.fechaExpedicion}</strong>
+                    <div className="flex">
+                      <span className="w-48 text-slate-800">Lugar y Fecha de expedición:</span>
+                      <strong className="font-black text-slate-950 uppercase">{currentTitleData.lugarExpedicion}, {currentTitleData.fechaExpedicion}</strong>
                     </div>
-                    <div>
-                      <span>Año de Egreso: </span>
-                      <strong className="text-slate-950 font-black">{currentTitleData.graduationYear}</strong>
-                    </div>
-                  </div>
-
-                  {/* Signatures & Official Seals Row */}
-                  <div className="relative z-10 mt-8 grid grid-cols-3 gap-6 items-end text-center text-[7.5pt]">
-                    {/* Director */}
-                    <div className="text-left pl-6">
-                      <div className="h-9 flex items-end">
-                        <div className="w-24 border-b border-slate-600 border-dashed"></div>
-                      </div>
-                      <div className="text-slate-700">Director(a) Zona Educativa / Plantel</div>
-                      <div>Nombre: <strong className="text-slate-950">{currentTitleData.directorNombre}</strong></div>
-                      <div>C.I. <strong className="font-mono text-slate-950">{currentTitleData.directorCedula}</strong></div>
-                    </div>
-
-                    {/* Coordinador Control de Estudio */}
-                    <div className="text-left">
-                      <div className="h-9 flex items-end">
-                        <div className="w-24 border-b border-slate-600 border-dashed"></div>
-                      </div>
-                      <div className="text-slate-700">Coordinador de Control de Estudio<br />Representante del Consejo General de Docentes</div>
-                      <div>Nombre: <strong className="text-slate-950">{currentTitleData.coordinadorControlEstudio}</strong></div>
-                      <div>C.I. <strong className="font-mono text-slate-950">{currentTitleData.coordinadorCedula}</strong></div>
-                    </div>
-
-                    {/* Funcionario MPPE */}
-                    <div className="text-left pr-4">
-                      <div className="h-9 flex items-end">
-                        <div className="w-24 border-b border-slate-600 border-dashed"></div>
-                      </div>
-                      <div className="text-slate-700">Funcionario Designado por el<br />Ministerio del Poder Popular para la Educación</div>
-                      <div>Nombre: <strong className="text-slate-950">{currentTitleData.funcionarioMppeNombre}</strong></div>
-                      <div>C.I. <strong className="font-mono text-slate-950">{currentTitleData.funcionarioMppeCedula}</strong></div>
+                    <div className="flex">
+                      <span className="w-48 text-slate-800">Año de Egreso:</span>
+                      <strong className="font-black text-slate-950">{currentTitleData.graduationYear}</strong>
                     </div>
                   </div>
 
-                  {/* Institutional Stamps & Gov Footer */}
-                  <div className="relative z-10 mt-6 pt-3 flex items-center justify-between border-t border-slate-300 text-[6.5pt] text-slate-500 font-mono">
-                    <div>
-                      Casa de la Moneda - Venezuela • CERTIFICACIÓN SICE-CBA: TOMO {currentTitleData.tomo} • FOLIO {currentTitleData.folio} • {currentTitleData.registeredCode}
+                  {/* Firmas y Sellos Circulares Oficiales */}
+                  <div className="relative z-10 mt-4 grid grid-cols-12 gap-2 items-end">
+                    
+                    {/* Columna 1: Firma y Datos del Director (cols 1 a 4) */}
+                    <div className="col-span-4 pl-26">
+                      <div className="h-10 relative">
+                        <img
+                          src={`${import.meta.env.BASE_URL}titulo-firma-director.png`}
+                          alt="Firma Director"
+                          className="h-9 w-auto object-contain mix-blend-multiply"
+                        />
+                      </div>
+                      <div className="text-[7.2pt] leading-tight text-slate-800">
+                        Director(a) Zona Educativa / Plantel<br />
+                        Nombre: <strong className="font-black text-slate-950">{currentTitleData.directorNombre}</strong><br />
+                        C.I. <strong className="font-mono text-slate-950">{currentTitleData.directorCedula}</strong>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 text-right">
-                      <span className="font-bold text-slate-700">Gobierno Bolivariano de Venezuela</span>
-                      <span>| Ministerio del Poder Popular para la Educación</span>
+
+                    {/* Columna 2: Firma Coordinador de Control de Estudios (cols 5 a 8) */}
+                    <div className="col-span-4 pl-4">
+                      <div className="h-10 relative">
+                        <img
+                          src={`${import.meta.env.BASE_URL}titulo-firma-coordinador.png`}
+                          alt="Firma Coordinador"
+                          className="h-9 w-auto object-contain mix-blend-multiply"
+                        />
+                      </div>
+                      <div className="text-[7.2pt] leading-tight text-slate-800">
+                        Coordinador de Control de Estudio<br />
+                        Representante del Consejo General de Docentes<br />
+                        Nombre: <strong className="font-black text-slate-950">{currentTitleData.coordinadorControlEstudio}</strong><br />
+                        C.I. <strong className="font-mono text-slate-950">{currentTitleData.coordinadorCedula}</strong>
+                      </div>
+                    </div>
+
+                    {/* Columna 3: Firma Funcionario MPPE (cols 9 a 12) */}
+                    <div className="col-span-4 pl-4">
+                      <div className="h-10 relative">
+                        <img
+                          src={`${import.meta.env.BASE_URL}titulo-firma-mppe.png`}
+                          alt="Firma MPPE"
+                          className="h-9 w-auto object-contain mix-blend-multiply"
+                        />
+                      </div>
+                      <div className="text-[7.2pt] leading-tight text-slate-800">
+                        Funcionario Designado por el<br />
+                        Ministerio del Poder Popular para la Educación<br />
+                        Nombre: <strong className="font-black text-slate-950">{currentTitleData.funcionarioMppeNombre}</strong><br />
+                        C.I. <strong className="font-mono text-slate-950">{currentTitleData.funcionarioMppeCedula}</strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Fila de Sellos Circulares (Sello Plantel y Sello Zona Educativa) */}
+                  <div className="relative z-10 mt-1 flex items-center justify-between px-20 pointer-events-none">
+                    {/* Sello Plantel */}
+                    <div className="w-28 h-28 -mt-2">
+                      <img
+                        src={`${import.meta.env.BASE_URL}titulo-sello-plantel.png`}
+                        alt="Sello Oficial Plantel CBA"
+                        className="w-full h-full object-contain mix-blend-multiply opacity-90"
+                      />
+                    </div>
+
+                    {/* Leyenda central Sello de la Zona Educativa */}
+                    <div className="text-center text-[7pt] text-slate-600 font-bold uppercase">
+                      Sello de la<br />Zona Educativa
+                    </div>
+
+                    {/* Sello Zona Educativa Zulia CDCE */}
+                    <div className="w-28 h-28 -mt-2">
+                      <img
+                        src={`${import.meta.env.BASE_URL}titulo-sello-zona.png`}
+                        alt="Sello Zona Educativa Zulia"
+                        className="w-full h-full object-contain mix-blend-multiply opacity-90"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Pie Oficial con Casa de la Moneda y Logo Gobierno Bolivariano */}
+                  <div className="relative z-10 flex items-center justify-between pt-1 border-t border-slate-300 text-[6.8pt] text-slate-600">
+                    <div className="font-mono">
+                      Casa de la Moneda - Venezuela
+                    </div>
+                    <div>
+                      <img
+                        src={`${import.meta.env.BASE_URL}titulo-logo-gobierno.png`}
+                        alt="Gobierno Bolivariano de Venezuela - MPPE"
+                        className="h-6 w-auto object-contain"
+                      />
                     </div>
                   </div>
                 </div>
