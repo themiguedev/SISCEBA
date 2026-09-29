@@ -56,22 +56,50 @@ export const supabaseFetchStudents = async (): Promise<Student[] | null> => {
       return null;
     }
 
-    return data.map(row => ({
-      id: row.id,
-      cedula: row.cedula,
-      fullName: row.full_name,
-      gender: row.gender,
-      birthDate: row.birth_date,
-      level: row.level,
-      grade: row.grade,
-      section: row.section,
-      representativeName: row.representative_name,
-      representativeEmail: row.representative_email || '',
-      representativePhone: row.representative_phone || '',
-      status: row.status,
-      pendingSubjects: row.pending_subjects || [],
-      avatarUrl: row.avatar_url
-    }));
+    return data.map(row => {
+      let meta: Record<string, any> = {};
+      let cleanAvatarUrl = row.avatar_url;
+      if (row.avatar_url && row.avatar_url.startsWith('stu-meta:')) {
+        try {
+          meta = JSON.parse(row.avatar_url.slice('stu-meta:'.length));
+          cleanAvatarUrl = meta.avatarUrl || undefined;
+        } catch {
+          cleanAvatarUrl = row.avatar_url;
+        }
+      }
+
+      return {
+        id: row.id,
+        cedula: row.cedula,
+        fullName: row.full_name,
+        primerNombre: meta.primerNombre,
+        segundoNombre: meta.segundoNombre,
+        primerApellido: meta.primerApellido,
+        segundoApellido: meta.segundoApellido,
+        gender: row.gender,
+        birthDate: row.birth_date,
+        nacionalidad: meta.nacionalidad,
+        pais: meta.pais,
+        estado: meta.estado,
+        ciudad: meta.ciudad,
+        estadoCivil: meta.estadoCivil,
+        religion: meta.religion,
+        direccion: meta.direccion,
+        telefono: meta.telefono,
+        level: row.level,
+        grade: row.grade,
+        section: row.section,
+        representativeName: row.representative_name,
+        representativeEmail: row.representative_email || '',
+        representativePhone: row.representative_phone || '',
+        status: row.status,
+        pendingSubjects: row.pending_subjects || [],
+        avatarUrl: cleanAvatarUrl,
+        motherInfo: meta.motherInfo,
+        fatherInfo: meta.fatherInfo,
+        alergiasSalud: meta.alergiasSalud
+      };
+    });
   } catch (e) {
     console.error('Error al consultar estudiantes en Supabase:', e);
     return null;
@@ -81,6 +109,25 @@ export const supabaseFetchStudents = async (): Promise<Student[] | null> => {
 export const supabaseSaveStudent = async (student: Student): Promise<boolean> => {
   if (!isSupabaseConfigured()) return false;
   try {
+    const metaPayload = {
+      avatarUrl: student.avatarUrl,
+      primerNombre: student.primerNombre,
+      segundoNombre: student.segundoNombre,
+      primerApellido: student.primerApellido,
+      segundoApellido: student.segundoApellido,
+      nacionalidad: student.nacionalidad,
+      pais: student.pais,
+      estado: student.estado,
+      ciudad: student.ciudad,
+      estadoCivil: student.estadoCivil,
+      religion: student.religion,
+      direccion: student.direccion,
+      telefono: student.telefono,
+      motherInfo: student.motherInfo,
+      fatherInfo: student.fatherInfo,
+      alergiasSalud: student.alergiasSalud
+    };
+
     const row = {
       id: student.id,
       cedula: student.cedula,
@@ -95,7 +142,7 @@ export const supabaseSaveStudent = async (student: Student): Promise<boolean> =>
       representative_phone: student.representativePhone,
       status: student.status,
       pending_subjects: student.pendingSubjects || [],
-      avatar_url: student.avatarUrl
+      avatar_url: `stu-meta:${JSON.stringify(metaPayload)}`
     };
     const { error } = await supabase.from('students').upsert(row);
     if (error) {

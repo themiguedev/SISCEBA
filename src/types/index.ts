@@ -153,12 +153,46 @@ export interface PlanLapso {
 
 export type StudentStatus = 'REGULAR' | 'EN_REVISION' | 'MATERIA_PENDIENTE';
 
+export interface ParentLegalInfo {
+  parentesco: 'Madre' | 'Padre' | 'Tutor Legal' | 'Abuelo(a)';
+  cedula: string;
+  primerNombre: string;
+  segundoNombre?: string;
+  primerApellido: string;
+  segundoApellido?: string;
+  nacionalidad: 'V' | 'E';
+  pais: string;
+  estado: string;
+  ciudad: string;
+  sexo: 'MASCULINO' | 'FEMENINO';
+  fechaNacimiento?: string;
+  estadoCivil: 'Soltero(a)' | 'Casado(a)' | 'Divorciado(a)' | 'Viudo(a)' | 'Concubinato(a)';
+  religion: string;
+  telefono: string;
+  correo: string;
+  profesion?: string;
+  direccion: string;
+  isPrimaryRepresentative?: boolean;
+}
+
 export interface Student {
   id: string;
   cedula: string;
   fullName: string;
+  primerNombre?: string;
+  segundoNombre?: string;
+  primerApellido?: string;
+  segundoApellido?: string;
   gender: 'M' | 'F';
   birthDate: string;
+  nacionalidad?: 'V' | 'E';
+  pais?: string;
+  estado?: string;
+  ciudad?: string;
+  estadoCivil?: string;
+  religion?: string;
+  direccion?: string;
+  telefono?: string;
   level: EducationalLevel;
   grade: string;
   section: string;
@@ -168,6 +202,9 @@ export interface Student {
   status: StudentStatus;
   pendingSubjects?: string[];
   avatarUrl?: string;
+  motherInfo?: ParentLegalInfo;
+  fatherInfo?: ParentLegalInfo;
+  alergiasSalud?: string;
 }
 
 export type QualitativeScore = 'L' | 'P' | 'EP' | 'I'; // Primaria: Logrado (L), Proceso (P / EP), Inicio (I)
