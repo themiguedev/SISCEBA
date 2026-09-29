@@ -122,6 +122,7 @@ import {
   supabaseSaveDocumentRequest,
   supabaseSaveAdminBlock,
   supabaseSaveTitleRecord,
+  supabaseDeleteTitleRecord,
   supabaseSaveCommunityNotice,
   supabaseSaveNotification,
   supabaseMarkNotificationAsRead,
@@ -247,6 +248,7 @@ interface AppContextType {
 
   titles: TitleRecord[];
   saveTitleRecord: (record: TitleRecord) => void;
+  deleteTitleRecord: (titleId: string) => void;
 
   schoolYearConfig: SchoolYearConfig;
   toggleLapsoGrading: (lapso: 1 | 2 | 3) => void;
@@ -1849,6 +1851,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     syncWithCloud(() => supabaseSaveTitleRecord(record), 'guardar título bachiller');
   };
 
+  const deleteTitleRecord = (titleId: string) => {
+    setTitles(prev => prev.filter(t => t.id !== titleId));
+    syncWithCloud(() => supabaseDeleteTitleRecord(titleId), 'eliminar título bachiller');
+  };
+
   const addCommunityNotice = (notice: Omit<CommunityNotice, 'id'>): CommunityNotice => {
     const newNotice: CommunityNotice = {
       ...notice,
@@ -2301,6 +2308,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         toggleAdminBlock,
         titles,
         saveTitleRecord,
+        deleteTitleRecord,
         schoolYearConfig,
         toggleLapsoGrading,
         isLapsoOpenForGrading,

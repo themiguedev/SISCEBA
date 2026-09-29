@@ -400,6 +400,35 @@ export interface AdministrativeBlockEntry {
   debtAmount?: string;
 }
 
+export interface TitleBlockLayout {
+  id: string;
+  label: string;
+  enabled: boolean;
+  xMm: number; // Distancia desde el borde izquierdo en mm
+  yMm: number; // Distancia desde el borde superior en mm
+  fontSizePt: number; // Tamaño de fuente en pt
+  fontWeight: 'normal' | 'bold' | '900';
+  letterSpacingMm: number; // Espaciado entre letras
+  lineHeight: number;
+  textAlign: 'left' | 'center' | 'right';
+  fontFamily: 'serif' | 'sans-serif' | 'mono';
+  color: string;
+  sampleTemplate: string; // Plantilla con tokens
+}
+
+export interface TitlePrintSettings {
+  pageWidthMm: number; // Carta: 215.9 o Legal/Oficio: 215.9 x 355.6 o Personalizado
+  pageHeightMm: number;
+  orientation: 'landscape' | 'portrait';
+  marginTopMm: number;
+  marginLeftMm: number;
+  marginRightMm: number;
+  marginBottomMm: number;
+  globalFontScale: number; // % escala global
+  showGuidelines: boolean; // Mostrar guías de calibración milimétrica
+  showBackgroundTemplate: boolean; // Mostrar u ocultar fondo de papel de seguridad escaneado para calibrar
+}
+
 export interface TitleRecord {
   id: string;
   studentId: string;
@@ -407,11 +436,29 @@ export interface TitleRecord {
   cedula: string;
   schoolYear: string;
   graduationYear: string;
-  serialNumber: string;
+  serialNumber: string; // e.g. AB 0307994
   tomo: string;
   folio: string;
   registeredCode: string;
   calibrated: boolean;
+  // Campos del formato oficial venezolano (Gaceta Oficial / MPPE)
+  plantel?: string;
+  codigoPlantel?: string;
+  tituloMencion?: string;
+  planEstudio?: string;
+  planCodigo?: string;
+  lugarNacimiento?: string;
+  fechaNacimiento?: string;
+  lugarExpedicion?: string;
+  fechaExpedicion?: string;
+  directorNombre?: string;
+  directorCedula?: string;
+  coordinadorControlEstudio?: string;
+  coordinadorCedula?: string;
+  funcionarioMppeNombre?: string;
+  funcionarioMppeCedula?: string;
+  customBlocks?: Record<string, Partial<TitleBlockLayout>>;
+  printSettings?: Partial<TitlePrintSettings>;
 }
 
 export interface SchoolYearConfig {
