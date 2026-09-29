@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
+import { normalizeCedulaUsername } from '../../utils/rbac';
 import {
   UserCheck,
   User,
@@ -14,11 +15,12 @@ import {
 } from 'lucide-react';
 
 export const InscripcionesWizardView: React.FC = () => {
-  const { students, addStudent, sendNotification } = useApp();
+  const { students, users, addStudent, addUser, sendNotification } = useApp();
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
   const [searchCedula, setSearchCedula] = useState('');
   const [isSuccessBanner, setIsSuccessBanner] = useState(false);
   const [lastEnrolledName, setLastEnrolledName] = useState('');
+  const [createdAccountsNotice, setCreatedAccountsNotice] = useState<{ repUser: string; stuUser: string } | null>(null);
 
   // Step 1: Representante State
   const [repData, setRepData] = useState({
@@ -83,9 +85,14 @@ export const InscripcionesWizardView: React.FC = () => {
     const fullName = `${studentData.primerNombre.trim()} ${studentData.segundoNombre.trim()} ${studentData.primerApellido.trim()} ${studentData.segundoApellido.trim()}`.replace(/\s+/g, ' ').trim();
     const repFullName = `${repData.primerNombre.trim()} ${repData.primerApellido.trim()}`.replace(/\s+/g, ' ').trim();
 
+    const studentCedula = studentData.cedulaEscolar.trim() || `ESC-${Date.now().toString().slice(-6)}`;
+    const studentUsername = normalizeCedulaUsername(studentCedula);
+    const repCedula = repData.cedula.trim();
+    const repUsername = normalizeCedulaUsername(repCedula);
+
     // Registrar estudiante y persistir de inmediato en Supabase
     addStudent({
-      cedula: studentData.cedulaEscolar.trim() || `ESC-${Date.now().toString().slice(-6)}`,
+      cedula: studentCedula,
       fullName: fullName || 'Estudiante CBA',
       gender: (studentData.genero as 'M' | 'F') || 'M',
       birthDate: studentData.fechaNacimiento,
@@ -98,9 +105,58 @@ export const InscripcionesWizardView: React.FC = () => {
       status: 'REGULAR'
     });
 
+    // 1. Crear / Vincular cuenta de usuario institucional para el REPRESENTANTE
+    if (repUsername) {
+      const repExists = users.some(
+        u => normalizeCedulaUsername(u.username) === repUsername || (repData.correo.trim() && u.email.toLowerCase() === repData.correo.trim().toLowerCase())
+      );
+      if (!repExists) {
+        const rawDigits = repCedula.replace(/[^0-9]/g, '');
+        const initialPass = rawDigits || 'cba2026';
+        addUser({
+          username: repUsername,
+          password: initialPass,
+          fullName: repFullName || 'Representante CBA',
+          email: repData.correo.trim() || `${repUsername}@representante.cba`,
+          role: 'REPRESENTANTE',
+          defaultLevel: level,
+          allowedLevels: [level],
+          active: true,
+          phone: repData.telefono.trim()
+        }).catch(err => console.warn('No se pudo crear automáticamente cuenta de representante:', err));
+      }
+    }
+
+    // 2. Crear cuenta de usuario institucional para el ESTUDIANTE
+    if (studentUsername) {
+      const stuExists = users.some(
+        u => normalizeCedulaUsername(u.username) === studentUsername
+      );
+      if (!stuExists) {
+        const rawDigits = studentCedula.replace(/[^0-9]/g, '');
+        const initialPass = rawDigits || 'cba2026';
+        addUser({
+          username: studentUsername,
+          password: initialPass,
+          fullName: fullName || 'Estudiante CBA',
+          email: `${studentUsername}@estudiante.cba`,
+          role: 'ESTUDIANTE',
+          defaultLevel: level,
+          allowedLevels: [level],
+          active: true,
+          gender: studentData.genero === 'F' ? 'FEMENINO' : 'MASCULINO'
+        }).catch(err => console.warn('No se pudo crear automáticamente cuenta de estudiante:', err));
+      }
+    }
+
+    setCreatedAccountsNotice({
+      repUser: repUsername || repCedula,
+      stuUser: studentUsername || studentCedula
+    });
+
     sendNotification({
       title: 'Nueva Inscripción Formalizada',
-      message: `El estudiante ${fullName} ha sido inscrito en ${academicData.grado} "${academicData.seccion}" (${level.replace('_', ' ')}). Expediente digital creado y sincronizado en base de datos.`,
+      message: `El estudiante ${fullName} ha sido inscrito en ${academicData.grado} "${academicData.seccion}" (${level.replace('_', ' ')}). Cuentas de acceso institucional creadas con cédula como nombre de usuario.`,
       category: 'INSTITUCIONAL',
       priority: 'ALTA',
       recipientRole: 'TODOS',
@@ -126,7 +182,10 @@ export const InscripcionesWizardView: React.FC = () => {
       alergiasSalud: 'Ninguna alergia reportada'
     });
 
-    setTimeout(() => setIsSuccessBanner(false), 6000);
+    setTimeout(() => {
+      setIsSuccessBanner(false);
+      setCreatedAccountsNotice(null);
+    }, 12000);
   };
 
   return (
@@ -221,16 +280,32 @@ export const InscripcionesWizardView: React.FC = () => {
       </div>
 
       {isSuccessBanner && (
-        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-bold flex items-center justify-between gap-3 animate-in fade-in shadow-sm">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-            <span>
-              ¡Inscripción formalizada exitosamente! Se ha creado el expediente de <strong>{lastEnrolledName || 'el estudiante'}</strong> y se guardó de inmediato en la base de datos de Supabase.
+        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-bold space-y-2 animate-in fade-in shadow-sm">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+              <span>
+                ¡Inscripción formalizada exitosamente! Se ha creado el expediente de <strong>{lastEnrolledName || 'el estudiante'}</strong> y se guardó de inmediato en la base de datos de Supabase.
+              </span>
+            </div>
+            <span className="hidden sm:inline-block px-2.5 py-1 rounded-md bg-emerald-200/80 text-emerald-900 text-[10px] uppercase font-black tracking-wider shrink-0">
+              Sincronizado en la Nube
             </span>
           </div>
-          <span className="hidden sm:inline-block px-2.5 py-1 rounded-md bg-emerald-200/80 text-emerald-900 text-[10px] uppercase font-black tracking-wider shrink-0">
-            Sincronizado en la Nube
-          </span>
+          {createdAccountsNotice && (
+            <div className="bg-white/80 p-2.5 rounded-lg border border-emerald-200 text-[11px] text-slate-700 flex flex-wrap items-center gap-4">
+              <span className="font-extrabold text-[#2C2E53] flex items-center gap-1.5">
+                <ShieldCheck className="w-4 h-4 text-[#D4AF37]" />
+                Accesos Institucionales Generados (Cédula como usuario):
+              </span>
+              <span className="bg-slate-100 px-2 py-0.5 rounded text-slate-800 font-mono">
+                Representante: <strong>{createdAccountsNotice.repUser}</strong>
+              </span>
+              <span className="bg-slate-100 px-2 py-0.5 rounded text-slate-800 font-mono">
+                Estudiante: <strong>{createdAccountsNotice.stuUser}</strong>
+              </span>
+            </div>
+          )}
         </div>
       )}
 

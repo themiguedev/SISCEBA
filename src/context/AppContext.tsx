@@ -48,6 +48,7 @@ import {
   verifyTOTPCode
 } from '../utils/security';
 import { getDefaultAvatarForUser, decodeUserAvatarMetadata } from '../utils/avatarCatalog';
+import { normalizeCedulaUsername } from '../utils/rbac';
 import PRIVILEGIOS_DATA from '../data/privilegiosCEO.json';
 import {
   INITIAL_AREAS,
@@ -607,17 +608,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       };
     }
 
+    const normalizedCedulaInput = normalizeCedulaUsername(userInput);
+
     let matched = users.find(
-      u => u.username.toLowerCase() === trimmedInput || u.email.toLowerCase() === trimmedInput
+      u =>
+        u.username.toLowerCase() === trimmedInput ||
+        u.email.toLowerCase() === trimmedInput ||
+        (normalizedCedulaInput && normalizeCedulaUsername(u.username) === normalizedCedulaInput)
     );
 
     // Si Supabase está configurado, validamos directamente contra la tabla app_users en tiempo real
     if (isSupabaseConfigured()) {
       try {
+        const queryFilter = normalizedCedulaInput && normalizedCedulaInput !== trimmedInput
+          ? `username.ilike.${trimmedInput},email.ilike.${trimmedInput},username.ilike.${normalizedCedulaInput}`
+          : `username.ilike.${trimmedInput},email.ilike.${trimmedInput}`;
+
         const { data, error } = await supabase
           .from('app_users')
           .select('*')
-          .or(`username.ilike.${trimmedInput},email.ilike.${trimmedInput}`)
+          .or(queryFilter)
           .limit(1);
 
         if (!error && data && data.length > 0) {

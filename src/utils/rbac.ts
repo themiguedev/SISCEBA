@@ -437,3 +437,14 @@ export const getUserAllowedLevels = (
   // 5. Fallback por defecto si no está especificado
   return ['MEDIA_GENERAL'];
 };
+
+/**
+ * Normaliza una cédula de identidad venezolana o código escolar para su uso estandarizado como username.
+ * Remueve puntos, espacios, guiones y caracteres no alfanuméricos.
+ * Retorna en minúsculas (ej: "V-18.452.991" -> "v18452991", "28.123.456" -> "28123456").
+ */
+export const normalizeCedulaUsername = (rawCedula: string): string => {
+  if (!rawCedula) return '';
+  return rawCedula.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+};
+

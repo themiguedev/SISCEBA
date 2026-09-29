@@ -178,7 +178,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
               onChange={(e) => setUserInput(e.target.value)}
               onFocus={() => setUserFocused(true)}
               onBlur={() => setUserFocused(false)}
-              placeholder="Usuario o correo institucional"
+              placeholder="Usuario, cédula o correo institucional"
               className="w-full px-3 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none bg-transparent"
               autoComplete="username email"
             />

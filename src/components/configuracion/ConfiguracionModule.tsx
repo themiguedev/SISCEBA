@@ -33,7 +33,7 @@ import {
   Trash2,
   SlidersHorizontal
 } from 'lucide-react';
-import { hasSubTabAccess, canConfigureSchool, ROLE_METADATA } from '../../utils/rbac';
+import { hasSubTabAccess, canConfigureSchool, ROLE_METADATA, normalizeCedulaUsername } from '../../utils/rbac';
 import { getDefaultAvatarForUser } from '../../utils/avatarCatalog';
 import { PasswordStrengthBar } from '../common/PasswordStrengthBar';
 import { ConfiguracionAvanzadaView } from './ConfiguracionAvanzadaView';
@@ -112,9 +112,14 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
       fullName: newFullName.trim()
     });
 
+    let cleanUsername = newUsername.trim().toLowerCase();
+    if (newRole === 'REPRESENTANTE' || newRole === 'ESTUDIANTE' || cleanUsername.startsWith('v-') || cleanUsername.startsWith('e-') || /^[0-9]+$/.test(cleanUsername)) {
+      cleanUsername = normalizeCedulaUsername(cleanUsername) || cleanUsername;
+    }
+
     await addUser({
       fullName: newFullName.trim(),
-      username: newUsername.trim().toLowerCase(),
+      username: cleanUsername,
       email: newEmail.trim().toLowerCase(),
       password: newPassword,
       role: newRole,
@@ -472,11 +477,18 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
                   </div>
 
                   <div>
-                    <label className="block font-bold text-slate-700 mb-1">Nombre de Usuario *</label>
+                    <label className="block font-bold text-slate-700 mb-1">
+                      Nombre de Usuario *
+                      {(newRole === 'REPRESENTANTE' || newRole === 'ESTUDIANTE') && (
+                        <span className="text-[10px] text-amber-700 font-normal ml-1">
+                          (Usar Cédula de Identidad)
+                        </span>
+                      )}
+                    </label>
                     <input
                       type="text"
                       required
-                      placeholder="Ej: rmendoza"
+                      placeholder={newRole === 'REPRESENTANTE' || newRole === 'ESTUDIANTE' ? "Ej: V-18452991 ó 18452991" : "Ej: rmendoza"}
                       value={newUsername}
                       onChange={(e) => setNewUsername(e.target.value)}
                       className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#2C2E53] focus:border-transparent outline-none font-medium"
@@ -524,6 +536,8 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
                       <option value="COORDINACION">COORDINACION (Control de Estudios)</option>
                       <option value="DIRECTOR">DIRECTOR (Dirección General)</option>
                       <option value="ADMINISTRADOR">ADMINISTRADOR (Administrador)</option>
+                      <option value="REPRESENTANTE">REPRESENTANTE (Padre / Tutor Legal)</option>
+                      <option value="ESTUDIANTE">ESTUDIANTE (Estudiante Regular)</option>
                     </select>
                   </div>
 
