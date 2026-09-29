@@ -26,3 +26,7 @@
 - Por cada grado y año escolar en todos los subsistemas (Educación Inicial, Primaria y Media General), **exclusivamente existen dos secciones: `A` y `B`**.
 - Ningún formulario, selector de matrícula, filtro de prosecución o módulo de asignación debe permitir o mostrar secciones adicionales (`C`, `D`, `U` u otras).
 
+## 5. Módulo de Matrícula y Prosecución
+- La subpestaña y función de **Matrícula y Prosecución** (`MATRICULA`) dentro del módulo de Gestión es de **acceso y ejecución exclusiva para el rol `ADMINISTRADOR`**. Ningún otro rol (`DIRECTOR`, `COORDINACION`, `SECRETARIA`, `DOCENTE`) tiene permisos de acceso a este submódulo.
+
+
