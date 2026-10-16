@@ -5,6 +5,7 @@ import {
   Competency,
   Indicator,
   Strategy,
+  EducationalResource,
   EvaluationRecord,
   QualitativeScore,
   LiteralScore,
@@ -30,7 +31,12 @@ import {
   AuditLogEntry,
   ScheduleTypeConfig,
   CRPTaller,
-  CRPEstudianteInscrito
+  CRPEstudianteInscrito,
+  RevisionEvaluationRecord,
+  PendingSubjectEnrollment,
+  PendingSubjectGrade,
+  SectionTransferLog,
+  ExternalAcademicRecord
 } from '../types';
 import {
   encodeUserAvatarWithMetadata,
@@ -393,6 +399,66 @@ export const supabaseDeleteStrategy = async (id: string): Promise<boolean> => {
 };
 
 // ==========================================
+// 3.1 RECURSOS EDUCATIVOS (educational_resources)
+// ==========================================
+export const supabaseFetchEducationalResources = async (): Promise<EducationalResource[] | null> => {
+  if (!isSupabaseConfigured()) return null;
+  try {
+    const { data, error } = await supabase.from('educational_resources').select('*');
+    if (error || !data) {
+      console.warn('Supabase fetch educational_resources aviso:', error?.message);
+      return null;
+    }
+
+    return data.map((row) => ({
+      id: row.id,
+      name: row.name,
+      category: row.category,
+      areaId: row.area_id,
+      level: row.level,
+      description: row.description,
+      location: row.location,
+      quantity: row.quantity !== null ? Number(row.quantity) : 1,
+      isReusable: row.is_reusable !== false
+    }));
+  } catch (e) {
+    console.error('Error en supabaseFetchEducationalResources:', e);
+    return null;
+  }
+};
+
+export const supabaseSaveEducationalResource = async (res: EducationalResource): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('educational_resources').upsert({
+      id: res.id,
+      name: res.name,
+      category: res.category,
+      area_id: res.areaId || null,
+      level: res.level,
+      description: res.description || null,
+      location: res.location || null,
+      quantity: res.quantity ?? 1,
+      is_reusable: res.isReusable ?? true
+    });
+    return !error;
+  } catch (e) {
+    console.error('Error en supabaseSaveEducationalResource:', e);
+    return false;
+  }
+};
+
+export const supabaseDeleteEducationalResource = async (id: string): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('educational_resources').delete().eq('id', id);
+    return !error;
+  } catch {
+    return false;
+  }
+};
+
+// ==========================================
 // 4. CALIFICACIONES Y EVALUACIONES (evaluation_records)
 // ==========================================
 export const supabaseFetchEvaluations = async (): Promise<EvaluationRecord[] | null> => {
@@ -418,6 +484,10 @@ export const supabaseFetchEvaluations = async (): Promise<EvaluationRecord[] | n
       })(),
       scoreLiteral: typeof row.score_literal === 'string' ? (row.score_literal.trim() as LiteralScore) : undefined,
       roboticsScore: row.robotics_score,
+      checklistScores: Array.isArray(row.checklist_scores) ? row.checklist_scores : undefined,
+      rasgosScore: row.rasgos_score !== null && row.rasgos_score !== undefined ? Number(row.rasgos_score) : undefined,
+      autoScore: row.auto_score !== null && row.auto_score !== undefined ? Number(row.auto_score) : undefined,
+      coevScore: row.coev_score !== null && row.coev_score !== undefined ? Number(row.coev_score) : undefined,
       observations: row.observations,
       recordedAt: row.recorded_at,
       teacherId: row.teacher_id || 'docente'
@@ -442,6 +512,10 @@ export const supabaseSaveEvaluation = async (rec: EvaluationRecord): Promise<boo
       score_qualitative: rec.scoreQualitative ?? null,
       score_literal: rec.scoreLiteral ?? null,
       robotics_score: rec.roboticsScore ? rec.roboticsScore : null,
+      checklist_scores: rec.checklistScores || [],
+      rasgos_score: rec.rasgosScore ?? null,
+      auto_score: rec.autoScore ?? null,
+      coev_score: rec.coevScore ?? null,
       observations: rec.observations || null,
       recorded_at: rec.recordedAt,
       teacher_id: rec.teacherId
@@ -467,6 +541,10 @@ export const supabaseBulkSaveEvaluations = async (records: EvaluationRecord[]): 
       score_qualitative: rec.scoreQualitative ?? null,
       score_literal: rec.scoreLiteral ?? null,
       robotics_score: rec.roboticsScore ? rec.roboticsScore : null,
+      checklist_scores: rec.checklistScores || [],
+      rasgos_score: rec.rasgosScore ?? null,
+      auto_score: rec.autoScore ?? null,
+      coev_score: rec.coevScore ?? null,
       observations: rec.observations || null,
       recorded_at: rec.recordedAt,
       teacher_id: rec.teacherId
@@ -819,7 +897,11 @@ export const supabaseFetchAdminBlocks = async (): Promise<AdministrativeBlockEnt
       reason: row.reason,
       blockDate: row.block_date,
       active: row.active ?? true,
-      debtAmount: row.debt_amount
+      debtAmount: row.debt_amount !== null && row.debt_amount !== undefined ? Number(row.debt_amount) : undefined,
+      concept: row.concept || 'OTRO',
+      unblockedDate: row.unblocked_date,
+      unblockedBy: row.unblocked_by,
+      notes: row.notes
     }));
   } catch (e) {
     console.error('Error en supabaseFetchAdminBlocks:', e);
@@ -840,8 +922,22 @@ export const supabaseSaveAdminBlock = async (block: AdministrativeBlockEntry): P
       reason: block.reason,
       block_date: block.blockDate,
       active: block.active,
-      debt_amount: block.debtAmount || null
+      debt_amount: block.debtAmount || null,
+      concept: block.concept || 'OTRO',
+      unblocked_date: block.unblockedDate || null,
+      unblocked_by: block.unblockedBy || null,
+      notes: block.notes || null
     });
+    return !error;
+  } catch {
+    return false;
+  }
+};
+
+export const supabaseDeleteAdminBlock = async (id: string): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('administrative_blocks').delete().eq('id', id);
     return !error;
   } catch {
     return false;
@@ -930,6 +1026,8 @@ export const supabaseFetchCommunityNotices = async (): Promise<CommunityNotice[]
       date: row.date,
       type: row.type,
       targetAudience: row.target_audience,
+      theme: row.theme || 'ESTANDAR',
+      subsystem: row.subsystem || 'TODOS',
       author: row.author,
       pinned: row.pinned ?? false
     }));
@@ -949,6 +1047,7 @@ export const supabaseSaveCommunityNotice = async (notice: CommunityNotice): Prom
       date: notice.date,
       type: notice.type,
       target_audience: notice.targetAudience,
+      theme: notice.theme || 'ESTANDAR',
       author: notice.author,
       pinned: notice.pinned ?? false
     });
@@ -1100,7 +1199,8 @@ export const supabaseFetchUsers = async (): Promise<AppUser[] | null> => {
         phone: meta.phone,
         bio: meta.bio,
         receiveEmails: meta.receiveEmails ?? true,
-        receiveMessages: meta.receiveMessages ?? true
+        receiveMessages: meta.receiveMessages ?? true,
+        academicAssignments: Array.isArray(row.academic_assignments) ? row.academic_assignments : []
       };
     });
   } catch (e) {
@@ -1125,12 +1225,7 @@ export const supabaseSaveUser = async (user: AppUser): Promise<boolean> => {
       allowedLevels: user.allowedLevels
     });
 
-    // En Supabase la tabla app_users puede tener check constraint original
-    // Guardamos en la columna role un valor compatible si aplica, mientras los metadatos preservan su rol institucional real
-    let dbRole = user.role;
-    if (user.role === 'ASISTENTE' || user.role === 'SECRETARIA') {
-      dbRole = 'COORDINACION';
-    }
+    const dbRole = user.role;
 
     const payload: Record<string, any> = {
       id: user.id,
@@ -1141,7 +1236,8 @@ export const supabaseSaveUser = async (user: AppUser): Promise<boolean> => {
       role: dbRole,
       default_level: user.defaultLevel,
       active: user.active,
-      avatar_url: encodedAvatar
+      avatar_url: encodedAvatar,
+      academic_assignments: user.academicAssignments || []
     };
 
     const { error } = await supabase.from('app_users').upsert(payload);
@@ -1152,6 +1248,21 @@ export const supabaseSaveUser = async (user: AppUser): Promise<boolean> => {
     return true;
   } catch (e) {
     console.error('Excepción al guardar usuario en Supabase:', e);
+    return false;
+  }
+};
+
+export const supabaseDeleteUser = async (userId: string): Promise<boolean> => {
+  if (!isSupabaseConfigured() || !userId) return false;
+  try {
+    const { error } = await supabase.from('app_users').delete().eq('id', userId);
+    if (error) {
+      console.error('Error al eliminar usuario en Supabase (app_users):', error.message);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error('Excepción al eliminar usuario en Supabase:', e);
     return false;
   }
 };
@@ -1238,7 +1349,9 @@ export const supabaseFetchRegistrationCodes = async (): Promise<RegistrationCode
       createdAt: row.created_at,
       used: row.used ?? false,
       usedBy: row.used_by || undefined,
-      usedAt: row.used_at || undefined
+      usedAt: row.used_at || undefined,
+      expiresAt: row.expires_at || undefined,
+      durationHours: row.duration_hours || undefined
     }));
   } catch (e) {
     console.error('Error en supabaseFetchRegistrationCodes:', e);
@@ -1257,7 +1370,8 @@ export const supabaseSaveRegistrationCode = async (code: RegistrationCode): Prom
       created_at: code.createdAt,
       used: code.used,
       used_by: code.usedBy || null,
-      used_at: code.usedAt || null
+      used_at: code.usedAt || null,
+      expires_at: code.expiresAt || null
     });
     return !error;
   } catch (e) {
@@ -1479,6 +1593,9 @@ export const supabaseFetchSchoolData = async (): Promise<InstitutionalSchoolData
       correo: data.correo || '',
       director: data.director || '',
       subdirector: data.subdirector || '',
+      supervisorCircuito: data.supervisor_circuito || '',
+      directorFirmaUrl: data.director_firma_url || '',
+      selloInstitucionalUrl: data.sello_institucional_url || '',
       updatedAt: data.updated_at
     };
   } catch (e) {
@@ -1502,6 +1619,9 @@ export const supabaseSaveSchoolData = async (schoolData: InstitutionalSchoolData
       correo: schoolData.correo,
       director: schoolData.director,
       subdirector: schoolData.subdirector,
+      supervisor_circuito: schoolData.supervisorCircuito || null,
+      director_firma_url: schoolData.directorFirmaUrl || null,
+      sello_institucional_url: schoolData.selloInstitucionalUrl || null,
       updated_at: new Date().toISOString()
     });
 
@@ -1858,5 +1978,335 @@ export const supabaseDeleteCRPInscrito = async (id: string): Promise<boolean> =>
     return false;
   }
 };
+
+// ==========================================
+// 26. EVALUACIONES DE REVISIÓN / REPARACIÓN (revision_evaluations)
+// ==========================================
+export const supabaseFetchRevisionEvaluations = async (): Promise<RevisionEvaluationRecord[] | null> => {
+  if (!isSupabaseConfigured()) return null;
+  try {
+    const { data, error } = await supabase
+      .from('revision_evaluations')
+      .select('*')
+      .order('evaluation_date', { ascending: false });
+
+    if (error || !data) {
+      console.warn('Supabase fetch revision_evaluations aviso:', error?.message);
+      return null;
+    }
+
+    return data.map(r => ({
+      id: r.id,
+      studentId: r.student_id,
+      studentName: r.student_name,
+      studentCedula: r.student_cedula,
+      areaId: r.area_id,
+      areaName: r.area_name,
+      schoolYear: r.school_year,
+      grade: r.grade,
+      section: r.section as 'A' | 'B',
+      revisionScore: Number(r.revision_score),
+      passed: Boolean(r.passed),
+      evaluatedBy: r.evaluated_by,
+      evaluatedByName: r.evaluated_by_name,
+      evaluationDate: r.evaluation_date,
+      actaNumber: r.acta_number,
+      observations: r.observations,
+      createdAt: r.created_at
+    }));
+  } catch (e) {
+    console.error('Error en supabaseFetchRevisionEvaluations:', e);
+    return null;
+  }
+};
+
+export const supabaseSaveRevisionEvaluation = async (rec: RevisionEvaluationRecord): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('revision_evaluations').upsert({
+      id: rec.id,
+      student_id: rec.studentId,
+      student_name: rec.studentName || null,
+      student_cedula: rec.studentCedula || null,
+      area_id: rec.areaId,
+      area_name: rec.areaName || null,
+      school_year: rec.schoolYear,
+      grade: rec.grade,
+      section: rec.section,
+      revision_score: rec.revisionScore,
+      passed: rec.passed,
+      evaluated_by: rec.evaluatedBy || null,
+      evaluated_by_name: rec.evaluatedByName || null,
+      evaluation_date: rec.evaluationDate,
+      acta_number: rec.actaNumber || null,
+      observations: rec.observations || null
+    });
+
+    if (error) {
+      console.warn('Supabase save revision_evaluations aviso:', error.message);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error('Error en supabaseSaveRevisionEvaluation:', e);
+    return false;
+  }
+};
+
+export const supabaseDeleteRevisionEvaluation = async (id: string): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('revision_evaluations').delete().eq('id', id);
+    return !error;
+  } catch {
+    return false;
+  }
+};
+
+// ==========================================
+// 27. MATERIA PENDIENTE (pending_subject_enrollments & grades)
+// ==========================================
+export const supabaseFetchPendingSubjects = async (): Promise<PendingSubjectEnrollment[] | null> => {
+  if (!isSupabaseConfigured()) return null;
+  try {
+    const { data: enrollments, error: errEnr } = await supabase
+      .from('pending_subject_enrollments')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (errEnr || !enrollments) {
+      console.warn('Supabase fetch pending_subject_enrollments aviso:', errEnr?.message);
+      return null;
+    }
+
+    const { data: grades } = await supabase.from('pending_subject_grades').select('*');
+
+    return enrollments.map(enr => {
+      const enrGrades: PendingSubjectGrade[] = (grades || [])
+        .filter((g: any) => g.enrollment_id === enr.id)
+        .map((g: any) => ({
+          id: g.id,
+          enrollmentId: g.enrollment_id,
+          momentNumber: g.moment_number as 1 | 2 | 3 | 4,
+          score: g.score !== null ? Number(g.score) : undefined,
+          evaluatedAt: g.evaluated_at,
+          notes: g.notes
+        }));
+
+      return {
+        id: enr.id,
+        studentId: enr.student_id,
+        studentName: enr.student_name,
+        studentCedula: enr.student_cedula,
+        areaId: enr.area_id,
+        areaName: enr.area_name,
+        schoolYear: enr.school_year,
+        originGrade: enr.origin_grade,
+        currentGrade: enr.current_grade,
+        assignedTeacherId: enr.assigned_teacher_id,
+        assignedTeacherName: enr.assigned_teacher_name,
+        status: enr.status,
+        finalScore: enr.final_score !== null ? Number(enr.final_score) : undefined,
+        grades: enrGrades,
+        createdAt: enr.created_at,
+        updatedAt: enr.updated_at
+      };
+    });
+  } catch (e) {
+    console.error('Error en supabaseFetchPendingSubjects:', e);
+    return null;
+  }
+};
+
+export const supabaseSavePendingSubjectEnrollment = async (rec: PendingSubjectEnrollment): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('pending_subject_enrollments').upsert({
+      id: rec.id,
+      student_id: rec.studentId,
+      student_name: rec.studentName || null,
+      student_cedula: rec.studentCedula || null,
+      area_id: rec.areaId,
+      area_name: rec.areaName || null,
+      school_year: rec.schoolYear,
+      origin_grade: rec.originGrade,
+      current_grade: rec.currentGrade,
+      assigned_teacher_id: rec.assignedTeacherId || null,
+      assigned_teacher_name: rec.assignedTeacherName || null,
+      status: rec.status,
+      final_score: rec.finalScore ?? null,
+      updated_at: new Date().toISOString()
+    });
+
+    if (error) {
+      console.warn('Supabase save pending_subject_enrollments aviso:', error.message);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error('Error en supabaseSavePendingSubjectEnrollment:', e);
+    return false;
+  }
+};
+
+export const supabaseSavePendingSubjectGrade = async (grade: PendingSubjectGrade): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('pending_subject_grades').upsert({
+      id: grade.id,
+      enrollment_id: grade.enrollmentId,
+      moment_number: grade.momentNumber,
+      score: grade.score ?? null,
+      evaluated_at: grade.evaluatedAt || new Date().toISOString().split('T')[0],
+      notes: grade.notes || null
+    });
+
+    return !error;
+  } catch (e) {
+    console.error('Error en supabaseSavePendingSubjectGrade:', e);
+    return false;
+  }
+};
+
+export const supabaseDeletePendingSubjectEnrollment = async (id: string): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('pending_subject_enrollments').delete().eq('id', id);
+    return !error;
+  } catch {
+    return false;
+  }
+};
+
+// ==========================================
+// 28. HISTORIAL DE TRASLADO / CAMBIO DE SECCIÓN (section_transfers_log)
+// ==========================================
+export const supabaseFetchSectionTransfers = async (): Promise<SectionTransferLog[] | null> => {
+  if (!isSupabaseConfigured()) return null;
+  try {
+    const { data, error } = await supabase
+      .from('section_transfers_log')
+      .select('*')
+      .order('transferred_at', { ascending: false });
+
+    if (error || !data) {
+      console.warn('Supabase fetch section_transfers_log aviso:', error?.message);
+      return null;
+    }
+
+    return data.map(r => ({
+      id: r.id,
+      studentId: r.student_id,
+      studentName: r.student_name,
+      studentCedula: r.student_cedula,
+      previousSection: r.previous_section as 'A' | 'B',
+      newSection: r.new_section as 'A' | 'B',
+      grade: r.grade,
+      level: r.level as EducationalLevel,
+      reason: r.reason,
+      transferredBy: r.transferred_by,
+      transferredByName: r.transferred_by_name,
+      transferredAt: r.transferred_at,
+      recordsMigratedCount: r.records_migrated_count || 0
+    }));
+  } catch (e) {
+    console.error('Error en supabaseFetchSectionTransfers:', e);
+    return null;
+  }
+};
+
+export const supabaseSaveSectionTransfer = async (log: SectionTransferLog): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('section_transfers_log').upsert({
+      id: log.id,
+      student_id: log.studentId,
+      student_name: log.studentName || null,
+      student_cedula: log.studentCedula || null,
+      previous_section: log.previousSection,
+      new_section: log.newSection,
+      grade: log.grade,
+      level: log.level,
+      reason: log.reason,
+      transferred_by: log.transferredBy,
+      transferred_by_name: log.transferredByName || null,
+      records_migrated_count: log.recordsMigratedCount || 0
+    });
+
+    return !error;
+  } catch (e) {
+    console.error('Error en supabaseSaveSectionTransfer:', e);
+    return false;
+  }
+};
+
+// ==========================================
+// 29. CALIFICACIONES EXTERNAS Y CONVALIDACIONES (external_academic_records)
+// ==========================================
+export const supabaseFetchExternalAcademicRecords = async (): Promise<ExternalAcademicRecord[] | null> => {
+  if (!isSupabaseConfigured()) return null;
+  try {
+    const { data, error } = await supabase
+      .from('external_academic_records')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error || !data) {
+      console.warn('Supabase fetch external_academic_records aviso:', error?.message);
+      return null;
+    }
+
+    return data.map(r => ({
+      id: r.id,
+      studentId: r.student_id,
+      studentName: r.student_name,
+      studentCedula: r.student_cedula,
+      originSchool: r.origin_school,
+      schoolYear: r.school_year,
+      grade: r.grade,
+      subjectName: r.subject_name,
+      finalScore: Number(r.final_score),
+      certifiedDocumentRef: r.certified_document_ref,
+      createdAt: r.created_at
+    }));
+  } catch (e) {
+    console.error('Error en supabaseFetchExternalAcademicRecords:', e);
+    return null;
+  }
+};
+
+export const supabaseSaveExternalAcademicRecord = async (rec: ExternalAcademicRecord): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('external_academic_records').upsert({
+      id: rec.id,
+      student_id: rec.studentId,
+      student_name: rec.studentName || null,
+      student_cedula: rec.studentCedula || null,
+      origin_school: rec.originSchool,
+      school_year: rec.schoolYear,
+      grade: rec.grade,
+      subject_name: rec.subjectName,
+      final_score: rec.finalScore,
+      certified_document_ref: rec.certifiedDocumentRef || null
+    });
+
+    return !error;
+  } catch (e) {
+    console.error('Error en supabaseSaveExternalAcademicRecord:', e);
+    return false;
+  }
+};
+
+export const supabaseDeleteExternalAcademicRecord = async (id: string): Promise<boolean> => {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('external_academic_records').delete().eq('id', id);
+    return !error;
+  } catch {
+    return false;
+  }
+};
+
 
 

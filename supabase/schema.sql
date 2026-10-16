@@ -80,6 +80,20 @@ CREATE TABLE IF NOT EXISTS strategies (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 6.1 TABLA DE RECURSOS EDUCATIVOS Y MATERIALES DIDÁCTICOS
+CREATE TABLE IF NOT EXISTS educational_resources (
+    id VARCHAR(60) PRIMARY KEY,
+    name VARCHAR(150) NOT NULL,
+    category VARCHAR(60) NOT NULL,
+    area_id VARCHAR(60) REFERENCES subject_areas(id) ON DELETE SET NULL,
+    level VARCHAR(20) NOT NULL CHECK (level IN ('INICIAL', 'PRIMARIA', 'MEDIA_GENERAL')),
+    description TEXT,
+    location VARCHAR(120),
+    quantity INT DEFAULT 1,
+    is_reusable BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- 7. TABLA DE PLANIFICACIÓN DIDÁCTICA OFICIAL (PRIMARIA Y MEDIA GENERAL)
 CREATE TABLE IF NOT EXISTS didactic_plans (
     id VARCHAR(60) PRIMARY KEY,
@@ -142,6 +156,10 @@ CREATE TABLE IF NOT EXISTS evaluation_records (
     score_qualitative VARCHAR(2) CHECK (score_qualitative IN ('L', 'P', 'EP', 'I', 'C')),
     score_literal CHAR(1) CHECK (score_literal IN ('A', 'B', 'C', 'D', 'E')),
     robotics_score JSONB,
+    checklist_scores JSONB DEFAULT '[]'::jsonb,
+    rasgos_score NUMERIC(4,2),
+    auto_score NUMERIC(4,2),
+    coev_score NUMERIC(4,2),
     observations TEXT,
     recorded_at DATE DEFAULT CURRENT_DATE,
     teacher_id VARCHAR(60),
@@ -245,7 +263,8 @@ CREATE TABLE IF NOT EXISTS community_notices (
     content TEXT NOT NULL,
     date DATE NOT NULL,
     type VARCHAR(30) CHECK (type IN ('NOTICIA', 'ANUNCIO_URGENTE', 'EVENTO')),
-    target_audience VARCHAR(30) CHECK (target_audience IN ('TODOS', 'DOCENTES', 'REPRESENTANTES', 'ESTUDIANTES')),
+    target_audience VARCHAR(30) CHECK (target_audience IN ('TODOS', 'DIRECCION', 'COORDINACION', 'DOCENTES', 'REPRESENTANTES', 'ESTUDIANTES')),
+    theme VARCHAR(40) DEFAULT 'ESTANDAR',
     author VARCHAR(100) NOT NULL,
     pinned BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMPTZ DEFAULT NOW()
@@ -275,10 +294,12 @@ CREATE TABLE IF NOT EXISTS app_users (
     username VARCHAR(50) UNIQUE NOT NULL,
     password VARCHAR(100) NOT NULL,
     full_name VARCHAR(150) NOT NULL,
+    email VARCHAR(100),
     role VARCHAR(30) NOT NULL CHECK (role IN ('DOCENTE', 'COORDINACION', 'COORDINADOR', 'DIRECTOR', 'ADMINISTRADOR', 'REPRESENTANTE', 'ESTUDIANTE', 'ASISTENTE', 'SECRETARIA')),
     default_level VARCHAR(20) DEFAULT 'MEDIA_GENERAL' CHECK (default_level IN ('INICIAL', 'PRIMARIA', 'MEDIA_GENERAL')),
     active BOOLEAN DEFAULT TRUE,
     avatar_url TEXT,
+    academic_assignments JSONB DEFAULT '[]'::jsonb,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -291,8 +312,12 @@ CREATE TABLE IF NOT EXISTS registration_codes (
     created_at TIMESTAMPTZ DEFAULT NOW(),
     used BOOLEAN DEFAULT FALSE,
     used_by VARCHAR(100),
-    used_at TIMESTAMPTZ
+    used_at TIMESTAMPTZ,
+    expires_at TIMESTAMPTZ,
+    duration_hours INT DEFAULT 48
 );
+ALTER TABLE IF EXISTS registration_codes ADD COLUMN IF NOT EXISTS expires_at TIMESTAMPTZ;
+ALTER TABLE IF EXISTS registration_codes ADD COLUMN IF NOT EXISTS duration_hours INT DEFAULT 48;
 
 -- 20. TABLA DE CONFIGURACIÓN DEL AÑO ESCOLAR Y LAPSOS
 CREATE TABLE IF NOT EXISTS school_year_config (
@@ -485,6 +510,9 @@ CREATE TABLE IF NOT EXISTS institutional_school_data (
     correo VARCHAR(120),
     director VARCHAR(150),
     subdirector VARCHAR(150),
+    supervisor_circuito VARCHAR(150),
+    director_firma_url TEXT,
+    sello_institucional_url TEXT,
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -549,5 +577,169 @@ DROP POLICY IF EXISTS "Permitir lectura general a schedule_types" ON schedule_ty
 DROP POLICY IF EXISTS "Permitir escritura general a schedule_types" ON schedule_types;
 CREATE POLICY "Permitir lectura general a schedule_types" ON schedule_types FOR SELECT USING (true);
 CREATE POLICY "Permitir escritura general a schedule_types" ON schedule_types FOR ALL USING (true);
+
+-- 24. TABLA DE TALLERES CRP (crp_workshops)
+CREATE TABLE IF NOT EXISTS crp_workshops (
+    id VARCHAR(60) PRIMARY KEY,
+    code VARCHAR(30) UNIQUE NOT NULL,
+    nombre VARCHAR(150) NOT NULL,
+    area VARCHAR(100) NOT NULL,
+    docente_responsable VARCHAR(150) NOT NULL,
+    docente_id VARCHAR(60),
+    max_cupos INT DEFAULT 25,
+    horario VARCHAR(100),
+    aula_espacio VARCHAR(100),
+    descripcion TEXT,
+    nivel_educativo VARCHAR(20) DEFAULT 'MEDIA_GENERAL' CHECK (nivel_educativo IN ('INICIAL', 'PRIMARIA', 'MEDIA_GENERAL')),
+    grados_permitidos TEXT[] DEFAULT '{}',
+    activo BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE crp_workshops ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Permitir lectura general a crp_workshops" ON crp_workshops;
+DROP POLICY IF EXISTS "Permitir escritura general a crp_workshops" ON crp_workshops;
+CREATE POLICY "Permitir lectura general a crp_workshops" ON crp_workshops FOR SELECT USING (true);
+CREATE POLICY "Permitir escritura general a crp_workshops" ON crp_workshops FOR ALL USING (true);
+
+-- 25. TABLA DE INSCRIPCIONES Y CALIFICACIONES CRP (crp_enrollments)
+CREATE TABLE IF NOT EXISTS crp_enrollments (
+    id VARCHAR(60) PRIMARY KEY,
+    taller_id VARCHAR(60) REFERENCES crp_workshops(id) ON DELETE CASCADE,
+    student_id VARCHAR(60) REFERENCES students(id) ON DELETE CASCADE,
+    student_cedula VARCHAR(20) NOT NULL,
+    student_name VARCHAR(150) NOT NULL,
+    grado VARCHAR(40) NOT NULL,
+    seccion VARCHAR(10) NOT NULL,
+    fecha_inscripcion VARCHAR(50) NOT NULL,
+    asignacion_metodo VARCHAR(30) DEFAULT 'MANUAL' CHECK (asignacion_metodo IN ('MANUAL', 'AUTOMATICA')),
+    calificacion_momento1 VARCHAR(5),
+    calificacion_momento2 VARCHAR(5),
+    calificacion_prevalente VARCHAR(5),
+    observaciones TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE crp_enrollments ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Permitir lectura general a crp_enrollments" ON crp_enrollments;
+DROP POLICY IF EXISTS "Permitir escritura general a crp_enrollments" ON crp_enrollments;
+CREATE POLICY "Permitir lectura general a crp_enrollments" ON crp_enrollments FOR SELECT USING (true);
+CREATE POLICY "Permitir escritura general a crp_enrollments" ON crp_enrollments FOR ALL USING (true);
+
+-- 26. TABLA DE EVALUACIONES DE REVISIÓN / REPARACIÓN (revision_evaluations)
+CREATE TABLE IF NOT EXISTS revision_evaluations (
+    id VARCHAR(64) PRIMARY KEY,
+    student_id VARCHAR(64) NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+    student_name VARCHAR(150),
+    student_cedula VARCHAR(20),
+    area_id VARCHAR(64) NOT NULL REFERENCES subject_areas(id),
+    area_name VARCHAR(120),
+    school_year VARCHAR(32) NOT NULL,
+    grade VARCHAR(40) NOT NULL,
+    section CHAR(1) NOT NULL CHECK (section IN ('A', 'B')),
+    revision_score NUMERIC(4,2) NOT NULL CHECK (revision_score BETWEEN 0 AND 20),
+    passed BOOLEAN NOT NULL DEFAULT FALSE,
+    evaluated_by VARCHAR(64) REFERENCES app_users(id),
+    evaluated_by_name VARCHAR(150),
+    evaluation_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    acta_number VARCHAR(32),
+    observations TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE revision_evaluations ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Permitir lectura general a revision_evaluations" ON revision_evaluations;
+DROP POLICY IF EXISTS "Permitir escritura general a revision_evaluations" ON revision_evaluations;
+CREATE POLICY "Permitir lectura general a revision_evaluations" ON revision_evaluations FOR SELECT USING (true);
+CREATE POLICY "Permitir escritura general a revision_evaluations" ON revision_evaluations FOR ALL USING (true);
+
+-- 27. TABLA DE INSCRIPCIÓN EN MATERIA PENDIENTE (pending_subject_enrollments)
+CREATE TABLE IF NOT EXISTS pending_subject_enrollments (
+    id VARCHAR(64) PRIMARY KEY,
+    student_id VARCHAR(64) NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+    student_name VARCHAR(150),
+    student_cedula VARCHAR(20),
+    area_id VARCHAR(64) NOT NULL REFERENCES subject_areas(id),
+    area_name VARCHAR(120),
+    school_year VARCHAR(32) NOT NULL,
+    origin_grade VARCHAR(40) NOT NULL,
+    current_grade VARCHAR(40) NOT NULL,
+    assigned_teacher_id VARCHAR(64) REFERENCES app_users(id),
+    assigned_teacher_name VARCHAR(150),
+    status VARCHAR(32) NOT NULL DEFAULT 'CURSANDO' CHECK (status IN ('CURSANDO', 'APROBADA', 'REPROBADA')),
+    final_score NUMERIC(4,2),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE pending_subject_enrollments ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Permitir lectura general a pending_subject_enrollments" ON pending_subject_enrollments;
+DROP POLICY IF EXISTS "Permitir escritura general a pending_subject_enrollments" ON pending_subject_enrollments;
+CREATE POLICY "Permitir lectura general a pending_subject_enrollments" ON pending_subject_enrollments FOR SELECT USING (true);
+CREATE POLICY "Permitir escritura general a pending_subject_enrollments" ON pending_subject_enrollments FOR ALL USING (true);
+
+-- 28. TABLA DE CALIFICACIONES DE LOS 4 MOMENTOS DE MATERIA PENDIENTE (pending_subject_grades)
+CREATE TABLE IF NOT EXISTS pending_subject_grades (
+    id VARCHAR(64) PRIMARY KEY,
+    enrollment_id VARCHAR(64) NOT NULL REFERENCES pending_subject_enrollments(id) ON DELETE CASCADE,
+    moment_number INT NOT NULL CHECK (moment_number BETWEEN 1 AND 4),
+    score NUMERIC(4,2) CHECK (score BETWEEN 0 AND 20),
+    evaluated_at DATE,
+    notes TEXT,
+    UNIQUE(enrollment_id, moment_number)
+);
+
+ALTER TABLE pending_subject_grades ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Permitir lectura general a pending_subject_grades" ON pending_subject_grades;
+DROP POLICY IF EXISTS "Permitir escritura general a pending_subject_grades" ON pending_subject_grades;
+CREATE POLICY "Permitir lectura general a pending_subject_grades" ON pending_subject_grades FOR SELECT USING (true);
+CREATE POLICY "Permitir escritura general a pending_subject_grades" ON pending_subject_grades FOR ALL USING (true);
+
+-- 29. TABLA DE HISTORIAL DE TRASLADO / CAMBIO DE SECCIÓN (section_transfers_log)
+CREATE TABLE IF NOT EXISTS section_transfers_log (
+    id VARCHAR(64) PRIMARY KEY,
+    student_id VARCHAR(64) NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+    student_name VARCHAR(150),
+    student_cedula VARCHAR(20),
+    previous_section CHAR(1) NOT NULL CHECK (previous_section IN ('A', 'B')),
+    new_section CHAR(1) NOT NULL CHECK (new_section IN ('A', 'B')),
+    grade VARCHAR(40) NOT NULL,
+    level VARCHAR(20) NOT NULL CHECK (level IN ('INICIAL', 'PRIMARIA', 'MEDIA_GENERAL')),
+    reason TEXT NOT NULL,
+    transferred_by VARCHAR(64) NOT NULL,
+    transferred_by_name VARCHAR(150),
+    transferred_at TIMESTAMPTZ DEFAULT NOW(),
+    records_migrated_count INT DEFAULT 0
+);
+
+ALTER TABLE section_transfers_log ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Permitir lectura general a section_transfers_log" ON section_transfers_log;
+DROP POLICY IF EXISTS "Permitir escritura general a section_transfers_log" ON section_transfers_log;
+CREATE POLICY "Permitir lectura general a section_transfers_log" ON section_transfers_log FOR SELECT USING (true);
+CREATE POLICY "Permitir escritura general a section_transfers_log" ON section_transfers_log FOR ALL USING (true);
+
+-- 30. TABLA DE CALIFICACIONES EXTERNAS Y CONVALIDACIONES (external_academic_records)
+CREATE TABLE IF NOT EXISTS external_academic_records (
+    id VARCHAR(64) PRIMARY KEY,
+    student_id VARCHAR(64) NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+    student_name VARCHAR(150),
+    student_cedula VARCHAR(20),
+    origin_school VARCHAR(150) NOT NULL,
+    school_year VARCHAR(32) NOT NULL,
+    grade VARCHAR(40) NOT NULL,
+    subject_name VARCHAR(100) NOT NULL,
+    final_score NUMERIC(4,2) NOT NULL CHECK (final_score BETWEEN 0 AND 20),
+    certified_document_ref VARCHAR(64),
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE external_academic_records ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Permitir lectura general a external_academic_records" ON external_academic_records;
+DROP POLICY IF EXISTS "Permitir escritura general a external_academic_records" ON external_academic_records;
+CREATE POLICY "Permitir lectura general a external_academic_records" ON external_academic_records FOR SELECT USING (true);
+CREATE POLICY "Permitir escritura general a external_academic_records" ON external_academic_records FOR ALL USING (true);
+
 
 

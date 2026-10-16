@@ -34,10 +34,9 @@ interface DeveloperConsoleHUDProps {
 const AVAILABLE_ROLES: { id: UserRole; label: string; desc: string }[] = [
   { id: 'ADMINISTRADOR', label: 'Admin / Rector', desc: 'Acceso total y configuración' },
   { id: 'DIRECTOR', label: 'Director', desc: 'Supervisión general y firma institucional' },
-  { id: 'COORDINADOR', label: 'Coordinador', desc: 'Validación de planes y actas' },
-  { id: 'SECRETARIA', label: 'Secretaria', desc: 'Gestión de matrícula y expedientes' },
+  { id: 'COORDINACION', label: 'Coordinación', desc: 'Validación de planes y actas' },
+  { id: 'SECRETARIA', label: 'Secretaria', desc: 'Asistencia y registro de conducta' },
   { id: 'DOCENTE', label: 'Docente', desc: 'Evaluación y planificación de aula' },
-  { id: 'ASISTENTE', label: 'Asistente', desc: 'Registro de asistencia, pases y conducta' },
   { id: 'REPRESENTANTE', label: 'Representante', desc: 'Portal de familia y notas' },
   { id: 'ESTUDIANTE', label: 'Estudiante', desc: 'Consulta de boletines y avisos' }
 ];
@@ -54,6 +53,7 @@ export const DeveloperConsoleHUD: React.FC<DeveloperConsoleHUDProps> = ({
   const {
     currentRole,
     setCurrentRole,
+    switchActiveRole,
     currentLevel,
     setCurrentLevel,
     activeLapso,
@@ -225,7 +225,7 @@ export const DeveloperConsoleHUD: React.FC<DeveloperConsoleHUDProps> = ({
                   <button
                     key={role.id}
                     onClick={() => {
-                      setCurrentRole(role.id);
+                      switchActiveRole(role.id);
                       onShowToast(`Rol simulado: ${role.label}`, role.desc, true);
                     }}
                     className={`flex items-center justify-between px-3 py-2 rounded-xl text-left font-semibold transition-all ${

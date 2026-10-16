@@ -4,14 +4,16 @@ import { MainNavigationTab } from '../types';
 interface KeyboardShortcutsOptions {
   onOpenSearch: () => void;
   onOpenShortcuts: () => void;
+  onOpenAccessibility?: () => void;
   onToggleSidebar: () => void;
   onNavigateTab: (tab: MainNavigationTab) => void;
-  onNavigateShortcut?: (actionNumber: '1' | '2' | '3' | '4' | '5' | '6') => void;
+  onNavigateShortcut?: (actionNumber: '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9') => void;
   onPrint?: () => void;
   onToggleMode: () => void;
   onCycleTheme: () => void;
   onToggleDevHUD: () => void;
   onCycleRole: () => void;
+  onCycleActiveRole?: () => void;
   onCycleLapso: () => void;
   onToggleOffline: () => void;
   onCopyDiagnostics: () => void;
@@ -144,14 +146,28 @@ export const useKeyboardShortcuts = (options: KeyboardShortcutsOptions) => {
         return;
       }
 
-      // E. Alt + T: Rotar paleta de color / tema
+      // E. Alt + A: Abrir panel de Accesibilidad & Ergonomía Visual
+      if (hasAlt && (e.key === 'a' || e.key === 'A')) {
+        e.preventDefault();
+        options.onOpenAccessibility?.();
+        return;
+      }
+
+      // F. Alt + P: Conmutador de Perfil / Rol Activo (cuentas multi-rol o simulación)
+      if (hasAlt && (e.key === 'p' || e.key === 'P')) {
+        e.preventDefault();
+        options.onCycleActiveRole?.();
+        return;
+      }
+
+      // G. Alt + T: Rotar paleta de color / tema
       if (hasAlt && (e.key === 't' || e.key === 'T')) {
         e.preventDefault();
         options.onCycleTheme();
         return;
       }
 
-      // F. Alt + H: Ir al Escritorio / Dashboard
+      // H. Alt + H: Ir al Escritorio / Dashboard
       if (hasAlt && (e.key === 'h' || e.key === 'H')) {
         e.preventDefault();
         if (options.onNavigateShortcut) {
@@ -162,19 +178,22 @@ export const useKeyboardShortcuts = (options: KeyboardShortcutsOptions) => {
         return;
       }
 
-      // G. Alt + 1..6: Navegación por módulos institucionales
-      if (hasAlt && e.key >= '1' && e.key <= '6') {
+      // I. Alt + 1..9: Navegación por todos los 9 módulos institucionales oficiales
+      if (hasAlt && e.key >= '1' && e.key <= '9') {
         e.preventDefault();
         if (options.onNavigateShortcut) {
-          options.onNavigateShortcut(e.key as '1' | '2' | '3' | '4' | '5' | '6');
+          options.onNavigateShortcut(e.key as '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9');
         } else {
           const tabMap: Record<string, MainNavigationTab> = {
             '1': 'ESCRITORIO',
             '2': 'GESTION',
             '3': 'INICIAL',
-            '4': 'CONSULTAS',
-            '5': 'COMUNIDAD',
-            '6': 'CONFIGURACION'
+            '4': 'PRIMARIA',
+            '5': 'MEDIA_GENERAL',
+            '6': 'CONSULTAS',
+            '7': 'COMUNIDAD',
+            '8': 'CONFIGURACION',
+            '9': 'AYUDA'
           };
           const targetTab = tabMap[e.key];
           if (targetTab) {

@@ -8,12 +8,17 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "db:init": "node tools/init-db.mjs",
+    "db:start": "node tools/db-runner.mjs",
+    "db:stop": "node tools/db-stop.mjs",
+    "test:stress": "node tools/stress-test.mjs"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.116.0",
+    "@types/pg": "^8.23.1",
     "clsx": "^2.1.1",
     "lucide-react": "^1.46.0",
+    "pg": "^8.23.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "recharts": "^3.10.1",

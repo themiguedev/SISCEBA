@@ -10,13 +10,14 @@ import { QuickActionDock } from './components/layout/QuickActionDock';
 import { ModernMobileNav } from './components/layout/ModernMobileNav';
 import { CommandSearchModal } from './components/layout/CommandSearchModal';
 import { KeyboardShortcutsModal } from './components/layout/KeyboardShortcutsModal';
+import { AccessibilityModal } from './components/layout/AccessibilityModal';
 import { DeveloperConsoleHUD } from './components/dev/DeveloperConsoleHUD';
 import { ShortcutToast, ShortcutToastMessage } from './components/common/ShortcutToast';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useDevice } from './hooks/useDevice';
 import { LoginView } from './components/auth/LoginView';
 import { SeasonalAccessoryIcon } from './components/auth/LogoSeasonalAccessory';
-import { hasTabAccess, hasSubTabAccess, getDefaultTabForRole, getUserAllowedLevels, ROLE_METADATA } from './utils/rbac';
+import { hasTabAccess, hasSubTabAccess, getDefaultTabForRole, getUserAllowedLevels, getUserEffectiveRoles, ROLE_METADATA } from './utils/rbac';
 
 // Modules
 import { EscritorioView } from './components/dashboard/EscritorioView';
@@ -29,7 +30,7 @@ import { ComunidadModule } from './components/comunidad/ComunidadModule';
 import { ConfiguracionModule } from './components/configuracion/ConfiguracionModule';
 import { AyudaModule } from './components/ayuda/AyudaModule';
 
-import { BookOpen, ClipboardList, MessageSquare, WifiOff } from 'lucide-react';
+import { BookOpen, ClipboardList, MessageSquare, WifiOff, ShieldCheck } from 'lucide-react';
 
 const SiscebaMainApp: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(() =>
@@ -37,6 +38,7 @@ const SiscebaMainApp: React.FC = () => {
   );
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [shortcutsModalOpen, setShortcutsModalOpen] = useState(false);
+  const [accessibilityModalOpen, setAccessibilityModalOpen] = useState(false);
   const [devHUDOpen, setDevHUDOpen] = useState(false);
   const [isSimulatedOffline, setIsSimulatedOffline] = useState(false);
   const [isDebugGridActive, setIsDebugGridActive] = useState(false);
@@ -50,7 +52,7 @@ const SiscebaMainApp: React.FC = () => {
   const [gestionSubTab, setGestionSubTab] = useState<string>('INSCRIPCIONES');
   const [consultasSubTab, setConsultasSubTab] = useState<ConsultasSubTab>('RENDIMIENTO');
   const [comunidadSubTab, setComunidadSubTab] = useState<'NOTICIAS' | 'CUMPLEANOS' | 'COMUNICADOS'>('NOTICIAS');
-  const [configuracionSubTab, setConfiguracionSubTab] = useState<'LAPSOS' | 'ESTRUCTURA' | 'DOCENTES' | 'TEMAS' | 'CONFIG_CEO' | 'AVANZADA'>('LAPSOS');
+  const [configuracionSubTab, setConfiguracionSubTab] = useState<'LAPSOS' | 'ESTRUCTURA' | 'TEMAS' | 'CONFIG_CEO' | 'AVANZADA'>('LAPSOS');
   const [ayudaSubTab, setAyudaSubTab] = useState<'MANUAL' | 'MAPA_SITIO'>('MANUAL');
   const [planningSubTab, setPlanningSubTab] = useState<string>('AREAS_PERFILES');
   const [evaluationSubTab, setEvaluationSubTab] = useState<string>('PROCESAL');
@@ -64,6 +66,7 @@ const SiscebaMainApp: React.FC = () => {
     setActiveLapso,
     currentRole,
     setCurrentRole,
+    switchActiveRole,
     isAuthenticated,
     currentUser,
     students,
@@ -91,18 +94,41 @@ const SiscebaMainApp: React.FC = () => {
     }
   }, [device.deviceType, device.orientation, device.isTouch, device.isMobile, device.isDesktop]);
 
-  // Keep activeTab and currentLevel synchronized with RBAC hierarchy and user allowed educational levels
+  // Keep activeTab, subTabs, and currentLevel synchronized with RBAC hierarchy and user allowed educational levels
   useEffect(() => {
-    const userLevels = getUserAllowedLevels(currentUser || currentRole, currentUser);
+    const userLevels = getUserAllowedLevels(currentRole, currentUser);
     if (userLevels.length > 0 && !userLevels.includes(currentLevel)) {
       setCurrentLevel(userLevels[0]);
     }
 
-    if (!hasTabAccess(currentUser || currentRole, activeTab)) {
-      const defaultTab = getDefaultTabForRole(currentUser || currentRole);
+    if (!hasTabAccess(currentRole, activeTab)) {
+      const defaultTab = getDefaultTabForRole(currentRole);
       setActiveTab(defaultTab);
+      if (defaultTab === 'CONSULTAS') {
+        setConsultasSubTab('RENDIMIENTO');
+      } else {
+        setEscritorioSubTab('DASHBOARD');
+      }
       return;
     }
+
+    // Harmonize subtabs if not accessible under currentRole
+    if (activeTab === 'GESTION' && !hasSubTabAccess(currentRole, 'GESTION', gestionSubTab)) {
+      const allowed = (['INSCRIPCIONES', 'PASES', 'INASISTENCIAS', 'CONDUCTAS', 'DOCUMENTOS', 'BLOQUEO', 'TITULOS', 'MATRICULA', 'TALLERES_CRP', 'USUARIOS'] as const)
+        .filter(st => hasSubTabAccess(currentRole, 'GESTION', st));
+      if (allowed.length > 0) setGestionSubTab(allowed[0]);
+    }
+    if (activeTab === 'CONSULTAS' && !hasSubTabAccess(currentRole, 'CONSULTAS', consultasSubTab)) {
+      const allowed = (['RENDIMIENTO', 'BOLETIN', 'ASISTENCIA', 'ESTADISTICAS', 'NOMINAS'] as ConsultasSubTab[])
+        .filter(st => hasSubTabAccess(currentRole, 'CONSULTAS', st));
+      if (allowed.length > 0) setConsultasSubTab(allowed[0]);
+    }
+    if (activeTab === 'CONFIGURACION' && !hasSubTabAccess(currentRole, 'CONFIGURACION', configuracionSubTab)) {
+      const allowed = (['LAPSOS', 'ESTRUCTURA', 'TEMAS', 'CONFIG_CEO', 'AVANZADA'] as const)
+        .filter(st => hasSubTabAccess(currentRole, 'CONFIGURACION', st));
+      if (allowed.length > 0) setConfiguracionSubTab(allowed[0]);
+    }
+
     if (activeTab === 'INICIAL' || activeTab === 'PRIMARIA' || activeTab === 'MEDIA_GENERAL') {
       if (userLevels.length > 0 && !userLevels.includes(activeTab)) {
         setActiveTab(userLevels[0]);
@@ -110,20 +136,20 @@ const SiscebaMainApp: React.FC = () => {
         setActiveTab(currentLevel);
       }
     }
-  }, [currentLevel, currentRole, activeTab, currentUser]);
+  }, [currentLevel, currentRole, activeTab, currentUser, gestionSubTab, consultasSubTab, configuracionSubTab]);
 
   const handleTabChange = (tab: MainNavigationTab) => {
-    if (!hasTabAccess(currentUser || currentRole, tab)) {
+    if (!hasTabAccess(currentRole, tab)) {
       showToast(
         'Acceso Restringido',
-        `Su cuenta institucional (${ROLE_METADATA[currentRole]?.label || currentRole}) no tiene permisos para acceder a ${tab}.`,
+        `Su modo actual (${ROLE_METADATA[currentRole]?.label || currentRole}) no tiene permisos para acceder a ${tab}.`,
         true
       );
       return;
     }
 
     if (tab === 'INICIAL' || tab === 'PRIMARIA' || tab === 'MEDIA_GENERAL') {
-      const userLevels = getUserAllowedLevels(currentUser || currentRole, currentUser);
+      const userLevels = getUserAllowedLevels(currentRole, currentUser);
       if (userLevels.length > 0 && !userLevels.includes(tab)) {
         showToast(
           'Nivel No Asignado',
@@ -137,28 +163,29 @@ const SiscebaMainApp: React.FC = () => {
     setActiveTab(tab);
   };
 
-  const handleSubTabChange = (sub: string) => {
-    if (!hasSubTabAccess(currentUser || currentRole, activeTab, sub)) {
+  const handleSubTabChange = (sub: string, targetTab?: MainNavigationTab) => {
+    const effectiveTab = targetTab || activeTab;
+    if (!hasSubTabAccess(currentRole, effectiveTab, sub)) {
       showToast(
         'Acceso Restringido',
-        `La función seleccionada no está disponible para sus roles asignados (${ROLE_METADATA[currentRole]?.label || currentRole}).`,
+        `La función seleccionada no está disponible para su modo actual (${ROLE_METADATA[currentRole]?.label || currentRole}).`,
         true
       );
       return;
     }
     if (sub === 'DASHBOARD' || sub === 'PERFIL' || sub === 'HORARIO' || sub === 'SUGERENCIAS') {
       setEscritorioSubTab(sub as 'DASHBOARD' | 'PERFIL' | 'HORARIO' | 'SUGERENCIAS');
-    } else if (['INSCRIPCIONES', 'PASES', 'INASISTENCIAS', 'CONDUCTAS', 'DOCUMENTOS', 'BLOQUEO', 'TITULOS', 'MATRICULA', 'TALLERES_CRP'].includes(sub)) {
+    } else if (['INSCRIPCIONES', 'PASES', 'INASISTENCIAS', 'CONDUCTAS', 'DOCUMENTOS', 'BLOQUEO', 'TITULOS', 'MATRICULA', 'TALLERES_CRP', 'USUARIOS'].includes(sub)) {
       setGestionSubTab(sub);
-    } else if (['RENDIMIENTO', 'BOLETIN', 'ASISTENCIA', 'ESTADISTICAS', 'NOMINAS'].includes(sub)) {
+    } else if (effectiveTab === 'CONSULTAS' && ['RENDIMIENTO', 'BOLETIN', 'ASISTENCIA', 'ESTADISTICAS', 'NOMINAS'].includes(sub)) {
       setConsultasSubTab(sub as ConsultasSubTab);
     } else if (['NOTICIAS', 'CUMPLEANOS', 'COMUNICADOS'].includes(sub)) {
       setComunidadSubTab(sub as 'NOTICIAS' | 'CUMPLEANOS' | 'COMUNICADOS');
-    } else if (['LAPSOS', 'ESTRUCTURA', 'DOCENTES', 'TEMAS', 'CONFIG_CEO', 'AVANZADA'].includes(sub)) {
-      setConfiguracionSubTab(sub as 'LAPSOS' | 'ESTRUCTURA' | 'DOCENTES' | 'TEMAS' | 'CONFIG_CEO' | 'AVANZADA');
+    } else if (['LAPSOS', 'ESTRUCTURA', 'TEMAS', 'CONFIG_CEO', 'AVANZADA'].includes(sub)) {
+      setConfiguracionSubTab(sub as 'LAPSOS' | 'ESTRUCTURA' | 'TEMAS' | 'CONFIG_CEO' | 'AVANZADA');
     } else if (['MANUAL', 'MAPA_SITIO'].includes(sub)) {
       setAyudaSubTab(sub as 'MANUAL' | 'MAPA_SITIO');
-    } else if (['DIAGNOSTICA', 'PROCESAL', 'FINAL_LAPSO', 'ESTADISTICAS'].includes(sub)) {
+    } else if (['DIAGNOSTICA', 'PROCESAL', 'FINAL_LAPSO'].includes(sub) || (effectiveTab !== 'CONSULTAS' && sub === 'ESTADISTICAS')) {
       setLevelPillarTab('EVALUACION');
       setEvaluationSubTab(sub);
     } else if (['BOLETIN', 'ACTAS_CONSEJO', 'IA_ACTION_PLANS', 'REMEDIALES', 'REPORTES_INSTITUCIONALES'].includes(sub)) {
@@ -233,7 +260,7 @@ const SiscebaMainApp: React.FC = () => {
       if (subTab) setComunidadSubTab(subTab as 'NOTICIAS' | 'CUMPLEANOS' | 'COMUNICADOS');
     } else if (tab === 'CONFIGURACION') {
       handleTabChange('CONFIGURACION');
-      if (subTab) setConfiguracionSubTab(subTab as 'LAPSOS' | 'ESTRUCTURA' | 'DOCENTES' | 'TEMAS');
+      if (subTab) setConfiguracionSubTab(subTab as 'LAPSOS' | 'ESTRUCTURA' | 'TEMAS' | 'CONFIG_CEO' | 'AVANZADA');
     } else if (tab === 'AYUDA') {
       handleTabChange('AYUDA');
       if (subTab) setAyudaSubTab(subTab as 'MANUAL' | 'MAPA_SITIO');
@@ -251,7 +278,7 @@ const SiscebaMainApp: React.FC = () => {
       if (subTab) setCommunicationSubTab(subTab);
     } else {
       handleTabChange(tab);
-      if (subTab) handleSubTabChange(subTab);
+      if (subTab) handleSubTabChange(subTab, tab);
     }
   };
 
@@ -270,11 +297,11 @@ const SiscebaMainApp: React.FC = () => {
       showToast('Acceso Restringido', 'Solo la cuenta de Administrador puede simular otros roles.', true);
       return;
     }
-    const roles: UserRole[] = ['ADMINISTRADOR', 'DIRECTOR', 'COORDINACION', 'SECRETARIA', 'DOCENTE', 'ASISTENTE', 'REPRESENTANTE', 'ESTUDIANTE'];
+    const roles: UserRole[] = ['ADMINISTRADOR', 'DIRECTOR', 'COORDINACION', 'SECRETARIA', 'DOCENTE', 'REPRESENTANTE', 'ESTUDIANTE'];
     const nextIdx = (roles.indexOf(currentRole) + 1) % roles.length;
     const nextRole = roles[nextIdx];
-    setCurrentRole(nextRole);
-    showToast(`Rol simulado: ${nextRole}`, 'Permisos de interfaz actualizados', true);
+    switchActiveRole(nextRole);
+    showToast(`Rol simulado: ${ROLE_METADATA[nextRole]?.label || nextRole}`, 'Permisos de interfaz actualizados', true);
   };
 
   // Dev Action: Cycle through academic lapsos
@@ -367,6 +394,7 @@ const SiscebaMainApp: React.FC = () => {
   const handleCloseAllModals = () => {
     setSearchModalOpen(false);
     setShortcutsModalOpen(false);
+    setAccessibilityModalOpen(false);
     setDevHUDOpen(false);
   };
 
@@ -376,6 +404,7 @@ const SiscebaMainApp: React.FC = () => {
       setSearchModalOpen(true);
     },
     onOpenShortcuts: () => setShortcutsModalOpen(true),
+    onOpenAccessibility: () => setAccessibilityModalOpen(true),
     onToggleSidebar: () => setSidebarOpen((prev) => !prev),
     onNavigateTab: (tab) => {
       handleTabChange(tab === 'INICIAL' ? currentLevel : tab);
@@ -407,53 +436,23 @@ const SiscebaMainApp: React.FC = () => {
         }
         return;
       }
-      if (currentRole === 'ASISTENTE') {
-        switch (key) {
-          case '1':
-            handleQuickAction('ESCRITORIO', 'DASHBOARD');
-            showToast('Escritorio', 'Dashboard operativo de asistencia');
-            break;
-          case '2':
-            handleQuickAction('GESTION', 'PASES');
-            showToast('Pases por Retraso', 'Emisión y control de pases');
-            break;
-          case '3':
-            handleQuickAction('GESTION', 'INASISTENCIAS');
-            showToast('Pase de Lista', 'Inasistencias diarias de aula');
-            break;
-          case '4':
-            handleQuickAction('GESTION', 'CONDUCTAS');
-            showToast('Disciplina y Conducta', 'Registro de incidencias');
-            break;
-          case '5':
-            handleQuickAction('COMUNIDAD', 'NOTICIAS');
-            showToast('Comunidad CBA', 'Noticias y cartelera escolar');
-            break;
-          case '6':
-            handleQuickAction('AYUDA', 'MANUAL');
-            showToast('Manual de Ayuda', 'Guía para asistentes');
-            break;
-        }
-        return;
-      }
-
       if (currentRole === 'SECRETARIA') {
         switch (key) {
           case '1':
             handleQuickAction('ESCRITORIO', 'DASHBOARD');
-            showToast('Escritorio', 'Dashboard de control de estudios');
+            showToast('Escritorio', 'Dashboard de asistencia y conducta');
             break;
           case '2':
-            handleQuickAction('GESTION', 'INSCRIPCIONES');
-            showToast('Inscripciones', 'Registro y admisión de alumnos');
+            handleQuickAction('GESTION', 'INASISTENCIAS');
+            showToast('Pase de Lista', 'Inasistencias diarias de aula');
             break;
           case '3':
-            handleQuickAction('GESTION', 'MATRICULA');
-            showToast('Matrícula Escolar', 'Padrón estudiantil y expedientes');
+            handleQuickAction('GESTION', 'CONDUCTAS');
+            showToast('Disciplina y Conducta', 'Registro de incidencias');
             break;
           case '4':
-            handleQuickAction('GESTION', 'DOCUMENTOS');
-            showToast('Trámites y Constancias', 'Bandeja de solicitudes');
+            handleQuickAction('CONSULTAS', 'NOMINAS');
+            showToast('Nóminas Oficiales', 'Padrón de estudiantes');
             break;
           case '5':
             handleQuickAction('COMUNIDAD', 'NOTICIAS');
@@ -496,6 +495,19 @@ const SiscebaMainApp: React.FC = () => {
       }
     },
     onPrint: () => {
+      const isViewingBulletin =
+        (activeTab === 'CONSULTAS' && consultasSubTab === 'BOLETIN') ||
+        (['INICIAL', 'PRIMARIA', 'MEDIA_GENERAL'].includes(activeTab) &&
+          levelPillarTab === 'COMUNICACION' &&
+          communicationSubTab === 'BOLETIN');
+
+      const isAdmin = currentRole === 'ADMINISTRADOR';
+
+      if (isViewingBulletin && !isAdmin) {
+        showToast('Impresión Restringida', 'Solo el Administrador está autorizado para emitir e imprimir boletines oficiales.');
+        return;
+      }
+
       showToast('Imprimir / Generar PDF', 'Preparando vista para impresión o PDF');
       window.print();
     },
@@ -509,6 +521,19 @@ const SiscebaMainApp: React.FC = () => {
       });
     },
     onCycleRole: handleCycleRole,
+    onCycleActiveRole: () => {
+      const userRoles = getUserEffectiveRoles(currentUser);
+      if (userRoles.length > 1) {
+        const currIdx = userRoles.indexOf(currentRole);
+        const nextRole = userRoles[(currIdx + 1) % userRoles.length];
+        switchActiveRole(nextRole);
+        showToast(`Perfil Activo: ${ROLE_METADATA[nextRole]?.label || nextRole}`, 'Permisos de interfaz actualizados', false);
+      } else if (currentUser?.role === 'ADMINISTRADOR') {
+        handleCycleRole();
+      } else {
+        showToast(`Rol: ${currentRole}`, 'Cuenta con rol único asignado', false);
+      }
+    },
     onCycleLapso: handleCycleLapso,
     onToggleOffline: handleToggleOffline,
     onCopyDiagnostics: handleCopyDiagnostics,
@@ -549,6 +574,7 @@ const SiscebaMainApp: React.FC = () => {
         setSidebarOpen={setSidebarOpen}
         onOpenSearch={() => setSearchModalOpen(true)}
         onOpenShortcuts={() => setShortcutsModalOpen(true)}
+        onOpenAccessibility={() => setAccessibilityModalOpen(true)}
         onGoHome={handleGoHome}
         onSelectLevel={(lvl) => handleTabChange(lvl)}
         onOpenThemeSettings={() => handleQuickAction('CONFIGURACION', 'TEMAS')}
@@ -585,6 +611,12 @@ const SiscebaMainApp: React.FC = () => {
       <KeyboardShortcutsModal
         isOpen={shortcutsModalOpen}
         onClose={() => setShortcutsModalOpen(false)}
+      />
+
+      {/* Global Accessibility & Ergonomics Modal */}
+      <AccessibilityModal
+        isOpen={accessibilityModalOpen}
+        onClose={() => setAccessibilityModalOpen(false)}
       />
 
       {/* Developer Engineering Console HUD */}

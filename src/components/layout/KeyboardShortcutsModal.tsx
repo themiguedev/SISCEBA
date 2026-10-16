@@ -26,77 +26,125 @@ interface ShortcutItem {
 }
 
 const SHORTCUTS_DATA: ShortcutItem[] = [
-  // Usuario General
+  // Accesibilidad y Apariencia
   {
-    keys: ['?', 'Shift + ?'],
-    title: 'Centro de Atajos',
-    description: 'Despliega un modal interactivo con buscador y la guía de teclas. También accesible con el botón de teclado en la cabecera.',
-    category: 'Ayuda'
-  },
-  {
-    keys: ['/'],
-    title: 'Búsqueda Rápida',
-    description: 'Enfoca inmediatamente la barra de búsqueda global del sistema.',
-    category: 'Navegación'
-  },
-  {
-    keys: ['Alt', '1'],
-    title: 'Escritorio / Dashboard',
-    description: 'Regresa a la vista principal.',
-    category: 'Navegación'
-  },
-  {
-    keys: ['Alt', '2'],
-    title: 'Estudiantes y Matrícula',
-    description: 'Acceso al padrón estudiantil.',
-    category: 'Navegación'
-  },
-  {
-    keys: ['Alt', '3'],
-    title: 'Calificaciones y Notas',
-    description: 'Acceso a carga de notas y evaluaciones.',
-    category: 'Navegación'
-  },
-  {
-    keys: ['Alt', '4'],
-    title: 'Asistencias',
-    description: 'Acceso al pase de lista diario.',
-    category: 'Navegación'
-  },
-  {
-    keys: ['Alt', '5'],
-    title: 'Comunidad y Avisos',
-    description: 'Cartelera, circulares y noticias.',
-    category: 'Navegación'
-  },
-  {
-    keys: ['Alt', '6'],
-    title: 'Configuración',
-    description: 'Acceso a parámetros (según rol).',
-    category: 'Navegación'
+    keys: ['Alt', 'A'],
+    title: 'Accesibilidad & Ergonomía',
+    description: 'Abre el panel visual para ajustar escala tipográfica (100%-122%), alto contraste WCAG AAA y reducción de movimiento.',
+    category: 'Accesibilidad'
   },
   {
     keys: ['Alt', 'D'],
     title: 'Modo Oscuro / Claro',
-    description: 'Alterna el tema visual al instante.',
-    category: 'Apariencia'
+    description: 'Alterna el tema visual al instante entre modo diurno y nocturno.',
+    category: 'Accesibilidad'
+  },
+  {
+    keys: ['Alt', 'T'],
+    title: 'Rotar Paleta Institucional',
+    description: 'Cicla entre las paletas oficiales (CBA Institucional, Esmeralda, Borgoña, Caribe, Sepia, Medianoche).',
+    category: 'Accesibilidad'
+  },
+
+  // Perfiles de Usuario
+  {
+    keys: ['Alt', 'P'],
+    title: 'Conmutador de Perfil / Rol Activo',
+    description: 'Alterna rápidamente el rol de operación en cuentas con roles múltiples (ej. Docente ↔ Representante, o Director ↔ Docente).',
+    category: 'Perfiles'
+  },
+
+  // Navegación de Módulos (1 al 9)
+  {
+    keys: ['Alt', '1'],
+    title: 'Escritorio / Dashboard',
+    description: 'Regresa a la vista principal y panel de control general.',
+    category: 'Navegación'
+  },
+  {
+    keys: ['Alt', '2'],
+    title: 'Gestión Escolar',
+    description: 'Pases, inasistencias, conductas, matrículas y usuarios.',
+    category: 'Navegación'
+  },
+  {
+    keys: ['Alt', '3'],
+    title: 'Educación Inicial',
+    description: 'Planificación quincenal y evaluación cualitativa de salas 3, 4 y 5 años.',
+    category: 'Navegación'
+  },
+  {
+    keys: ['Alt', '4'],
+    title: 'Educación Primaria',
+    description: 'Proyectos de aprendizaje y evaluación cualitativa/formativa (1° a 6° Grado).',
+    category: 'Navegación'
+  },
+  {
+    keys: ['Alt', '5'],
+    title: 'Media General',
+    description: 'Planes de lapso y evaluación vigesimal (01-20) de bachillerato (1° a 5° Año).',
+    category: 'Navegación'
+  },
+  {
+    keys: ['Alt', '6'],
+    title: 'Consultas y Reportes',
+    description: 'Sábanas de calificaciones, estadísticas académicas y nóminas.',
+    category: 'Navegación'
+  },
+  {
+    keys: ['Alt', '7'],
+    title: 'Comunidad CBA',
+    description: 'Noticias con temáticas de efemérides, comunicados y cartelera.',
+    category: 'Navegación'
+  },
+  {
+    keys: ['Alt', '8'],
+    title: 'Configuración',
+    description: 'Apertura de lapsos, parámetros institucionales y temas.',
+    category: 'Navegación'
+  },
+  {
+    keys: ['Alt', '9'],
+    title: 'Manual & Mapa del Sitio',
+    description: 'Guía interactiva de uso del sistema y directorio completo.',
+    category: 'Navegación'
+  },
+
+  // Utilidades y Acciones Rápidas
+  {
+    keys: ['?', 'Shift + ?'],
+    title: 'Centro de Atajos',
+    description: 'Despliega este modal interactivo con buscador y la guía completa de teclas.',
+    category: 'Ayuda'
+  },
+  {
+    keys: ['Ctrl', 'K'],
+    title: 'Buscador Global (Spotlight)',
+    description: 'Enfoca la barra de búsqueda universal para localizar estudiantes, materias o secciones.',
+    category: 'Acciones'
+  },
+  {
+    keys: ['/'],
+    title: 'Búsqueda Rápida',
+    description: 'Enfoca inmediatamente la búsqueda cuando no estás en un campo de texto.',
+    category: 'Acciones'
   },
   {
     keys: ['Alt', 'B'],
     title: 'Colapsar Barra Lateral',
-    description: 'Oculta/muestra el menú lateral para mayor amplitud en pantalla.',
+    description: 'Oculta o expande el menú lateral para mayor amplitud en pantalla.',
     category: 'Navegación'
   },
   {
     keys: ['Ctrl', 'P'],
     title: 'Imprimir / Generar PDF',
-    description: 'Prepara actas, boletines o la vista actual para impresión.',
+    description: 'Prepara actas, boletines o la vista actual para impresión y exportación.',
     category: 'Acciones'
   },
   {
     keys: ['Escape'],
     title: 'Cerrar Diálogos',
-    description: 'Cierra cualquier modal o panel flotante abierto.',
+    description: 'Cierra cualquier modal o panel flotante abierto inmediatamente.',
     category: 'Acciones'
   }
 ];

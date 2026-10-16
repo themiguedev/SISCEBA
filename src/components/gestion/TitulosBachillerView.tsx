@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
-import { TitleRecord, TitleBlockLayout, TitlePrintSettings } from '../../types';
+import { TitleRecord, TitleBlockLayout, TitlePrintSettings, ExternalAcademicRecord } from '../../types';
 import {
   GraduationCap,
   Printer,
@@ -287,7 +287,15 @@ const DEFAULT_PRINT_SETTINGS: TitlePrintSettings = {
 };
 
 export const TitulosBachillerView: React.FC = () => {
-  const { titles, saveTitleRecord, deleteTitleRecord, students } = useApp();
+  const {
+    titles,
+    saveTitleRecord,
+    deleteTitleRecord,
+    students,
+    externalAcademicRecords,
+    saveExternalAcademicRecord,
+    deleteExternalAcademicRecord
+  } = useApp();
 
   // Selected title state
   const [selectedTitleId, setSelectedTitleId] = useState<string>(titles[0]?.id || '');
@@ -307,6 +315,16 @@ export const TitulosBachillerView: React.FC = () => {
   // New Title Form modal / toggle
   const [showNewModal, setShowNewModal] = useState(false);
   const [newStudentId, setNewStudentId] = useState('');
+
+  // Modal Calificaciones Externas y Convalidaciones
+  const [showExternalGradesModal, setShowExternalGradesModal] = useState(false);
+  const [extStudentId, setExtStudentId] = useState(students[0]?.id || '');
+  const [extOriginSchool, setExtOriginSchool] = useState('');
+  const [extSchoolYear, setExtSchoolYear] = useState('2023 - 2024');
+  const [extGrade, setExtGrade] = useState('2do Año');
+  const [extSubjectName, setExtSubjectName] = useState('Matemática');
+  const [extFinalScore, setExtFinalScore] = useState<number>(16);
+  const [extCertRef, setExtCertRef] = useState('');
 
   // Active Title selection
   const activeTitle: TitleRecord | undefined = useMemo(() => {
@@ -527,13 +545,7 @@ export const TitulosBachillerView: React.FC = () => {
       {/* Main Top Header */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-cba-card flex flex-col md:flex-row items-start md:items-center justify-between gap-4 no-print">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#D4AF37]"></span>
-            <span className="text-xs font-bold text-[#2C2E53] dark:text-[#D4AF37] uppercase tracking-wider">
-              Secretaría de Grado y Egresos • Administrador
-            </span>
-          </div>
-          <h2 className="text-2xl font-black text-[#2C2E53] dark:text-white mt-1 flex items-center gap-2.5">
+          <h2 className="text-2xl font-black text-[#2C2E53] dark:text-white flex items-center gap-2.5">
             <GraduationCap className="w-7 h-7 text-[#D4AF37]" />
             Emisión y Editor Calibrador de Títulos de Bachiller
           </h2>
@@ -545,10 +557,23 @@ export const TitulosBachillerView: React.FC = () => {
         <div className="flex items-center gap-2.5 flex-wrap">
           <button
             onClick={() => setShowNewModal(true)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-md transition-all active:scale-95"
+            className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-md transition-all active:scale-95 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             Nuevo Título
+          </button>
+
+          <button
+            onClick={() => setShowExternalGradesModal(true)}
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#2C2E53] hover:bg-[#1f213b] text-[#D4AF37] font-bold rounded-xl text-xs shadow-md transition-all active:scale-95 border border-[#D4AF37]/30 cursor-pointer"
+          >
+            <FileText className="w-4 h-4" />
+            <span>Convalidaciones Externas</span>
+            {externalAcademicRecords.length > 0 && (
+              <span className="bg-[#D4AF37] text-slate-950 font-black text-[10px] px-1.5 py-0.2 rounded-full">
+                {externalAcademicRecords.length}
+              </span>
+            )}
           </button>
 
           <button
@@ -1519,6 +1544,241 @@ export const TitulosBachillerView: React.FC = () => {
           );
         })}
       </div>
+
+      {/* MODAL: CONVALIDACIONES Y CALIFICACIONES EXTERNAS */}
+      {showExternalGradesModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 no-print">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-3xl w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto space-y-5">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-sm">
+                  <FileText className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-base text-[#2C2E53] dark:text-white">
+                    Convalidaciones y Calificaciones Externas
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Expediente académico de años previos cursados en otros planteles para egresados de 5to año.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowExternalGradesModal(false)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Formulario de Nueva Convalidación */}
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                const student = students.find((s) => s.id === extStudentId);
+                if (!student || !extOriginSchool.trim() || !extSubjectName.trim()) return;
+
+                const newRec: ExternalAcademicRecord = {
+                  id: `ext-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+                  studentId: student.id,
+                  studentName: student.fullName,
+                  studentCedula: student.cedula,
+                  originSchool: extOriginSchool.trim(),
+                  schoolYear: extSchoolYear.trim(),
+                  grade: extGrade,
+                  subjectName: extSubjectName.trim(),
+                  finalScore: Number(extFinalScore),
+                  certifiedDocumentRef: extCertRef.trim()
+                };
+
+                await saveExternalAcademicRecord(newRec);
+                setExtOriginSchool('');
+                setExtSubjectName('');
+                setExtCertRef('');
+              }}
+              className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 space-y-3 text-xs"
+            >
+              <span className="text-[10px] uppercase font-black tracking-wider text-indigo-700 dark:text-indigo-400 block">
+                + Asentar Nueva Calificación Externa
+              </span>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Estudiante *</label>
+                  <select
+                    value={extStudentId}
+                    onChange={(e) => setExtStudentId(e.target.value)}
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 font-bold"
+                    required
+                  >
+                    {students.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.fullName} ({s.cedula}) — {s.grade}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Plantel de Procedencia *</label>
+                  <input
+                    type="text"
+                    placeholder="Ej. U.E. San Vicente de Paúl"
+                    value={extOriginSchool}
+                    onChange={(e) => setExtOriginSchool(e.target.value)}
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div>
+                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Año Escolar *</label>
+                  <input
+                    type="text"
+                    value={extSchoolYear}
+                    onChange={(e) => setExtSchoolYear(e.target.value)}
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Grado Cursado *</label>
+                  <select
+                    value={extGrade}
+                    onChange={(e) => setExtGrade(e.target.value)}
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 font-bold"
+                  >
+                    {['1er Año', '2do Año', '3er Año', '4to Año'].map((g) => (
+                      <option key={g} value={g}>{g}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Asignatura *</label>
+                  <input
+                    type="text"
+                    value={extSubjectName}
+                    onChange={(e) => setExtSubjectName(e.target.value)}
+                    placeholder="Ej. Castellano"
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 font-bold"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Nota (01-20) *</label>
+                  <input
+                    type="number"
+                    min={0}
+                    max={20}
+                    value={extFinalScore}
+                    onChange={(e) => setExtFinalScore(Number(e.target.value))}
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 font-black text-center text-sm font-mono"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
+                <div>
+                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Ref. Certificación de Calificaciones MPPE
+                  </label>
+                  <input
+                    type="text"
+                    value={extCertRef}
+                    onChange={(e) => setExtCertRef(e.target.value)}
+                    placeholder="Ej. Folio 012 / Libro Cert. 2024"
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700"
+                  />
+                </div>
+
+                <div className="flex justify-end">
+                  <button
+                    type="submit"
+                    className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs rounded-xl shadow-md transition-all cursor-pointer"
+                  >
+                    Asentar Calificación Externa
+                  </button>
+                </div>
+              </div>
+            </form>
+
+            {/* Listado de Calificaciones Externas */}
+            <div className="space-y-2">
+              <span className="text-xs font-black uppercase tracking-wider text-slate-500 block">
+                Historial de Convalidaciones Registradas ({externalAcademicRecords.length})
+              </span>
+
+              {externalAcademicRecords.length === 0 ? (
+                <div className="py-8 text-center text-slate-400 text-xs">
+                  No hay calificaciones externas registradas aún.
+                </div>
+              ) : (
+                <div className="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-xl">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead className="bg-slate-50 dark:bg-slate-800 text-slate-500 font-extrabold text-[10px] uppercase border-b border-slate-200 dark:border-slate-700">
+                      <tr>
+                        <th className="py-2.5 px-3">Estudiante</th>
+                        <th className="py-2.5 px-3">Plantel de Origen</th>
+                        <th className="py-2.5 px-3">Año / Grado</th>
+                        <th className="py-2.5 px-3">Asignatura</th>
+                        <th className="py-2.5 px-3 text-center">Nota</th>
+                        <th className="py-2.5 px-3">Ref. MPPE</th>
+                        <th className="py-2.5 px-3 text-right">Acción</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                      {externalAcademicRecords.map((r) => (
+                        <tr key={r.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40">
+                          <td className="py-2.5 px-3">
+                            <strong className="text-slate-800 dark:text-slate-200 block truncate max-w-[150px]">
+                              {r.studentName}
+                            </strong>
+                            <span className="text-[10px] text-slate-400 font-mono">{r.studentCedula}</span>
+                          </td>
+                          <td className="py-2.5 px-3 text-slate-600 dark:text-slate-400 truncate max-w-[150px]">
+                            {r.originSchool}
+                          </td>
+                          <td className="py-2.5 px-3 text-slate-600 dark:text-slate-400">
+                            {r.grade} <span className="text-[10px] text-slate-400">({r.schoolYear})</span>
+                          </td>
+                          <td className="py-2.5 px-3 font-bold text-slate-800 dark:text-slate-200">
+                            {r.subjectName}
+                          </td>
+                          <td className="py-2.5 px-3 text-center font-black font-mono text-indigo-700 dark:text-indigo-400">
+                            {String(r.finalScore).padStart(2, '0')} / 20
+                          </td>
+                          <td className="py-2.5 px-3 text-slate-500 font-mono text-[10px]">
+                            {r.certifiedDocumentRef || '—'}
+                          </td>
+                          <td className="py-2.5 px-3 text-right">
+                            <button
+                              onClick={() => {
+                                if (confirm('¿Desea eliminar esta calificación externa del expediente?')) {
+                                  deleteExternalAcademicRecord(r.id);
+                                }
+                              }}
+                              className="p-1 rounded-lg text-slate-400 hover:text-rose-600 transition cursor-pointer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

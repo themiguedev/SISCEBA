@@ -4,6 +4,7 @@ import { AreasProfilesView } from './AreasProfilesView';
 import { CompetenciesBank } from './CompetenciesBank';
 import { IndicatorsBank } from './IndicatorsBank';
 import { StrategiesBank } from './StrategiesBank';
+import { EducationalResourcesBank } from './EducationalResourcesBank';
 import { PlanQuincenalView } from './PlanQuincenalView';
 import { PlanLapsoView } from './PlanLapsoView';
 import { DisenadorPlanificacionView } from './DisenadorPlanificacionView';
@@ -12,6 +13,7 @@ import {
   Layers,
   Tag,
   Lightbulb,
+  Boxes,
   Calendar,
   CalendarDays,
   FileSpreadsheet
@@ -33,6 +35,7 @@ export const PlanningModule: React.FC<PlanningModuleProps> = ({
     { id: 'DISENADOR_OFICIAL', label: 'Diseñador Didáctico Oficial', icon: FileSpreadsheet },
     { id: 'PLAN_QUINCENAL', label: 'Planes Quincenales', icon: Calendar },
     { id: 'AREAS_PERFILES', label: 'Áreas y Perfiles', icon: BookOpen },
+    { id: 'BANCO_RECURSOS', label: 'Banco de Recursos Didácticos', icon: Boxes },
     { id: 'BANCO_COMPETENCIAS', label: 'Banco Competencias', icon: Layers },
     { id: 'BANCO_INDICADORES', label: 'Banco Indicadores', icon: Tag },
     { id: 'BANCO_ESTRATEGIAS', label: 'Banco Estrategias', icon: Lightbulb },
@@ -102,6 +105,7 @@ export const PlanningModule: React.FC<PlanningModuleProps> = ({
         />
       )}
       {activeSubTab === 'AREAS_PERFILES' && <AreasProfilesView />}
+      {activeSubTab === 'BANCO_RECURSOS' && <EducationalResourcesBank />}
       {activeSubTab === 'BANCO_COMPETENCIAS' && <CompetenciesBank />}
       {activeSubTab === 'BANCO_INDICADORES' && <IndicatorsBank />}
       {activeSubTab === 'BANCO_ESTRATEGIAS' && <StrategiesBank />}

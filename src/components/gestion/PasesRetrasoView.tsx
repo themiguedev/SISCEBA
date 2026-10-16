@@ -53,20 +53,6 @@ export const PasesRetrasoView: React.FC = () => {
       printed: false
     });
 
-    // Despacho de notificación al representante y alumno
-    sendNotification({
-      title: `Aviso de Portería • Pase de Retraso #${newPass.ticketNumber}`,
-      message: `Se registró el ingreso tardío a las ${passTime} para el estudiante ${stu.fullName} (${stu.grade} "${stu.section}"). Motivo: ${passReason}. Representante legal notificado.`,
-      category: 'ASISTENCIA',
-      priority: 'MEDIA',
-      recipientRole: 'REPRESENTANTE',
-      recipientName: stu.representativeName,
-      studentName: stu.fullName,
-      actionTab: 'GESTION',
-      actionSubTab: 'PASES',
-      deliveryChannels: ['PORTAL', 'SMS_WHATSAPP']
-    });
-
     setIsCreateModalOpen(false);
     setActiveTicketToPrint(newPass);
   };
@@ -81,14 +67,8 @@ export const PasesRetrasoView: React.FC = () => {
       {/* Top Banner */}
       <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-cba-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#D4AF37]"></span>
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
-              Control de Acceso y Portería
-            </span>
-          </div>
-          <h2 className="text-xl font-extrabold text-[#2C2E53] mt-1">Pases por Retraso</h2>
-          <p className="text-xs text-slate-500">
+          <h2 className="text-xl font-extrabold text-[#2C2E53]">Pases por Retraso</h2>
+          <p className="text-xs text-slate-500 mt-1">
             ADM: Registre las llegadas tardías de los estudiantes y emita boletas oficiales de ingreso.
           </p>
         </div>

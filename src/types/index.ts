@@ -1,6 +1,6 @@
 export type EducationalLevel = 'INICIAL' | 'PRIMARIA' | 'MEDIA_GENERAL';
 
-export type UserRole = 'DOCENTE' | 'COORDINACION' | 'COORDINADOR' | 'DIRECTOR' | 'ADMINISTRADOR' | 'REPRESENTANTE' | 'ESTUDIANTE' | 'ASISTENTE' | 'SECRETARIA';
+export type UserRole = 'DOCENTE' | 'COORDINACION' | 'COORDINADOR' | 'DIRECTOR' | 'ADMINISTRADOR' | 'REPRESENTANTE' | 'ESTUDIANTE' | 'SECRETARIA';
 
 export interface AppUser {
   id: string;
@@ -23,17 +23,37 @@ export interface AppUser {
   twoFactorEnabled?: boolean;
   twoFactorSecret?: string;
   passwordLastChanged?: string;
+  academicAssignments?: AcademicAssignment[];
 }
+
+export interface AcademicAssignment {
+  id: string;
+  level: EducationalLevel;
+  grade: string;
+  section: 'A' | 'B';
+  areaId: string;
+  areaCode?: string;
+  areaName?: string;
+  subjectName?: string;
+}
+
+export const LEVEL_GRADES_CATALOG: Record<EducationalLevel, string[]> = {
+  INICIAL: ['Sala de 3 Años', 'Sala de 4 Años', 'Sala de 5 Años'],
+  PRIMARIA: ['1er Grado', '2do Grado', '3er Grado', '4to Grado', '5to Grado', '6to Grado'],
+  MEDIA_GENERAL: ['1er Año', '2do Año', '3er Año', '4to Año', '5to Año']
+};
 
 export interface RegistrationCode {
   id: string;
   code: string;
-  allowedRole?: 'DOCENTE' | 'ASISTENTE' | 'SECRETARIA';
+  allowedRole?: 'DOCENTE' | 'SECRETARIA';
   createdBy: string;
   createdAt: string;
   used: boolean;
   usedBy?: string;
   usedAt?: string;
+  expiresAt?: string;
+  durationHours?: number;
 }
 
 export type SubjectType = 'REGULAR' | 'INTEGRADA' | 'ESPECIALIZADA';
@@ -58,6 +78,7 @@ export interface Competency {
   description: string;
   level: EducationalLevel;
   lapso: 1 | 2 | 3;
+  grade?: string; // ej: 'Sala de 4 Años', 'Sala de 5 Años'
 }
 
 export interface Indicator {
@@ -70,6 +91,7 @@ export interface Indicator {
   lapso: 1 | 2 | 3;
   weight?: number; // Para Media General (ej. 20%)
   evaluationInstrument?: string;
+  grade?: string; // ej: 'Sala de 4 Años', 'Sala de 5 Años'
 }
 
 export interface Strategy {
@@ -81,6 +103,54 @@ export interface Strategy {
   description: string;
   resources: string;
   level: EducationalLevel;
+}
+
+export type ResourceCategory =
+  | 'DEPORTIVO_PSICOMOTOR'
+  | 'MANIPULATIVO_CONCRETO'
+  | 'ARTISTICO_PLASTICO'
+  | 'LABORATORIO_CIENTIFICO'
+  | 'DIGITAL_TECNOLOGICO'
+  | 'BIBLIOGRAFICO_IMPRESO'
+  | 'AUDIOVISUAL_MULTIMEDIA';
+
+export interface EducationalResource {
+  id: string;
+  name: string;
+  category: ResourceCategory;
+  areaId: string;
+  level: EducationalLevel;
+  description?: string;
+  location?: string;
+  quantity?: number;
+  totalQuantity?: number;
+  availableQuantity?: number;
+  specifications?: string;
+  isReusable?: boolean;
+}
+
+export interface DiagnosticCriterion {
+  id: string;
+  code: string;
+  name: string;
+  description: string;
+  areaId: string;
+  level: EducationalLevel;
+  grade?: string;
+  category?: string;
+  criterion?: string;
+  domain?: string;
+  instrument?: string;
+  scaleType?: string;
+}
+
+export interface ChecklistScoreItem {
+  criterionId: string;
+  criterionName?: string;
+  criterionText?: string;
+  status: 'L' | 'EP' | 'I' | 'C' | 'ED' | 'RN' | 'LOGRADO' | 'EN_PROCESO' | 'INICIADO';
+  score?: number;
+  notes?: string;
 }
 
 export type PlanStatus = 'BORRADOR' | 'A_REVISION' | 'DEFINITIVO';
@@ -119,7 +189,7 @@ export interface PlanQuincenal {
   docenteName?: string;
   schoolYear?: string; // ej: "2026 - 2027"
   periodoQuincenal?: string; // ej: "21/09 al 02/10/2026"
-  componente?: string; // Primaria: Componente institucional
+  componente?: string; // Primaria e Inicial: Componente institucional
   temaGenerador?: string; // Media General: Tema Generador
   rows?: DidacticPlanRow[];
   actividadesInicio?: string;
@@ -127,6 +197,12 @@ export interface PlanQuincenal {
   actividadesCierre?: string;
   recursos?: string;
   fuentesConsulta?: string;
+  // Campos especializados de Formato Adaptable por Subsistema
+  espaciosTrabajo?: string; // Inicial: Rincones (Construir, Representar, Expresar, Experimentar)
+  rutinaDiaria?: string; // Inicial: Rutina (Llegada, Trabajo en Espacios, Orden, Aseo, Recuento)
+  ejesIntegradores?: string; // Primaria: Ejes del Proyecto de Aprendizaje (PA)
+  tipoProyecto?: string; // Primaria: Título o modalidad del PA
+  temaIndispensable?: string; // Media General: Tema Indispensable
 }
 
 export interface LapsoEvaluationItem {
@@ -243,6 +319,10 @@ export interface EvaluationRecord {
   scoreLiteral?: LiteralScore; // Exclusively for INICIAL (A, B, C, D, E)
   scoreQualitative?: QualitativeScore; // Exclusively for PRIMARIA (L, P/EP, I)
   roboticsScore?: RoboticsSpecialEvaluation;
+  checklistScores?: ChecklistScoreItem[];
+  rasgosScore?: number; // Media General (0..20, 10% rasgos del docente)
+  autoScore?: number; // Media General (0..20, 10% autoevaluación)
+  coevScore?: number; // Media General (0..20, 10% coevaluación)
   observations?: string;
   recordedAt: string;
   teacherId: string;
@@ -397,7 +477,11 @@ export interface AdministrativeBlockEntry {
   reason: string;
   blockDate: string;
   active: boolean;
-  debtAmount?: string;
+  debtAmount?: number;
+  concept?: 'MATRICULA' | 'MENSUALIDAD' | 'MATERIALES' | 'RECAUDOS' | 'OTRO';
+  unblockedDate?: string;
+  unblockedBy?: string;
+  notes?: string;
 }
 
 export interface TitleBlockLayout {
@@ -461,17 +545,40 @@ export interface TitleRecord {
   printSettings?: Partial<TitlePrintSettings>;
 }
 
+export interface LapsoConfig {
+  lapso: 1 | 2 | 3;
+  name: string;
+  startDate: string;
+  endDate: string;
+  isGradingOpen: boolean; // Regla de negocio oficial de bloqueo manual
+  deadlineDate?: string; // Fecha límite programada (YYYY-MM-DD)
+  deadlineTime?: string; // Hora límite programada (HH:mm)
+  autoLockEnabled?: boolean; // Bloqueo automático programado activo
+}
+
 export interface SchoolYearConfig {
   year: string;
   isCurrent: boolean;
-  lapsos: {
-    lapso: 1 | 2 | 3;
-    name: string;
-    startDate: string;
-    endDate: string;
-    isGradingOpen: boolean; // Regla de negocio oficial de bloqueo: "No existen lapsos habilitados para la carga de registros"
-  }[];
+  lapsos: LapsoConfig[];
 }
+
+export type NoticeTheme = 
+  | 'ESTANDAR'
+  | 'HALLOWEEN'
+  | 'NAVIDAD'
+  | 'ZULIANIDAD'
+  | 'CARNAVAL'
+  | 'DIA_DEL_MAESTRO'
+  | 'ANIVERSARIO_CBA'
+  | 'PATRIO_VENEZUELA';
+
+export type TargetAudienceRole = 
+  | 'TODOS'
+  | 'DIRECCION'
+  | 'COORDINACION'
+  | 'DOCENTES'
+  | 'REPRESENTANTES'
+  | 'ESTUDIANTES';
 
 export interface CommunityNotice {
   id: string;
@@ -479,9 +586,25 @@ export interface CommunityNotice {
   content: string;
   date: string;
   type: 'NOTICIA' | 'ANUNCIO_URGENTE' | 'EVENTO';
-  targetAudience: 'TODOS' | 'DOCENTES' | 'REPRESENTANTES' | 'ESTUDIANTES';
+  targetAudience: TargetAudienceRole;
+  theme?: NoticeTheme;
+  subsystem?: 'TODOS' | EducationalLevel;
   author: string;
   pinned?: boolean;
+}
+
+export interface BroadcastMessage {
+  id: string;
+  title: string;
+  content: string;
+  targetAudience: TargetAudienceRole;
+  subsystem?: 'TODOS' | EducationalLevel;
+  theme?: NoticeTheme;
+  channel: 'SMS_Y_CORREO' | 'SOLO_CORREO' | 'SMS' | 'PORTAL';
+  date: string;
+  time: string;
+  sender: string;
+  urgent?: boolean;
 }
 
 export interface BirthdayPerson {
@@ -515,7 +638,7 @@ export interface SystemNotification {
   read: boolean;
   category: NotificationCategory;
   priority: 'BAJA' | 'MEDIA' | 'ALTA';
-  recipientRole: 'TODOS' | 'REPRESENTANTE' | 'ESTUDIANTE' | 'DOCENTE' | 'COORDINACION';
+  recipientRole: 'TODOS' | 'REPRESENTANTE' | 'ESTUDIANTE' | 'DOCENTE' | 'COORDINACION' | 'DIRECTOR';
   recipientName?: string;
   studentName?: string;
   actionTab?: MainNavigationTab;
@@ -577,6 +700,9 @@ export interface InstitutionalSchoolData {
   correo: string;
   director: string;
   subdirector: string;
+  supervisorCircuito?: string;
+  directorFirmaUrl?: string;
+  selloInstitucionalUrl?: string;
   updatedAt?: string;
 }
 
@@ -645,10 +771,100 @@ export interface CRPEstudianteInscrito {
   seccion: string;
   fechaInscripcion: string;
   asignacionMetodo: 'MANUAL' | 'AUTOMATICA';
-  // Dos momentos pedagógicos en el año escolar
   calificacionMomento1?: CRPLiteralScore;
   calificacionMomento2?: CRPLiteralScore;
   calificacionPrevalente?: CRPLiteralScore;
   observaciones?: string;
 }
+
+// ==========================================
+// RÉGIMEN MPPE: PRUEBAS DE REVISIÓN (JULIO)
+// ==========================================
+export interface RevisionEvaluationRecord {
+  id: string;
+  studentId: string;
+  studentName?: string;
+  studentCedula?: string;
+  areaId: string;
+  areaName?: string;
+  schoolYear: string;
+  grade: string;
+  section: 'A' | 'B';
+  revisionScore: number; // 0..20 (Mínimo aprobatorio: 10)
+  passed: boolean;
+  evaluatedBy: string;
+  evaluatedByName?: string;
+  evaluationDate: string;
+  actaNumber?: string;
+  observations?: string;
+  createdAt?: string;
+}
+
+// ==========================================
+// RÉGIMEN MPPE: MATERIA PENDIENTE (4 MOMENTOS)
+// ==========================================
+export interface PendingSubjectGrade {
+  id: string;
+  enrollmentId: string;
+  momentNumber: 1 | 2 | 3 | 4;
+  score?: number; // 0..20
+  evaluatedAt?: string;
+  notes?: string;
+}
+
+export interface PendingSubjectEnrollment {
+  id: string;
+  studentId: string;
+  studentName?: string;
+  studentCedula?: string;
+  areaId: string;
+  areaName?: string;
+  schoolYear: string;
+  originGrade: string; // Grado donde reprobó
+  currentGrade: string; // Grado actual que cursa
+  assignedTeacherId?: string;
+  assignedTeacherName?: string;
+  status: 'CURSANDO' | 'APROBADA' | 'REPROBADA';
+  finalScore?: number;
+  grades?: PendingSubjectGrade[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+// ==========================================
+// TRASLADO / CAMBIO DE SECCIÓN OFICIAL (A <-> B)
+// ==========================================
+export interface SectionTransferLog {
+  id: string;
+  studentId: string;
+  studentName?: string;
+  studentCedula?: string;
+  previousSection: 'A' | 'B';
+  newSection: 'A' | 'B';
+  grade: string;
+  level: EducationalLevel;
+  reason: string;
+  transferredBy: string;
+  transferredByName?: string;
+  transferredAt: string;
+  recordsMigratedCount?: number;
+}
+
+// ==========================================
+// CALIFICACIONES EXTERNAS Y CONVALIDACIONES
+// ==========================================
+export interface ExternalAcademicRecord {
+  id: string;
+  studentId: string;
+  studentName?: string;
+  studentCedula?: string;
+  originSchool: string;
+  schoolYear: string;
+  grade: string;
+  subjectName: string;
+  finalScore: number; // 0..20
+  certifiedDocumentRef?: string;
+  createdAt?: string;
+}
+
 

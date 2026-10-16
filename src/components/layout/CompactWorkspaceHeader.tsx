@@ -57,6 +57,8 @@ export const CompactWorkspaceHeader: React.FC<CompactWorkspaceHeaderProps> = ({
     BLOQUEO: 'Bloqueo Administrativo',
     TITULOS: 'Títulos de Bachiller',
     MATRICULA: 'Matrícula y Prosecución',
+    TALLERES_CRP: 'Talleres CRP',
+    USUARIOS: 'Usuarios y Roles',
     // Planificación
     AREAS_PERFILES: 'Áreas de Aprendizaje / Perfiles',
     BANCO_COMPETENCIAS: 'Banco de Competencias',

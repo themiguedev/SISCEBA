@@ -596,13 +596,19 @@ html.dark [data-force-light] .border-slate-200 {
 }
 
 /* Superficies neutras en Modo Oscuro (incluyendo cualquier variante con opacidad /80, /70, /50) */
-html.dark [class*="bg-slate-50"]:not(.force-light):not([data-force-light]) {
+html.dark [class~="bg-slate-50"]:not(.force-light):not([data-force-light]),
+html.dark [class*=" bg-slate-50/"]:not(.force-light):not([data-force-light]),
+html.dark [class^="bg-slate-50/"]:not(.force-light):not([data-force-light]) {
   background-color: rgba(255, 255, 255, 0.04) !important;
 }
-html.dark [class*="bg-slate-100"]:not(.force-light):not([data-force-light]) {
+html.dark [class~="bg-slate-100"]:not(.force-light):not([data-force-light]),
+html.dark [class*=" bg-slate-100/"]:not(.force-light):not([data-force-light]),
+html.dark [class^="bg-slate-100/"]:not(.force-light):not([data-force-light]) {
   background-color: rgba(255, 255, 255, 0.07) !important;
 }
-html.dark [class*="bg-slate-200"]:not(.force-light):not([data-force-light]) {
+html.dark [class~="bg-slate-200"]:not(.force-light):not([data-force-light]),
+html.dark [class*=" bg-slate-200/"]:not(.force-light):not([data-force-light]),
+html.dark [class^="bg-slate-200/"]:not(.force-light):not([data-force-light]) {
   background-color: rgba(255, 255, 255, 0.10) !important;
 }
 
@@ -1224,5 +1230,72 @@ html.dark .card-hover-lift:hover {
     scroll-behavior: auto !important;
   }
 }
+
+/* ==============================================================
+   ACCESIBILIDAD Y ERGONOMÍA VISUAL SICE-CBA (WCAG AAA)
+   ============================================================== */
+
+/* 1. Escala tipográfica accesible */
+html[data-font-size="normal"] {
+  font-size: 100%;
+}
+
+html[data-font-size="large"] {
+  font-size: 110%;
+}
+
+html[data-font-size="extra-large"] {
+  font-size: 122%;
+}
+
+/* 2. Reducción de movimiento forzada por el usuario */
+html[data-reduced-motion="true"] *,
+html[data-reduced-motion="true"] *::before,
+html[data-reduced-motion="true"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* 3. Modo de Alto Contraste (High Contrast Mode) */
+html[data-high-contrast="true"] {
+  --contrast-border: #000000;
+  --contrast-text: #000000;
+}
+
+html[data-high-contrast="true"].dark {
+  --contrast-border: #ffffff;
+  --contrast-text: #ffffff;
+}
+
+html[data-high-contrast="true"] button,
+html[data-high-contrast="true"] input,
+html[data-high-contrast="true"] select,
+html[data-high-contrast="true"] textarea {
+  border-width: 1.5px !important;
+  font-weight: 600 !important;
+}
+
+html[data-high-contrast="true"] .text-slate-400,
+html[data-high-contrast="true"] .text-slate-500 {
+  color: #334155 !important;
+}
+
+html[data-high-contrast="true"].dark .text-slate-400,
+html[data-high-contrast="true"].dark .text-slate-500 {
+  color: #cbd5e1 !important;
+}
+
+html[data-high-contrast="true"] .border-slate-200,
+html[data-high-contrast="true"] .border-slate-300 {
+  border-color: #64748b !important;
+}
+
+html[data-high-contrast="true"].dark .border-slate-700,
+html[data-high-contrast="true"].dark .border-slate-800 {
+  border-color: #94a3b8 !important;
+}
+
 
 

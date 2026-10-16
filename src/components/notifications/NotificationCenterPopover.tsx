@@ -8,6 +8,7 @@ import {
   Clock,
   FileText,
   School,
+  Megaphone,
   Trash2,
   Mail,
   Smartphone,
@@ -60,6 +61,7 @@ export const NotificationCenterPopover: React.FC<NotificationCenterPopoverProps>
       case 'DOCUMENTOS':
         return <FileText className="w-4 h-4 text-emerald-400" />;
       case 'INSTITUCIONAL':
+        return <Megaphone className="w-4 h-4 text-pink-400" />;
       default:
         return <School className="w-4 h-4 text-violet-400" />;
     }
@@ -143,11 +145,11 @@ export const NotificationCenterPopover: React.FC<NotificationCenterPopoverProps>
 
           {/* Categories Pill Filters */}
           <div className="p-2.5 bg-slate-100/90 dark:bg-[#111322] border-b border-slate-200 dark:border-[#2C2E53]">
-            <div className="grid grid-cols-4 gap-1 text-[11px]">
+            <div className="grid grid-cols-5 gap-1 text-[10px] sm:text-[11px]">
               <button
                 type="button"
                 onClick={() => setSelectedCategory('ALL')}
-                className={`py-1.5 px-1 rounded-lg font-bold transition-all text-center flex flex-col sm:flex-row items-center justify-center gap-1 cursor-pointer truncate ${
+                className={`py-1.5 px-1 rounded-lg font-bold transition-all text-center flex items-center justify-center gap-1 cursor-pointer truncate ${
                   selectedCategory === 'ALL'
                     ? 'bg-[#2C2E53] text-[#F5C842] border border-[#D4AF37]/50 shadow-xs'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-white/80 dark:hover:bg-white/5 border border-transparent'
@@ -155,7 +157,7 @@ export const NotificationCenterPopover: React.FC<NotificationCenterPopoverProps>
                 title="Todas las notificaciones"
               >
                 <span>Todas</span>
-                <span className="text-[10px] px-1 py-0.2 rounded-full bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-300 font-semibold">
+                <span className="text-[9px] sm:text-[10px] px-1 py-0.2 rounded-full bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-300 font-semibold">
                   {notifications.length}
                 </span>
               </button>
@@ -198,6 +200,19 @@ export const NotificationCenterPopover: React.FC<NotificationCenterPopoverProps>
               >
                 <span className="truncate">Trámites</span>
               </button>
+
+              <button
+                type="button"
+                onClick={() => setSelectedCategory('INSTITUCIONAL')}
+                className={`py-1.5 px-1 rounded-lg font-bold transition-all text-center flex items-center justify-center cursor-pointer truncate ${
+                  selectedCategory === 'INSTITUCIONAL'
+                    ? 'bg-[#2C2E53] text-[#F5C842] border border-[#D4AF37]/50 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-white/80 dark:hover:bg-white/5 border border-transparent'
+                }`}
+                title="Noticias y Cartelera Institucional"
+              >
+                <span className="truncate">Noticias</span>
+              </button>
             </div>
           </div>
 
@@ -210,7 +225,7 @@ export const NotificationCenterPopover: React.FC<NotificationCenterPopoverProps>
                   No hay notificaciones en este apartado
                 </p>
                 <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
-                  Las alertas de notas y pases se reflejarán aquí al emitirse.
+                  Las alertas de notas, pases y noticias de cartelera se reflejarán aquí al emitirse.
                 </p>
               </div>
             ) : (

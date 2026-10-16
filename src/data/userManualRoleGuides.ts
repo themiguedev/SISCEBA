@@ -93,7 +93,7 @@ export const ROLE_SPECIFIC_MANUALS: Record<UserRole, DetailedRoleGuide> = {
           'Ingresa a Consultas y Reportes → Boletín Informativo.',
           'Escoge la sección y el estudiante a inspeccionar.',
           'Verifica las notas de cada asignatura y agrega observaciones pedagógicas cualitativas.',
-          'Usa el botón de Vista Previa o Imprimir Boletín si requieres la versión física en tamaño carta.'
+          'Supervisa la vista previa oficial del boletín. La emisión e impresión física oficial es potestad exclusiva del Administrador.'
         ]
       }
     ],
@@ -113,128 +113,31 @@ export const ROLE_SPECIFIC_MANUALS: Record<UserRole, DetailedRoleGuide> = {
 
   SECRETARIA: {
     roleId: 'SECRETARIA',
-    roleTitle: 'Secretaría Académica / Control de Estudios',
+    roleTitle: 'Secretaría / Asistencia y Conducta',
     badgeEmoji: '📂',
-    department: 'Secretaría de Control de Estudios (UCE)',
-    roleGreeting: '¡Bienvenida, Secretaría Académica!',
-    roleOverview: 'Tu labor es el corazón administrativo del colegio: te encargas de las admisiones e inscripciones de estudiantes, el padrón de matrícula, la emisión formal de constancias y la custodia del archivo institucional.',
+    department: 'Secretaría Escolar / Control de Asistencia y Disciplina',
+    roleGreeting: '¡Bienvenida, Secretaría Escolar!',
+    roleOverview: 'Tu función en SICE-CBA está enfocada en la vida operativa y control diario de los estudiantes: registrar y justificar Inasistencias / Asistencia Diaria, asentar el Historial de Conducta y Disciplina, y consultar nóminas oficiales.',
     badgeColor: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
     missions: [
       {
         id: 'sec-m1',
-        title: 'Inscribir Nuevos Alumnos y Regulares',
-        badge: 'Admisiones',
-        summary: 'Registra los expedientes completos vinculando datos del representante legal, ficha médica y grado/sección.',
-        iconName: 'UserCheck',
-        targetTab: 'GESTION',
-        targetSubTab: 'INSCRIPCIONES',
-        recommendedSteps: [
-          'Accede a Gestión Escolar → Asistente de Inscripciones.',
-          'Paso 1: Completa los datos y correo del Representante Legal.',
-          'Paso 2: Llena el expediente del Alumno (nombres, cédula escolar, tipo de sangre).',
-          'Paso 3: Asigna el subsistema (Inicial, Primaria, Media) y sección, y genera la planilla de matrícula.'
-        ]
-      },
-      {
-        id: 'sec-m2',
-        title: 'Padrón Estudiantil y Ficha del Alumno',
-        badge: 'Matrícula',
-        summary: 'Consulta la lista general de estudiantes activos por nivel, edad, género y estatus administrativo.',
-        iconName: 'Users',
-        targetTab: 'GESTION',
-        targetSubTab: 'MATRICULA',
-        recommendedSteps: [
-          'Dirígete a Gestión Escolar → Matrícula y Padrón.',
-          'Utiliza los filtros rápidos por grado o escribe el nombre del estudiante en el buscador.',
-          'Visualiza el expediente del alumno, sus datos familiares y la información de contacto de emergencia.',
-          'Exporta la nómina del curso a formato Excel o PDF cuando la Dirección lo solicite.'
-        ]
-      },
-      {
-        id: 'sec-m3',
-        title: 'Tramitar Constancias y Documentos Oficiales',
-        badge: 'Trámites',
-        summary: 'Atiende y gestiona las solicitudes de constancias de estudio, cartas de buena conducta y notas certificadas.',
-        iconName: 'FileText',
-        targetTab: 'GESTION',
-        targetSubTab: 'DOCUMENTOS',
-        recommendedSteps: [
-          'Ve a Gestión Escolar → Documentos Solicitados.',
-          'Revisa las peticiones entrantes de los representantes o genera una nueva solicitud en ventanilla.',
-          'Verifica que el alumno no posea bloqueo administrativo pendiente.',
-          'Cambia el estado a "Listo para Retirar" y presiona "Imprimir Constancia" con el membrete institucional.'
-        ]
-      },
-      {
-        id: 'sec-m4',
-        title: 'Consultar Sábanas de Rendimiento y Listados',
-        badge: 'Consultas',
-        summary: 'Accede a las sábanas integrales de calificaciones por sección y nóminas oficiales para auditorías ministeriales.',
-        iconName: 'FileSpreadsheet',
-        targetTab: 'CONSULTAS',
-        targetSubTab: 'NOMINAS',
-        recommendedSteps: [
-          'Navega a Consultas y Reportes → Nóminas de Alumnos.',
-          'Selecciona el nivel y la sección deseada.',
-          'Descarga el listado oficial con cédulas de identidad, fechas de nacimiento y nombres completos.'
-        ]
-      }
-    ],
-    dosAndDonts: {
-      dos: [
-        'Verificar cuidadosamente que la cédula y fecha de nacimiento coincidan con la partida de nacimiento física.',
-        'Atender y resolver las solicitudes de constancias en el módulo de Documentos en un plazo no mayor a 48 horas.',
-        'Verificar el estatus de solvencia antes de imprimir constancias o notas certificadas.'
-      ],
-      donts: [
-        'No asentar o modificar calificaciones académicas (función exclusiva de docentes y coordinación).',
-        'No inscribir alumnos en grados o secciones con cupo cerrado sin previa autorización escrita de Dirección.'
-      ]
-    }
-  },
-
-  ASISTENTE: {
-    roleId: 'ASISTENTE',
-    roleTitle: 'Asistente de Aula y Disciplina',
-    badgeEmoji: '🤝',
-    department: 'Coordinación de Asistencia y Disciplina',
-    roleGreeting: '¡Bienvenido(a), Asistente de Aula!',
-    roleOverview: 'Tu función en SICE-CBA está enfocada operativamente en el día a día escolar: controlar la puntualidad mediante Pases por Retraso, asentar la Asistencia Diaria y llevar el historial de Conducta y Disciplina.',
-    badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-    missions: [
-      {
-        id: 'asi-m1',
-        title: 'Emitir Pases por Retraso a Primera Hora',
-        badge: 'Portería & Pases',
-        summary: 'Genera boletas térmicas o tickets rápidos para estudiantes que llegan después del timbre de entrada.',
-        iconName: 'Clock',
-        targetTab: 'GESTION',
-        targetSubTab: 'PASES',
-        recommendedSteps: [
-          'Ingresa a Gestión Escolar → Pases por Retraso.',
-          'Busca al alumno por nombre o número de cédula.',
-          'Indica si el retraso es Justificado o Injustificado y escribe el motivo brevemente.',
-          'Haz clic en "Emitir e Imprimir Pase" y entrega el comprobante para su ingreso al salón.'
-        ]
-      },
-      {
-        id: 'asi-m2',
-        title: 'Registro de Asistencias Diarias',
+        title: 'Registro y Control de Inasistencias Diarias',
         badge: 'Asistencia',
-        summary: 'Apoya a los salones en la toma y verificación del pase de lista durante la jornada escolar.',
+        summary: 'Apoya a las secciones en la toma, verificación y justificación de inasistencias durante la jornada escolar.',
         iconName: 'CheckCircle2',
         targetTab: 'GESTION',
         targetSubTab: 'INASISTENCIAS',
         recommendedSteps: [
           'Ve a Gestión Escolar → Registro de Asistencia.',
-          'Selecciona la sección y confirma los presentes y ausentes reportados.',
-          'Registra las justificaciones médicas recibidas en portería para actualizar las inasistencias.',
-          'Guarda el registro diario para alimentar los reportes estadísticos semanales.'
+          'Selecciona el grado y sección correspondiente.',
+          'Registra las justificaciones médicas o motivos reportados por los representantes.',
+          'Guarda el registro diario para alimentar los reportes estadísticos.'
         ]
       },
       {
-        id: 'asi-m3',
-        title: 'Registrar Incidencias de Conducta',
+        id: 'sec-m2',
+        title: 'Registrar Incidencias de Conducta y Disciplina',
         badge: 'Disciplina',
         summary: 'Asienta faltas de uniforme, llamados de atención o reconocimientos de convivencia escolar.',
         iconName: 'ShieldAlert',
@@ -243,20 +146,34 @@ export const ROLE_SPECIFIC_MANUALS: Record<UserRole, DetailedRoleGuide> = {
         recommendedSteps: [
           'Entra en Gestión Escolar → Historial de Conductas.',
           'Busca al estudiante involucrado en la incidencia.',
-          'Selecciona el tipo de evento: Leve, Moderada, Grave o Mérito Positivo.',
+          'Selecciona la tipificación del evento: Leve, Moderada, Grave o Mérito Positivo.',
           'Escribe una descripción objetiva de los hechos y pulsa "Registrar Conducta".'
+        ]
+      },
+      {
+        id: 'sec-m3',
+        title: 'Consultar Nóminas Oficiales y Reportes',
+        badge: 'Consultas',
+        summary: 'Accede a las listas de alumnos por sección y reportes de asistencia para auditorías institucionales.',
+        iconName: 'FileSpreadsheet',
+        targetTab: 'CONSULTAS',
+        targetSubTab: 'NOMINAS',
+        recommendedSteps: [
+          'Navega a Consultas y Reportes → Nóminas de Alumnos.',
+          'Selecciona el nivel y la sección deseada.',
+          'Descarga o consulta el listado con cédulas escolares y nombres completos.'
         ]
       }
     ],
     dosAndDonts: {
       dos: [
-        'Emitir el pase de retraso inmediatamente al llegar el alumno para que no pierda tiempo de clase.',
-        'Registrar con precisión las justificaciones médicas presentadas por los representantes.',
-        'Mantener un tono pedagógico, cordial y objetivo en los reportes de convivencia.'
+        'Registrar con prontitud y objetividad las justificaciones presentadas por los representantes.',
+        'Mantener un registro claro y descriptivo en las anotaciones de conducta escolar.',
+        'Verificar la nómina oficial antes de asentar reportes por sección.'
       ],
       donts: [
-        'No tienes permisos para registrar ni modificar calificaciones o notas académicas.',
-        'No omitas registrar un pase de retraso aunque el estudiante ingrese con su representante.'
+        'No asentar o modificar calificaciones académicas (función exclusiva de docentes y coordinación).',
+        'No alterar reportes de conducta sin la debida confirmación o acta institucional.'
       ]
     }
   },
@@ -312,7 +229,7 @@ export const ROLE_SPECIFIC_MANUALS: Record<UserRole, DetailedRoleGuide> = {
           'Ve a Consultas y Reportes → Boletín Informativo.',
           'Selecciona el grado o año escolar.',
           'Verifica las observaciones redactadas por el docente guía.',
-          'Presiona "Imprimir Boletín Oficial" para generar las copias con membrete y casillas de firma.'
+          'Valida y refrenda las valoraciones para que el Administrador proceda a la emisión e impresión oficial del boletín.'
         ]
       },
       {
@@ -467,12 +384,12 @@ export const ROLE_SPECIFIC_MANUALS: Record<UserRole, DetailedRoleGuide> = {
         id: 'adm-m1',
         title: 'Gestión de Personal y Cuentas de Acceso',
         badge: 'Usuarios & Seguridad',
-        summary: 'Crea nuevas cuentas para docentes, asistentes o secretarias y genera códigos de auto-registro.',
+        summary: 'Crea nuevas cuentas para docentes o secretarias y genera códigos de auto-registro.',
         iconName: 'Users',
-        targetTab: 'CONFIGURACION',
-        targetSubTab: 'DOCENTES',
+        targetTab: 'GESTION',
+        targetSubTab: 'USUARIOS',
         recommendedSteps: [
-          'Ingresa a Configuración → Personal Docente y Administrativo.',
+          'Ingresa a Gestión → Directorio de Usuarios.',
           'Registra un nuevo usuario con su correo institucional, contraseña inicial y rol asignado.',
           'Alternativamente, genera un "Código de Autorización" de uso único para que el docente se auto-registre (se destruye de inmediato tras su uso).'
         ]
@@ -523,7 +440,7 @@ export const ROLE_SPECIFIC_MANUALS: Record<UserRole, DetailedRoleGuide> = {
     dosAndDonts: {
       dos: [
         'Resguardar la integridad de los datos en producción manteniendo tablas limpias de registros falsos.',
-        'Asignar siempre el rol exacto según las responsabilidades del trabajador (ej. Asistente para portería, Secretaria para admisiones).'
+        'Asignar siempre el rol exacto según las responsabilidades del trabajador (ej. Secretaria para asistencia y disciplina, Docente para aula).'
       ],
       donts: [
         'No conceder rol de Administrador a personal que no pertenezca al equipo de sistemas o dirección.',

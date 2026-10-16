@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Calendar,
   Layers,
   BookOpen,
   Users,
   Compass,
-  FileSpreadsheet,
   Clock,
   UserCheck,
   Award,
@@ -27,6 +26,7 @@ import {
   Sliders
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { InstitutionalSchoolData } from '../../types';
 
 export type ConfigAcademicaSection =
   | 'ANOS_ESCOLARES'
@@ -39,7 +39,6 @@ export type ConfigAcademicaSection =
   | 'GRADOS_TRANSFERENCIAS'
   | 'ASIGNACION_MATERIAS'
   | 'ASIGNACION_MATERIAS_P'
-  | 'CARGA_HORARIA'
   | 'COORDINADORES_DOCENTES'
   | 'DOCENTES_GUIAS'
   | 'DIRECTORES'
@@ -72,7 +71,6 @@ const ACADEMIC_CONFIG_ITEMS: SectionItem[] = [
   { id: 'GRADOS_TRANSFERENCIAS', label: 'GRADOS TRANSFERENCIAS', icon: Compass, count: 5 },
   { id: 'ASIGNACION_MATERIAS', label: 'ASIGNACIÓN DE MATERIAS', icon: ClipboardList, badge: 'Media' },
   { id: 'ASIGNACION_MATERIAS_P', label: 'ASIGNACIÓN DE MATERIAS P.', icon: ClipboardList, badge: 'Primaria' },
-  { id: 'CARGA_HORARIA', label: 'CARGA HORARIA', icon: FileSpreadsheet, badge: 'Horas' },
   { id: 'COORDINADORES_DOCENTES', label: 'COORDINADORES DOCENTES', icon: ShieldCheck, count: 3 },
   { id: 'DOCENTES_GUIAS', label: 'DOCENTES GUÍAS', icon: UserCheck, count: 18 },
   { id: 'DIRECTORES', label: 'DIRECTORES', icon: Award, count: 2 },
@@ -98,14 +96,26 @@ function AlertIcon(props: React.SVGProps<SVGSVGElement>) {
 }
 
 export const ConfiguracionGeneralCEOView: React.FC = () => {
-  const { currentRole, schoolYearConfig, users } = useApp();
+  const { currentRole, schoolYearConfig, users, schoolData, saveSchoolData, addAuditLog } = useApp();
   const [activeSection, setActiveSection] = useState<ConfigAcademicaSection>('ANOS_ESCOLARES');
   const [searchTerm, setSearchTerm] = useState('');
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
+  const [editSchoolData, setEditSchoolData] = useState<InstitutionalSchoolData>(schoolData);
+
+  useEffect(() => {
+    setEditSchoolData(schoolData);
+  }, [schoolData]);
+
   const showToast = (msg: string) => {
     setToastMsg(msg);
     setTimeout(() => setToastMsg(null), 3000);
+  };
+
+  const handleSaveAuthorities = async () => {
+    await saveSchoolData(editSchoolData);
+    await addAuditLog('Actualización Autoridades', 'Modificados directivos y supervisores MPPE');
+    showToast('Datos de autoridades directivas guardados con éxito.');
   };
 
   // State catalogs for dynamic items
@@ -320,13 +330,7 @@ export const ConfiguracionGeneralCEOView: React.FC = () => {
           {/* Header */}
           <div className="flex items-center justify-between pb-4 mb-6 border-b border-slate-100">
             <div>
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-amber-600"></span>
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-                  Configuración Académica CBA
-                </span>
-              </div>
-              <h2 className="text-xl font-extrabold text-slate-900 mt-1">
+              <h2 className="text-xl font-extrabold text-slate-900">
                 {ACADEMIC_CONFIG_ITEMS.find((i) => i.id === activeSection)?.label}
               </h2>
             </div>
@@ -610,30 +614,6 @@ export const ConfiguracionGeneralCEOView: React.FC = () => {
             </div>
           )}
 
-          {/* SECTION 11: CARGA HORARIA */}
-          {activeSection === 'CARGA_HORARIA' && (
-            <div className="space-y-4">
-              <p className="text-xs text-slate-500">Resumen y distribución semanal de horas pedagógicas:</p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div className="p-3.5 rounded-xl border border-slate-200 bg-white text-center">
-                  <span className="text-2xl font-black text-amber-600">36</span>
-                  <p className="text-xs font-bold text-slate-800 mt-1">Horas Semanales Docente</p>
-                  <p className="text-[10px] text-slate-400">Tiempo Completo</p>
-                </div>
-                <div className="p-3.5 rounded-xl border border-slate-200 bg-white text-center">
-                  <span className="text-2xl font-black text-amber-600">18</span>
-                  <p className="text-xs font-bold text-slate-800 mt-1">Horas Semanales Docente</p>
-                  <p className="text-[10px] text-slate-400">Medio Tiempo</p>
-                </div>
-                <div className="p-3.5 rounded-xl border border-slate-200 bg-white text-center">
-                  <span className="text-2xl font-black text-amber-600">45 min</span>
-                  <p className="text-xs font-bold text-slate-800 mt-1">Bloque Pedagógico</p>
-                  <p className="text-[10px] text-slate-400">Duración Oficial</p>
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* SECTION 12: COORDINADORES DOCENTES */}
           {activeSection === 'COORDINADORES_DOCENTES' && (
             <div className="space-y-4">
@@ -679,25 +659,59 @@ export const ConfiguracionGeneralCEOView: React.FC = () => {
           {/* SECTION 14: DIRECTORES */}
           {activeSection === 'DIRECTORES' && (
             <div className="space-y-4">
-              <p className="text-xs text-slate-500">Registro de firmas autorizadas y directivos del plantel:</p>
-              <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-3 text-xs">
-                <div className="flex justify-between items-center pb-2 border-b">
+              <p className="text-xs text-slate-500">Registro de autoridades directivas y firmas oficiales para documentos MPPE:</p>
+              <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-4 text-xs">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <h4 className="font-extrabold text-slate-800">Prof. Carlos R. Méndez P.</h4>
-                    <p className="text-[11px] text-slate-500">Director General CBA • C.I. V-12.345.678</p>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">Director(a) General CBA</label>
+                    <input
+                      type="text"
+                      value={editSchoolData.director}
+                      onChange={(e) => setEditSchoolData({ ...editSchoolData, director: e.target.value })}
+                      placeholder="Prof. Carlos R. Méndez P."
+                      className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    />
                   </div>
-                  <span className="px-2.5 py-1 rounded bg-amber-100 text-amber-800 font-bold text-[10px]">
-                    Firma Principal
-                  </span>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">Subdirector(a) / Coordinador(a) General</label>
+                    <input
+                      type="text"
+                      value={editSchoolData.subdirector}
+                      onChange={(e) => setEditSchoolData({ ...editSchoolData, subdirector: e.target.value })}
+                      placeholder="Lic. Mayuli G. Silva M."
+                      className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">Firma Digitalizada Director (URL o Base64)</label>
+                    <input
+                      type="text"
+                      value={editSchoolData.directorFirmaUrl || ''}
+                      onChange={(e) => setEditSchoolData({ ...editSchoolData, directorFirmaUrl: e.target.value })}
+                      placeholder="https://... o data:image/png;base64,..."
+                      className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 font-mono text-[11px] text-slate-700 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">Sello Oficial del Plantel (URL o Base64)</label>
+                    <input
+                      type="text"
+                      value={editSchoolData.selloInstitucionalUrl || ''}
+                      onChange={(e) => setEditSchoolData({ ...editSchoolData, selloInstitucionalUrl: e.target.value })}
+                      placeholder="https://... o data:image/png;base64,..."
+                      className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 font-mono text-[11px] text-slate-700 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    />
+                  </div>
                 </div>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h4 className="font-extrabold text-slate-800">Lic. Mayuli G. Silva M.</h4>
-                    <p className="text-[11px] text-slate-500">Subdirectora Académica • C.I. V-18.765.432</p>
-                  </div>
-                  <span className="px-2.5 py-1 rounded bg-slate-100 text-slate-700 font-bold text-[10px]">
-                    Firma Delegada
-                  </span>
+
+                <div className="pt-2 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={handleSaveAuthorities}
+                    className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-sm transition"
+                  >
+                    <Save className="w-3.5 h-3.5" /> Guardar Autoridades Directivas
+                  </button>
                 </div>
               </div>
             </div>
@@ -706,15 +720,49 @@ export const ConfiguracionGeneralCEOView: React.FC = () => {
           {/* SECTION 15: SUPERVISORES */}
           {activeSection === 'SUPERVISORES' && (
             <div className="space-y-4">
-              <p className="text-xs text-slate-500">Supervisores del Circuito Escolar MPPE:</p>
-              <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-2 text-xs">
-                <div className="flex justify-between py-1.5 border-b border-slate-50">
-                  <span className="font-bold text-slate-800">Supervisor(a) Circuital</span>
-                  <span className="text-slate-600">Lic. Rosa Elena Torres (Circuito Escolar 05)</span>
+              <p className="text-xs text-slate-500">Supervisores del Circuito Escolar MPPE y enlace zonal:</p>
+              <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-4 text-xs">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">Supervisor(a) Circuital MPPE</label>
+                    <input
+                      type="text"
+                      value={editSchoolData.supervisorCircuito || ''}
+                      onChange={(e) => setEditSchoolData({ ...editSchoolData, supervisorCircuito: e.target.value })}
+                      placeholder="Lic. Rosa Elena Torres (Circuito Escolar 05)"
+                      className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">Circuito Educativo</label>
+                    <input
+                      type="text"
+                      value={editSchoolData.circuito}
+                      onChange={(e) => setEditSchoolData({ ...editSchoolData, circuito: e.target.value })}
+                      placeholder="Circuito Escolar N° 05"
+                      className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 text-slate-800 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">Distrito Escolar / Municipio</label>
+                    <input
+                      type="text"
+                      value={editSchoolData.distrito || ''}
+                      onChange={(e) => setEditSchoolData({ ...editSchoolData, distrito: e.target.value })}
+                      placeholder="Distrito Escolar N° 02 Barinas"
+                      className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 text-slate-800 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    />
+                  </div>
                 </div>
-                <div className="flex justify-between py-1.5">
-                  <span className="font-bold text-slate-800">Enlace UCE Zonal</span>
-                  <span className="text-slate-600">Prof. Gerardo Peña (Zona Educativa Barinas)</span>
+
+                <div className="pt-2 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={handleSaveAuthorities}
+                    className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-sm transition"
+                  >
+                    <Save className="w-3.5 h-3.5" /> Guardar Supervisores MPPE
+                  </button>
                 </div>
               </div>
             </div>

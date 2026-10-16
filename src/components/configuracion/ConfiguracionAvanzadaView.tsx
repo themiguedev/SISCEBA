@@ -374,13 +374,7 @@ export const ConfiguracionAvanzadaView: React.FC = () => {
           {/* Header of Active Section */}
           <div className="flex items-center justify-between pb-4 mb-6 border-b border-slate-100">
             <div>
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-violet-600"></span>
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-                  Configuración Avanzada CBA
-                </span>
-              </div>
-              <h2 className="text-xl font-extrabold text-slate-900 mt-1">
+              <h2 className="text-xl font-extrabold text-slate-900">
                 {menuItems.find((i) => i.id === activeSection)?.label}
               </h2>
             </div>
@@ -502,9 +496,8 @@ export const ConfiguracionAvanzadaView: React.FC = () => {
                   { rol: 'ADMINISTRADOR', peso: 100, desc: 'Control total del sistema, bases de datos y seguridad.' },
                   { rol: 'DIRECTOR', peso: 80, desc: 'Máxima autoridad académica, firma de actas y boletines.' },
                   { rol: 'COORDINACION', peso: 60, desc: 'Control de Estudios y Evaluación institucional.' },
-                  { rol: 'SECRETARIA', peso: 50, desc: 'Inscripciones, matrícula, constancias y títulos.' },
+                  { rol: 'SECRETARIA', peso: 50, desc: 'Control de inasistencias diarias y registro de conducta escolar.' },
                   { rol: 'DOCENTE', peso: 40, desc: 'Planificación, evaluaciones y registro de notas.' },
-                  { rol: 'ASISTENTE', peso: 30, desc: 'Asistencia, pases de retraso y conducta escolar.' },
                   { rol: 'REPRESENTANTE', peso: 20, desc: 'Consulta de boletines y comunicados de sus representados.' },
                   { rol: 'ESTUDIANTE', peso: 10, desc: 'Consulta de asignaturas, notas y horarios de clase.' }
                 ].map((r) => (
@@ -1380,6 +1373,46 @@ export const ConfiguracionAvanzadaView: React.FC = () => {
                     value={editSchoolData.subdirector}
                     onChange={(e) => setEditSchoolData({ ...editSchoolData, subdirector: e.target.value })}
                     className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-violet-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Supervisor(a) Circuital MPPE</label>
+                  <input
+                    type="text"
+                    value={editSchoolData.supervisorCircuito || ''}
+                    placeholder="Ej: Lic. Rosa Elena Torres (Circuito 05)"
+                    onChange={(e) => setEditSchoolData({ ...editSchoolData, supervisorCircuito: e.target.value })}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-violet-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Distrito Escolar</label>
+                  <input
+                    type="text"
+                    value={editSchoolData.distrito || ''}
+                    placeholder="Ej: Distrito Escolar N° 02 Barinas"
+                    onChange={(e) => setEditSchoolData({ ...editSchoolData, distrito: e.target.value })}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-violet-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Firma Digitalizada Director (URL o Base64)</label>
+                  <input
+                    type="text"
+                    value={editSchoolData.directorFirmaUrl || ''}
+                    placeholder="https://... o data:image/png;base64,..."
+                    onChange={(e) => setEditSchoolData({ ...editSchoolData, directorFirmaUrl: e.target.value })}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-violet-500 font-mono text-[11px]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Sello Oficial Plantel (URL o Base64)</label>
+                  <input
+                    type="text"
+                    value={editSchoolData.selloInstitucionalUrl || ''}
+                    placeholder="https://... o data:image/png;base64,..."
+                    onChange={(e) => setEditSchoolData({ ...editSchoolData, selloInstitucionalUrl: e.target.value })}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-violet-500 font-mono text-[11px]"
                   />
                 </div>
               </div>

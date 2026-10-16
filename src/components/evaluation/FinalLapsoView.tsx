@@ -66,13 +66,7 @@ export const FinalLapsoView: React.FC = () => {
       {/* Header Info */}
       <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-cba-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#D4AF37]"></span>
-            <span className="text-xs font-bold text-[#2C2E53] uppercase tracking-wider">
-              Cierre y Certificación de Calificaciones
-            </span>
-          </div>
-          <h2 className="text-2xl font-black text-[#2C2E53] mt-1">
+          <h2 className="text-2xl font-black text-[#2C2E53]">
             Matriz Final de Lapso {activeLapso} ({currentLevel.replace('_', ' ')})
           </h2>
           <p className="text-sm text-slate-500 mt-1">

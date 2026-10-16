@@ -1,0 +1,46 @@
+======================================================================
+              ENLACES Y DIRECCIONES DE ACCESO - SICE-CBA
+======================================================================
+
+1. APLICACIÓN WEB PRINCIPAL (SICE-CBA FRONTEND)
+----------------------------------------------------------------------
+   Acceso Local (este equipo):
+   http://localhost:3000/SISCEBA/
+   http://127.0.0.1:3000/SISCEBA/
+
+   Acceso en Red Local (otros equipos, tablets o teléfonos en la red):
+   http://172.16.7.81:3000/SISCEBA/
+
+
+2. API REST LOCAL (SUPABASE GATEWAY)
+----------------------------------------------------------------------
+   Endpoint Local:
+   http://127.0.0.1:54321/rest/v1/
+
+   Endpoint en Red Local:
+   http://172.16.7.81:54321/rest/v1/
+
+
+3. DIAGNÓSTICO Y SALUD DE LA BASE DE DATOS
+----------------------------------------------------------------------
+   Diagnóstico Local:
+   http://127.0.0.1:54321/health
+
+   Diagnóstico en Red Local:
+   http://172.16.7.81:54321/health
+
+
+4. MOTOR POSTGRESQL NATIVO LOCAL (PUERTO 5432)
+----------------------------------------------------------------------
+   Host Local:       127.0.0.1:5432
+   Host en Red:      172.16.7.81:5432
+   Base de Datos:    sisceba
+   Usuario:          postgres
+   URL Conexión:     postgresql://postgres@127.0.0.1:5432/sisceba
+
+
+======================================================================
+NOTA: Si la dirección IP de red de este equipo cambia en el futuro 
+(por asignación dinámica DHCP), puedes verificar la nueva IP 
+ejecutando "ipconfig" en la consola de comandos.
+======================================================================

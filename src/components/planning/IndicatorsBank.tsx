@@ -25,6 +25,7 @@ export const IndicatorsBank: React.FC = () => {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedAreaId, setSelectedAreaId] = useState<string>('ALL');
+  const [selectedGradeFilter, setSelectedGradeFilter] = useState<string>('ALL');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [transferTargetInd, setTransferTargetInd] = useState<Indicator | null>(null);
   const [transferLapso, setTransferLapso] = useState<1 | 2 | 3>(activeLapso === 1 ? 2 : 3);
@@ -46,11 +47,12 @@ export const IndicatorsBank: React.FC = () => {
   const levelIndicators = indicators.filter(i => i.level === currentLevel);
   const filteredIndicators = levelIndicators.filter(ind => {
     const matchesArea = selectedAreaId === 'ALL' || ind.areaId === selectedAreaId;
+    const matchesGrade = selectedGradeFilter === 'ALL' || !ind.grade || ind.grade === selectedGradeFilter;
     const matchesSearch =
       ind.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
       ind.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (ind.evaluationInstrument && ind.evaluationInstrument.toLowerCase().includes(searchTerm.toLowerCase()));
-    return matchesArea && matchesSearch;
+    return matchesArea && matchesGrade && matchesSearch;
   });
 
   const handleCreateSubmit = (e: React.FormEvent) => {
@@ -85,13 +87,7 @@ export const IndicatorsBank: React.FC = () => {
       {/* Header Info */}
       <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-cba-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#D4AF37]"></span>
-            <span className="text-xs font-bold text-[#2C2E53] uppercase tracking-wider">
-              Evaluación y Seguimiento
-            </span>
-          </div>
-          <h2 className="text-2xl font-black text-[#2C2E53] mt-1">
+          <h2 className="text-2xl font-black text-[#2C2E53]">
             Banco de Indicadores de Logro ({currentLevel.replace('_', ' ')})
           </h2>
           <p className="text-sm text-slate-500 mt-1">
@@ -143,6 +139,48 @@ export const IndicatorsBank: React.FC = () => {
             ))}
           </select>
         </div>
+
+        {currentLevel === 'INICIAL' && (
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <label htmlFor="select-ind-grade-filter" className="text-xs font-bold text-slate-500 hidden sm:inline">
+              Sala:
+            </label>
+            <select
+              id="select-ind-grade-filter"
+              value={selectedGradeFilter}
+              onChange={(e) => setSelectedGradeFilter(e.target.value)}
+              aria-label="Filtrar indicadores por sala"
+              className="w-full sm:w-44 px-3 py-2 bg-white rounded-xl border border-slate-200 text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#2C2E53]"
+            >
+              <option value="ALL">Todas las salas</option>
+              <option value="Sala de 4 Años">Sala de 4 Años</option>
+              <option value="Sala de 5 Años">Sala de 5 Años</option>
+            </select>
+          </div>
+        )}
+
+        {currentLevel === 'PRIMARIA' && (
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <label htmlFor="select-ind-grade-filter-pri" className="text-xs font-bold text-slate-500 hidden sm:inline">
+              Grado:
+            </label>
+            <select
+              id="select-ind-grade-filter-pri"
+              value={selectedGradeFilter}
+              onChange={(e) => setSelectedGradeFilter(e.target.value)}
+              aria-label="Filtrar indicadores por grado"
+              className="w-full sm:w-44 px-3 py-2 bg-white rounded-xl border border-slate-200 text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#2C2E53]"
+            >
+              <option value="ALL">Todos los grados</option>
+              <option value="1er Grado">1er Grado</option>
+              <option value="2do Grado">2do Grado</option>
+              <option value="3er Grado">3er Grado</option>
+              <option value="4to Grado">4to Grado</option>
+              <option value="5to Grado">5to Grado</option>
+              <option value="6to Grado">6to Grado</option>
+            </select>
+          </div>
+        )}
       </div>
 
       {/* List of Indicators */}
@@ -165,6 +203,11 @@ export const IndicatorsBank: React.FC = () => {
                     <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-600">
                       Lapso {ind.lapso}
                     </span>
+                    {ind.grade && (
+                      <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200">
+                        {ind.grade}
+                      </span>
+                    )}
                     {ind.weight && (
                       <span className="text-[11px] font-extrabold px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200 flex items-center gap-1">
                         <Scale className="w-3 h-3 text-[#D4AF37]" />

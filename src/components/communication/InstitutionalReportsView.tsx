@@ -9,8 +9,10 @@ import {
   BrainCircuit,
   ClipboardList,
   BarChart3,
-  Layers
+  Layers,
+  FileCheck
 } from 'lucide-react';
+import { OfficialFormatPrintModal, OfficialFormatType } from '../common/OfficialFormatPrintModal';
 
 type InstitutionalReportType =
   | 'DIAGNOSTICA'
@@ -32,6 +34,8 @@ export const InstitutionalReportsView: React.FC = () => {
 
   const [activeReportType, setActiveReportType] = useState<InstitutionalReportType>('DIAGNOSTICA');
   const [selectedStudentId, setSelectedStudentId] = useState<string>(levelStudents[0]?.id || '');
+  const [isOfficialModalOpen, setIsOfficialModalOpen] = useState(false);
+  const [modalFormatType, setModalFormatType] = useState<OfficialFormatType>('CONSTANCIA_ESTUDIO');
 
   const activeStudent = levelStudents.find(s => s.id === selectedStudentId) || levelStudents[0];
 
@@ -50,13 +54,7 @@ export const InstitutionalReportsView: React.FC = () => {
       {/* Top Banner */}
       <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-cba-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 no-print">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#D4AF37]"></span>
-            <span className="text-xs font-bold text-[#2C2E53] uppercase tracking-wider">
-              Documentación y Comunicación Oficial SICE-CBA
-            </span>
-          </div>
-          <h2 className="text-2xl font-black text-[#2C2E53] mt-1">
+          <h2 className="text-2xl font-black text-[#2C2E53]">
             Reportes Institucionales ({currentLevel.replace('_', ' ')})
           </h2>
           <p className="text-sm text-slate-500 mt-1">
@@ -64,7 +62,7 @@ export const InstitutionalReportsView: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {['ESTUDIANTES', 'REPRESENTANTES', 'FINAL_ANO'].includes(activeReportType) && (
             <>
               <label htmlFor="select-report-student" className="sr-only">
@@ -83,6 +81,18 @@ export const InstitutionalReportsView: React.FC = () => {
               </select>
             </>
           )}
+
+          <button
+            onClick={() => {
+              setModalFormatType('CONSTANCIA_ESTUDIO');
+              setIsOfficialModalOpen(true);
+            }}
+            className="flex items-center gap-2 px-4 py-2 bg-[#D4AF37] hover:bg-[#e6c148] text-[#1e2038] font-black rounded-xl text-xs shadow-md transition"
+            title="Abrir catálogo oficial de formatos y planillas de impresión del CBA"
+          >
+            <FileCheck className="w-4 h-4" />
+            Formatos Oficiales CBA
+          </button>
 
           <button
             onClick={() => window.print()}
@@ -485,6 +495,16 @@ export const InstitutionalReportsView: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* MODAL DE FORMATOS Y PLANILLAS OFICIALES CBA */}
+      <OfficialFormatPrintModal
+        isOpen={isOfficialModalOpen}
+        onClose={() => setIsOfficialModalOpen(false)}
+        formatType={modalFormatType}
+        student={activeStudent}
+        studentsList={levelStudents}
+        onSelectStudent={(st) => setSelectedStudentId(st.id)}
+      />
     </div>
   );
 };

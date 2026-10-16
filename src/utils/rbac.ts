@@ -27,7 +27,6 @@ export const ROLE_HIERARCHY: Record<UserRole, number> = {
   COORDINADOR: 60, // Alias de compatibilidad
   SECRETARIA: 50,
   DOCENTE: 40,
-  ASISTENTE: 30,
   REPRESENTANTE: 20,
   ESTUDIANTE: 10
 };
@@ -93,21 +92,12 @@ export const ROLE_METADATA: Record<UserRole, RoleMetadata> = {
   },
   SECRETARIA: {
     id: 'SECRETARIA',
-    label: 'Secretaría Académica / Control de Estudios',
+    label: 'Secretaría / Asistencia y Conducta',
     badge: '📂 Secretaría',
     badgeBg: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
-    description: 'Gestión de admisiones, inscripciones, expedientes de matrícula, solicitud y emisión de documentos académicos y constancias.',
-    department: 'Secretaría de Control de Estudios (UCE)',
-    scope: 'Gestión de Matrícula, Expedientes y Emisión de Documentos'
-  },
-  ASISTENTE: {
-    id: 'ASISTENTE',
-    label: 'Asistente de Aula y Disciplina',
-    badge: '🤝 Asistente',
-    badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-    description: 'Registro operativo de asistencia diaria de estudiantes, control de pases por retraso e historial de conducta y disciplina.',
-    department: 'Coordinación de Asistencia y Disciplina',
-    scope: 'Registro de Asistencia, Pases y Conducta Estudiantil'
+    description: 'Gestión y control de inasistencias diarias de estudiantes y registro de conducta y disciplina.',
+    department: 'Secretaría Escolar / Control de Asistencia y Disciplina',
+    scope: 'Inasistencias Diarias y Registro de Conducta'
   },
   REPRESENTANTE: {
     id: 'REPRESENTANTE',
@@ -195,13 +185,6 @@ export const ROLE_TAB_PERMISSIONS: Record<UserRole, MainNavigationTab[]> = {
     'COMUNIDAD',
     'AYUDA'
   ],
-  ASISTENTE: [
-    'ESCRITORIO',
-    'GESTION',
-    'CONSULTAS',
-    'COMUNIDAD',
-    'AYUDA'
-  ],
   REPRESENTANTE: [
     'CONSULTAS',
     'COMUNIDAD',
@@ -244,13 +227,13 @@ export const ALL_LEVEL_SUBTABS: string[] = [
 export const ROLE_SUBTAB_PERMISSIONS: Record<UserRole, Partial<Record<MainNavigationTab, string[]>>> = {
   ADMINISTRADOR: {
     ESCRITORIO: ['DASHBOARD', 'PERFIL', 'HORARIO', 'SUGERENCIAS'],
-    GESTION: ['INSCRIPCIONES', 'PASES', 'INASISTENCIAS', 'CONDUCTAS', 'DOCUMENTOS', 'BLOQUEO', 'TITULOS', 'MATRICULA', 'TALLERES_CRP'],
+    GESTION: ['INSCRIPCIONES', 'PASES', 'INASISTENCIAS', 'CONDUCTAS', 'DOCUMENTOS', 'BLOQUEO', 'TITULOS', 'MATRICULA', 'TALLERES_CRP', 'USUARIOS'],
     INICIAL: ALL_LEVEL_SUBTABS,
     PRIMARIA: ALL_LEVEL_SUBTABS,
     MEDIA_GENERAL: ALL_LEVEL_SUBTABS,
     CONSULTAS: ['RENDIMIENTO', 'BOLETIN', 'ASISTENCIA', 'ESTADISTICAS', 'NOMINAS'],
     COMUNIDAD: ['NOTICIAS', 'CUMPLEANOS', 'COMUNICADOS'],
-    CONFIGURACION: ['LAPSOS', 'ESTRUCTURA', 'DOCENTES', 'TEMAS', 'CONFIG_CEO', 'AVANZADA'],
+    CONFIGURACION: ['LAPSOS', 'ESTRUCTURA', 'TEMAS', 'CONFIG_CEO', 'AVANZADA'],
     AYUDA: ['MANUAL', 'MAPA_SITIO']
   },
   DIRECTOR: {
@@ -261,7 +244,7 @@ export const ROLE_SUBTAB_PERMISSIONS: Record<UserRole, Partial<Record<MainNaviga
     MEDIA_GENERAL: ALL_LEVEL_SUBTABS,
     CONSULTAS: ['RENDIMIENTO', 'BOLETIN', 'ASISTENCIA', 'ESTADISTICAS', 'NOMINAS'],
     COMUNIDAD: ['NOTICIAS', 'CUMPLEANOS', 'COMUNICADOS'],
-    CONFIGURACION: ['LAPSOS', 'ESTRUCTURA', 'DOCENTES', 'TEMAS'],
+    CONFIGURACION: ['LAPSOS', 'ESTRUCTURA', 'TEMAS'],
     AYUDA: ['MANUAL', 'MAPA_SITIO']
   },
   COORDINACION: {
@@ -272,7 +255,7 @@ export const ROLE_SUBTAB_PERMISSIONS: Record<UserRole, Partial<Record<MainNaviga
     MEDIA_GENERAL: ALL_LEVEL_SUBTABS,
     CONSULTAS: ['RENDIMIENTO', 'BOLETIN', 'ASISTENCIA', 'ESTADISTICAS', 'NOMINAS'],
     COMUNIDAD: ['NOTICIAS', 'CUMPLEANOS', 'COMUNICADOS'],
-    CONFIGURACION: ['LAPSOS', 'ESTRUCTURA', 'DOCENTES', 'TEMAS'],
+    CONFIGURACION: ['LAPSOS', 'ESTRUCTURA', 'TEMAS'],
     AYUDA: ['MANUAL']
   },
   COORDINADOR: {
@@ -283,7 +266,7 @@ export const ROLE_SUBTAB_PERMISSIONS: Record<UserRole, Partial<Record<MainNaviga
     MEDIA_GENERAL: ALL_LEVEL_SUBTABS,
     CONSULTAS: ['RENDIMIENTO', 'BOLETIN', 'ASISTENCIA', 'ESTADISTICAS', 'NOMINAS'],
     COMUNIDAD: ['NOTICIAS', 'CUMPLEANOS', 'COMUNICADOS'],
-    CONFIGURACION: ['LAPSOS', 'ESTRUCTURA', 'DOCENTES', 'TEMAS'],
+    CONFIGURACION: ['LAPSOS', 'ESTRUCTURA', 'TEMAS'],
     AYUDA: ['MANUAL']
   },
   DOCENTE: {
@@ -299,15 +282,8 @@ export const ROLE_SUBTAB_PERMISSIONS: Record<UserRole, Partial<Record<MainNaviga
   },
   SECRETARIA: {
     ESCRITORIO: ['DASHBOARD', 'PERFIL', 'HORARIO', 'SUGERENCIAS'],
-    GESTION: ['INSCRIPCIONES', 'DOCUMENTOS', 'TALLERES_CRP'], // Admisiones, expedientes y trámites
+    GESTION: ['INASISTENCIAS', 'CONDUCTAS'], // Inasistencias y Registro de Conductas
     CONSULTAS: ['RENDIMIENTO', 'BOLETIN', 'ASISTENCIA', 'ESTADISTICAS', 'NOMINAS'],
-    COMUNIDAD: ['NOTICIAS', 'CUMPLEANOS', 'COMUNICADOS'],
-    AYUDA: ['MANUAL']
-  },
-  ASISTENTE: {
-    ESCRITORIO: ['DASHBOARD', 'PERFIL', 'HORARIO', 'SUGERENCIAS'],
-    GESTION: ['PASES', 'INASISTENCIAS', 'CONDUCTAS'], // Enfoque principal: Asistencia, Pases y Registro de Conductas
-    CONSULTAS: ['ASISTENCIA', 'NOMINAS'],
     COMUNIDAD: ['NOTICIAS', 'CUMPLEANOS', 'COMUNICADOS'],
     AYUDA: ['MANUAL']
   },
@@ -456,6 +432,18 @@ export const canPublishCommunity = (
 };
 
 /**
+ * Verifica si el rol tiene privilegios de administración (edición y eliminación) sobre publicaciones de cartelera
+ */
+export const canManageCommunityNotices = (
+  roleOrUser: UserRole | (Partial<AppUser> & { role?: UserRole }) | UserRole[]
+): boolean => {
+  const roles = Array.isArray(roleOrUser)
+    ? roleOrUser
+    : getUserEffectiveRoles(roleOrUser);
+  return roles.some(r => r === 'ADMINISTRADOR' || r === 'DIRECTOR');
+};
+
+/**
  * Determina si el rol tiene restricciones de confidencialidad familiar/estudiantil (solo consultas)
  */
 export const isConsultasOnlyRole = (
@@ -490,6 +478,10 @@ export const getUserAllowedLevels = (
 
   // 3. Si alguno de los roles es docente pero no tiene allowedLevels especificado
   if (roles.includes('DOCENTE')) {
+    // Si un administrador simula rol docente, permitir explorar todos los subsistemas educativos
+    if (user && 'role' in user && (user as any).role === 'ADMINISTRADOR') {
+      return ['INICIAL', 'PRIMARIA', 'MEDIA_GENERAL'];
+    }
     if (user?.defaultLevel) {
       return [user.defaultLevel];
     }
@@ -497,7 +489,7 @@ export const getUserAllowedLevels = (
   }
 
   // 4. Roles puramente operativos o de consulta no son docentes de aula
-  if (roles.every(r => r === 'ASISTENTE' || r === 'SECRETARIA' || r === 'REPRESENTANTE' || r === 'ESTUDIANTE')) {
+  if (roles.every(r => r === 'SECRETARIA' || r === 'REPRESENTANTE' || r === 'ESTUDIANTE')) {
     return [];
   }
 
@@ -517,5 +509,40 @@ export const getUserAllowedLevels = (
 export const normalizeCedulaUsername = (rawCedula: string): string => {
   if (!rawCedula) return '';
   return rawCedula.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+};
+
+/**
+ * Determina si una cuenta pertenece al personal institucional y posee simultáneamente
+ * el rol extra de REPRESENTANTE (caso exclusivo de doble rol Personal + Representante).
+ * Nota: Aplica exclusivamente a estos casos, excluyendo cuentas que no sean de personal o al administrador.
+ */
+export const isStaffWithRepresentativeRole = (user: AppUser | null | undefined): boolean => {
+  if (!user) return false;
+  if (user.role === 'ADMINISTRADOR') return false; // Administrador cuenta con simulador propio de sistema
+
+  const staffRoles: UserRole[] = ['DOCENTE', 'SECRETARIA', 'COORDINACION', 'COORDINADOR', 'DIRECTOR'];
+
+  // Caso 1: Su rol primario es personal institucional y tiene 'REPRESENTANTE' en sus roles adicionales
+  if (staffRoles.includes(user.role) && Array.isArray(user.roles) && user.roles.includes('REPRESENTANTE')) {
+    return true;
+  }
+
+  // Caso 2: Su rol primario es REPRESENTANTE y tiene un rol institucional de personal en roles adicionales
+  if (user.role === 'REPRESENTANTE' && Array.isArray(user.roles) && user.roles.some(r => staffRoles.includes(r))) {
+    return true;
+  }
+
+  return false;
+};
+
+/**
+ * Retorna el rol laboral/institucional de personal para un usuario con doble rol (ej: DOCENTE, SECRETARIA).
+ */
+export const getStaffRoleForUser = (user: AppUser | null | undefined): UserRole => {
+  if (!user) return 'DOCENTE';
+  const staffRoles: UserRole[] = ['DOCENTE', 'SECRETARIA', 'COORDINACION', 'COORDINADOR', 'DIRECTOR'];
+  if (staffRoles.includes(user.role)) return user.role;
+  const match = user.roles?.find(r => staffRoles.includes(r));
+  return match || 'DOCENTE';
 };
 

@@ -16,8 +16,8 @@ export const AyudaModule: React.FC<AyudaModuleProps> = ({
   setActiveSubTab,
   onNavigate
 }) => {
-  const { currentRole, currentUser } = useApp();
-  const effectiveUserOrRole = currentUser || currentRole;
+  const { currentRole } = useApp();
+  const effectiveUserOrRole = currentRole;
   const canAccessMapaSitio = hasSubTabAccess(effectiveUserOrRole, 'AYUDA', 'MAPA_SITIO');
 
   const [internalTab, setInternalTab] = useState<'MANUAL' | 'MAPA_SITIO'>('MANUAL');

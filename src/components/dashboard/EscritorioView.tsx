@@ -39,7 +39,7 @@ import {
   ChevronRight,
   Filter
 } from 'lucide-react';
-import { EducationalLevel, UserSchedule, ScheduleBlock, ScheduleDay } from '../../types';
+import { EducationalLevel, UserSchedule, ScheduleBlock, ScheduleDay, AcademicAssignment, LEVEL_GRADES_CATALOG } from '../../types';
 import { OFFICIAL_AVATARS, getDefaultAvatarForUser } from '../../utils/avatarCatalog';
 import { PasswordStrengthBar } from '../common/PasswordStrengthBar';
 import { ROLE_METADATA } from '../../utils/rbac';
@@ -59,6 +59,7 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
     currentRole,
     birthdays,
     currentUser,
+    users,
     updateUser,
     userSchedules,
     currentUserSchedule,
@@ -98,9 +99,11 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
 
   // Profile Form State synced with currentUser
   const [fullName, setFullName] = useState(currentUser?.fullName || '');
+  const [username, setUsername] = useState(currentUser?.username || '');
   const [email, setEmail] = useState(currentUser?.email || '');
   const [cedula, setCedula] = useState(currentUser?.cedula || currentUser?.username || '');
   const [phone, setPhone] = useState(currentUser?.phone || '');
+  const [usernameError, setUsernameError] = useState('');
   const [gender, setGender] = useState<'MASCULINO' | 'FEMENINO'>(
     currentUser?.gender || (currentUser ? (getDefaultAvatarForUser(currentUser).includes('female') ? 'FEMENINO' : 'MASCULINO') : 'MASCULINO')
   );
@@ -163,9 +166,11 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
   React.useEffect(() => {
     if (currentUser) {
       setFullName(currentUser.fullName || '');
+      setUsername(currentUser.username || '');
       setEmail(currentUser.email || '');
       setCedula(currentUser.cedula || currentUser.username || '');
       setPhone(currentUser.phone || '');
+      setUsernameError('');
       const userGender = currentUser.gender || (getDefaultAvatarForUser(currentUser).includes('female') ? 'FEMENINO' : 'MASCULINO');
       setGender(userGender);
       setProfileComment(currentUser.bio || 'Coordinación de Evaluación y Docencia - Colegio Bellas Artes');
@@ -260,13 +265,30 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentUser || isSavingProfile) return;
+    setUsernameError('');
+
+    const cleanUsername = username.trim().toLowerCase().replace(/\s+/g, '');
+    if (!cleanUsername) {
+      setUsernameError('El nombre de usuario no puede estar vacío.');
+      return;
+    }
+
+    // Verificar si el nuevo username ya está en uso por otro usuario
+    const isTaken = users.some(
+      u => u.id !== currentUser.id && u.username.toLowerCase() === cleanUsername
+    );
+    if (isTaken) {
+      setUsernameError(`El nombre de usuario "${cleanUsername}" ya está en uso por otra cuenta.`);
+      return;
+    }
 
     setIsSavingProfile(true);
     try {
       await updateUser(currentUser.id, {
         fullName: fullName.trim() || currentUser.fullName,
+        username: cleanUsername,
         email: email.trim() || currentUser.email,
-        cedula: cedula.trim() || currentUser.cedula || currentUser.username,
+        cedula: cedula.trim() || currentUser.cedula || cleanUsername,
         phone: phone.trim(),
         gender: gender,
         bio: profileComment.trim(),
@@ -276,6 +298,12 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
         allowedLevels: selectedLevels,
         defaultLevel: defaultLevel
       });
+
+      // Actualizar también la preferencia de usuario recordado si coincidía
+      const remembered = localStorage.getItem('sisceba_remembered_user');
+      if (remembered && remembered.toLowerCase() === currentUser.username.toLowerCase()) {
+        localStorage.setItem('sisceba_remembered_user', cleanUsername);
+      }
 
       setProfileSaved(true);
       setTimeout(() => setProfileSaved(false), 3500);
@@ -462,63 +490,33 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
                 <span className="text-[11px] text-slate-400 font-medium">Frecuencia de Uso</span>
               </div>
 
-              {currentRole === 'ASISTENTE' ? (
+              {currentRole === 'SECRETARIA' ? (
                 <div className="space-y-3">
                   <div>
                     <div className="flex justify-between text-xs font-bold mb-1">
-                      <span className="text-slate-700">1. Pases por Retraso (Gestión)</span>
-                      <span className="text-[#D4AF37] font-extrabold">42.5 %</span>
+                      <span className="text-slate-700">1. Inasistencias y Pase de Lista</span>
+                      <span className="text-emerald-600 font-extrabold">52.4 %</span>
                     </div>
                     <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-amber-400 to-[#D4AF37] rounded-full" style={{ width: '42.5%' }}></div>
+                      <div className="h-full bg-emerald-500 rounded-full" style={{ width: '52.4%' }}></div>
                     </div>
                   </div>
                   <div>
                     <div className="flex justify-between text-xs font-bold mb-1">
-                      <span className="text-slate-700">2. Inasistencias y Pase de Lista</span>
-                      <span className="text-emerald-600 font-extrabold">34.8 %</span>
+                      <span className="text-slate-700">2. Registro de Conductas y Faltas</span>
+                      <span className="text-amber-600 font-extrabold">31.8 %</span>
                     </div>
                     <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-emerald-500 rounded-full" style={{ width: '34.8%' }}></div>
+                      <div className="h-full bg-amber-500 rounded-full" style={{ width: '31.8%' }}></div>
                     </div>
                   </div>
                   <div>
                     <div className="flex justify-between text-xs font-bold mb-1">
-                      <span className="text-slate-700">3. Registro de Conductas y Faltas</span>
-                      <span className="text-amber-600 font-extrabold">22.7 %</span>
+                      <span className="text-slate-700">3. Nóminas y Reportes de Asistencia</span>
+                      <span className="text-[#D4AF37] font-extrabold">15.8 %</span>
                     </div>
                     <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-amber-500 rounded-full" style={{ width: '22.7%' }}></div>
-                    </div>
-                  </div>
-                </div>
-              ) : currentRole === 'SECRETARIA' ? (
-                <div className="space-y-3">
-                  <div>
-                    <div className="flex justify-between text-xs font-bold mb-1">
-                      <span className="text-slate-700">1. Solicitudes y Documentos Académicos</span>
-                      <span className="text-[#D4AF37] font-extrabold">45.0 %</span>
-                    </div>
-                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-amber-400 to-[#D4AF37] rounded-full" style={{ width: '45%' }}></div>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-xs font-bold mb-1">
-                      <span className="text-slate-700">2. Padrón Estudiantil y Matrícula</span>
-                      <span className="text-indigo-600 font-extrabold">31.2 %</span>
-                    </div>
-                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-indigo-500 rounded-full" style={{ width: '31.2%' }}></div>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-xs font-bold mb-1">
-                      <span className="text-slate-700">3. Registro de Inscripciones</span>
-                      <span className="text-emerald-600 font-extrabold">23.8 %</span>
-                    </div>
-                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-emerald-500 rounded-full" style={{ width: '23.8%' }}></div>
+                      <div className="h-full bg-gradient-to-r from-amber-400 to-[#D4AF37] rounded-full" style={{ width: '15.8%' }}></div>
                     </div>
                   </div>
                 </div>
@@ -932,17 +930,32 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Nombre de Usuario (Login):
+                    Nombre de Usuario (Login / Acceso):
                   </label>
                   <input
                     type="text"
-                    disabled
-                    value={currentUser?.username || 'usuario'}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-100 text-slate-500 text-xs font-mono font-semibold cursor-not-allowed"
+                    required
+                    value={username}
+                    onChange={(e) => {
+                      setUsername(e.target.value.toLowerCase().replace(/\s+/g, ''));
+                      setUsernameError('');
+                    }}
+                    placeholder="Ej: cvillalobos"
+                    className={`w-full px-3.5 py-2.5 rounded-xl border text-xs font-mono font-bold focus:outline-none focus:ring-2 ${
+                      usernameError
+                        ? 'border-rose-300 bg-rose-50/50 text-rose-900 focus:ring-rose-500'
+                        : 'border-slate-300 bg-white text-slate-800 focus:ring-[#2C2E53]'
+                    }`}
                   />
-                  <span className="text-[10px] text-slate-400 mt-1 block">
-                    Identificador de cuenta en el sistema.
-                  </span>
+                  {usernameError ? (
+                    <span className="text-[10px] text-rose-600 font-semibold mt-1 block">
+                      {usernameError}
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-slate-400 mt-1 block">
+                      Nombre de usuario institucional para iniciar sesión.
+                    </span>
+                  )}
                 </div>
 
                 <div>
@@ -1173,6 +1186,79 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
                 </button>
               </div>
             </form>
+
+            {/* SECCIÓN: CÁTEDRAS Y SALONES OFICIALES ASIGNADOS (DISTRIBUTIVO INSTITUCIONAL) */}
+            <div className="mt-8 pt-6 border-t border-slate-200">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-[#2C2E53] text-[#D4AF37] flex items-center justify-center font-bold">
+                    <BookOpen className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-sm text-[#2C2E53] flex items-center gap-2">
+                      Cátedras y Salones Oficiales Asignados
+                      {currentUser?.academicAssignments && currentUser.academicAssignments.length > 0 && (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-blue-100 text-blue-800">
+                          {currentUser.academicAssignments.length} {currentUser.academicAssignments.length === 1 ? 'cátedra' : 'cátedras'}
+                        </span>
+                      )}
+                    </h4>
+                    <p className="text-[11px] text-slate-500">
+                      Distributivo de asignaturas y salones oficiales asignados institucionalmente por Dirección / Coordinación.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {currentUser?.academicAssignments && currentUser.academicAssignments.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {currentUser.academicAssignments.map((assignment) => (
+                    <div
+                      key={assignment.id}
+                      className="p-3.5 bg-gradient-to-br from-slate-50 to-blue-50/30 border border-slate-200 rounded-xl hover:border-blue-300 transition-all shadow-xs flex flex-col justify-between"
+                    >
+                      <div>
+                        <div className="flex items-center justify-between gap-1 mb-1.5">
+                          <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-slate-200 text-slate-700">
+                            {assignment.level === 'MEDIA_GENERAL'
+                              ? 'Media General'
+                              : assignment.level === 'PRIMARIA'
+                              ? 'Primaria'
+                              : 'Inicial'}
+                          </span>
+                          <span className="text-[11px] font-black px-2 py-0.5 rounded bg-[#2C2E53] text-[#D4AF37]">
+                            Sección "{assignment.section}"
+                          </span>
+                        </div>
+                        <h5 className="font-bold text-slate-900 text-xs mt-1">
+                          {assignment.areaName || assignment.subjectName}
+                        </h5>
+                        <p className="text-[11px] font-semibold text-slate-600 mt-0.5">
+                          {assignment.grade}
+                        </p>
+                      </div>
+                      <div className="mt-2.5 pt-2 border-t border-slate-200/60 flex items-center justify-between text-[10px] text-slate-400 font-medium">
+                        <span>Cátedra Oficial</span>
+                        <span className="text-emerald-700 font-bold flex items-center gap-1">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                          Habilitada
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-200/80 text-amber-900 flex items-start gap-3">
+                  <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                  <div className="text-xs">
+                    <p className="font-bold mb-0.5">Sin asignación oficial de cátedras registrada</p>
+                    <p className="text-amber-800 text-[11px]">
+                      La Coordinación Académica y Dirección configuran las áreas y salones de enseñanza desde el módulo de <span className="font-bold">Gestión &gt; Usuarios</span>. Una vez asignadas, sus materias y salones se autocompletarán de forma inmediata en el Cuaderno de Calificaciones, Planificación Didáctica y Horarios.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* SECCIÓN 3: CAMBIO DE CONTRASEÑA CON GENERADOR ROBUSTO */}
             <div className="mt-8 pt-6 border-t border-slate-200">
@@ -1579,6 +1665,37 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
                   </div>
 
                   <form onSubmit={handleAddBlockSubmit} className="space-y-4">
+                    {/* Atajo: Cargar desde Cátedra Oficial Asignada */}
+                    {currentUser?.academicAssignments && currentUser.academicAssignments.length > 0 && (
+                      <div className="p-3 bg-amber-50/70 border border-amber-200/80 rounded-xl">
+                        <label className="block text-[11px] font-black uppercase tracking-wider text-amber-900 mb-1.5 flex items-center gap-1.5">
+                          <BookOpen className="w-3.5 h-3.5 text-amber-700" />
+                          Cargar desde Cátedra Oficial Asignada:
+                        </label>
+                        <select
+                          className="w-full px-3 py-2 text-xs rounded-lg border border-amber-300 bg-white text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-sm"
+                          defaultValue=""
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (!val) return;
+                            const found = currentUser.academicAssignments?.find((a) => a.id === val);
+                            if (found) {
+                              setBlockSubject(found.areaName || found.subjectName || '');
+                              setBlockLevel(found.level);
+                              setBlockGradeSection(`${found.grade} ${found.section}`);
+                            }
+                          }}
+                        >
+                          <option value="">-- Seleccionar cátedra para autocompletar sesión --</option>
+                          {currentUser.academicAssignments.map((assign) => (
+                            <option key={assign.id} value={assign.id}>
+                              {assign.areaName || assign.subjectName} — {assign.grade} "{assign.section}" ({assign.level === 'MEDIA_GENERAL' ? 'Media General' : assign.level === 'PRIMARIA' ? 'Primaria' : 'Inicial'})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+
                     <div className="grid grid-cols-2 gap-3">
                       <div>
                         <label className="block text-xs font-bold text-slate-700 mb-1">Día de la Semana:</label>
@@ -1661,11 +1778,18 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
                         <input
                           type="text"
                           required
+                          list="schedule-grade-section-options"
                           placeholder="Ej. 4to Año A, Sala 5 Años B..."
                           value={blockGradeSection}
                           onChange={(e) => setBlockGradeSection(e.target.value)}
                           className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2C2E53]"
                         />
+                        <datalist id="schedule-grade-section-options">
+                          {(LEVEL_GRADES_CATALOG[blockLevel] || []).flatMap((grade) => [
+                            <option key={`${grade}-A`} value={`${grade} A`} />,
+                            <option key={`${grade}-B`} value={`${grade} B`} />
+                          ])}
+                        </datalist>
                       </div>
                     </div>
 

@@ -28,7 +28,6 @@ export const ModernMobileNav: React.FC<ModernMobileNavProps> = ({
 
   // Determinamos los ítems clave según el rol del usuario
   const isFamilyOrStudent = currentRole === 'REPRESENTANTE' || currentRole === 'ESTUDIANTE';
-  const isAsistente = currentRole === 'ASISTENTE';
   const isSecretaria = currentRole === 'SECRETARIA';
 
   // Configuración de accesos directos principales adaptados por rol
@@ -59,32 +58,6 @@ export const ModernMobileNav: React.FC<ModernMobileNavProps> = ({
       ];
     }
 
-    if (isAsistente) {
-      return [
-        {
-          id: 'ESCRITORIO' as MainNavigationTab,
-          label: 'Inicio',
-          icon: Home,
-          onClick: () => onNavigate('ESCRITORIO', 'DASHBOARD'),
-          isActive: activeTab === 'ESCRITORIO'
-        },
-        {
-          id: 'GESTION' as MainNavigationTab,
-          label: 'Pases',
-          icon: ClipboardList,
-          onClick: () => onNavigate('GESTION', 'PASES'),
-          isActive: activeTab === 'GESTION'
-        },
-        {
-          id: 'GESTION' as MainNavigationTab,
-          label: 'Asistencia',
-          icon: CalendarCheck,
-          onClick: () => onNavigate('GESTION', 'INASISTENCIAS'),
-          isActive: false
-        }
-      ];
-    }
-
     if (isSecretaria) {
       return [
         {
@@ -96,16 +69,16 @@ export const ModernMobileNav: React.FC<ModernMobileNavProps> = ({
         },
         {
           id: 'GESTION' as MainNavigationTab,
-          label: 'Inscripción',
-          icon: ClipboardList,
-          onClick: () => onNavigate('GESTION', 'INSCRIPCIONES'),
+          label: 'Asistencia',
+          icon: CalendarCheck,
+          onClick: () => onNavigate('GESTION', 'INASISTENCIAS'),
           isActive: activeTab === 'GESTION'
         },
         {
           id: 'GESTION' as MainNavigationTab,
-          label: 'Matrícula',
-          icon: BarChart3,
-          onClick: () => onNavigate('GESTION', 'MATRICULA'),
+          label: 'Conductas',
+          icon: ClipboardList,
+          onClick: () => onNavigate('GESTION', 'CONDUCTAS'),
           isActive: false
         }
       ];

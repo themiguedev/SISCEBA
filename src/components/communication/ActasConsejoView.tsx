@@ -11,8 +11,10 @@ import {
   FileEdit,
   PenTool,
   Save,
-  Scale
+  Scale,
+  FileCheck
 } from 'lucide-react';
+import { OfficialFormatPrintModal } from '../common/OfficialFormatPrintModal';
 
 export const ActasConsejoView: React.FC = () => {
   const {
@@ -32,6 +34,7 @@ export const ActasConsejoView: React.FC = () => {
 
   // State for adding formal grade adjustment
   const [isAdjustModalOpen, setIsAdjustModalOpen] = useState(false);
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
   const [adjStudentId, setAdjStudentId] = useState(levelStudents[0]?.id || '');
   const [adjAreaId, setAdjAreaId] = useState(levelAreas[0]?.id || '');
   const [adjOldScore, setAdjOldScore] = useState('08');
@@ -53,13 +56,7 @@ export const ActasConsejoView: React.FC = () => {
       {/* Header Info */}
       <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-cba-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 no-print">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#D4AF37]"></span>
-            <span className="text-xs font-bold text-[#2C2E53] uppercase tracking-wider">
-              Órgano Colegiado de Evaluación
-            </span>
-          </div>
-          <h2 className="text-2xl font-black text-[#2C2E53] mt-1">
+          <h2 className="text-2xl font-black text-[#2C2E53]">
             Acta de Consejo de Curso y Ajuste de Calificaciones
           </h2>
           <p className="text-sm text-slate-500 mt-1">
@@ -67,7 +64,7 @@ export const ActasConsejoView: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setIsAdjustModalOpen(true)}
             className="flex items-center gap-2 px-4 py-2 bg-[#D4AF37] hover:bg-[#c29f2e] text-[#1B1C33] font-black rounded-xl text-xs shadow-cba-gold transition-all"
@@ -76,11 +73,19 @@ export const ActasConsejoView: React.FC = () => {
             Ajustar Calificación / Indicador
           </button>
           <button
+            onClick={() => setIsPrintModalOpen(true)}
+            className="flex items-center gap-2 px-3.5 py-2 bg-[#2C2E53] hover:bg-[#1B1C33] text-[#D4AF37] font-bold rounded-xl text-xs transition-colors shadow-sm"
+            title="Abrir formato oficial ministerial de 1 página según modelo de actas CBA"
+          >
+            <FileCheck className="w-4 h-4" />
+            Formato Oficial CBA
+          </button>
+          <button
             onClick={() => window.print()}
             className="flex items-center gap-2 px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition-colors"
           >
             <Printer className="w-4 h-4" />
-            Imprimir Acta
+            Imprimir Vista
           </button>
         </div>
       </div>
@@ -367,6 +372,15 @@ export const ActasConsejoView: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* MODAL DE IMPRESIÓN OFICIAL DE ACTA DE CONSEJO */}
+      <OfficialFormatPrintModal
+        isOpen={isPrintModalOpen}
+        onClose={() => setIsPrintModalOpen(false)}
+        formatType="ACTA_CONSEJO"
+        councilMinute={activeMinute}
+        studentsList={levelStudents}
+      />
     </div>
   );
 };

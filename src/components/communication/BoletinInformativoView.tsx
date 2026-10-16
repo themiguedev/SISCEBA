@@ -7,39 +7,92 @@ import {
   BookOpen,
   CheckCircle2,
   FileText,
-  AlertCircle
+  AlertCircle,
+  Lock,
+  ShieldAlert,
+  CreditCard,
+  AlertTriangle
 } from 'lucide-react';
 
 export const BoletinInformativoView: React.FC = () => {
   const {
     levelStudents,
     levelAreas,
+    indicators,
     currentLevel,
     activeLapso,
     currentSection,
     evaluations,
     currentRole,
-    currentUser
+    currentUser,
+    adminBlocks,
+    toggleAdminBlock
   } = useApp();
 
   const isFamilyOrStudent = currentRole === 'REPRESENTANTE' || currentRole === 'ESTUDIANTE';
+  const isAdmin = currentRole === 'ADMINISTRADOR';
   const displayStudents = isFamilyOrStudent
     ? (() => {
-        const filtered = levelStudents.filter(s => {
-          if (currentRole === 'ESTUDIANTE') {
+        if (currentRole === 'ESTUDIANTE') {
+          const normCedula = currentUser?.cedula?.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || '';
+          const normUsername = currentUser?.username?.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || '';
+          const userEmail = currentUser?.email?.toLowerCase().trim() || '';
+          const userFullName = currentUser?.fullName?.toLowerCase().trim() || '';
+
+          const matched = levelStudents.filter((s) => {
+            const studentCedula = s.cedula?.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || '';
+            const studentEmail = s.representativeEmail?.toLowerCase().trim() || '';
+            const studentName = s.fullName?.toLowerCase().trim() || '';
+
             return (
-              s.fullName.toLowerCase().includes(currentUser?.fullName?.toLowerCase() || '') ||
-              s.cedula.toLowerCase().includes(currentUser?.username?.toLowerCase() || '')
+              (normCedula && studentCedula === normCedula) ||
+              (normUsername && studentCedula === normUsername) ||
+              (normUsername && normUsername === s.id.toLowerCase()) ||
+              (userEmail && studentEmail === userEmail) ||
+              (userFullName && studentName === userFullName)
             );
+          });
+
+          if (matched.length > 0) {
+            return [matched[0]];
           }
-          const repName = currentUser?.fullName?.toLowerCase() || '';
-          const repEmail = currentUser?.email?.toLowerCase() || '';
+
+          // Si es el Administrador simulando el rol de Estudiante
+          if (currentUser?.role === 'ADMINISTRADOR') {
+            return levelStudents.length > 0 ? [levelStudents[0]] : [];
+          }
+
+          return [];
+        }
+
+        // Si es REPRESENTANTE
+        const repName = currentUser?.fullName?.toLowerCase().trim() || '';
+        const repEmail = currentUser?.email?.toLowerCase().trim() || '';
+        const repCedula = currentUser?.cedula?.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || '';
+        const repUsername = currentUser?.username?.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || '';
+
+        const matched = levelStudents.filter((s) => {
+          const sRepName = s.representativeName?.toLowerCase().trim() || '';
+          const sRepEmail = s.representativeEmail?.toLowerCase().trim() || '';
+          const sRepCedula = s.motherInfo?.cedula?.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || s.fatherInfo?.cedula?.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || '';
+
           return (
-            (repName && s.representativeName.toLowerCase().includes(repName)) ||
-            (repEmail && s.representativeEmail.toLowerCase().includes(repEmail))
+            (repCedula && sRepCedula === repCedula) ||
+            (repUsername && sRepCedula === repUsername) ||
+            (repEmail && sRepEmail === repEmail) ||
+            (repName && sRepName.includes(repName))
           );
         });
-        return filtered.length > 0 ? filtered : levelStudents;
+
+        if (matched.length > 0) {
+          return matched;
+        }
+
+        if (currentUser?.role === 'ADMINISTRADOR') {
+          return levelStudents.slice(0, 2);
+        }
+
+        return [];
       })()
     : levelStudents;
 
@@ -47,6 +100,15 @@ export const BoletinInformativoView: React.FC = () => {
     displayStudents[0]?.id || levelStudents[0]?.id || ''
   );
   const activeStudent = displayStudents.find(s => s.id === selectedStudentId) || displayStudents[0] || levelStudents[0];
+
+  // Verificar si el estudiante actual posee un bloqueo administrativo activo
+  const activeBlock = adminBlocks.find(b =>
+    b.active &&
+    (b.studentId === activeStudent?.id ||
+     (activeStudent?.cedula && b.studentId === activeStudent.cedula) ||
+     (activeStudent?.fullName && b.studentName?.toLowerCase().trim() === activeStudent.fullName?.toLowerCase().trim()))
+  );
+  const isBlocked = !!activeBlock;
 
   // Helper to fetch student score per area
   const getAreaEvaluation = (areaId: string) => {
@@ -110,6 +172,25 @@ export const BoletinInformativoView: React.FC = () => {
           nav, header, aside, .no-print, button {
             display: none !important;
           }
+          ${!isAdmin ? `
+          .bulletin-print-wrapper, .bulletin-page {
+            display: none !important;
+          }
+          body::after {
+            content: "AVISO INSTITUCIONAL: La emisión e impresión oficial de boletines de calificaciones está reservada exclusivamente para el Administrador del sistema.";
+            display: block;
+            margin: 80px auto;
+            text-align: center;
+            font-family: sans-serif;
+            font-size: 15pt;
+            font-weight: bold;
+            color: #b91c1c;
+            max-width: 650px;
+            border: 2px solid #b91c1c;
+            padding: 30px;
+            border-radius: 12px;
+          }
+          ` : `
           .bulletin-print-wrapper {
             margin: 0 !important;
             padding: 0 !important;
@@ -129,19 +210,14 @@ export const BoletinInformativoView: React.FC = () => {
             page-break-after: auto !important;
             break-after: auto !important;
           }
+          `}
         }
       `}</style>
 
       {/* Interactive Control Bar */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-cba-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 no-print">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#D4AF37]"></span>
-            <span className="text-xs font-bold text-[#2C2E53] dark:text-[#D4AF37] uppercase tracking-wider">
-              Documento Institucional Oficial • U.E. Bellas Artes
-            </span>
-          </div>
-          <h2 className="text-2xl font-black text-[#2C2E53] dark:text-white mt-1">
+          <h2 className="text-2xl font-black text-[#2C2E53] dark:text-white">
             Boletín de Calificaciones ({currentLevel.replace('_', ' ')})
           </h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
@@ -150,34 +226,164 @@ export const BoletinInformativoView: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <label htmlFor="select-bulletin-student" className="sr-only">
-            Seleccionar estudiante
-          </label>
-          <select
-            id="select-bulletin-student"
-            value={selectedStudentId}
-            onChange={(e) => setSelectedStudentId(e.target.value)}
-            aria-label="Seleccionar estudiante para ver boletín informativo"
-            className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-black text-[#2C2E53] dark:text-white focus:ring-2 focus:ring-[#2C2E53]"
-          >
-            {displayStudents.map(s => (
-              <option key={s.id} value={s.id}>{s.fullName} ({s.cedula})</option>
-            ))}
-          </select>
+          {currentRole !== 'ESTUDIANTE' ? (
+            <>
+              <label htmlFor="select-bulletin-student" className="sr-only">
+                Seleccionar estudiante
+              </label>
+              <select
+                id="select-bulletin-student"
+                value={selectedStudentId}
+                onChange={(e) => setSelectedStudentId(e.target.value)}
+                aria-label="Seleccionar estudiante para ver boletín informativo"
+                className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-black text-[#2C2E53] dark:text-white focus:ring-2 focus:ring-[#2C2E53]"
+              >
+                {displayStudents.map(s => (
+                  <option key={s.id} value={s.id}>{s.fullName} ({s.cedula})</option>
+                ))}
+              </select>
+            </>
+          ) : activeStudent ? (
+            <div className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-black text-[#2C2E53] dark:text-white flex items-center gap-2">
+              <User className="w-3.5 h-3.5 text-[#D4AF37]" />
+              <span>{activeStudent.fullName} ({activeStudent.cedula})</span>
+            </div>
+          ) : null}
 
-          <button
-            onClick={() => window.print()}
-            className="flex items-center gap-2 px-5 py-2.5 bg-[#2C2E53] text-[#D4AF37] hover:bg-[#232543] font-black rounded-xl text-xs shadow-md transition-all whitespace-nowrap active:scale-95"
-          >
-            <Printer className="w-4 h-4" />
-            Imprimir Boletín
-          </button>
+          {isFamilyOrStudent && isBlocked ? (
+            <div className="flex items-center gap-2 px-4 py-2.5 bg-red-100 dark:bg-red-950/60 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 font-black rounded-xl text-xs whitespace-nowrap">
+              <Lock className="w-4 h-4 text-red-600 dark:text-red-400" />
+              Impresión Bloqueada por Mora
+            </div>
+          ) : isFamilyOrStudent ? null : !isAdmin ? (
+            <div
+              className="flex items-center gap-2 px-4 py-2.5 bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 font-bold rounded-xl text-xs whitespace-nowrap shadow-sm select-none"
+              title="La emisión e impresión oficial de boletines está reservada exclusivamente para el rol Administrador"
+            >
+              <Lock className="w-4 h-4 text-slate-400 shrink-0" />
+              <span>Impresión Exclusiva (Admin)</span>
+            </div>
+          ) : (
+            <button
+              onClick={() => window.print()}
+              className="flex items-center gap-2 px-5 py-2.5 bg-[#2C2E53] text-[#D4AF37] hover:bg-[#232543] font-black rounded-xl text-xs shadow-md transition-all whitespace-nowrap active:scale-95"
+            >
+              <Printer className="w-4 h-4" />
+              Imprimir Boletín
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Render Subsystem-Specific Layout */}
-      {activeStudent ? (
-        <div className="bulletin-print-wrapper bg-white text-slate-800 rounded-2xl border border-slate-200 shadow-xl max-w-4xl mx-auto overflow-hidden">
+      {/* CASO: BLOQUEO ADMINISTRATIVO PARA REPRESENTANTES Y ESTUDIANTES */}
+      {activeStudent && isFamilyOrStudent && isBlocked ? (
+        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-red-200 dark:border-red-900/50 shadow-2xl max-w-3xl mx-auto overflow-hidden p-8 sm:p-12 text-center animate-fade-in space-y-6">
+          <div className="flex flex-col items-center justify-center space-y-3">
+            <div className="w-20 h-20 rounded-3xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 flex items-center justify-center text-red-600 dark:text-red-400 shadow-inner">
+              <Lock className="w-10 h-10" />
+            </div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 text-xs font-black uppercase tracking-wider">
+              <ShieldAlert className="w-4 h-4" /> Control Administrativo Activo
+            </div>
+            <h2 className="text-2xl font-black text-[#2C2E53] dark:text-white max-w-lg">
+              Acceso a Boletín Temporalmente Restringido
+            </h2>
+            <p className="text-sm text-slate-600 dark:text-slate-300 max-w-md leading-relaxed">
+              Estimado representante, la visualización y descarga de las calificaciones oficiales de <strong className="text-[#2C2E53] dark:text-white">{activeStudent.fullName}</strong> ({activeStudent.grade} "{activeStudent.section}") se encuentra pausada preventivamente debido a un compromiso administrativo pendiente con la institución.
+            </p>
+          </div>
+
+          {/* Tarjeta de Detalle del Compromiso */}
+          <div className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 text-left grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <div>
+              <span className="text-slate-400 block font-bold text-[10px] uppercase">Concepto en Mora:</span>
+              <span className="font-black text-red-600 dark:text-red-400 text-sm">{activeBlock.concept}</span>
+            </div>
+            <div>
+              <span className="text-slate-400 block font-bold text-[10px] uppercase">Compromiso Financiero Referencial:</span>
+              <span className="font-black text-slate-800 dark:text-white text-sm">
+                {activeBlock.debtAmount ? `$${Number(activeBlock.debtAmount).toFixed(2)} USD` : 'Por verificar en Cobranzas'}
+              </span>
+            </div>
+            <div className="sm:col-span-2">
+              <span className="text-slate-400 block font-bold text-[10px] uppercase">Observación Registrada por Cobranzas:</span>
+              <span className="text-slate-700 dark:text-slate-300 font-semibold">{activeBlock.reason}</span>
+            </div>
+            <div>
+              <span className="text-slate-400 block font-bold text-[10px] uppercase">Fecha de Emisión del Bloqueo:</span>
+              <span className="text-slate-600 dark:text-slate-400 font-medium">{activeBlock.blockDate}</span>
+            </div>
+            <div>
+              <span className="text-slate-400 block font-bold text-[10px] uppercase">Representante Registrado:</span>
+              <span className="text-slate-700 dark:text-slate-300 font-medium">{activeBlock.representativeName || activeStudent.representativeName}</span>
+            </div>
+          </div>
+
+          {/* Pasos para regularizar */}
+          <div className="bg-amber-50 dark:bg-amber-950/30 rounded-2xl p-5 border border-amber-200 dark:border-amber-800 text-left space-y-2">
+            <h4 className="text-xs font-black text-amber-900 dark:text-amber-200 uppercase tracking-wider flex items-center gap-2">
+              <CreditCard className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+              ¿Cómo solventar esta situación y consultar las calificaciones?
+            </h4>
+            <ol className="text-xs text-amber-950 dark:text-amber-300/90 space-y-1.5 list-decimal list-inside leading-relaxed">
+              <li>Acérquese a la <strong>Coordinación de Administración y Cobranzas</strong> de la U.E. Bellas Artes (Horario: Lun - Vie, 7:30 AM a 1:00 PM).</li>
+              <li>Consigne su comprobante de pago o reporte su cancelación por punto de venta, transferencia o efectivo.</li>
+              <li>Una vez emitido el recibo de solvencia, el sistema habilitará automáticamente el acceso inmediato al boletín en su portal digital.</li>
+            </ol>
+          </div>
+
+          <div className="text-[11px] text-slate-400">
+            Para dudas sobre estados de cuenta, comuníquese con administración institucional al correo oficial de cobranzas.
+          </div>
+        </div>
+      ) : activeStudent ? (
+        <>
+          {/* Banner de Control Administrativo para Personal Institucional */}
+          {isBlocked && (
+            <div className="p-4 rounded-2xl border bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 no-print shadow-sm">
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-xl bg-amber-500/10 text-amber-700 dark:text-amber-400 mt-0.5">
+                  <AlertTriangle className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-black uppercase text-amber-800 dark:text-amber-300">
+                      Bloqueo Administrativo Activo para este Estudiante
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-200 dark:bg-amber-800 text-amber-900 dark:text-amber-100">
+                      {activeBlock.concept}
+                    </span>
+                  </div>
+                  <p className="text-xs text-amber-900/80 dark:text-amber-300/80 mt-1">
+                    <strong>Motivo:</strong> {activeBlock.reason} • <strong>Monto:</strong> {activeBlock.debtAmount ? `$${Number(activeBlock.debtAmount).toFixed(2)} USD` : 'Sin monto fijado'} • <strong>Fecha:</strong> {activeBlock.blockDate}
+                  </p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                    {(currentRole === 'ADMINISTRADOR' || currentRole === 'SECRETARIA')
+                      ? 'Los representantes tienen restringida la vista y descarga del boletín. Puede solventar el estado aquí tras verificar el pago.'
+                      : 'Aviso pedagógico: Favor no entregar boletas oficiales en físico a representantes sin constancia de solvencia.'}
+                  </p>
+                </div>
+              </div>
+
+              {(currentRole === 'ADMINISTRADOR' || currentRole === 'SECRETARIA') && (
+                <button
+                  onClick={() => toggleAdminBlock(activeBlock.id)}
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black shadow-md transition-all active:scale-95 whitespace-nowrap flex items-center gap-2"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  Desbloquear por Pago Recibido (Solvente)
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Render Subsystem-Specific Layout */}
+          <div className="bulletin-print-wrapper bg-white text-slate-800 rounded-2xl border border-slate-200 shadow-xl max-w-4xl mx-auto overflow-hidden">
+            {isBlocked && (
+              <div className="hidden print:block bg-red-100 text-red-900 border-b-2 border-red-500 px-4 py-1.5 text-center text-xs font-black uppercase tracking-wider">
+                *** COPIA INTERNA INSTITUCIONAL — ESTUDIANTE CON COMPROMISO ADMINISTRATIVO ({activeBlock.concept}) ***
+              </div>
+            )}
           
           {/* ========================================================= */}
           {/* CASO 1: MEDIA GENERAL (Formato Exacto 1 Página Letter)    */}
@@ -198,7 +404,7 @@ export const BoletinInformativoView: React.FC = () => {
                     </h1>
                     <p className="text-[11px] text-slate-500 font-bold">MARACAIBO EDO. ZULIA</p>
                     <p className="text-[11px] text-slate-600 mt-0.5">
-                      <strong>AÑO ESCOLAR:</strong> 2025-2026 &nbsp;|&nbsp; <strong>NIVEL:</strong> MEDIA GENERAL
+                      <strong>AÑO ESCOLAR:</strong> 2026 - 2027 &nbsp;|&nbsp; <strong>NIVEL:</strong> MEDIA GENERAL
                     </p>
                   </div>
                 </div>
@@ -397,7 +603,7 @@ export const BoletinInformativoView: React.FC = () => {
                       </h1>
                       <p className="text-[11px] text-slate-500 font-bold">MARACAIBO EDO-ZULIA</p>
                       <p className="text-[11px] text-slate-600 mt-0.5">
-                        <strong>AÑO ESCOLAR:</strong> 2025-2026 &nbsp;|&nbsp; <strong>NIVEL:</strong> PRIMARIA
+                        <strong>AÑO ESCOLAR:</strong> 2026 - 2027 &nbsp;|&nbsp; <strong>NIVEL:</strong> PRIMARIA
                       </p>
                     </div>
                   </div>
@@ -428,23 +634,47 @@ export const BoletinInformativoView: React.FC = () => {
                         <th className="py-2 px-3">ÁREAS O ASIGNATURAS</th>
                         <th className="py-2 px-2 text-center w-24">Indicadores<br />Evaluados</th>
                         <th className="py-2 px-2 text-center w-20 bg-emerald-800">LOGRADO<br />(L)</th>
-                        <th className="py-2 px-2 text-center w-20 bg-sky-800">AVANZADO<br />(A)</th>
-                        <th className="py-2 px-2 text-center w-20 bg-amber-800">EN PROCESO<br />(P)</th>
+                        <th className="py-2 px-2 text-center w-20 bg-amber-800">EN PROCESO<br />(P / EP)</th>
                         <th className="py-2 px-2 text-center w-20 bg-rose-800">INICIADO<br />(I)</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200">
-                      {levelAreas.map((area, idx) => (
-                        <tr key={area.id} className="hover:bg-slate-50">
-                          <td className="py-1 px-2 text-center text-slate-400 font-mono text-[10px]">{idx + 1}</td>
-                          <td className="py-1 px-3 font-bold text-[#2C2E53]">{area.name}</td>
-                          <td className="py-1 px-2 text-center font-bold">12</td>
-                          <td className="py-1 px-2 text-center font-black text-emerald-700 bg-emerald-50/50">10</td>
-                          <td className="py-1 px-2 text-center font-bold text-sky-700 bg-sky-50/50">2</td>
-                          <td className="py-1 px-2 text-center text-slate-400">0</td>
-                          <td className="py-1 px-2 text-center text-slate-400">0</td>
-                        </tr>
-                      ))}
+                      {levelAreas.map((area, idx) => {
+                        const areaInds = indicators.filter(i => {
+                          const matchesArea = i.areaId === area.id && i.level === 'PRIMARIA' && i.lapso === activeLapso;
+                          if (!matchesArea) return false;
+                          if (i.grade && activeStudent.grade) {
+                            if (!i.grade.includes(activeStudent.grade) && !activeStudent.grade.includes(i.grade)) return false;
+                          }
+                          return true;
+                        });
+
+                        const studentEvals = evaluations.filter(
+                          e => e.studentId === activeStudent.id &&
+                               e.areaId === area.id &&
+                               e.lapso === activeLapso &&
+                               e.moment === 'PROCESAL'
+                        );
+
+                        const countL = studentEvals.filter(e => e.scoreQualitative === 'L').length;
+                        const countP = studentEvals.filter(e => e.scoreQualitative === 'P' || e.scoreQualitative === 'EP').length;
+                        const countI = studentEvals.filter(e => e.scoreQualitative === 'I').length;
+                        const totalEvaluated = studentEvals.length || (areaInds.length > 0 ? areaInds.length : 0);
+                        const displayedL = studentEvals.length > 0 ? countL : Math.max(0, areaInds.length - 1);
+                        const displayedP = studentEvals.length > 0 ? countP : (areaInds.length > 0 ? 1 : 0);
+                        const displayedI = studentEvals.length > 0 ? countI : 0;
+
+                        return (
+                          <tr key={area.id} className="hover:bg-slate-50">
+                            <td className="py-1 px-2 text-center text-slate-400 font-mono text-[10px]">{idx + 1}</td>
+                            <td className="py-1 px-3 font-bold text-[#2C2E53]">{area.name}</td>
+                            <td className="py-1 px-2 text-center font-bold">{totalEvaluated}</td>
+                            <td className="py-1 px-2 text-center font-black text-emerald-700 bg-emerald-50/50">{displayedL}</td>
+                            <td className="py-1 px-2 text-center font-bold text-amber-700 bg-amber-50/50">{displayedP}</td>
+                            <td className="py-1 px-2 text-center text-rose-700 bg-rose-50/50">{displayedI}</td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -497,52 +727,46 @@ export const BoletinInformativoView: React.FC = () => {
                 </div>
 
                 <div className="space-y-3 text-[11px]">
-                  <div className="border border-slate-300 rounded-lg overflow-hidden">
-                    <div className="bg-[#2C2E53] text-white px-3 py-1 font-bold flex justify-between">
-                      <span>ÁREA DE LENGUAJE Y COMUNICACIÓN</span>
-                      <span className="text-[10px] opacity-80">Competencias Consolidadas</span>
-                    </div>
-                    <div className="p-3 space-y-2 bg-white">
-                      <div className="flex justify-between items-start">
-                        <span>• Afianza el desarrollo de su capacidad de investigación y búsqueda permanente de la información.</span>
-                        <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 font-bold rounded text-[10px]">L</span>
-                      </div>
-                      <div className="flex justify-between items-start">
-                        <span>• Utiliza el diccionario para buscar significados, ampliar vocabulario y revisar ortografía.</span>
-                        <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 font-bold rounded text-[10px]">L</span>
-                      </div>
-                    </div>
-                  </div>
+                  {levelAreas.filter(a => ['pri-len', 'pri-mat', 'pri-cn', 'pri-cs'].includes(a.id)).map(area => {
+                    const areaInds = indicators.filter(i => {
+                      if (i.areaId !== area.id || i.level !== 'PRIMARIA' || i.lapso !== activeLapso) return false;
+                      if (i.grade && activeStudent.grade) {
+                        return i.grade.includes(activeStudent.grade) || activeStudent.grade.includes(i.grade);
+                      }
+                      return true;
+                    });
+                    if (areaInds.length === 0) return null;
 
-                  <div className="border border-slate-300 rounded-lg overflow-hidden">
-                    <div className="bg-[#2C2E53] text-white px-3 py-1 font-bold flex justify-between">
-                      <span>ÁREA DE MATEMÁTICA Y CIENCIAS</span>
-                      <span className="text-[10px] opacity-80">Pensamiento Lógico y Operacional</span>
-                    </div>
-                    <div className="p-3 space-y-2 bg-white">
-                      <div className="flex justify-between items-start">
-                        <span>• Identifica, clasifica y construye figuras bidimensionales y polígonos regulares.</span>
-                        <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 font-bold rounded text-[10px]">L</span>
-                      </div>
-                      <div className="flex justify-between items-start">
-                        <span>• Resuelve situaciones problemáticas aplicando operaciones aritméticas combinadas con exactitud.</span>
-                        <span className="px-2 py-0.5 bg-sky-100 text-sky-800 font-bold rounded text-[10px]">A</span>
-                      </div>
-                    </div>
-                  </div>
+                    return (
+                      <div key={area.id} className="border border-slate-300 rounded-lg overflow-hidden">
+                        <div className="bg-[#2C2E53] text-white px-3 py-1 font-bold flex justify-between">
+                          <span className="uppercase">{area.name}</span>
+                          <span className="text-[10px] opacity-80">{areaInds.length} Indicadores Evaluados</span>
+                        </div>
+                        <div className="p-3 space-y-1.5 bg-white divide-y divide-slate-100">
+                          {areaInds.map(ind => {
+                            const evalRec = evaluations.find(
+                              e => e.studentId === activeStudent.id && e.indicatorId === ind.id && e.lapso === activeLapso && e.moment === 'PROCESAL'
+                            );
+                            const score = evalRec?.scoreQualitative || 'L';
+                            const badgeColor = score === 'L' ? 'bg-emerald-100 text-emerald-800' : (score === 'I' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800');
 
-                  <div className="border border-slate-300 rounded-lg overflow-hidden">
-                    <div className="bg-[#D4AF37] text-[#1e2038] px-3 py-1 font-black flex justify-between">
-                      <span>ROBÓTICA EDUCATIVA & TECNOLOGÍA</span>
-                      <span className="text-[10px]">Prototipado MakerLab & Micro:bit</span>
-                    </div>
-                    <div className="p-3 space-y-2 bg-white">
-                      <div className="flex justify-between items-start">
-                        <span>• Diseña, programa y construye prototipos automatizados en entorno MakeCode con sensores.</span>
-                        <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 font-bold rounded text-[10px]">L</span>
+                            return (
+                              <div key={ind.id} className="pt-1.5 first:pt-0 flex justify-between items-start gap-2">
+                                <span className="text-slate-700 leading-snug">
+                                  <strong className="text-slate-400 font-mono text-[9px] mr-1">{ind.code}</strong>
+                                  {ind.description}
+                                </span>
+                                <span className={`px-2 py-0.5 font-bold rounded text-[10px] shrink-0 ${badgeColor}`}>
+                                  {score}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
-                    </div>
-                  </div>
+                    );
+                  })}
                 </div>
 
                 <div className="grid grid-cols-2 gap-8 text-center text-xs pt-4 border-t border-slate-200">
@@ -579,7 +803,7 @@ export const BoletinInformativoView: React.FC = () => {
                       </h1>
                       <p className="text-[11px] text-slate-500 font-bold">MARACAIBO EDO-ZULIA</p>
                       <p className="text-[11px] text-slate-600 mt-0.5">
-                        <strong>AÑO ESCOLAR:</strong> 2025-2026 &nbsp;|&nbsp; <strong>NIVEL:</strong> PREESCOLAR
+                        <strong>AÑO ESCOLAR:</strong> 2026 - 2027 &nbsp;|&nbsp; <strong>NIVEL:</strong> PREESCOLAR
                       </p>
                     </div>
                   </div>
@@ -634,16 +858,43 @@ export const BoletinInformativoView: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200">
-                      {levelAreas.map((area, idx) => (
-                        <tr key={area.id} className="hover:bg-slate-50">
-                          <td className="py-1 px-2 text-center text-slate-400 font-mono text-[10px]">{idx + 1}</td>
-                          <td className="py-1 px-3 font-bold text-[#2C2E53]">{area.name}</td>
-                          <td className="py-1 px-2 text-center font-bold">10</td>
-                          <td className="py-1 px-2 text-center font-black text-emerald-700 bg-emerald-50/50">9</td>
-                          <td className="py-1 px-2 text-center text-amber-700 bg-amber-50/50">1</td>
-                          <td className="py-1 px-2 text-center text-slate-400">0</td>
-                        </tr>
-                      ))}
+                      {levelAreas.map((area, idx) => {
+                        const areaInds = indicators.filter(i => {
+                          if (i.areaId !== area.id || i.level !== 'INICIAL') return false;
+                          if (i.grade) {
+                            if (activeStudent.grade?.includes('4') && i.grade.includes('4')) return true;
+                            if (activeStudent.grade?.includes('5') && i.grade.includes('5')) return true;
+                            if (activeStudent.grade?.includes('3') && i.grade.includes('3')) return true;
+                            return false;
+                          }
+                          return true;
+                        });
+                        const totalInds = areaInds.length || (area.id === 'ini-ca' ? (activeStudent.grade?.includes('5') ? 12 : 13) : (area.id === 'ini-ap' ? (activeStudent.grade?.includes('5') ? 16 : 14) : (area.id === 'ini-ef' ? 4 : (area.id === 'ini-nat' ? 4 : (area.id === 'ini-aje' ? 4 : (area.id === 'ini-inf' ? 6 : (area.id === 'ini-ing' ? 5 : 8)))))));
+
+                        const studentEvals = evaluations.filter(
+                          e => e.studentId === activeStudent.id && e.areaId === area.id && e.lapso === activeLapso && e.moment === 'PROCESAL'
+                        );
+
+                        const countA = studentEvals.filter(e => e.scoreLiteral === 'A' || e.scoreLiteral === 'B').length;
+                        const countP = studentEvals.filter(e => e.scoreLiteral === 'C' || e.scoreLiteral === 'D').length;
+                        const countPA = studentEvals.filter(e => e.scoreLiteral === 'E').length;
+
+                        const displayTotal = totalInds;
+                        const displayA = studentEvals.length > 0 ? countA : Math.max(1, displayTotal - 1);
+                        const displayP = studentEvals.length > 0 ? countP : 1;
+                        const displayPA = studentEvals.length > 0 ? countPA : 0;
+
+                        return (
+                          <tr key={area.id} className="hover:bg-slate-50">
+                            <td className="py-1 px-2 text-center text-slate-400 font-mono text-[10px]">{idx + 1}</td>
+                            <td className="py-1 px-3 font-bold text-[#2C2E53]">{area.name}</td>
+                            <td className="py-1 px-2 text-center font-bold">{displayTotal}</td>
+                            <td className="py-1 px-2 text-center font-black text-emerald-700 bg-emerald-50/50">{displayA}</td>
+                            <td className="py-1 px-2 text-center text-amber-700 bg-amber-50/50">{displayP}</td>
+                            <td className="py-1 px-2 text-center text-slate-400">{displayPA}</td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -666,6 +917,7 @@ export const BoletinInformativoView: React.FC = () => {
           )}
 
         </div>
+        </>
       ) : (
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-12 text-center max-w-xl mx-auto space-y-3">
           <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 mx-auto flex items-center justify-center">

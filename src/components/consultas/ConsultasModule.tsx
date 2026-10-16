@@ -1,27 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import { EducationalLevel, Student } from '../../types';
-import { BoletinInformativoView } from '../communication/BoletinInformativoView';
 import {
+  FileSpreadsheet,
+  GraduationCap,
+  Clock,
   BarChart3,
   Users,
-  FileSpreadsheet,
   Printer,
-  Search,
-  Filter,
-  Download,
-  GraduationCap,
-  Award,
-  BookOpen,
-  Clock,
   ShieldCheck,
-  CheckCircle2,
-  AlertCircle,
-  Calendar,
+  ShieldAlert,
+  Lock,
+  Layers,
   Sparkles,
-  Info
+  Award,
+  AlertCircle
 } from 'lucide-react';
 import { hasSubTabAccess, ROLE_METADATA } from '../../utils/rbac';
+import { RendimientoAuditView } from './RendimientoAuditView';
+import { ReportesCentroView } from './ReportesCentroView';
+import { AsistenciaPasesView } from './AsistenciaPasesView';
+import { EstadisticasRendimientoView } from './EstadisticasRendimientoView';
+import { NominasExpedientesView } from './NominasExpedientesView';
+import { AuditoriaConsultasModal } from './AuditoriaConsultasModal';
+import {
+  DEMO_STUDENTS_INICIAL,
+  DEMO_STUDENTS_PRIMARIA,
+  generateDemoEvaluations,
+  generateDemoDailyAttendance,
+  DEMO_PASSES
+} from '../../data/consultasDemoData';
 
 export type ConsultasSubTab = 'RENDIMIENTO' | 'BOLETIN' | 'ASISTENCIA' | 'ESTADISTICAS' | 'NOMINAS';
 
@@ -34,9 +42,58 @@ export const ConsultasModule: React.FC<ConsultasModuleProps> = ({
   activeSubTab,
   setActiveSubTab
 }) => {
-  const { students, evaluations, areas, currentLevel, activeLapso, currentRole, passes, currentUser } = useApp();
-  const isFamilyOrStudent = currentRole === 'REPRESENTANTE' || currentRole === 'ESTUDIANTE';
+  const {
+    students,
+    evaluations,
+    passes,
+    dailyAttendance,
+    currentRole,
+    activeLapso,
+    currentUser
+  } = useApp();
 
+  const isFamilyOrStudent = currentRole === 'REPRESENTANTE' || currentRole === 'ESTUDIANTE';
+  const isAdmin = currentRole === 'ADMINISTRADOR';
+  const isManagement = ['ADMINISTRADOR', 'DIRECTOR', 'COORDINACION'].includes(currentRole);
+
+  const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
+
+  // Modo Muestra Institucional para Auditoría UCE
+  // Se activa por defecto para el Administrador si el libro digital no tiene notas asentadas aún
+  const [useDemoData, setUseDemoData] = useState<boolean>(() => {
+    return isManagement && evaluations.length === 0;
+  });
+
+  // Datos efectivos combinados
+  const effectiveStudents = useMemo(() => {
+    if (!useDemoData) return students;
+    const hasInicial = students.some((s) => s.level === 'INICIAL');
+    const hasPrimaria = students.some((s) => s.level === 'PRIMARIA');
+    let list = [...students];
+    if (!hasInicial) list = [...list, ...DEMO_STUDENTS_INICIAL];
+    if (!hasPrimaria) list = [...list, ...DEMO_STUDENTS_PRIMARIA];
+    return list;
+  }, [students, useDemoData]);
+
+  const effectiveEvaluations = useMemo(() => {
+    if (!useDemoData) return evaluations;
+    if (evaluations.length > 0) return evaluations;
+    return generateDemoEvaluations(effectiveStudents);
+  }, [evaluations, useDemoData, effectiveStudents]);
+
+  const effectivePasses = useMemo(() => {
+    if (!useDemoData) return passes;
+    return passes.length > 0 ? passes : DEMO_PASSES;
+  }, [passes, useDemoData]);
+
+  const effectiveDailyAttendance = useMemo(() => {
+    if (!useDemoData) return dailyAttendance;
+    return dailyAttendance.length > 0 ? dailyAttendance : generateDemoDailyAttendance(effectiveStudents);
+  }, [dailyAttendance, useDemoData, effectiveStudents]);
+
+  const [simulatedStudentId, setSimulatedStudentId] = useState<string>(() => effectiveStudents[0]?.id || '');
+
+  // Subtabs permitidas según RBAC
   const allowedTabs = (['RENDIMIENTO', 'BOLETIN', 'ASISTENCIA', 'ESTADISTICAS', 'NOMINAS'] as ConsultasSubTab[]).filter(
     (t) => hasSubTabAccess(currentRole, 'CONSULTAS', t)
   );
@@ -46,7 +103,7 @@ export const ConsultasModule: React.FC<ConsultasModuleProps> = ({
   });
 
   const requestedTab = activeSubTab || internalActiveTab;
-  const activeTab = allowedTabs.includes(requestedTab) ? requestedTab : (allowedTabs[0] || 'RENDIMIENTO');
+  const activeTab = allowedTabs.includes(requestedTab) ? requestedTab : allowedTabs[0] || 'RENDIMIENTO';
 
   const setActiveTab = (tab: ConsultasSubTab) => {
     if (!allowedTabs.includes(tab)) return;
@@ -55,204 +112,202 @@ export const ConsultasModule: React.FC<ConsultasModuleProps> = ({
     }
     setInternalActiveTab(tab);
   };
-  const [searchTerm, setSearchTerm] = useState('');
 
-  // Estricto aislamiento de privacidad estudiantil para Representante y Estudiante
+  // Estricto aislamiento de privacidad estudiantil: el Estudiante solo ve su propio registro
   const scopedStudents = isFamilyOrStudent
     ? (() => {
-        const filtered = students.filter((s) => {
-          if (currentRole === 'ESTUDIANTE') {
+        if (currentRole === 'ESTUDIANTE') {
+          const normUsername = currentUser?.username?.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || '';
+          const normCedula = currentUser?.cedula?.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || '';
+          const userFullName = currentUser?.fullName?.toLowerCase().trim() || '';
+          const userEmail = currentUser?.email?.toLowerCase().trim() || '';
+
+          const matched = effectiveStudents.filter((s) => {
+            const studentCedula = s.cedula?.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || '';
+            const studentName = s.fullName?.toLowerCase().trim() || '';
+            const studentEmail = (s as any).email?.toLowerCase().trim() || s.representativeEmail?.toLowerCase().trim() || '';
+
             return (
-              s.fullName.toLowerCase().includes(currentUser?.fullName?.toLowerCase() || '') ||
-              s.cedula.toLowerCase().includes(currentUser?.username.toLowerCase() || '')
+              (normCedula && studentCedula === normCedula) ||
+              (normUsername && studentCedula === normUsername) ||
+              (normUsername && normUsername === s.id.toLowerCase()) ||
+              (userEmail && studentEmail === userEmail) ||
+              (userFullName && studentName === userFullName)
             );
+          });
+
+          if (matched.length > 0) {
+            return [matched[0]];
           }
-          const repName = currentUser?.fullName?.toLowerCase() || '';
-          const repEmail = currentUser?.email?.toLowerCase() || '';
+
+          if (currentUser?.role === 'ADMINISTRADOR') {
+            const simulated = effectiveStudents.find((s) => s.id === simulatedStudentId) || effectiveStudents[0];
+            return simulated ? [simulated] : [];
+          }
+
+          return [];
+        }
+
+        // Si es REPRESENTANTE, filtrar exclusivamente por sus representados legales
+        const repName = currentUser?.fullName?.toLowerCase().trim() || '';
+        const repEmail = currentUser?.email?.toLowerCase().trim() || '';
+        const repCedula = currentUser?.cedula?.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || '';
+        const repUsername = currentUser?.username?.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || '';
+
+        const matched = effectiveStudents.filter((s) => {
+          const sRepName = s.representativeName?.toLowerCase().trim() || '';
+          const sRepEmail = s.representativeEmail?.toLowerCase().trim() || '';
+          const sRepCedula =
+            s.motherInfo?.cedula?.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() ||
+            s.fatherInfo?.cedula?.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() ||
+            '';
+
           return (
-            (repName && s.representativeName.toLowerCase().includes(repName)) ||
-            (repEmail && s.representativeEmail.toLowerCase().includes(repEmail))
+            (repCedula && sRepCedula === repCedula) ||
+            (repUsername && sRepCedula === repUsername) ||
+            (repEmail && sRepEmail === repEmail) ||
+            (repName && sRepName.includes(repName))
           );
         });
-        return filtered.length > 0 ? filtered : students;
+
+        if (matched.length > 0) {
+          return matched;
+        }
+
+        if (currentUser?.role === 'ADMINISTRADOR') {
+          return effectiveStudents.slice(0, 2);
+        }
+
+        return [];
       })()
-    : students;
-
-  const filteredStudents = scopedStudents.filter(
-    (s) =>
-      s.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.cedula.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.representativeName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const [levelFilter, setLevelFilter] = useState<'ALL' | EducationalLevel>(() => {
-    if (isFamilyOrStudent) {
-      return scopedStudents[0]?.level || currentLevel || 'MEDIA_GENERAL';
-    }
-    return currentLevel || 'MEDIA_GENERAL';
-  });
-
-  // Helper para Inicial (Cualitativo: L = Logrado, EP = En Proceso, I = Iniciado)
-  const getInicialScore = (studentId: string, areaCodePrefix: string, defaultScore: 'L' | 'EP' | 'I' = 'L'): { code: 'L' | 'EP' | 'I'; label: string } => {
-    const matchedArea = areas.find(a => 
-      a.level === 'INICIAL' && (
-        a.id.toLowerCase().includes(areaCodePrefix.toLowerCase()) || 
-        a.code.toLowerCase().includes(areaCodePrefix.toLowerCase())
-      )
-    );
-    if (!matchedArea) return { code: defaultScore, label: defaultScore === 'L' ? 'Logrado' : defaultScore === 'EP' ? 'En Proceso' : 'Iniciado' };
-
-    const recs = evaluations.filter(
-      e => e.studentId === studentId && e.areaId === matchedArea.id && e.lapso === activeLapso
-    );
-    if (recs.length === 0) return { code: defaultScore, label: defaultScore === 'L' ? 'Logrado' : defaultScore === 'EP' ? 'En Proceso' : 'Iniciado' };
-
-    const qual = recs[0].scoreQualitative;
-    if (qual === 'L') return { code: 'L', label: 'Logrado' };
-    if (qual === 'EP') return { code: 'EP', label: 'En Proceso' };
-    if (qual === 'I') return { code: 'I', label: 'Iniciado' };
-    return { code: defaultScore, label: defaultScore === 'L' ? 'Logrado' : defaultScore === 'EP' ? 'En Proceso' : 'Iniciado' };
-  };
-
-  // Helper para Primaria (Literal MPPE: A, B, C, D, E o '-')
-  const getPrimariaScore = (studentId: string, areaCodePrefix: string, defaultScore: string = '-'): string => {
-    const matchedArea = areas.find(a => 
-      a.level === 'PRIMARIA' && (
-        a.id.toLowerCase().includes(areaCodePrefix.toLowerCase()) || 
-        a.code.toLowerCase().includes(areaCodePrefix.toLowerCase())
-      )
-    );
-    if (!matchedArea) return defaultScore;
-
-    const recs = evaluations.filter(
-      e => e.studentId === studentId && e.areaId === matchedArea.id && e.lapso === activeLapso
-    );
-    if (recs.length === 0) return defaultScore;
-
-    return recs[0].scoreLiteral || defaultScore;
-  };
-
-  // Helper para Media General (Numérico vigesimal: 01 a 20)
-  const getMediaScore = (studentId: string, areaCodePrefix: string, fallbackScore: number): number => {
-    const matchedArea = areas.find(a => 
-      a.level === 'MEDIA_GENERAL' && (
-        a.id.toLowerCase().includes(areaCodePrefix.toLowerCase()) || 
-        a.code.toLowerCase().includes(areaCodePrefix.toLowerCase())
-      )
-    );
-    if (!matchedArea) return fallbackScore;
-
-    const recs = evaluations.filter(
-      e => e.studentId === studentId && e.areaId === matchedArea.id && e.lapso === activeLapso
-    );
-    if (recs.length === 0) return fallbackScore;
-
-    const finalRec = recs.find(e => e.moment === 'FINAL_LAPSO');
-    if (finalRec && finalRec.scoreNumeric !== undefined) return finalRec.scoreNumeric;
-
-    const numericScores = recs.filter(e => e.scoreNumeric !== undefined).map(e => e.scoreNumeric as number);
-    if (numericScores.length > 0) {
-      const avgScore = numericScores.reduce((a, b) => a + b, 0) / numericScores.length;
-      return Math.round(avgScore * 10) / 10;
-    }
-
-    return fallbackScore;
-  };
+    : effectiveStudents;
 
   return (
-    <div className="space-y-6">
-      {/* Role-Specific Consultas Welcome Banner for Representante / Estudiante */}
+    <div className="space-y-4">
+      {/* Banner de Bienvenida Contextual para Familias / Estudiantes */}
       {isFamilyOrStudent && (
-        <div className="bg-gradient-to-r from-[#2C2E53] via-[#1E2142] to-[#2C2E53] p-5 rounded-2xl border border-[#D4AF37]/40 shadow-xl text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-in fade-in duration-200">
+        <div className="bg-gradient-to-r from-[#2C2E53] via-[#1E2142] to-[#2C2E53] p-4 rounded-2xl border border-[#D4AF37]/40 shadow-xl text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-in fade-in duration-200">
           <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-xl bg-[#D4AF37] text-[#1B1C33] font-black flex items-center justify-center shrink-0 shadow-md">
-              {currentRole === 'REPRESENTANTE' ? <Users className="w-6 h-6" /> : <GraduationCap className="w-6 h-6" />}
+            <div className="w-10 h-10 rounded-xl bg-[#D4AF37] text-[#1B1C33] font-black flex items-center justify-center shrink-0 shadow-md">
+              {currentRole === 'REPRESENTANTE' ? <Users className="w-5 h-5" /> : <GraduationCap className="w-5 h-5" />}
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37]">
-                  {currentRole === 'REPRESENTANTE' ? 'Portal Oficial de Padres y Representantes' : 'Portal Oficial del Estudiante'}
+                  {currentRole === 'REPRESENTANTE'
+                    ? 'Portal Oficial de Padres y Representantes'
+                    : 'Portal Oficial del Estudiante'}
                 </span>
-                <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                   Acceso Exclusivo a Consultas
                 </span>
               </div>
-              <h3 className="text-base font-black text-white mt-0.5">
+              <h3 className="text-sm font-black text-white mt-0.5">
                 {currentRole === 'REPRESENTANTE'
                   ? 'Consulta Académica y Seguimiento de su Representado'
                   : 'Consulta de Calificaciones, Rendimiento y Asistencia'}
               </h3>
-              <p className="text-xs text-slate-300 mt-0.5">
-                Usted dispone de acceso en tiempo real a la sábana de notas, boletines informativos oficiales, estadísticas y récord de asistencias.
-              </p>
             </div>
           </div>
 
           <div className="text-right shrink-0">
-            <span className="text-[11px] font-bold text-slate-300 block">Año Escolar Activo</span>
-            <span className="text-xs font-black text-[#D4AF37] uppercase tracking-wider">2026 - 2027 • Lapso {activeLapso}</span>
+            <span className="text-[10px] font-bold text-slate-300 block">Año Escolar Activo</span>
+            <span className="text-xs font-black text-[#D4AF37] uppercase tracking-wider">
+              2026 - 2027 • Lapso {activeLapso}
+            </span>
           </div>
         </div>
       )}
 
       {/* Top Header Card */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-cba-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-cba-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              Auditoría, Boletines y Reportes Centrales
-            </span>
+          <div className="flex items-center gap-2 flex-wrap">
+            <h2 className="text-lg sm:text-xl font-extrabold text-[#2C2E53] dark:text-white">
+              Módulo de Consultas y Reportes Institucionales
+            </h2>
+            {useDemoData && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#D4AF37]/15 text-[#94721C] dark:text-amber-300 border border-[#D4AF37]/40">
+                <Sparkles className="w-3 h-3 text-[#D4AF37]" />
+                Muestra Pedagógica Activa
+              </span>
+            )}
           </div>
-          <h2 className="text-xl font-extrabold text-[#2C2E53] dark:text-white mt-1">
-            Consultas y Rendimiento Estudiantil
-          </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            Centralización de calificaciones, emisión de boletines, estadísticas de rendimiento y control de asistencia.
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Inteligencia académica, auditoría pedagógica UCE, emisión oficial de documentos certificados y nóminas.
           </p>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2 shrink-0 flex-wrap">
+          {/* Toggle de Muestra Institucional para Gestión */}
+          {isManagement && (
+            <button
+              onClick={() => setUseDemoData(!useDemoData)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition border shadow-xs ${
+                useDemoData
+                  ? 'bg-[#1B1C33] text-[#D4AF37] border-[#D4AF37]/40 hover:bg-[#25284B]'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200'
+              }`}
+              title="Alternar datos de muestra institucional CBA para auditoría visual"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
+              <span>{useDemoData ? 'Muestra UCE: ON' : 'Muestra UCE: OFF'}</span>
+            </button>
+          )}
+
+          {/* Botón de Auditoría UCE para Administrador / Directivos */}
+          {isManagement && (
+            <button
+              onClick={() => setIsAuditModalOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition border border-slate-200 dark:border-slate-700 shadow-xs"
+              title="Auditoría de Reportes y Comunicaciones (C.E.O.)"
+            >
+              <ShieldAlert className="w-3.5 h-3.5 text-[#D4AF37]" />
+              <span className="hidden sm:inline">Bitácora</span>
+            </button>
+          )}
+
+          {/* Botón de Impresión según Submódulo */}
           <button
             onClick={() => window.print()}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs transition border border-slate-200 dark:border-slate-700 shadow-sm"
-            title="Imprimir Consulta"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#2C2E53] hover:bg-[#1E2038] text-[#D4AF37] font-bold text-xs transition border border-[#2C2E53] shadow-xs"
+            title="Imprimir vista actual en formato oficial"
           >
-            <Printer className="w-4 h-4 text-slate-500" />
-            <span>Imprimir Consulta</span>
+            <Printer className="w-3.5 h-3.5" />
+            <span>Imprimir</span>
           </button>
         </div>
       </div>
 
-      {/* Full-Width Responsive Subtabs Navigation Bar (No text truncation & Adaptable Wrap) */}
-      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 p-1.5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-        {/* 1. Sábana de Notas */}
+      {/* Subtabs Navigation Bar */}
+      <div className="flex flex-wrap items-center gap-1.5 p-1.5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        {/* 1. Rendimiento / Sábana de Notas */}
         {allowedTabs.includes('RENDIMIENTO') && (
           <button
             onClick={() => setActiveTab('RENDIMIENTO')}
-            className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
+            className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
               activeTab === 'RENDIMIENTO'
                 ? 'bg-[#14232B] text-cyan-300 shadow-sm border border-cyan-500/40 ring-1 ring-cyan-500/20'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
           >
             <FileSpreadsheet className={`w-4 h-4 shrink-0 ${activeTab === 'RENDIMIENTO' ? 'text-cyan-400' : 'text-slate-400'}`} />
-            <span>{isFamilyOrStudent ? 'Mis Calificaciones' : 'Sábana de Notas'}</span>
+            <span>{isFamilyOrStudent ? 'Mis Calificaciones' : 'Sábana & Rendimiento'}</span>
           </button>
         )}
 
-        {/* 2. Boletín Informativo */}
+        {/* 2. Boletín / Reportes Oficiales */}
         {allowedTabs.includes('BOLETIN') && (
           <button
             onClick={() => setActiveTab('BOLETIN')}
-            className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
+            className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
               activeTab === 'BOLETIN'
                 ? 'bg-[#14232B] text-cyan-300 shadow-sm border border-cyan-500/40 ring-1 ring-cyan-500/20'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
           >
             <GraduationCap className={`w-4 h-4 shrink-0 ${activeTab === 'BOLETIN' ? 'text-cyan-400' : 'text-slate-400'}`} />
-            <span>Boletín Oficial</span>
+            <span>Centro de Reportes & Boletines</span>
           </button>
         )}
 
@@ -260,630 +315,178 @@ export const ConsultasModule: React.FC<ConsultasModuleProps> = ({
         {allowedTabs.includes('ASISTENCIA') && (
           <button
             onClick={() => setActiveTab('ASISTENCIA')}
-            className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
+            className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
               activeTab === 'ASISTENCIA'
                 ? 'bg-[#14232B] text-cyan-300 shadow-sm border border-cyan-500/40 ring-1 ring-cyan-500/20'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
           >
             <Clock className={`w-4 h-4 shrink-0 ${activeTab === 'ASISTENCIA' ? 'text-cyan-400' : 'text-slate-400'}`} />
-            <span>{isFamilyOrStudent ? 'Mi Asistencia y Pases' : 'Asistencia & Pases'}</span>
+            <span>{isFamilyOrStudent ? 'Mi Asistencia y Pases' : 'Asistencia & Inasistencias LOE'}</span>
           </button>
         )}
 
-        {/* 4. Estadísticas */}
+        {/* 4. Estadísticas y Semáforo UCE */}
         {allowedTabs.includes('ESTADISTICAS') && (
           <button
             onClick={() => setActiveTab('ESTADISTICAS')}
-            className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
+            className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
               activeTab === 'ESTADISTICAS'
                 ? 'bg-[#14232B] text-cyan-300 shadow-sm border border-cyan-500/40 ring-1 ring-cyan-500/20'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
           >
             <BarChart3 className={`w-4 h-4 shrink-0 ${activeTab === 'ESTADISTICAS' ? 'text-cyan-400' : 'text-slate-400'}`} />
-            <span>Estadísticas</span>
+            <span>Analítica & Semáforo UCE</span>
           </button>
         )}
 
-        {/* 5. Nóminas / Expedientes */}
+        {/* 5. Nóminas, Expedientes y Horarios */}
         {allowedTabs.includes('NOMINAS') && (
           <button
             onClick={() => setActiveTab('NOMINAS')}
-            className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
+            className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
               activeTab === 'NOMINAS'
                 ? 'bg-[#14232B] text-cyan-300 shadow-sm border border-cyan-500/40 ring-1 ring-cyan-500/20'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
           >
             <Users className={`w-4 h-4 shrink-0 ${activeTab === 'NOMINAS' ? 'text-cyan-400' : 'text-slate-400'}`} />
-            <span>Expedientes</span>
+            <span>Nóminas, Docentes & Horarios</span>
           </button>
         )}
       </div>
 
-      {/* VIEW 1: RENDIMIENTO ESTUDIANTIL CONSOLIDADO (SÁBANA) */}
+      {/* KPI Summary Strip */}
+      {!isFamilyOrStudent && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-2.5">
+          <div className="bg-white dark:bg-slate-900 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0">
+              <Users className="w-3.5 h-3.5" />
+            </div>
+            <div className="min-w-0">
+              <span className="text-[9px] font-black uppercase text-slate-400 block truncate">
+                Matrícula Auditada
+              </span>
+              <span className="text-xs font-black text-slate-900 dark:text-white">
+                {effectiveStudents.length} Alumnos
+              </span>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-slate-900 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+              <Award className="w-3.5 h-3.5" />
+            </div>
+            <div className="min-w-0">
+              <span className="text-[9px] font-black uppercase text-slate-400 block truncate">
+                Promedio UCE
+              </span>
+              <span className="text-xs font-black text-emerald-600 dark:text-emerald-400">
+                16.4 / 20
+              </span>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-slate-900 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+              <BarChart3 className="w-3.5 h-3.5" />
+            </div>
+            <div className="min-w-0">
+              <span className="text-[9px] font-black uppercase text-slate-400 block truncate">
+                Semáforo Carga
+              </span>
+              <span className="text-xs font-black text-indigo-600 dark:text-indigo-400">
+                84% Carga Docente
+              </span>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-slate-900 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+              <ShieldAlert className="w-3.5 h-3.5" />
+            </div>
+            <div className="min-w-0">
+              <span className="text-[9px] font-black uppercase text-slate-400 block truncate">
+                Riesgo LOE Art. 109
+              </span>
+              <span className="text-xs font-black text-rose-600 dark:text-rose-400">
+                2 en Alerta (&gt;25%)
+              </span>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-slate-900 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center gap-2.5 col-span-2 sm:col-span-1">
+            <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+              <Clock className="w-3.5 h-3.5" />
+            </div>
+            <div className="min-w-0">
+              <span className="text-[9px] font-black uppercase text-slate-400 block truncate">
+                Pases Portería
+              </span>
+              <span className="text-xs font-black text-amber-600 dark:text-amber-400">
+                {effectivePasses.length} Pases
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SUBVIEW 1: RENDIMIENTO & SÁBANA (consulta_notas_estrategias_coordinador.php) */}
       {activeTab === 'RENDIMIENTO' && (
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-cba-card overflow-hidden print:border-none print:shadow-none print-landscape">
-          {/* Official Printable Institutional Header */}
-          <div className="hidden print:block mb-3 border-b-2 border-[#2C2E53] pb-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <img
-                  src={`${import.meta.env.BASE_URL}logo-cba.png`}
-                  alt="Colegio Bellas Artes"
-                  className="h-10 w-auto object-contain"
-                />
-                <div>
-                  <span className="text-[9px] font-black uppercase text-slate-500 block">
-                    República Bolivariana de Venezuela • MPPE • Código DEA S0432D2305
-                  </span>
-                  <h1 className="text-sm font-black text-[#2C2E53] tracking-tight">
-                    U.E.P. COLEGIO BELLAS ARTES • SÁBANA OFICIAL DE RENDIMIENTO ESTUDIANTIL
-                  </h1>
-                </div>
-              </div>
-              <div className="text-right text-[10px]">
-                <span className="font-extrabold text-[#2C2E53] block">LAPSO {activeLapso} • 2026-2027</span>
-                <span className="text-slate-500">Maracaibo, Estado Zulia</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-col gap-4 no-print">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-xs text-slate-700 dark:text-slate-300">
-                  Consolidado por Alumno: Lapso {activeLapso}
-                </span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#D4AF37]/15 text-[#94721C] dark:text-amber-300">
-                  Año Escolar 2026-2027
-                </span>
-              </div>
-
-              <div className="relative w-full sm:w-64">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-                <input
-                  type="text"
-                  placeholder="Buscar estudiante, cédula..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#2C2E53]"
-                />
-              </div>
-            </div>
-
-            {/* Selector de Nivel Académico para la Sábana de Notas */}
-            {!isFamilyOrStudent && (
-              <div className="flex flex-wrap items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800/70 rounded-xl border border-slate-200 dark:border-slate-700">
-                <button
-                  onClick={() => setLevelFilter('MEDIA_GENERAL')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                    levelFilter === 'MEDIA_GENERAL'
-                      ? 'bg-[#1B1C33] text-[#D4AF37] shadow-sm'
-                      : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
-                  }`}
-                >
-                  Media General (Numérico 01-20)
-                </button>
-                <button
-                  onClick={() => setLevelFilter('PRIMARIA')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                    levelFilter === 'PRIMARIA'
-                      ? 'bg-[#1B1C33] text-[#D4AF37] shadow-sm'
-                      : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
-                  }`}
-                >
-                  Primaria (Literales A-E)
-                </button>
-                <button
-                  onClick={() => setLevelFilter('INICIAL')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                    levelFilter === 'INICIAL'
-                      ? 'bg-[#1B1C33] text-[#D4AF37] shadow-sm'
-                      : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
-                  }`}
-                >
-                  Inicial (Logrado / En Proceso)
-                </button>
-                <button
-                  onClick={() => setLevelFilter('ALL')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                    levelFilter === 'ALL'
-                      ? 'bg-[#1B1C33] text-[#D4AF37] shadow-sm'
-                      : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
-                  }`}
-                >
-                  Todos los Niveles
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Vistas Dinámicas Adaptadas al Sistema de Evaluación por Nivel */}
-          <div className="divide-y divide-slate-200 dark:divide-slate-800">
-            {/* 1. SECCIÓN INICIAL (CUALITATIVO L / EP / I) */}
-            {(levelFilter === 'INICIAL' || levelFilter === 'ALL') && (
-              <div>
-                {levelFilter === 'ALL' && (
-                  <div className="bg-[#142621]/40 px-4 py-2 border-b border-teal-500/20 flex items-center justify-between">
-                    <span className="text-xs font-black text-teal-300 uppercase tracking-wider">
-                      Educación Inicial (Salas de 3, 4 y 5 Años) • Evaluación Cualitativa Formativa
-                    </span>
-                    <span className="text-[10px] font-bold text-teal-400 bg-teal-950/60 px-2 py-0.5 rounded-full border border-teal-800/40">
-                      Escala Oficial: Logrado (L) • En Proceso (EP) • Iniciado (I)
-                    </span>
-                  </div>
-                )}
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead className="bg-[#142621] text-teal-300 uppercase text-[10px] tracking-wider font-extrabold border-b border-teal-500/30">
-                      <tr>
-                        <th className="py-3.5 px-4">Cédula Escolar</th>
-                        <th className="py-3.5 px-4">Estudiante</th>
-                        <th className="py-3.5 px-4">Sala / Sección</th>
-                        <th className="py-3.5 px-4 text-center">Formación Personal (INI-FP)</th>
-                        <th className="py-3.5 px-4 text-center">Componentes del Ambiente (INI-CA)</th>
-                        <th className="py-3.5 px-4 text-center">Artes Plásticas (INI-AP)</th>
-                        <th className="py-3.5 px-4 text-center">Psicomotricidad (INI-EF)</th>
-                        <th className="py-3.5 px-4 text-center">Apreciación del Lapso</th>
-                        <th className="py-3.5 px-4 text-center">Estatus</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300 font-medium">
-                      {filteredStudents.filter(s => s.level === 'INICIAL').length === 0 ? (
-                        <tr>
-                          <td colSpan={9} className="py-8 text-center text-slate-400 font-medium italic">
-                            No hay estudiantes de Educación Inicial registrados en la base de datos.
-                          </td>
-                        </tr>
-                      ) : (
-                        filteredStudents.filter(s => s.level === 'INICIAL').map((stu) => {
-                        const fpScore = getInicialScore(stu.id, 'fp', 'L');
-                        const caScore = getInicialScore(stu.id, 'ca', 'L');
-                        const apScore = getInicialScore(stu.id, 'ap', 'L');
-                        const efScore = getInicialScore(stu.id, 'ef', 'L');
-
-                        const hasEvaluations = evaluations.some(e => e.studentId === stu.id && e.lapso === activeLapso);
-                        const hasEP = fpScore.code === 'EP' || caScore.code === 'EP' || apScore.code === 'EP' || efScore.code === 'EP';
-
-                        const renderBadge = (score: { code: 'L' | 'EP' | 'I'; label: string }) => {
-                          if (!hasEvaluations) return <span className="text-slate-400 font-mono">-</span>;
-                          if (score.code === 'L') {
-                            return (
-                              <span className="px-2.5 py-1 rounded-lg text-xs font-black bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700">
-                                L (Logrado)
-                              </span>
-                            );
-                          }
-                          if (score.code === 'EP') {
-                            return (
-                              <span className="px-2.5 py-1 rounded-lg text-xs font-black bg-amber-50 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700">
-                                EP (En Proceso)
-                              </span>
-                            );
-                          }
-                          return (
-                            <span className="px-2.5 py-1 rounded-lg text-xs font-black bg-blue-50 dark:bg-blue-950/50 text-blue-800 dark:text-blue-300 border border-blue-300 dark:border-blue-700">
-                              I (Iniciado)
-                            </span>
-                          );
-                        };
-
-                        return (
-                          <tr key={stu.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors">
-                            <td className="py-3 px-4 font-mono font-bold text-teal-700 dark:text-teal-300">{stu.cedula}</td>
-                            <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">{stu.fullName}</td>
-                            <td className="py-3 px-4 font-semibold text-slate-600 dark:text-slate-300">{stu.grade} {stu.section}</td>
-                            <td className="py-3 px-4 text-center">{renderBadge(fpScore)}</td>
-                            <td className="py-3 px-4 text-center">{renderBadge(caScore)}</td>
-                            <td className="py-3 px-4 text-center">{renderBadge(apScore)}</td>
-                            <td className="py-3 px-4 text-center">{renderBadge(efScore)}</td>
-                            <td className="py-3 px-4 text-center">
-                              {!hasEvaluations ? (
-                                <span className="text-[10px] text-slate-400 font-semibold italic">Sin evaluar</span>
-                              ) : (
-                                <span className={`px-3 py-1 rounded-full text-xs font-black border ${
-                                  hasEP
-                                    ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-700'
-                                    : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-200 border-emerald-300 dark:border-emerald-700'
-                                }`}>
-                                  {hasEP ? 'En Proceso (EP)' : 'Logrado (L)'}
-                                </span>
-                              )}
-                            </td>
-                            <td className="py-3 px-4 text-center">
-                              {!hasEvaluations ? (
-                                <span className="text-[10px] text-slate-400 font-semibold italic">En curso</span>
-                              ) : (
-                                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${
-                                  hasEP
-                                    ? 'bg-amber-100/70 dark:bg-amber-950/50 text-amber-900 dark:text-amber-200 border-amber-300 dark:border-amber-700'
-                                    : 'bg-emerald-100/70 dark:bg-emerald-950/50 text-emerald-900 dark:text-emerald-200 border-emerald-300 dark:border-emerald-700'
-                                }`}>
-                                  {hasEP ? 'En Proceso' : 'Logrado'}
-                                </span>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      }))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-
-            {/* 2. SECCIÓN PRIMARIA (LITERALES A - E) */}
-            {(levelFilter === 'PRIMARIA' || levelFilter === 'ALL') && (
-              <div>
-                {levelFilter === 'ALL' && (
-                  <div className="bg-[#14232B]/40 px-4 py-2 border-b border-cyan-500/20 flex items-center justify-between">
-                    <span className="text-xs font-black text-cyan-300 uppercase tracking-wider">
-                      Educación Primaria (1ero a 6to Grado) • Evaluación Cualitativa Literal MPPE
-                    </span>
-                    <span className="text-[10px] font-bold text-cyan-400 bg-cyan-950/60 px-2 py-0.5 rounded-full border border-cyan-800/40">
-                      Escala Oficial: A • B • C • D • E
-                    </span>
-                  </div>
-                )}
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead className="bg-[#14232B] text-cyan-300 uppercase text-[10px] tracking-wider font-extrabold border-b border-cyan-500/30">
-                      <tr>
-                        <th className="py-3.5 px-4">Cédula Escolar</th>
-                        <th className="py-3.5 px-4">Estudiante</th>
-                        <th className="py-3.5 px-4">Grado / Sección</th>
-                        <th className="py-3.5 px-4 text-center">Lenguaje (PRI-LEN)</th>
-                        <th className="py-3.5 px-4 text-center">Matemáticas (PRI-MAT)</th>
-                        <th className="py-3.5 px-4 text-center">Ciencias Naturales (PRI-CN)</th>
-                        <th className="py-3.5 px-4 text-center">Ciencias Sociales (PRI-CS)</th>
-                        <th className="py-3.5 px-4 text-center">Literal del Lapso</th>
-                        <th className="py-3.5 px-4 text-center">Estatus</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300 font-medium">
-                      {filteredStudents.filter(s => s.level === 'PRIMARIA').length === 0 ? (
-                        <tr>
-                          <td colSpan={9} className="py-8 text-center text-slate-400 font-medium italic">
-                            No hay estudiantes de Educación Primaria registrados en la base de datos.
-                          </td>
-                        </tr>
-                      ) : (
-                        filteredStudents.filter(s => s.level === 'PRIMARIA').map((stu) => {
-                        const lenScore = getPrimariaScore(stu.id, 'len', '-');
-                        const matScore = getPrimariaScore(stu.id, 'mat', '-');
-                        const natScore = getPrimariaScore(stu.id, 'cn', '-');
-                        const socScore = getPrimariaScore(stu.id, 'cs', '-');
-
-                        const validLiterals = [lenScore, matScore, natScore, socScore].filter(l => l !== '-');
-                        const literalGlobal = validLiterals.length > 0 ? validLiterals[0] : '-';
-
-                        const renderLiteral = (lit: string) => {
-                          if (lit === '-') return <span className="text-slate-400 font-mono">-</span>;
-                          return (
-                            <span className={`px-2.5 py-1 rounded-lg text-xs font-black border ${
-                              lit === 'A'
-                                ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700'
-                                : lit === 'B'
-                                ? 'bg-teal-50 dark:bg-teal-950/50 text-teal-700 dark:text-teal-300 border-teal-300 dark:border-teal-700'
-                                : 'bg-amber-50 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-700'
-                            }`}>
-                              Literal {lit}
-                            </span>
-                          );
-                        };
-
-                        return (
-                          <tr key={stu.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors">
-                            <td className="py-3 px-4 font-mono font-bold text-cyan-700 dark:text-cyan-300">{stu.cedula}</td>
-                            <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">{stu.fullName}</td>
-                            <td className="py-3 px-4 font-semibold text-slate-600 dark:text-slate-300">{stu.grade} {stu.section}</td>
-                            <td className="py-3 px-4 text-center">{renderLiteral(lenScore)}</td>
-                            <td className="py-3 px-4 text-center">{renderLiteral(matScore)}</td>
-                            <td className="py-3 px-4 text-center">{renderLiteral(natScore)}</td>
-                            <td className="py-3 px-4 text-center">{renderLiteral(socScore)}</td>
-                            <td className="py-3 px-4 text-center">
-                              {literalGlobal === '-' ? (
-                                <span className="text-[10px] text-slate-400 font-semibold italic">Sin evaluar</span>
-                              ) : (
-                                <span className="px-3 py-1 rounded-full text-xs font-black bg-[#D4AF37]/15 text-[#94721C] dark:text-amber-300 border border-[#D4AF37]/40">
-                                  Literal {literalGlobal}
-                                </span>
-                              )}
-                            </td>
-                            <td className="py-3 px-4 text-center">
-                              {literalGlobal === '-' ? (
-                                <span className="text-[10px] text-slate-400 font-semibold italic">En curso</span>
-                              ) : (
-                                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100/70 dark:bg-emerald-950/50 text-emerald-900 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700">
-                                  Promovido
-                                </span>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      }))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-
-            {/* 3. SECCIÓN MEDIA GENERAL (NUMÉRICO VIGESIMAL 01 - 20) */}
-            {(levelFilter === 'MEDIA_GENERAL' || levelFilter === 'ALL') && (
-              <div>
-                {levelFilter === 'ALL' && (
-                  <div className="bg-[#1A1D36]/40 px-4 py-2 border-b border-indigo-500/20 flex items-center justify-between">
-                    <span className="text-xs font-black text-indigo-300 uppercase tracking-wider">
-                      Educación Media General (1ero a 5to Año) • Escala Cuantitativa Vigesimal
-                    </span>
-                    <span className="text-[10px] font-bold text-indigo-400 bg-indigo-950/60 px-2 py-0.5 rounded-full border border-indigo-800/40">
-                      Escala Oficial: 01 a 20 Puntos (Mínimo Aprobatorio: 10)
-                    </span>
-                  </div>
-                )}
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead className="bg-[#1B1C33] text-white uppercase text-[10px] tracking-wider font-extrabold">
-                      <tr>
-                        <th className="py-3.5 px-4">Cédula</th>
-                        <th className="py-3.5 px-4">Estudiante</th>
-                        <th className="py-3.5 px-4">Año / Sección</th>
-                        <th className="py-3.5 px-4 text-center">Matemáticas</th>
-                        <th className="py-3.5 px-4 text-center">Castellano</th>
-                        <th className="py-3.5 px-4 text-center">Física</th>
-                        <th className="py-3.5 px-4 text-center">Química</th>
-                        <th className="py-3.5 px-4 text-center">Promedio Lapso</th>
-                        <th className="py-3.5 px-4 text-center">Estatus</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300 font-medium">
-                      {filteredStudents.filter(s => s.level === 'MEDIA_GENERAL').length === 0 ? (
-                        <tr>
-                          <td colSpan={9} className="py-8 text-center text-slate-400 font-medium italic">
-                            No hay estudiantes de Educación Media General registrados en la base de datos.
-                          </td>
-                        </tr>
-                      ) : (
-                        filteredStudents.filter(s => s.level === 'MEDIA_GENERAL').map((stu) => {
-                        const mathScore = getMediaScore(stu.id, 'mat', 0);
-                        const castScore = getMediaScore(stu.id, 'cas', 0);
-                        const fisScore = getMediaScore(stu.id, 'fis', 0);
-                        const quiScore = getMediaScore(stu.id, 'qui', 0);
-                        const validScores = [mathScore, castScore, fisScore, quiScore].filter(s => s > 0);
-                        const avg = validScores.length > 0 ? (validScores.reduce((a, b) => a + b, 0) / validScores.length).toFixed(2) : '-';
-                        const isPassing = validScores.length > 0 && Number(avg) >= 10;
-
-                        return (
-                          <tr key={stu.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors">
-                            <td className="py-3 px-4 font-mono font-bold text-[#2C2E53] dark:text-amber-300">{stu.cedula}</td>
-                            <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">{stu.fullName}</td>
-                            <td className="py-3 px-4 font-semibold text-slate-600 dark:text-slate-300">{stu.grade} {stu.section}</td>
-                            <td className="py-3 px-4 text-center font-mono font-bold">{mathScore > 0 ? mathScore : '-'}</td>
-                            <td className="py-3 px-4 text-center font-mono font-bold">{castScore > 0 ? castScore : '-'}</td>
-                            <td className="py-3 px-4 text-center font-mono font-bold">{fisScore > 0 ? fisScore : '-'}</td>
-                            <td className="py-3 px-4 text-center font-mono font-bold">{quiScore > 0 ? quiScore : '-'}</td>
-                            <td className="py-3 px-4 text-center font-mono font-black text-[#2C2E53] dark:text-white">
-                              <span className="px-2 py-0.5 rounded bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200 border border-amber-200 dark:border-amber-800">
-                                {avg}
-                              </span>
-                            </td>
-                            <td className="py-3 px-4 text-center">
-                              {validScores.length === 0 ? (
-                                <span className="text-[10px] text-slate-400 font-semibold italic">Sin notas</span>
-                              ) : (
-                                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${
-                                  isPassing
-                                    ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
-                                    : 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800'
-                                }`}>
-                                  {isPassing ? 'Aprobado' : 'Materia Pendiente'}
-                                </span>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      }))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Printable Official Signatures & Footer */}
-          <div className="hidden print:block pt-6 print-signatures">
-            <div className="grid grid-cols-3 gap-6 text-center text-[10px]">
-              <div className="border-t border-slate-400 pt-1">
-                <strong className="block text-[#2C2E53]">Lic. Carolina Sánchez</strong>
-                <span className="text-slate-500">Coordinación de Evaluación</span>
-              </div>
-              <div className="border-t border-slate-400 pt-1">
-                <strong className="block text-[#2C2E53]">Prof. Docente Guía</strong>
-                <span className="text-slate-500">Docente de Asignatura</span>
-              </div>
-              <div className="border-t border-slate-400 pt-1">
-                <strong className="block text-[#2C2E53]">Dirección Académica CBA</strong>
-                <span className="text-slate-500">Sello de Control y Auditoría</span>
-              </div>
-            </div>
-            <div className="mt-3 text-[8px] text-slate-400 font-mono text-center">
-              Documento Oficial del Sistema Integral de Control y Evaluación (SICE-CBA) • U.E.P. Colegio Bellas Artes • Emisión: {new Date().toLocaleDateString('es-VE')}
-            </div>
-          </div>
-        </div>
+        <RendimientoAuditView
+          isFamilyOrStudent={isFamilyOrStudent}
+          scopedStudents={scopedStudents}
+          simulatedStudentId={simulatedStudentId}
+          setSimulatedStudentId={setSimulatedStudentId}
+          overrideStudents={effectiveStudents}
+          overrideEvaluations={effectiveEvaluations}
+        />
       )}
 
-      {/* VIEW 2: BOLETÍN OFICIAL DE CALIFICACIONES (Reutiliza el componente oficial) */}
+      {/* SUBVIEW 2: CENTRO DE REPORTES & BOLETINES (reg_opciones_reportes.php) */}
       {activeTab === 'BOLETIN' && (
-        <div className="space-y-4">
-          <BoletinInformativoView />
-        </div>
+        <ReportesCentroView
+          isFamilyOrStudent={isFamilyOrStudent}
+          scopedStudents={scopedStudents}
+          overrideStudents={effectiveStudents}
+          overrideEvaluations={effectiveEvaluations}
+        />
       )}
 
-      {/* VIEW 3: ASISTENCIA Y PASES POR RETRASO */}
+      {/* SUBVIEW 3: ASISTENCIA, INASISTENCIAS LOE & PASES */}
       {activeTab === 'ASISTENCIA' && (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm text-center">
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">Pases Registrados</span>
-              <span className="text-3xl font-black text-[#2C2E53] dark:text-white mt-1 block">{passes.length}</span>
-              <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold">100% justificados formalmente</span>
-            </div>
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm text-center">
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">Índice de Puntualidad</span>
-              <span className="text-3xl font-black text-[#D4AF37] mt-1 block">97.8%</span>
-              <span className="text-[11px] text-slate-500 font-semibold">Dentro del umbral institucional CBA</span>
-            </div>
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm text-center">
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">Notificación a Representantes</span>
-              <span className="text-3xl font-black text-emerald-600 mt-1 block">Activa</span>
-              <span className="text-[11px] text-slate-500 font-semibold">Vía SMS y correo oficial</span>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-cba-card overflow-hidden">
-            <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-              <h3 className="font-extrabold text-sm text-[#2C2E53] dark:text-white">
-                Historial de Pases por Retraso y Novedades de Asistencia
-              </h3>
-              <span className="text-xs font-bold text-slate-400">{passes.length} registros</span>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-[#1B1C33] text-white uppercase text-[10px] tracking-wider font-extrabold">
-                  <tr>
-                    <th className="py-3 px-4">Estudiante</th>
-                    <th className="py-3 px-4">Fecha y Hora</th>
-                    <th className="py-3 px-4">Motivo Informado</th>
-                    <th className="py-3 px-4">Autorizado Por</th>
-                    <th className="py-3 px-4 text-center">Estado Notificación</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
-                  {passes.map((pass) => (
-                    <tr key={pass.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors">
-                      <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">
-                        {pass.studentName}
-                      </td>
-                      <td className="py-3 px-4 font-mono text-xs">
-                        {pass.date} • {pass.time}
-                      </td>
-                      <td className="py-3 px-4 text-slate-600 dark:text-slate-300">
-                        {pass.reason}
-                      </td>
-                      <td className="py-3 px-4 text-slate-500">
-                        {pass.authorizedBy}
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                          {pass.printed ? `✓ Notificado (${pass.ticketNumber})` : `✓ Registrado (${pass.ticketNumber})`}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                  {passes.length === 0 && (
-                    <tr>
-                      <td colSpan={5} className="py-8 text-center text-slate-400 italic">
-                        No hay pases ni inasistencias registradas.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+        <AsistenciaPasesView
+          isFamilyOrStudent={isFamilyOrStudent}
+          scopedStudents={scopedStudents}
+          overrideStudents={effectiveStudents}
+          overrideDailyAttendance={effectiveDailyAttendance}
+          overridePasses={effectivePasses}
+        />
       )}
 
-      {/* VIEW 4: ESTADÍSTICAS */}
+      {/* SUBVIEW 4: ESTADÍSTICAS & SEMÁFORO UCE (reg_estadistica_rendimiento.php) */}
       {activeTab === 'ESTADISTICAS' && (
-        students.length === 0 ? (
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-12 border border-dashed border-slate-200 dark:border-slate-800 text-center space-y-3">
-            <BarChart3 className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto" />
-            <h3 className="font-extrabold text-sm text-slate-800 dark:text-white">Sin estadísticas registradas</h3>
-            <p className="text-xs text-slate-500 max-w-md mx-auto">
-              Las tasas de aprobación, promedios institucionales y estadísticas comparativas se generarán automáticamente al inscribir estudiantes y asentar sus evaluaciones.
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-cba-card text-center space-y-2">
-              <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider block">
-                Total Estudiantes Matriculados
-              </span>
-              <p className="text-4xl font-black text-[#2C2E53] dark:text-white">{students.length}</p>
-              <p className="text-xs text-emerald-600 dark:text-emerald-400 font-bold">Matrícula activa CBA</p>
-            </div>
-
-            <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-cba-card text-center space-y-2">
-              <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider block">
-                Evaluaciones Procesales
-              </span>
-              <p className="text-4xl font-black text-[#D4AF37]">{evaluations.length}</p>
-              <p className="text-xs text-slate-500 font-semibold">Registros asentados en Lapso {activeLapso}</p>
-            </div>
-
-            <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-cba-card text-center space-y-2">
-              <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider block">
-                Pases por Retraso Emitidos
-              </span>
-              <p className="text-4xl font-black text-amber-600">{passes.length}</p>
-              <p className="text-xs text-slate-500 font-semibold">Control de puntualidad</p>
-            </div>
-          </div>
-        )
+        <EstadisticasRendimientoView
+          overrideStudents={effectiveStudents}
+          overrideEvaluations={effectiveEvaluations}
+        />
       )}
 
-      {/* VIEW 5: EXPEDIENTES / NÓMINAS */}
+      {/* SUBVIEW 5: NÓMINAS, DIRECTIORIO DOCENTE & HORARIOS (reg_listado_estudiantes.php, reg_listado_docentes.php, horarios_docentes.php) */}
       {activeTab === 'NOMINAS' && (
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-cba-card space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
-            <div>
-              <h3 className="font-extrabold text-sm text-[#2C2E53] dark:text-white">
-                Nómina Estudiantil y Datos de Representantes Legales
-              </h3>
-              <p className="text-xs text-slate-500">Expediente formal registrado ante el Control de Estudios (UCE).</p>
-            </div>
-            <div className="relative w-full sm:w-60">
-              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
-              <input
-                type="text"
-                placeholder="Filtrar por nombre o representante..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#2C2E53]"
-              />
-            </div>
-          </div>
-          <div className="space-y-2">
-            {filteredStudents.length === 0 ? (
-              <div className="p-8 text-center text-slate-400 font-medium italic bg-slate-50 dark:bg-slate-800/20 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
-                No hay expedientes de estudiantes ni representantes registrados en el plantel.
-              </div>
-            ) : (
-              filteredStudents.map((stu) => (
-                <div
-                  key={stu.id}
-                  className="p-3.5 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2"
-                >
-                  <div>
-                    <p className="font-bold text-xs text-slate-900 dark:text-white">{stu.fullName} ({stu.cedula})</p>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                      {stu.grade} {stu.section} • Representante: <strong className="text-slate-700 dark:text-slate-200">{stu.representativeName}</strong>
-                    </p>
-                  </div>
-                  <div className="text-right text-[11px] text-slate-500 dark:text-slate-400">
-                    <p className="font-mono">{stu.representativePhone}</p>
-                    <p>{stu.representativeEmail}</p>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
+        <NominasExpedientesView
+          isFamilyOrStudent={isFamilyOrStudent}
+          scopedStudents={scopedStudents}
+          overrideStudents={effectiveStudents}
+        />
       )}
+
+      {/* Modal de Auditoría de Reportes y Comunicaciones (reg_auditorias_reportes.php) */}
+      <AuditoriaConsultasModal
+        isOpen={isAuditModalOpen}
+        onClose={() => setIsAuditModalOpen(false)}
+      />
     </div>
   );
 };

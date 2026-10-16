@@ -15,14 +15,30 @@ import {
   MapPin,
   Phone,
   Mail,
-  Users
+  Users,
+  ArrowLeftRight,
+  History,
+  AlertCircle,
+  Printer
 } from 'lucide-react';
+import { OfficialFormatPrintModal } from '../common/OfficialFormatPrintModal';
+import { Student } from '../../types';
 
 export const InscripcionesWizardView: React.FC = () => {
-  const { students, users, addStudent, addUser, sendNotification } = useApp();
+  const { students, users, addStudent, addUser, sendNotification, transferStudentSection, sectionTransfers } = useApp();
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
   const [parentTab, setParentTab] = useState<'madre' | 'padre'>('madre');
   const [includeFather, setIncludeFather] = useState<boolean>(true);
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+  const [selectedPrintStudent, setSelectedPrintStudent] = useState<Student | undefined>(undefined);
+  
+  // Modal de Traslado de Sección Oficial (A <-> B)
+  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+  const [transferStudentId, setTransferStudentId] = useState('');
+  const [transferTargetSection, setTransferTargetSection] = useState<'A' | 'B'>('B');
+  const [transferReason, setTransferReason] = useState('');
+  const [transferFilter, setTransferFilter] = useState('');
+  const [transferResult, setTransferResult] = useState<{ success: boolean; message: string } | null>(null);
   const [primaryLegalRep, setPrimaryLegalRep] = useState<'Madre' | 'Padre' | 'Tutor Legal'>('Madre');
 
   const [searchCedula, setSearchCedula] = useState('');
@@ -400,18 +416,56 @@ export const InscripcionesWizardView: React.FC = () => {
     <div className="space-y-6">
       {/* Top Banner */}
       <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-cba-card">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="w-2.5 h-2.5 rounded-full bg-[#D4AF37]"></span>
-          <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
-            Admisión, Matrícula Escolar y Registro Parental
-          </span>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-xl font-extrabold text-[#2C2E53]">
+              Inscripción de Estudiantes con Inclusión de Ambos Padres
+            </h2>
+            <p className="text-xs text-slate-500 mt-1 max-w-3xl">
+              Formulario oficial con datos demográficos completos (cédula, nombres, apellidos, nacionalidad, país, estado, ciudad, sexo, fecha de nacimiento, estado civil, religión, teléfono y dirección). Garantiza el registro y acceso institucional simultáneo tanto de la madre como del padre, salvaguardando el vínculo y corresponsabilidad familiar en todo momento.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                if (students.length > 0) {
+                  setSelectedPrintStudent(students[0]);
+                  setIsPrintModalOpen(true);
+                }
+              }}
+              className="flex items-center gap-2 px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-[#2C2E53] font-bold text-xs rounded-xl shadow-sm transition-all border border-slate-300 cursor-pointer"
+              title="Reimprimir planilla oficial de inscripción de cualquier estudiante matriculado"
+            >
+              <Printer className="w-4 h-4 text-[#D4AF37]" />
+              <span>Imprimir Planilla Oficial</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setIsTransferModalOpen(true);
+                setTransferResult(null);
+                setTransferReason('');
+                if (students.length > 0) {
+                  const first = students[0];
+                  setTransferStudentId(first.id);
+                  setTransferTargetSection(first.section === 'A' ? 'B' : 'A');
+                }
+              }}
+              className="flex items-center gap-2 px-4 py-2.5 bg-[#2C2E53] hover:bg-[#1B1C33] text-[#D4AF37] font-extrabold text-xs rounded-xl shadow-md transition-all active:scale-95 border border-[#D4AF37]/40 cursor-pointer"
+            >
+              <ArrowLeftRight className="w-4 h-4 text-[#D4AF37]" />
+              <span>Traslado Oficial de Sección (A ↔ B)</span>
+              {sectionTransfers.length > 0 && (
+                <span className="bg-[#D4AF37] text-slate-950 font-black text-[10px] px-1.5 py-0.5 rounded-full">
+                  {sectionTransfers.length}
+                </span>
+              )}
+            </button>
+          </div>
         </div>
-        <h2 className="text-xl font-extrabold text-[#2C2E53]">
-          Inscripción de Estudiantes con Inclusión de Ambos Padres
-        </h2>
-        <p className="text-xs text-slate-500 mt-1 max-w-4xl">
-          Formulario oficial con datos demográficos completos (cédula, nombres, apellidos, nacionalidad, país, estado, ciudad, sexo, fecha de nacimiento, estado civil, religión, teléfono y dirección). Garantiza el registro y acceso institucional simultáneo tanto de la madre como del padre, salvaguardando el vínculo y corresponsabilidad familiar en todo momento.
-        </p>
 
         {/* Wizard Stepper Bar */}
         <div className="mt-6 pt-6 border-t border-slate-100 grid grid-cols-3 gap-3">
@@ -502,7 +556,7 @@ export const InscripcionesWizardView: React.FC = () => {
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
               <span>
-                ¡Inscripción formalizada exitosamente! Se ha creado el expediente de <strong>{lastEnrolledName || 'el estudiante'}</strong> y se guardó de inmediato en Supabase con inclusión parental.
+                ¡Inscripción formalizada exitosamente! Se ha creado el expediente de <strong>{lastEnrolledName || 'el estudiante'}</strong> y se guardó de inmediato en la Base de Datos con inclusión parental.
               </span>
             </div>
             <span className="hidden sm:inline-block px-2.5 py-1 rounded-md bg-emerald-200/80 text-emerald-900 text-[10px] uppercase font-black tracking-wider shrink-0">
@@ -531,6 +585,26 @@ export const InscripcionesWizardView: React.FC = () => {
               </span>
             </div>
           )}
+
+          <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-emerald-200/80">
+            <span className="text-[11px] text-emerald-900 font-medium">
+              El estudiante ya cuenta con asignación oficial de grado y sección. Puede emitir e imprimir la planilla física ahora.
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                const enrolled = students.find(s => s.fullName.toLowerCase() === lastEnrolledName.toLowerCase()) || students[students.length - 1];
+                if (enrolled) {
+                  setSelectedPrintStudent(enrolled);
+                  setIsPrintModalOpen(true);
+                }
+              }}
+              className="px-4 py-2 bg-[#2C2E53] hover:bg-[#1B1C33] text-[#D4AF37] font-black rounded-xl text-xs shadow-md transition flex items-center gap-2 shrink-0 cursor-pointer"
+            >
+              <Printer className="w-4 h-4" />
+              Imprimir Planilla Oficial de Inscripción (CBA)
+            </button>
+          </div>
         </div>
       )}
 
@@ -1416,6 +1490,232 @@ export const InscripcionesWizardView: React.FC = () => {
           </form>
         )}
       </div>
+
+      {/* MODAL OFICIAL: TRASLADO DE SECCIÓN (A <-> B) */}
+      {isTransferModalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto space-y-5 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-[#2C2E53] text-[#D4AF37] flex items-center justify-center shadow-sm">
+                  <ArrowLeftRight className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-base text-[#2C2E53]">
+                    Traslado Oficial de Sección (Sección A ↔ Sección B)
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Cambio reglamentario de aula con migración íntegra y atómica de calificaciones y asistencias.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsTransferModalOpen(false)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            {transferResult && (
+              <div
+                className={`p-3.5 rounded-xl border text-xs font-bold flex items-center gap-2 ${
+                  transferResult.success
+                    ? 'bg-emerald-50 text-emerald-900 border-emerald-200'
+                    : 'bg-rose-50 text-rose-900 border-rose-200'
+                }`}
+              >
+                {transferResult.success ? (
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                ) : (
+                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                )}
+                <span>{transferResult.message}</span>
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-extrabold text-slate-700 mb-1">
+                  1. Buscar Estudiante en Matrícula Activa *
+                </label>
+                <div className="relative mb-2">
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                  <input
+                    type="text"
+                    placeholder="Filtrar por nombre o cédula escolar..."
+                    value={transferFilter}
+                    onChange={(e) => setTransferFilter(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-800"
+                  />
+                </div>
+
+                <select
+                  value={transferStudentId}
+                  onChange={(e) => {
+                    const sid = e.target.value;
+                    setTransferStudentId(sid);
+                    const stu = students.find((s) => s.id === sid);
+                    if (stu) {
+                      setTransferTargetSection(stu.section === 'A' ? 'B' : 'A');
+                    }
+                  }}
+                  className="w-full px-3 py-2.5 bg-slate-50 rounded-xl border border-slate-200 text-xs font-bold text-[#2C2E53]"
+                  size={5}
+                >
+                  {students
+                    .filter(
+                      (s) =>
+                        s.fullName.toLowerCase().includes(transferFilter.toLowerCase()) ||
+                        s.cedula.toLowerCase().includes(transferFilter.toLowerCase())
+                    )
+                    .map((s) => (
+                      <option key={s.id} value={s.id} className="py-1">
+                        {s.fullName} ({s.cedula}) — {s.grade} [Sección {s.section}]
+                      </option>
+                    ))}
+                </select>
+              </div>
+
+              {(() => {
+                const selectedStudent = students.find((s) => s.id === transferStudentId);
+                if (!selectedStudent) return null;
+
+                return (
+                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+                    <div className="grid grid-cols-2 gap-3 text-xs">
+                      <div>
+                        <span className="text-[10px] uppercase font-bold text-slate-400 block">Estudiante</span>
+                        <strong className="text-slate-800">{selectedStudent.fullName}</strong>
+                      </div>
+                      <div>
+                        <span className="text-[10px] uppercase font-bold text-slate-400 block">Grado / Nivel</span>
+                        <strong className="text-slate-800">
+                          {selectedStudent.grade} ({selectedStudent.level.replace('_', ' ')})
+                        </strong>
+                      </div>
+                    </div>
+
+                    <div className="pt-3 border-t border-slate-200 grid grid-cols-2 gap-4">
+                      <div>
+                        <span className="text-[10px] uppercase font-bold text-slate-500 block mb-1">
+                          Sección Actual Oficial
+                        </span>
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-200 text-slate-800 font-extrabold text-xs">
+                          Sección {selectedStudent.section}
+                        </span>
+                      </div>
+
+                      <div>
+                        <span className="text-[10px] uppercase font-bold text-[#2C2E53] block mb-1">
+                          Nueva Sección Destino (Estricto A o B) *
+                        </span>
+                        <div className="flex items-center gap-2">
+                          {(['A', 'B'] as const).map((sec) => (
+                            <button
+                              key={sec}
+                              type="button"
+                              onClick={() => setTransferTargetSection(sec)}
+                              className={`flex-1 py-1.5 text-xs font-black rounded-lg border transition-all ${
+                                transferTargetSection === sec
+                                  ? 'bg-[#2C2E53] text-[#D4AF37] border-[#2C2E53] shadow-sm'
+                                  : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'
+                              }`}
+                            >
+                              Sección {sec}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] uppercase font-bold text-slate-600 mb-1">
+                        Motivo Oficial del Traslado (Exigido por UCE) *
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={transferReason}
+                        onChange={(e) => setTransferReason(e.target.value)}
+                        placeholder="Ej: Balance de cupos institucionales, adaptación pedagógica o solicitud formal de representación..."
+                        className="w-full px-3 py-2 bg-white rounded-xl border border-slate-200 text-xs text-slate-800"
+                        required
+                      />
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (!transferReason.trim()) {
+                          alert('Por favor especifique el motivo oficial del traslado.');
+                          return;
+                        }
+                        const res = await transferStudentSection(
+                          selectedStudent.id,
+                          transferTargetSection,
+                          transferReason.trim()
+                        );
+                        setTransferResult(res);
+                        if (res.success) {
+                          setTransferReason('');
+                        }
+                      }}
+                      className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+                    >
+                      <ArrowLeftRight className="w-4 h-4" />
+                      <span>Ejecutar Traslado y Migrar Calificaciones</span>
+                    </button>
+                  </div>
+                );
+              })()}
+
+              {/* Bitácora de Traslados Realizados */}
+              {sectionTransfers.length > 0 && (
+                <div className="pt-3 border-t border-slate-200">
+                  <h4 className="text-xs font-extrabold text-[#2C2E53] mb-2 flex items-center gap-1.5">
+                    <History className="w-4 h-4 text-[#D4AF37]" />
+                    <span>Historial Institucional de Traslados ({sectionTransfers.length})</span>
+                  </h4>
+                  <div className="max-h-40 overflow-y-auto space-y-1.5 pr-1">
+                    {sectionTransfers.map((log) => (
+                      <div
+                        key={log.id}
+                        className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-[11px] flex items-center justify-between gap-3"
+                      >
+                        <div className="truncate">
+                          <strong className="text-slate-800 block truncate">{log.studentName}</strong>
+                          <span className="text-slate-500">
+                            {log.grade} • Motivo: {log.reason}
+                          </span>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <span className="inline-block px-2 py-0.5 rounded-full font-black text-[10px] bg-indigo-100 text-indigo-900 border border-indigo-200">
+                            Secc. {log.previousSection} ➔ {log.newSection}
+                          </span>
+                          <span className="block text-[9px] text-slate-400 mt-0.5">
+                            {new Date(log.transferredAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DE IMPRESIÓN OFICIAL CBA */}
+      <OfficialFormatPrintModal
+        isOpen={isPrintModalOpen}
+        onClose={() => setIsPrintModalOpen(false)}
+        formatType="PLANILLA_INSCRIPCION"
+        student={selectedPrintStudent}
+        studentsList={students}
+        onSelectStudent={(st) => setSelectedPrintStudent(st)}
+      />
     </div>
   );
 };

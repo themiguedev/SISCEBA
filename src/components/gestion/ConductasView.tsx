@@ -62,14 +62,8 @@ export const ConductasView: React.FC = () => {
       {/* Top Banner */}
       <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-cba-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#D4AF37]"></span>
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
-              Convivencia y Disciplina Escolar
-            </span>
-          </div>
-          <h2 className="text-xl font-extrabold text-[#2C2E53] mt-1">Registro de Conductas</h2>
-          <p className="text-xs text-slate-500">
+          <h2 className="text-xl font-extrabold text-[#2C2E53]">Registro de Conductas</h2>
+          <p className="text-xs text-slate-500 mt-1">
             ADM / DOC: Agregue y consulte el registro de incidencias, llamados de atención y reconocimientos del alumno.
           </p>
         </div>

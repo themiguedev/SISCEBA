@@ -1,9 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { PlanQuincenal, DidacticPlanRow, EducationalLevel, PlanStatus } from '../../types';
+import { PlanQuincenal, DidacticPlanRow, EducationalLevel, PlanStatus, LEVEL_GRADES_CATALOG, AcademicAssignment, Competency } from '../../types';
+import { INITIAL_DIAGNOSTIC_CRITERIA } from '../../data/seedData';
 import {
+  TEMPLATE_INICIAL,
+  TEMPLATE_INICIAL_5A,
+  TEMPLATE_INICIAL_AP_4A,
+  TEMPLATE_INICIAL_AP_5A,
+  TEMPLATE_INICIAL_EF_4A,
+  TEMPLATE_INICIAL_EF_5A,
+  TEMPLATE_INICIAL_NAT_4A,
+  TEMPLATE_INICIAL_NAT_5A,
+  TEMPLATE_INICIAL_AJE_4A,
+  TEMPLATE_INICIAL_AJE_5A,
+  TEMPLATE_INICIAL_INF_4A,
+  TEMPLATE_INICIAL_INF_5A,
+  TEMPLATE_INICIAL_ING_4A,
+  TEMPLATE_INICIAL_ING_5A,
   TEMPLATE_PRIMARIA,
+  TEMPLATE_PRIMARIA_LEN_1G,
+  TEMPLATE_PRIMARIA_MAT_1G,
   TEMPLATE_MEDIA_GENERAL,
+  BLANK_INICIAL_PLAN,
   BLANK_PRIMARIA_PLAN,
   BLANK_MEDIA_PLAN,
   DidacticTemplateData
@@ -26,7 +44,12 @@ import {
   Info,
   Calendar,
   Layers,
-  ChevronDown
+  ChevronDown,
+  Boxes,
+  Tag,
+  X,
+  Search,
+  Dumbbell
 } from 'lucide-react';
 
 interface DisenadorPlanificacionViewProps {
@@ -43,17 +66,22 @@ export const DisenadorPlanificacionView: React.FC<DisenadorPlanificacionViewProp
     plansQuincenal,
     currentLevel,
     currentRole,
+    currentUser,
+    currentTeacherAssignments,
     savePlanQuincenal,
-    updateQuincenalStatus
+    updateQuincenalStatus,
+    educationalResources,
+    competencies,
+    indicators
   } = useApp();
 
-  // Nivel seleccionado en el diseñador (Primaria o Media General)
+  // Nivel seleccionado en el diseñador (Inicial, Primaria o Media General)
   const [selectedLevel, setSelectedLevel] = useState<EducationalLevel>(() => {
     if (initialPlanId) {
       const existing = plansQuincenal.find(p => p.id === initialPlanId);
-      if (existing) return existing.level === 'MEDIA_GENERAL' ? 'MEDIA_GENERAL' : 'PRIMARIA';
+      if (existing) return existing.level;
     }
-    return currentLevel === 'MEDIA_GENERAL' ? 'MEDIA_GENERAL' : 'PRIMARIA';
+    return currentLevel;
   });
 
   // Estado del Plan Didáctico en edición
@@ -61,7 +89,7 @@ export const DisenadorPlanificacionView: React.FC<DisenadorPlanificacionViewProp
   const [status, setStatus] = useState<PlanStatus>('BORRADOR');
   const [title, setTitle] = useState<string>('');
   const [areaId, setAreaId] = useState<string>('');
-  const [docenteName, setDocenteName] = useState<string>('');
+  const [docenteName, setDocenteName] = useState<string>(() => currentUser?.fullName || '');
   const [gradeSection, setGradeSection] = useState<string>('');
   const [lapso, setLapso] = useState<1 | 2 | 3>(1);
   const [schoolYear, setSchoolYear] = useState<string>('2026 - 2027');
@@ -80,9 +108,43 @@ export const DisenadorPlanificacionView: React.FC<DisenadorPlanificacionViewProp
   const [reviewFeedback, setReviewFeedback] = useState<string | undefined>();
   const [reviewedBy, setReviewedBy] = useState<string | undefined>();
 
-  // Estados de control de UI
+  // Campos especializados de Formatos Adaptables por Subsistema
+  const [espaciosTrabajo, setEspaciosTrabajo] = useState<string>('');
+  const [rutinaDiaria, setRutinaDiaria] = useState<string>('');
+  const [ejesIntegradores, setEjesIntegradores] = useState<string>('');
+  const [tipoProyecto, setTipoProyecto] = useState<string>('');
+  const [temaIndispensable, setTemaIndispensable] = useState<string>('');
+
+  // Estados de control de UI y Modal de Banco
   const [isShareModalOpen, setIsShareModalOpen] = useState<boolean>(false);
+  const [isBankModalOpen, setIsBankModalOpen] = useState<boolean>(false);
+  const [bankActiveTab, setBankActiveTab] = useState<'RECURSOS' | 'COMPETENCIAS' | 'INDICADORES'>('RECURSOS');
+  const [bankSearch, setBankSearch] = useState<string>('');
+  const [targetRowIdForBank, setTargetRowIdForBank] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<{ text: string; type: 'success' | 'info' } | null>(null);
+
+  // Cátedras oficiales del docente filtradas por el nivel activo
+  const teacherLevelAssignments = (currentTeacherAssignments || []).filter(
+    (a: AcademicAssignment) => a.level === selectedLevel
+  );
+
+  const handleApplyAssignment = (asgId: string) => {
+    const asg = (currentTeacherAssignments || []).find((a: AcademicAssignment) => a.id === asgId);
+    if (!asg) return;
+    setAreaId(asg.areaId);
+    setGradeSection(`${asg.grade} ${asg.section}`);
+    if (currentUser?.fullName) {
+      setDocenteName(currentUser.fullName);
+    }
+    if (asg.level !== selectedLevel) {
+      setSelectedLevel(asg.level);
+    }
+    setToastMessage({
+      text: `Datos de cátedra oficial cargados: ${asg.areaName} (${asg.grade} Sección ${asg.section})`,
+      type: 'info'
+    });
+    setTimeout(() => setToastMessage(null), 3500);
+  };
 
   // Áreas correspondientes al nivel seleccionado
   const levelAreas = areas.filter(a => a.level === selectedLevel);
@@ -108,6 +170,11 @@ export const DisenadorPlanificacionView: React.FC<DisenadorPlanificacionViewProp
     setActividadesCierre(template.actividadesCierre);
     setRecursos(template.recursos);
     setFuentesConsulta(template.fuentesConsulta);
+    setEspaciosTrabajo(template.espaciosTrabajo || '');
+    setRutinaDiaria(template.rutinaDiaria || '');
+    setEjesIntegradores(template.ejesIntegradores || '');
+    setTipoProyecto(template.tipoProyecto || '');
+    setTemaIndispensable(template.temaIndispensable || '');
   };
 
   // Carga inicial: si viene initialPlanId se busca en el estado; de lo contrario, se precarga el modelo predeterminado del nivel
@@ -117,7 +184,7 @@ export const DisenadorPlanificacionView: React.FC<DisenadorPlanificacionViewProp
       if (existing) {
         setPlanId(existing.id);
         setStatus(existing.status);
-        setSelectedLevel(existing.level === 'MEDIA_GENERAL' ? 'MEDIA_GENERAL' : 'PRIMARIA');
+        setSelectedLevel(existing.level);
         setTitle(existing.title);
         setAreaId(existing.areaId);
         setDocenteName(existing.docenteName || (currentRole === 'DOCENTE' ? 'Docente Titular' : 'Prof. Especialista'));
@@ -132,6 +199,11 @@ export const DisenadorPlanificacionView: React.FC<DisenadorPlanificacionViewProp
         setProjectTheme(existing.projectTheme || '');
         setReviewFeedback(existing.reviewFeedback);
         setReviewedBy(existing.reviewedBy);
+        setEspaciosTrabajo(existing.espaciosTrabajo || '');
+        setRutinaDiaria(existing.rutinaDiaria || '');
+        setEjesIntegradores(existing.ejesIntegradores || '');
+        setTipoProyecto(existing.tipoProyecto || '');
+        setTemaIndispensable(existing.temaIndispensable || '');
 
         if (existing.rows && existing.rows.length > 0) {
           setRows(existing.rows);
@@ -160,7 +232,9 @@ export const DisenadorPlanificacionView: React.FC<DisenadorPlanificacionViewProp
     }
 
     // Si no hay plan previo, se carga el modelo predeterminado oficial
-    if (selectedLevel === 'PRIMARIA') {
+    if (selectedLevel === 'INICIAL') {
+      loadTemplateData(TEMPLATE_INICIAL);
+    } else if (selectedLevel === 'PRIMARIA') {
       loadTemplateData(TEMPLATE_PRIMARIA);
     } else {
       loadTemplateData(TEMPLATE_MEDIA_GENERAL);
@@ -172,7 +246,10 @@ export const DisenadorPlanificacionView: React.FC<DisenadorPlanificacionViewProp
     if (newLevel === selectedLevel) return;
     setSelectedLevel(newLevel);
     // Cargar automáticamente el modelo predeterminado del nuevo nivel
-    if (newLevel === 'PRIMARIA') {
+    if (newLevel === 'INICIAL') {
+      loadTemplateData(TEMPLATE_INICIAL);
+      showToast('Modelo oficial de Educación Inicial cargado automáticamente.', 'info');
+    } else if (newLevel === 'PRIMARIA') {
       loadTemplateData(TEMPLATE_PRIMARIA);
       showToast('Modelo oficial de Educación Primaria cargado automáticamente.', 'info');
     } else {
@@ -183,9 +260,67 @@ export const DisenadorPlanificacionView: React.FC<DisenadorPlanificacionViewProp
 
   // Cargar modelo predeterminado institucional explícitamente
   const handleLoadPreset = () => {
-    if (selectedLevel === 'PRIMARIA') {
-      loadTemplateData(TEMPLATE_PRIMARIA);
-      showToast('Plantilla institucional predeterminada de Primaria cargada con éxito.', 'success');
+    if (selectedLevel === 'INICIAL') {
+      if (areaId === 'ini-ing') {
+        if (gradeSection.includes('5')) {
+          loadTemplateData(TEMPLATE_INICIAL_ING_5A);
+        } else {
+          loadTemplateData(TEMPLATE_INICIAL_ING_4A);
+        }
+        showToast('Plantilla institucional predeterminada de Inglés cargada con éxito.', 'success');
+      } else if (areaId === 'ini-inf') {
+        if (gradeSection.includes('5')) {
+          loadTemplateData(TEMPLATE_INICIAL_INF_5A);
+        } else {
+          loadTemplateData(TEMPLATE_INICIAL_INF_4A);
+        }
+        showToast('Plantilla institucional predeterminada de Informática cargada con éxito.', 'success');
+      } else if (areaId === 'ini-aje') {
+        if (gradeSection.includes('5')) {
+          loadTemplateData(TEMPLATE_INICIAL_AJE_5A);
+        } else {
+          loadTemplateData(TEMPLATE_INICIAL_AJE_4A);
+        }
+        showToast('Plantilla institucional predeterminada de Ajedrez cargada con éxito.', 'success');
+      } else if (areaId === 'ini-nat') {
+        if (gradeSection.includes('5')) {
+          loadTemplateData(TEMPLATE_INICIAL_NAT_5A);
+        } else {
+          loadTemplateData(TEMPLATE_INICIAL_NAT_4A);
+        }
+        showToast('Plantilla institucional predeterminada de Natación cargada con éxito.', 'success');
+      } else if (areaId === 'ini-ef') {
+        if (gradeSection.includes('5')) {
+          loadTemplateData(TEMPLATE_INICIAL_EF_5A);
+        } else {
+          loadTemplateData(TEMPLATE_INICIAL_EF_4A);
+        }
+        showToast('Plantilla institucional predeterminada de Educación Física cargada con éxito.', 'success');
+      } else if (areaId === 'ini-ap') {
+        if (gradeSection.includes('5')) {
+          loadTemplateData(TEMPLATE_INICIAL_AP_5A);
+        } else {
+          loadTemplateData(TEMPLATE_INICIAL_AP_4A);
+        }
+        showToast('Plantilla institucional predeterminada de Artes Plásticas cargada con éxito.', 'success');
+      } else if (gradeSection.includes('5')) {
+        loadTemplateData(TEMPLATE_INICIAL_5A);
+        showToast('Plantilla institucional predeterminada de Inicial (Sala 5 Años) cargada con éxito.', 'success');
+      } else {
+        loadTemplateData(TEMPLATE_INICIAL);
+        showToast('Plantilla institucional predeterminada de Inicial (Sala 4 Años) cargada con éxito.', 'success');
+      }
+    } else if (selectedLevel === 'PRIMARIA') {
+      if (gradeSection.includes('1') && areaId === 'pri-mat') {
+        loadTemplateData(TEMPLATE_PRIMARIA_MAT_1G);
+        showToast('Plantilla institucional predeterminada de Matemática (1er Grado) cargada con éxito.', 'success');
+      } else if (gradeSection.includes('1') && areaId === 'pri-len') {
+        loadTemplateData(TEMPLATE_PRIMARIA_LEN_1G);
+        showToast('Plantilla institucional predeterminada de Lenguaje (1er Grado) cargada con éxito.', 'success');
+      } else {
+        loadTemplateData(TEMPLATE_PRIMARIA);
+        showToast('Plantilla institucional predeterminada de Primaria cargada con éxito.', 'success');
+      }
     } else {
       loadTemplateData(TEMPLATE_MEDIA_GENERAL);
       showToast('Plantilla institucional predeterminada de Media General cargada con éxito.', 'success');
@@ -195,7 +330,9 @@ export const DisenadorPlanificacionView: React.FC<DisenadorPlanificacionViewProp
   // Limpiar formulario para diseñar desde cero
   const handleResetBlank = () => {
     if (window.confirm('¿Deseas vaciar los campos para redactar la planificación desde cero?')) {
-      if (selectedLevel === 'PRIMARIA') {
+      if (selectedLevel === 'INICIAL') {
+        loadTemplateData(BLANK_INICIAL_PLAN);
+      } else if (selectedLevel === 'PRIMARIA') {
         loadTemplateData(BLANK_PRIMARIA_PLAN);
       } else {
         loadTemplateData(BLANK_MEDIA_PLAN);
@@ -230,6 +367,68 @@ export const DisenadorPlanificacionView: React.FC<DisenadorPlanificacionViewProp
     setRows(prev => prev.map(r => r.id === id ? { ...r, [field]: value } : r));
   };
 
+  // Inserción ágil desde el Banco de Recursos
+  const handleAddResourceToPlan = (resName: string) => {
+    setRecursos(prev => {
+      const trimmed = prev.trim();
+      if (!trimmed) return resName;
+      if (trimmed.toLowerCase().includes(resName.toLowerCase())) return trimmed;
+      return `${trimmed}, ${resName}`;
+    });
+    showToast(`Recurso "${resName}" agregado a la sección de Recursos`, 'success');
+  };
+
+  // Inserción ágil desde el Banco de Competencias
+  const handleInsertCompetencyToRow = (comp: Competency) => {
+    if (targetRowIdForBank) {
+      setRows(prev => prev.map(r => {
+        if (r.id !== targetRowIdForBank) return r;
+        return {
+          ...r,
+          aprendizajesEsperados: comp.title,
+          contenidoOReferente: r.contenidoOReferente || comp.description
+        };
+      }));
+      showToast(`Competencia "${comp.code} - ${comp.title}" cargada en la fila`, 'success');
+    } else {
+      const newRow: DidacticPlanRow = {
+        id: `row-${Date.now()}`,
+        contenidoOReferente: comp.description,
+        aprendizajesEsperados: comp.title,
+        indicadoresCompetencia: 'Demuestra dominio operativo y conceptual en las dinámicas planteadas.',
+        tecnicasInstrumentos: 'Observación directa y producciones del estudiante',
+        criteriosEvaluacion: '• Participación y coherencia en las actividades.',
+        ponderacionPercent: selectedLevel === 'MEDIA_GENERAL' ? 20 : undefined
+      };
+      setRows(prev => [...prev, newRow]);
+      showToast(`Nueva fila curricular creada con la competencia "${comp.code}"`, 'success');
+    }
+  };
+
+  // Inserción ágil desde el Banco de Indicadores & Criterios
+  const handleInsertIndicatorToRow = (indicatorText: string, instrument?: string) => {
+    const targetId = targetRowIdForBank || (rows[0] ? rows[0].id : null);
+    if (!targetId) {
+      handleAddRow();
+    }
+    setRows(prev => prev.map((r, idx) => {
+      if (targetId ? r.id === targetId : idx === 0) {
+        const currentInd = r.indicadoresCompetencia.trim();
+        const updatedInd = currentInd ? `${currentInd}\n• ${indicatorText}` : `• ${indicatorText}`;
+        const updatedInst = instrument && !r.tecnicasInstrumentos.includes(instrument)
+          ? (r.tecnicasInstrumentos ? `${r.tecnicasInstrumentos} / ${instrument}` : instrument)
+          : r.tecnicasInstrumentos;
+        return {
+          ...r,
+          indicadoresCompetencia: updatedInd,
+          tecnicasInstrumentos: updatedInst
+        };
+      }
+      return r;
+    }));
+    showToast(`Indicador curricular insertado en la fila activa`, 'success');
+  };
+
   // Helpers para notificaciones toast
   const showToast = (text: string, type: 'success' | 'info') => {
     setToastMessage({ text, type });
@@ -246,12 +445,12 @@ export const DisenadorPlanificacionView: React.FC<DisenadorPlanificacionViewProp
       id: planId,
       areaId: areaId || levelAreas[0]?.id || '',
       level: selectedLevel,
-      gradeSection: gradeSection || (selectedLevel === 'PRIMARIA' ? '3er Grado A y B' : '4to Año A y B'),
+      gradeSection: gradeSection || (selectedLevel === 'INICIAL' ? 'Sala de 4 Años A' : selectedLevel === 'PRIMARIA' ? '3er Grado A y B' : '4to Año A y B'),
       lapso,
       startDate,
       endDate,
       title: title || `Planificación Didáctica - ${gradeSection}`,
-      projectTheme: selectedLevel === 'PRIMARIA' ? componente : temaGenerador,
+      projectTheme: selectedLevel === 'MEDIA_GENERAL' ? temaGenerador : componente,
       status: newStatus,
       competencyIds: [],
       indicatorIds: [],
@@ -266,14 +465,19 @@ export const DisenadorPlanificacionView: React.FC<DisenadorPlanificacionViewProp
       docenteName,
       schoolYear,
       periodoQuincenal,
-      componente: selectedLevel === 'PRIMARIA' ? componente : undefined,
+      componente: selectedLevel !== 'MEDIA_GENERAL' ? componente : undefined,
       temaGenerador: selectedLevel === 'MEDIA_GENERAL' ? temaGenerador : undefined,
       rows,
       actividadesInicio,
       actividadesDesarrollo,
       actividadesCierre,
       recursos,
-      fuentesConsulta
+      fuentesConsulta,
+      espaciosTrabajo: selectedLevel === 'INICIAL' ? espaciosTrabajo : undefined,
+      rutinaDiaria: selectedLevel === 'INICIAL' ? rutinaDiaria : undefined,
+      ejesIntegradores: selectedLevel === 'PRIMARIA' ? ejesIntegradores : undefined,
+      tipoProyecto: selectedLevel === 'PRIMARIA' ? tipoProyecto : undefined,
+      temaIndispensable: selectedLevel === 'MEDIA_GENERAL' ? temaIndispensable : undefined
     };
   };
 
@@ -322,12 +526,6 @@ export const DisenadorPlanificacionView: React.FC<DisenadorPlanificacionViewProp
       <div className="no-print bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-cba-card">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#D4AF37] animate-pulse"></span>
-              <span className="text-xs font-black text-[#2C2E53] dark:text-amber-300 uppercase tracking-wider">
-                Módulo Oficial de Planificación Didáctica CBA
-              </span>
-            </div>
             <h2 className="text-2xl font-black text-[#2C2E53] dark:text-white">
               Diseñador de Planificación Didáctica
             </h2>
@@ -336,12 +534,24 @@ export const DisenadorPlanificacionView: React.FC<DisenadorPlanificacionViewProp
             </p>
           </div>
 
-          {/* Level Switcher (Primaria vs Media General) */}
+          {/* Level Switcher (Inicial vs Primaria vs Media General) */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <div className="bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl flex items-center border border-slate-200 dark:border-slate-700">
+            <div className="bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl flex flex-wrap items-center gap-1 border border-slate-200 dark:border-slate-700">
+              <button
+                onClick={() => handleLevelChange('INICIAL')}
+                className={`flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all ${
+                  selectedLevel === 'INICIAL'
+                    ? 'bg-[#2A1E2B] text-amber-300 border border-amber-400/50 shadow-md ring-2 ring-amber-500/20'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                <Sparkles className="w-4 h-4 text-[#D4AF37]" />
+                <span>Educación Inicial</span>
+              </button>
+
               <button
                 onClick={() => handleLevelChange('PRIMARIA')}
-                className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all ${
+                className={`flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all ${
                   selectedLevel === 'PRIMARIA'
                     ? 'bg-[#142621] text-teal-300 border border-teal-400/50 shadow-md ring-2 ring-teal-500/20'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -353,7 +563,7 @@ export const DisenadorPlanificacionView: React.FC<DisenadorPlanificacionViewProp
 
               <button
                 onClick={() => handleLevelChange('MEDIA_GENERAL')}
-                className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all ${
+                className={`flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all ${
                   selectedLevel === 'MEDIA_GENERAL'
                     ? 'bg-[#1A1D36] text-indigo-300 border border-indigo-400/50 shadow-md ring-2 ring-indigo-500/20'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -374,7 +584,7 @@ export const DisenadorPlanificacionView: React.FC<DisenadorPlanificacionViewProp
               className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#D4AF37]/15 hover:bg-[#D4AF37]/25 text-amber-900 dark:text-amber-300 border border-[#D4AF37]/40 rounded-xl text-xs font-extrabold transition-colors"
             >
               <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
-              <span>Cargar Información Predeterminada ({selectedLevel === 'PRIMARIA' ? 'Primaria' : 'Media General'})</span>
+              <span>Cargar Información Predeterminada ({selectedLevel === 'INICIAL' ? 'Inicial' : selectedLevel === 'PRIMARIA' ? 'Primaria' : 'Media General'})</span>
             </button>
 
             <button
@@ -384,6 +594,39 @@ export const DisenadorPlanificacionView: React.FC<DisenadorPlanificacionViewProp
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Diseñar en Blanco</span>
             </button>
+
+            <button
+              onClick={() => {
+                setTargetRowIdForBank(null);
+                setBankActiveTab('RECURSOS');
+                setIsBankModalOpen(true);
+              }}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black shadow-xs transition-colors"
+            >
+              <Boxes className="w-3.5 h-3.5 text-amber-300" />
+              <span>Banco Curricular & Recursos</span>
+            </button>
+
+            {teacherLevelAssignments.length > 0 && (
+              <div className="flex items-center gap-1.5 bg-indigo-50 dark:bg-indigo-950/40 p-1 rounded-xl border border-indigo-200 dark:border-indigo-800">
+                <span className="text-[10px] font-extrabold text-indigo-700 dark:text-indigo-300 px-2 flex items-center gap-1">
+                  <BookOpen className="w-3 h-3 text-indigo-500" />
+                  <span>Mi Cátedra:</span>
+                </span>
+                <select
+                  onChange={(e) => handleApplyAssignment(e.target.value)}
+                  defaultValue=""
+                  className="px-2 py-1 bg-white dark:bg-slate-900 rounded-lg text-xs font-bold text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 outline-none cursor-pointer"
+                >
+                  <option value="" disabled>Cargar cátedra asignada...</option>
+                  {teacherLevelAssignments.map((asg: AcademicAssignment) => (
+                    <option key={asg.id} value={asg.id}>
+                      {asg.areaName} — {asg.grade} Sec. {asg.section}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             {onBackToList && (
               <button
@@ -494,7 +737,7 @@ export const DisenadorPlanificacionView: React.FC<DisenadorPlanificacionViewProp
                 U.C.E. COLEGIO BELLAS ARTES
               </h1>
               <p className="text-xs font-bold text-slate-300">
-                PLANIFICACIÓN DIDÁCTICA — EDUCACIÓN {selectedLevel === 'PRIMARIA' ? 'PRIMARIA' : 'MEDIA GENERAL'}
+                PLANIFICACIÓN DIDÁCTICA — EDUCACIÓN {selectedLevel === 'INICIAL' ? 'INICIAL' : selectedLevel === 'PRIMARIA' ? 'PRIMARIA' : 'MEDIA GENERAL'}
               </p>
             </div>
             <div className="text-right sm:text-right flex flex-col items-center sm:items-end">
@@ -502,7 +745,7 @@ export const DisenadorPlanificacionView: React.FC<DisenadorPlanificacionViewProp
                 AÑO ESCOLAR {schoolYear}
               </span>
               <span className="text-[11px] text-slate-300 font-semibold mt-1">
-                {selectedLevel === 'PRIMARIA' ? 'Formato Cualitativo Primaria' : 'Formato Ponderado Media General'}
+                {selectedLevel === 'INICIAL' ? 'Formato Cualitativo Inicial' : selectedLevel === 'PRIMARIA' ? 'Formato Cualitativo Primaria' : 'Formato Ponderado Media General'}
               </span>
             </div>
           </div>
@@ -555,11 +798,19 @@ export const DisenadorPlanificacionView: React.FC<DisenadorPlanificacionViewProp
                 </label>
                 <input
                   type="text"
+                  list="grade-section-options"
                   value={gradeSection}
                   onChange={(e) => setGradeSection(e.target.value)}
-                  placeholder={selectedLevel === 'PRIMARIA' ? '3er Grado A y B' : '4to Año A y B'}
+                  placeholder={selectedLevel === 'INICIAL' ? 'Sala de 4 Años A' : selectedLevel === 'PRIMARIA' ? '3er Grado A y B' : '4to Año A y B'}
                   className="w-full text-xs font-bold bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 p-1.5 rounded-lg border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-[#2C2E53] print:border-none print:p-0"
                 />
+                <datalist id="grade-section-options">
+                  {LEVEL_GRADES_CATALOG[selectedLevel].flatMap(g => [
+                    <option key={`${g} A`} value={`${g} A`} />,
+                    <option key={`${g} B`} value={`${g} B`} />,
+                    <option key={`${g} A y B`} value={`${g} A y B`} />
+                  ])}
+                </datalist>
               </div>
 
               {/* LAPSO */}
@@ -584,12 +835,12 @@ export const DisenadorPlanificacionView: React.FC<DisenadorPlanificacionViewProp
               </div>
             </div>
 
-            {/* Second row: Periodo & Componente / Tema Generador */}
+            {/* Second row: Periodo & Campos Especializados por Subsistema */}
             <div className="grid grid-cols-1 lg:grid-cols-6 divide-y lg:divide-y-0 lg:divide-x divide-slate-300 dark:divide-slate-700">
-              {/* PERIODO (Quincenal) */}
+              {/* PERIODO (Quincenal / Lapso) */}
               <div className="p-3 lg:col-span-2 bg-slate-100/60 dark:bg-slate-800/60">
                 <label className="block text-[10px] font-black text-[#2C2E53] dark:text-[#D4AF37] uppercase tracking-wider mb-1">
-                  Período Quincenal:
+                  {selectedLevel === 'INICIAL' ? 'Período Quincenal / Quincena:' : selectedLevel === 'PRIMARIA' ? 'Período del PA:' : 'Período Quincenal:'}
                 </label>
                 <input
                   type="text"
@@ -600,29 +851,102 @@ export const DisenadorPlanificacionView: React.FC<DisenadorPlanificacionViewProp
                 />
               </div>
 
-              {/* COMPONENTE (Primaria) o TEMA GENERADOR (Media General) */}
-              <div className="p-3 lg:col-span-4 bg-[#D4AF37]/10 dark:bg-[#D4AF37]/5">
-                <label className="block text-[10px] font-black text-[#2C2E53] dark:text-[#D4AF37] uppercase tracking-wider mb-1">
-                  {selectedLevel === 'PRIMARIA' ? 'COMPONENTE INSTITUCIONAL:' : 'TEMA GENERADOR:'}
-                </label>
-                {selectedLevel === 'PRIMARIA' ? (
-                  <textarea
-                    rows={2}
-                    value={componente}
-                    onChange={(e) => setComponente(e.target.value)}
-                    placeholder="Escriba el componente articulador del Proyecto de Aprendizaje institucional..."
-                    className="w-full text-xs font-bold bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 p-1.5 rounded-lg border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-[#2C2E53] print:border-none print:p-0"
-                  />
-                ) : (
-                  <textarea
-                    rows={2}
-                    value={temaGenerador}
-                    onChange={(e) => setTemaGenerador(e.target.value)}
-                    placeholder="Escriba el tema generador ministerial y eje de articulación del área..."
-                    className="w-full text-xs font-bold bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 p-1.5 rounded-lg border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-[#2C2E53] print:border-none print:p-0"
-                  />
-                )}
-              </div>
+              {/* CAMPOS ESPECÍFICOS SEGÚN NIVEL */}
+              {selectedLevel === 'INICIAL' && (
+                <div className="p-3 lg:col-span-4 bg-amber-50/40 dark:bg-amber-950/20">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[10px] font-black text-[#2C2E53] dark:text-[#D4AF37] uppercase tracking-wider mb-1">
+                        COMPONENTE DE EDUCACIÓN INICIAL:
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={componente}
+                        onChange={(e) => setComponente(e.target.value)}
+                        placeholder="Componente curricular articulador..."
+                        className="w-full text-xs font-bold bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 p-1.5 rounded-lg border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-[#2C2E53] print:border-none print:p-0"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black text-[#2C2E53] dark:text-[#D4AF37] uppercase tracking-wider mb-1">
+                        CENTRO DE INTERÉS / TEMA DEL PROYECTO:
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={projectTheme}
+                        onChange={(e) => setProjectTheme(e.target.value)}
+                        placeholder="Título lúdico del proyecto infantil..."
+                        className="w-full text-xs font-bold bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 p-1.5 rounded-lg border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-[#2C2E53] print:border-none print:p-0"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {selectedLevel === 'PRIMARIA' && (
+                <div className="p-3 lg:col-span-4 bg-teal-50/40 dark:bg-teal-950/20">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[10px] font-black text-[#2C2E53] dark:text-[#D4AF37] uppercase tracking-wider mb-1">
+                        PROYECTO DE APRENDIZAJE (PA) / TEMA:
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={tipoProyecto || projectTheme}
+                        onChange={(e) => {
+                          setTipoProyecto(e.target.value);
+                          setProjectTheme(e.target.value);
+                        }}
+                        placeholder="Nombre oficial del Proyecto de Aprendizaje..."
+                        className="w-full text-xs font-bold bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 p-1.5 rounded-lg border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-[#2C2E53] print:border-none print:p-0"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black text-[#2C2E53] dark:text-[#D4AF37] uppercase tracking-wider mb-1">
+                        COMPONENTE INSTITUCIONAL:
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={componente}
+                        onChange={(e) => setComponente(e.target.value)}
+                        placeholder="Componente curricular articulador del PA..."
+                        className="w-full text-xs font-bold bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 p-1.5 rounded-lg border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-[#2C2E53] print:border-none print:p-0"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {selectedLevel === 'MEDIA_GENERAL' && (
+                <div className="p-3 lg:col-span-4 bg-indigo-50/40 dark:bg-indigo-950/20">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[10px] font-black text-[#2C2E53] dark:text-[#D4AF37] uppercase tracking-wider mb-1">
+                        TEMA INDISPENSABLE:
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={temaIndispensable}
+                        onChange={(e) => setTemaIndispensable(e.target.value)}
+                        placeholder="Tema indispensable ministerial..."
+                        className="w-full text-xs font-bold bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 p-1.5 rounded-lg border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-[#2C2E53] print:border-none print:p-0"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black text-[#2C2E53] dark:text-[#D4AF37] uppercase tracking-wider mb-1">
+                        TEMA GENERADOR:
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={temaGenerador}
+                        onChange={(e) => setTemaGenerador(e.target.value)}
+                        placeholder="Tema generador del área..."
+                        className="w-full text-xs font-bold bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 p-1.5 rounded-lg border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-[#2C2E53] print:border-none print:p-0"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -651,7 +975,11 @@ export const DisenadorPlanificacionView: React.FC<DisenadorPlanificacionViewProp
                   <tr className="bg-[#2C2E53] text-white border-b-2 border-slate-400">
                     {/* Col 1 */}
                     <th className="p-3 font-black text-[11px] uppercase tracking-wider w-1/4 border-r border-slate-400">
-                      {selectedLevel === 'PRIMARIA' ? 'CONTENIDOS' : 'TEJIDO TEMÁTICO / REFERENTES TEÓRICOS-PRÁCTICOS'}
+                      {selectedLevel === 'INICIAL'
+                        ? 'ÁREA DE APRENDIZAJE / COMPONENTE'
+                        : selectedLevel === 'PRIMARIA'
+                        ? 'CONTENIDOS PROGRAMÁTICOS (PA)'
+                        : 'TEJIDO TEMÁTICO / REFERENTES TEÓRICOS-PRÁCTICOS'}
                     </th>
                     {/* Col 2 */}
                     <th className="p-3 font-black text-[11px] uppercase tracking-wider w-1/4 border-r border-slate-400">
@@ -659,12 +987,16 @@ export const DisenadorPlanificacionView: React.FC<DisenadorPlanificacionViewProp
                     </th>
                     {/* Col 3 */}
                     <th className="p-3 font-black text-[11px] uppercase tracking-wider w-1/4 border-r border-slate-400">
-                      INDICADORES DE COMPETENCIA
+                      {selectedLevel === 'INICIAL'
+                        ? 'INDICADORES FORMATIVOS (LITERAL A-E)'
+                        : selectedLevel === 'PRIMARIA'
+                        ? 'INDICADORES DE COMPETENCIA (L / EP / I)'
+                        : 'INDICADORES DE COMPETENCIA'}
                     </th>
                     {/* Col 4 */}
                     <th className="p-3 font-black text-[11px] uppercase tracking-wider w-1/4 border-r border-slate-400">
                       <div>TÉCNICAS E INSTRUMENTOS DE EVALUACIÓN</div>
-                      <div className="text-[9px] font-semibold text-[#D4AF37] mt-0.5">/ CRITERIOS DE EVALUACIÓN</div>
+                      <div className="text-[9px] font-semibold text-[#D4AF37] mt-0.5">/ CRITERIOS OBSERVABLES</div>
                     </th>
                     {/* Col 5 (Solo Media General) */}
                     {selectedLevel === 'MEDIA_GENERAL' && (
@@ -673,7 +1005,7 @@ export const DisenadorPlanificacionView: React.FC<DisenadorPlanificacionViewProp
                       </th>
                     )}
                     {/* Acciones (Oculto en print) */}
-                    <th className="p-3 font-black text-[10px] text-center w-12 no-print">
+                    <th className="p-3 font-black text-[10px] text-center w-14 no-print">
                       ACC
                     </th>
                   </tr>
@@ -687,7 +1019,7 @@ export const DisenadorPlanificacionView: React.FC<DisenadorPlanificacionViewProp
                           rows={4}
                           value={row.contenidoOReferente}
                           onChange={(e) => handleUpdateRow(row.id, 'contenidoOReferente', e.target.value)}
-                          placeholder={selectedLevel === 'PRIMARIA' ? 'Temas y subtemas derivados del componente...' : 'Tejido temático y referentes teórico-prácticos...'}
+                          placeholder={selectedLevel !== 'MEDIA_GENERAL' ? 'Temas y subtemas derivados del componente...' : 'Tejido temático y referentes teórico-prácticos...'}
                           className="w-full text-xs bg-transparent border-0 focus:ring-1 focus:ring-[#2C2E53] p-1 rounded resize-y"
                         />
                       </td>
@@ -761,14 +1093,28 @@ export const DisenadorPlanificacionView: React.FC<DisenadorPlanificacionViewProp
 
                       {/* Acciones */}
                       <td className="p-2.5 text-center align-middle no-print">
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveRow(row.id)}
-                          title="Eliminar fila"
-                          className="p-1.5 text-slate-400 hover:text-red-500 rounded-lg transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        <div className="flex flex-col items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setTargetRowIdForBank(row.id);
+                              setBankActiveTab('COMPETENCIAS');
+                              setIsBankModalOpen(true);
+                            }}
+                            title="Insertar desde Banco Curricular"
+                            className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950/50 rounded-lg transition-colors border border-blue-200 dark:border-blue-800"
+                          >
+                            <Boxes className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveRow(row.id)}
+                            title="Eliminar fila"
+                            className="p-1.5 text-slate-400 hover:text-red-500 rounded-lg transition-colors"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -896,6 +1242,126 @@ export const DisenadorPlanificacionView: React.FC<DisenadorPlanificacionViewProp
             </div>
           </div>
 
+          {/* 3.1 ADAPTIVE SUBSYSTEM SECTIONS (Inicial: Espacios y Rutina / Primaria: Ejes Integradores) */}
+          {selectedLevel === 'INICIAL' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
+              {/* Rincones y Espacios de Trabajo */}
+              <div className="border-2 border-amber-300 dark:border-amber-700/60 rounded-xl overflow-hidden bg-amber-50/40 dark:bg-amber-950/20">
+                <div className="bg-[#2C2E53] text-[#D4AF37] px-4 py-2.5 flex items-center justify-between">
+                  <span className="font-black text-xs uppercase tracking-wider">
+                    ESPACIOS Y RINCONES DE APRENDIZAJE
+                  </span>
+                  <span className="text-[10px] font-bold text-slate-300">
+                    Educación Inicial
+                  </span>
+                </div>
+                <div className="p-4 space-y-2">
+                  <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                    Distribución de dinámicas por rincones: Expresión Plástica, Construcción, Juegos Simbólicos, Biblioteca o Experimentación.
+                  </p>
+                  <textarea
+                    rows={4}
+                    value={espaciosTrabajo}
+                    onChange={(e) => setEspaciosTrabajo(e.target.value)}
+                    placeholder="Ej: Espacio de Armar y Construir: Bloques lógicos...\nEspacio de Dramatización: Rincones lúdicos del hogar..."
+                    className="w-full text-xs bg-white dark:bg-slate-800 p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-[#2C2E53] leading-relaxed"
+                  />
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {['Rincón de Construcción', 'Expresión Plástica', 'Juegos Simbólicos', 'Biblioteca y Cuentos'].map((rincon) => (
+                      <button
+                        key={rincon}
+                        type="button"
+                        onClick={() => setEspaciosTrabajo(prev => prev ? `${prev}\n• ${rincon}: ` : `• ${rincon}: `)}
+                        className="px-2 py-0.5 bg-amber-100 dark:bg-amber-900/40 text-amber-900 dark:text-amber-200 text-[10px] font-bold rounded-md hover:bg-amber-200 transition-colors"
+                      >
+                        + {rincon}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Rutina Diaria de la Jornada Infantil */}
+              <div className="border-2 border-amber-300 dark:border-amber-700/60 rounded-xl overflow-hidden bg-amber-50/40 dark:bg-amber-950/20">
+                <div className="bg-[#2C2E53] text-[#D4AF37] px-4 py-2.5 flex items-center justify-between">
+                  <span className="font-black text-xs uppercase tracking-wider">
+                    RUTINA DIARIA Y MOMENTOS DE LA JORNADA
+                  </span>
+                  <span className="text-[10px] font-bold text-slate-300">
+                    Rutina Pedagógica
+                  </span>
+                </div>
+                <div className="p-4 space-y-2">
+                  <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                    Secuencia de períodos de la jornada escolar en Educación Inicial (Llegada, Alimentación, Actividades Colectivas, Despedida).
+                  </p>
+                  <textarea
+                    rows={4}
+                    value={rutinaDiaria}
+                    onChange={(e) => setRutinaDiaria(e.target.value)}
+                    placeholder="Ej: Bienvenida afectiva y ronda de canciones...\nAseo y merienda colectiva...\nTrabajo en pequeños grupos en los espacios...\nOrden y despedida..."
+                    className="w-full text-xs bg-white dark:bg-slate-800 p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-[#2C2E53] leading-relaxed"
+                  />
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {['Bienvenida y Saludo', 'Alimentación y Merienda', 'Aseo e Higiene', 'Juego Libre', 'Despedida'].map((momento) => (
+                      <button
+                        key={momento}
+                        type="button"
+                        onClick={() => setRutinaDiaria(prev => prev ? `${prev}\n• ${momento}: ` : `• ${momento}: `)}
+                        className="px-2 py-0.5 bg-amber-100 dark:bg-amber-900/40 text-amber-900 dark:text-amber-200 text-[10px] font-bold rounded-md hover:bg-amber-200 transition-colors"
+                      >
+                        + {momento}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {selectedLevel === 'PRIMARIA' && (
+            <div className="border-2 border-teal-300 dark:border-teal-700/60 rounded-xl overflow-hidden bg-teal-50/40 dark:bg-teal-950/20 pt-2">
+              <div className="bg-[#2C2E53] text-teal-300 px-4 py-2.5 flex items-center justify-between">
+                <span className="font-black text-xs uppercase tracking-wider">
+                  EJES INTEGRADORES Y ARTICULACIÓN DEL PROYECTO DE APRENDIZAJE (PA)
+                </span>
+                <span className="text-[10px] font-bold text-[#D4AF37]">
+                  Currículo de Primaria
+                </span>
+              </div>
+              <div className="p-4 space-y-2">
+                <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                  Articulación transversal con los ejes oficiales: Ambiente y Salud Integral, Interculturalidad, Tecnologías de la Información y Comunicación (TIC), Derechos Humanos y Cultura de Paz, Trabajo Liberador.
+                </p>
+                <textarea
+                  rows={3}
+                  value={ejesIntegradores}
+                  onChange={(e) => setEjesIntegradores(e.target.value)}
+                  placeholder="Describa cómo el Proyecto de Aprendizaje aborda transversalmente los ejes integradores institucionales..."
+                  className="w-full text-xs bg-white dark:bg-slate-800 p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-[#2C2E53] leading-relaxed"
+                />
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {[
+                    'Ambiente y Salud Integral',
+                    'Interculturalidad y Valores',
+                    'Tecnología de la Información (TIC)',
+                    'Trabajo Liberador',
+                    'Derechos Humanos y Cultura de Paz'
+                  ].map((eje) => (
+                    <button
+                      key={eje}
+                      type="button"
+                      onClick={() => setEjesIntegradores(prev => prev ? `${prev}\n• ${eje}: ` : `• ${eje}: `)}
+                      className="px-2 py-0.5 bg-teal-100 dark:bg-teal-900/40 text-teal-900 dark:text-teal-200 text-[10px] font-bold rounded-md hover:bg-teal-200 transition-colors"
+                    >
+                      + {eje}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* 4. OFFICIAL SIGNATURES & VALIDATION FOOTER (Print & Official Visuals) */}
           <div className="pt-6 border-t-2 border-slate-300 dark:border-slate-700 grid grid-cols-1 sm:grid-cols-2 gap-8 text-center">
             {/* Signature 1: Docente */}
@@ -921,7 +1387,7 @@ export const DisenadorPlanificacionView: React.FC<DisenadorPlanificacionViewProp
                 </span>
               </div>
               <span className="text-xs font-black text-[#2C2E53] dark:text-white uppercase">
-                {reviewedBy || (selectedLevel === 'PRIMARIA' ? 'Coordinación Pedagógica Primaria' : 'Coordinación Pedagógica Media General')}
+                {reviewedBy || (selectedLevel === 'INICIAL' ? 'Coordinación Pedagógica Inicial' : selectedLevel === 'PRIMARIA' ? 'Coordinación Pedagógica Primaria' : 'Coordinación Pedagógica Media General')}
               </span>
               <span className="text-[11px] text-slate-500 font-semibold">
                 Dirección Académica / Control de Estudios
@@ -938,6 +1404,275 @@ export const DisenadorPlanificacionView: React.FC<DisenadorPlanificacionViewProp
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
       />
+
+      {/* Modal Interactivo: Banco Curricular & Recursos Didácticos */}
+      {isBankModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl border-2 border-slate-300 dark:border-slate-700 shadow-2xl max-w-4xl w-full overflow-hidden flex flex-col max-h-[88vh] animate-in fade-in zoom-in-95 duration-200">
+            {/* Cabecera del Modal */}
+            <div className="bg-[#2C2E53] text-white p-5 border-b-2 border-[#D4AF37] flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-[#D4AF37] text-[#1B1C33] flex items-center justify-center font-black shadow-md">
+                  <Boxes className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-white flex items-center gap-2">
+                    Banco Curricular & Recursos Didácticos
+                    <span className="text-[10px] bg-[#D4AF37] text-[#1B1C33] px-2 py-0.5 rounded-full font-black uppercase">
+                      {selectedLevel.replace('_', ' ')}
+                    </span>
+                  </h3>
+                  <p className="text-xs text-slate-300">
+                    {targetRowIdForBank
+                      ? `Destino: Fila de la matriz curricular seleccionada`
+                      : 'Inserte recursos al plan o añada competencias e indicadores'}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsBankModalOpen(false)}
+                className="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Pestañas del Modal y Buscador */}
+            <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-1.5 bg-white dark:bg-slate-900 p-1 rounded-2xl border border-slate-200 dark:border-slate-700">
+                <button
+                  type="button"
+                  onClick={() => setBankActiveTab('RECURSOS')}
+                  className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-black transition-all ${
+                    bankActiveTab === 'RECURSOS'
+                      ? 'bg-[#2C2E53] text-[#D4AF37] shadow-sm'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  <Boxes className="w-4 h-4" />
+                  <span>Recursos Didácticos ({educationalResources.filter(r => r.level === selectedLevel).length})</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setBankActiveTab('COMPETENCIAS')}
+                  className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-black transition-all ${
+                    bankActiveTab === 'COMPETENCIAS'
+                      ? 'bg-[#2C2E53] text-[#D4AF37] shadow-sm'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  <BookOpen className="w-4 h-4" />
+                  <span>Competencias ({competencies.filter(c => c.level === selectedLevel).length})</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setBankActiveTab('INDICADORES')}
+                  className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-black transition-all ${
+                    bankActiveTab === 'INDICADORES'
+                      ? 'bg-[#2C2E53] text-[#D4AF37] shadow-sm'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  <Tag className="w-4 h-4" />
+                  <span>Indicadores & Criterios</span>
+                </button>
+              </div>
+
+              {/* Input de Búsqueda */}
+              <div className="relative flex-1 sm:max-w-xs">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={bankSearch}
+                  onChange={(e) => setBankSearch(e.target.value)}
+                  placeholder={`Buscar en ${bankActiveTab.toLowerCase()}...`}
+                  className="w-full pl-9 pr-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-[#2C2E53]"
+                />
+              </div>
+            </div>
+
+            {/* Contenido Dinámico con Scroll */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              {/* TAB 1: RECURSOS */}
+              {bankActiveTab === 'RECURSOS' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {educationalResources
+                    .filter(res => res.level === selectedLevel)
+                    .filter(res =>
+                      !bankSearch ||
+                      res.name.toLowerCase().includes(bankSearch.toLowerCase()) ||
+                      res.category.toLowerCase().includes(bankSearch.toLowerCase()) ||
+                      ((res.specifications || res.description) && (res.specifications || res.description)!.toLowerCase().includes(bankSearch.toLowerCase()))
+                    )
+                    .map(res => (
+                      <div
+                        key={res.id}
+                        className="bg-slate-50 dark:bg-slate-800/40 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-[#D4AF37] transition-all flex flex-col justify-between"
+                      >
+                        <div>
+                          <div className="flex items-start justify-between gap-2 mb-1.5">
+                            <span className="font-black text-xs text-[#2C2E53] dark:text-white">
+                              {res.name}
+                            </span>
+                            <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300">
+                              {res.category.replace('_', ' ')}
+                            </span>
+                          </div>
+                          {(res.specifications || res.description) && (
+                            <p className="text-[11px] text-slate-600 dark:text-slate-400 mb-2 leading-relaxed">
+                              {res.specifications || res.description}
+                            </p>
+                          )}
+                          <div className="text-[10px] text-slate-500 font-bold mb-3">
+                            Disponibles: <strong className="text-emerald-600 dark:text-emerald-400">{res.availableQuantity ?? res.quantity ?? 1}</strong> de {res.totalQuantity ?? res.quantity ?? 1} unidades
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleAddResourceToPlan(res.name)}
+                          className="w-full flex items-center justify-center gap-1.5 py-1.5 bg-[#2C2E53] hover:bg-[#393b68] text-[#D4AF37] text-xs font-black rounded-xl transition-colors shadow-xs"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>+ Añadir al Plan</span>
+                        </button>
+                      </div>
+                    ))}
+                  {educationalResources.filter(res => res.level === selectedLevel).length === 0 && (
+                    <div className="col-span-2 text-center py-8 text-slate-400 text-xs font-bold">
+                      No hay recursos precargados para {selectedLevel.replace('_', ' ')}.
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* TAB 2: COMPETENCIAS */}
+              {bankActiveTab === 'COMPETENCIAS' && (
+                <div className="space-y-3">
+                  {competencies
+                    .filter(c => c.level === selectedLevel)
+                    .filter(c =>
+                      !bankSearch ||
+                      c.title.toLowerCase().includes(bankSearch.toLowerCase()) ||
+                      c.code.toLowerCase().includes(bankSearch.toLowerCase()) ||
+                      c.description.toLowerCase().includes(bankSearch.toLowerCase())
+                    )
+                    .map(comp => (
+                      <div
+                        key={comp.id}
+                        className="bg-slate-50 dark:bg-slate-800/40 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-[#D4AF37] transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+                      >
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-[#2C2E53] text-[#D4AF37]">
+                              {comp.code}
+                            </span>
+                            <span className="font-extrabold text-xs text-[#2C2E53] dark:text-white">
+                              {comp.title}
+                            </span>
+                          </div>
+                          <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                            {comp.description}
+                          </p>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleInsertCompetencyToRow(comp)}
+                          className="shrink-0 flex items-center gap-1.5 px-3.5 py-2 bg-[#D4AF37] hover:bg-[#c49f2c] text-[#1B1C33] text-xs font-black rounded-xl shadow-xs transition-colors"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>{targetRowIdForBank ? 'Cargar en Fila' : '+ Crear Fila'}</span>
+                        </button>
+                      </div>
+                    ))}
+                  {competencies.filter(c => c.level === selectedLevel).length === 0 && (
+                    <div className="text-center py-8 text-slate-400 text-xs font-bold">
+                      No hay competencias registradas para este nivel en el banco oficial.
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* TAB 3: INDICADORES & CRITERIOS */}
+              {bankActiveTab === 'INDICADORES' && (
+                <div className="space-y-3">
+                  {[
+                    ...INITIAL_DIAGNOSTIC_CRITERIA
+                      .filter(diag => diag.level === selectedLevel)
+                      .map(diag => ({
+                        id: diag.id,
+                        text: diag.criterion || diag.description || diag.name,
+                        domain: diag.domain || diag.category || diag.code,
+                        instrument: diag.instrument || 'Observación directa'
+                      })),
+                    ...indicators
+                      .filter(ind => ind.level === selectedLevel)
+                      .map(ind => ({
+                        id: ind.id,
+                        text: ind.description,
+                        domain: ind.code,
+                        instrument: ind.evaluationInstrument || 'Observación directa'
+                      }))
+                  ]
+                    .filter(item =>
+                      !bankSearch ||
+                      item.text.toLowerCase().includes(bankSearch.toLowerCase()) ||
+                      (item.domain && item.domain.toLowerCase().includes(bankSearch.toLowerCase()))
+                    )
+                    .map((item, idx) => (
+                      <div
+                        key={`${item.id}-${idx}`}
+                        className="bg-slate-50 dark:bg-slate-800/40 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-[#D4AF37] transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+                      >
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-300">
+                              {item.domain || 'Criterio Observador'}
+                            </span>
+                            <span className="text-[10px] font-bold text-slate-400">
+                              Sugerido: {item.instrument}
+                            </span>
+                          </div>
+                          <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
+                            • {item.text}
+                          </p>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleInsertIndicatorToRow(item.text, item.instrument)}
+                          className="shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 bg-[#2C2E53] hover:bg-[#393b68] text-white text-xs font-black rounded-xl transition-colors shadow-xs"
+                        >
+                          <Plus className="w-3.5 h-3.5 text-[#D4AF37]" />
+                          <span>Insertar Indicador</span>
+                        </button>
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
+
+            {/* Pie del modal */}
+            <div className="p-4 bg-slate-100 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
+              <span className="text-[11px] text-slate-500 font-bold">
+                Haga clic sobre cualquier recurso o criterio para vincularlo inmediatamente.
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsBankModalOpen(false)}
+                className="px-4 py-1.5 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-white rounded-xl text-xs font-black transition-colors"
+              >
+                Cerrar Ventana
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

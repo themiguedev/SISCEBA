@@ -9,6 +9,7 @@ import { BloqueoAdministrativoView } from './BloqueoAdministrativoView';
 import { TitulosBachillerView } from './TitulosBachillerView';
 import { MatriculaProsecucionView } from './MatriculaProsecucionView';
 import { TalleresCRPView } from './TalleresCRPView';
+import { UsuariosGestionView } from './UsuariosGestionView';
 import {
   UserCheck,
   Clock,
@@ -19,9 +20,11 @@ import {
   GraduationCap,
   Users,
   ShieldX,
-  Palette
+  Palette,
+  ShieldCheck
 } from 'lucide-react';
 import { hasSubTabAccess, ROLE_METADATA } from '../../utils/rbac';
+import { recordSectionAccess, sortSubTabsByFrequency } from '../../utils/accessTracker';
 
 interface GestionModuleProps {
   activeSubTab: string;
@@ -32,7 +35,8 @@ export const GestionModule: React.FC<GestionModuleProps> = ({
   activeSubTab,
   setActiveSubTab
 }) => {
-  const { passes, documentRequests, adminBlocks, conducts, currentRole } = useApp();
+  const { passes, documentRequests, adminBlocks, conducts, currentRole, users, currentUser } = useApp();
+  const userId = currentUser?.id || currentUser?.username || currentRole;
 
   const pendingDocsCount = documentRequests.filter((d) => d.status === 'PENDIENTE').length;
   const blockedStudentsCount = adminBlocks.filter((b) => b.active).length;
@@ -99,10 +103,22 @@ export const GestionModule: React.FC<GestionModuleProps> = ({
       label: 'Talleres CRP',
       sublabel: '2 Momentos',
       icon: Palette
+    },
+    {
+      id: 'USUARIOS',
+      label: 'Usuarios y Roles',
+      sublabel: 'Clasificación',
+      icon: ShieldCheck,
+      badge: `${users.length}`,
+      badgeColor: 'bg-[#D4AF37]/20 text-[#D4AF37] font-black border border-[#D4AF37]/40'
     }
   ];
 
-  const allowedSubTabs = subTabs.filter((tab) => hasSubTabAccess(currentRole, 'GESTION', tab.id));
+  const allowedSubTabs = sortSubTabsByFrequency(
+    userId,
+    'GESTION',
+    subTabs.filter((tab) => hasSubTabAccess(currentRole, 'GESTION', tab.id))
+  );
   const isCurrentSubTabAllowed = hasSubTabAccess(currentRole, 'GESTION', activeSubTab);
 
   return (
@@ -116,7 +132,10 @@ export const GestionModule: React.FC<GestionModuleProps> = ({
           return (
             <button
               key={tab.id}
-              onClick={() => setActiveSubTab(tab.id)}
+              onClick={() => {
+                setActiveSubTab(tab.id);
+                recordSectionAccess(userId, 'GESTION', tab.id);
+              }}
               className={`flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl text-xs font-bold transition-all select-none cursor-pointer ${
                 isActive
                   ? 'bg-[#162721] text-emerald-300 shadow-md border border-emerald-500/40 ring-1 ring-emerald-500/20'
@@ -170,6 +189,7 @@ export const GestionModule: React.FC<GestionModuleProps> = ({
             {activeSubTab === 'TITULOS' && <TitulosBachillerView />}
             {activeSubTab === 'MATRICULA' && <MatriculaProsecucionView />}
             {activeSubTab === 'TALLERES_CRP' && <TalleresCRPView />}
+            {activeSubTab === 'USUARIOS' && <UsuariosGestionView />}
           </>
         )}
       </div>

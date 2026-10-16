@@ -26,17 +26,19 @@ import {
   Megaphone,
   Sliders,
   Sparkles,
-  Palette
+  Palette,
+  ShieldCheck
 } from 'lucide-react';
 import { SeasonalAccessoryIcon } from '../auth/LogoSeasonalAccessory';
 import { hasTabAccess, hasSubTabAccess, getUserAllowedLevels, isConsultasOnlyRole, ROLE_METADATA } from '../../utils/rbac';
+import { recordSectionAccess, sortSubTabsByFrequency } from '../../utils/accessTracker';
 
 interface ModernSidebarProps {
   isOpen: boolean;
   activeTab: MainNavigationTab;
   setActiveTab: (tab: MainNavigationTab) => void;
   activeSubTab: string;
-  setActiveSubTab: (subTab: string) => void;
+  setActiveSubTab: (subTab: string, parentTab?: MainNavigationTab) => void;
   onCloseMobile: () => void;
   onGoHome?: () => void;
 }
@@ -150,7 +152,8 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
         { id: 'BLOQUEO', label: 'Bloqueo Administrativo', icon: Lock },
         { id: 'TITULOS', label: 'Títulos de Bachiller', icon: GraduationCap },
         { id: 'MATRICULA', label: 'Matrícula y Prosecución', icon: Layers },
-        { id: 'TALLERES_CRP', label: 'Talleres CRP', icon: Palette }
+        { id: 'TALLERES_CRP', label: 'Talleres CRP', icon: Palette },
+        { id: 'USUARIOS', label: 'Usuarios y Roles', icon: ShieldCheck }
       ]
     },
 
@@ -183,7 +186,7 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
       shortLabel: 'Primaria',
       icon: Layers,
       color: 'text-teal-400',
-      badge: 'Literal A-E',
+      badge: 'Cualitativa (L, EP, I)',
       activeBadgeBg: 'bg-teal-500/20 text-teal-300 border border-teal-500/30',
       activeSubTabStyle: 'bg-teal-500/15 text-teal-200 border-l-2 border-teal-400 font-bold shadow-sm',
       subTabActiveIcon: 'text-teal-300',
@@ -231,16 +234,16 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
       shortLabel: 'Consultas',
       icon: BarChart3,
       color: 'text-cyan-400',
-      badge: currentRole === 'REPRESENTANTE' ? 'Representante' : currentRole === 'ESTUDIANTE' ? 'Alumno' : 'Sábana',
+      badge: currentRole === 'REPRESENTANTE' ? 'Representante' : currentRole === 'ESTUDIANTE' ? 'Alumno' : 'Sábana & UCE',
       activeBadgeBg: 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30',
       activeSubTabStyle: 'bg-cyan-500/15 text-cyan-200 border-l-2 border-cyan-400 font-bold shadow-sm',
       subTabActiveIcon: 'text-cyan-300',
       subTabs: [
-        { id: 'RENDIMIENTO', label: 'Sábana de Calificaciones', icon: FileSpreadsheet },
-        { id: 'BOLETIN', label: 'Boletín Oficial de Notas', icon: GraduationCap },
-        { id: 'ASISTENCIA', label: 'Asistencia y Pases', icon: Clock },
-        { id: 'ESTADISTICAS', label: 'Estadísticas de Rendimiento', icon: BarChart3 },
-        { id: 'NOMINAS', label: 'Expediente Estudiantil', icon: Users }
+        { id: 'RENDIMIENTO', label: 'Sábana & Rendimiento (UCE)', icon: FileSpreadsheet },
+        { id: 'BOLETIN', label: 'Centro de Reportes & Boletines', icon: GraduationCap },
+        { id: 'ASISTENCIA', label: 'Asistencia & Inasistencias LOE', icon: Clock },
+        { id: 'ESTADISTICAS', label: 'Analítica & Semáforo UCE', icon: BarChart3 },
+        { id: 'NOMINAS', label: 'Nóminas, Docentes & Horarios', icon: Users }
       ]
     },
     {
@@ -274,7 +277,6 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
       subTabs: [
         { id: 'LAPSOS', label: 'Años Escolares y Apertura Lapsos', icon: Clock },
         { id: 'ESTRUCTURA', label: 'Estructura de Cursos y Aulas', icon: Layers },
-        { id: 'DOCENTES', label: 'Carga Horaria y Docentes Guías', icon: UserCheck },
         { id: 'TEMAS', label: 'Apariencia y Temas', icon: Palette },
         { id: 'CONFIG_CEO', label: 'Configuración CEO (Académica)', icon: Settings },
         { id: 'AVANZADA', label: 'Conf. Avanzada (CEO / Sistema)', icon: Sliders }
@@ -360,7 +362,8 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
         {/* Navigation Sections */}
         <div className="flex-1 overflow-y-auto no-scrollbar py-4 px-3 space-y-4">
           {(() => {
-            const effectiveUserOrRole = currentUser || currentRole;
+            const effectiveUserOrRole = currentRole;
+            const userId = currentUser?.id || currentUser?.username || currentRole;
             const isConsultasOnly = isConsultasOnlyRole(effectiveUserOrRole);
             const userLevels = getUserAllowedLevels(effectiveUserOrRole, currentUser);
             const visibleSections = navigationSections
@@ -373,7 +376,11 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
               })
               .map((section) => ({
                 ...section,
-                subTabs: section.subTabs.filter((sub) => hasSubTabAccess(effectiveUserOrRole, section.id, sub.id))
+                subTabs: sortSubTabsByFrequency(
+                  userId,
+                  section.id,
+                  section.subTabs.filter((sub) => hasSubTabAccess(effectiveUserOrRole, section.id, sub.id))
+                )
               }));
 
             return visibleSections.map((section, index) => {
@@ -407,7 +414,10 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
 
                 {/* Section Main Tab Header Row */}
                 <div
-                  onClick={() => handleSectionClick(section)}
+                  onClick={() => {
+                    handleSectionClick(section);
+                    recordSectionAccess(userId, section.id);
+                  }}
                   className={`w-full flex items-center justify-between p-2.5 rounded-xl transition-all duration-200 group cursor-pointer select-none ${
                     isSectionActive
                       ? 'bg-gradient-to-r from-[#2C2E53] to-[#252747] text-white shadow-lg border border-[#D4AF37]/40'
@@ -420,6 +430,7 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
                       handleSectionClick(section);
+                      recordSectionAccess(userId, section.id);
                     }
                   }}
                 >
@@ -482,7 +493,8 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
                             if (activeTab !== section.id) {
                               setActiveTab(section.id);
                             }
-                            setActiveSubTab(sub.id);
+                            setActiveSubTab(sub.id, section.id);
+                            recordSectionAccess(userId, section.id, sub.id);
                             if (typeof window !== 'undefined' && window.innerWidth < 1024) {
                               onCloseMobile();
                             }

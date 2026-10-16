@@ -306,7 +306,6 @@ export function getDefaultAvatarForUser(user: {
     name.includes('coordinacion') ||
     name.includes('coordinadora') ||
     name.includes('secretaria') ||
-    name.includes('asistente') ||
     name.includes('profesora') ||
     name.includes('lic.') ||
     name.includes('maria') ||

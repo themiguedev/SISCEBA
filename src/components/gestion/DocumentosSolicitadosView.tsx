@@ -12,14 +12,19 @@ import {
   Send,
   Building,
   User,
-  X
+  X,
+  Printer
 } from 'lucide-react';
+import { OfficialFormatPrintModal, OfficialFormatType } from '../common/OfficialFormatPrintModal';
 
 export const DocumentosSolicitadosView: React.FC = () => {
   const { documentRequests, updateDocumentStatus, addDocumentRequest, students, currentUser } = useApp();
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+  const [printFormatType, setPrintFormatType] = useState<OfficialFormatType>('CONSTANCIA_ESTUDIO');
+  const [printStudent, setPrintStudent] = useState<typeof students[0] | undefined>(undefined);
 
   // Form State
   const [selectedStudentId, setSelectedStudentId] = useState(students[0]?.id || '');
@@ -57,30 +62,49 @@ export const DocumentosSolicitadosView: React.FC = () => {
     setIsCreateModalOpen(false);
   };
 
+  const handlePrintRequest = (req: DocumentRequest) => {
+    const stu = students.find((s) => s.fullName.toLowerCase() === req.studentName.toLowerCase()) || students[0];
+    setPrintStudent(stu);
+    if (req.documentType === 'Carta de Buena Conducta') {
+      setPrintFormatType('CONSTANCIA_CONDUCTA');
+    } else {
+      setPrintFormatType('CONSTANCIA_ESTUDIO');
+    }
+    setIsPrintModalOpen(true);
+  };
+
   return (
     <div className="space-y-6">
       {/* Top Banner */}
       <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-cba-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#D4AF37]"></span>
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
-              Trámites y Secretaría Escolar
-            </span>
-          </div>
-          <h2 className="text-xl font-extrabold text-[#2C2E53] mt-1">Documentos Solicitados</h2>
-          <p className="text-xs text-slate-500">
+          <h2 className="text-xl font-extrabold text-[#2C2E53]">Documentos Solicitados</h2>
+          <p className="text-xs text-slate-500 mt-1">
             ADM: Gestione las solicitudes de constancias, notas certificadas y recaudos con auditoría de días de espera (SLA).
           </p>
         </div>
 
-        <button
-          onClick={() => setIsCreateModalOpen(true)}
-          className="px-4 py-2 rounded-xl bg-[#2C2E53] hover:bg-[#1B1C33] text-[#D4AF37] font-bold text-xs shadow-md transition flex items-center gap-2"
-        >
-          <Plus className="w-4 h-4" />
-          Nueva Solicitud de Trámite
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => {
+              setPrintFormatType('CONSTANCIA_ESTUDIO');
+              setPrintStudent(students[0]);
+              setIsPrintModalOpen(true);
+            }}
+            className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#2C2E53] font-bold text-xs shadow-sm transition flex items-center gap-2 border border-slate-300"
+          >
+            <Printer className="w-4 h-4 text-[#D4AF37]" />
+            Emitir Formato Oficial
+          </button>
+
+          <button
+            onClick={() => setIsCreateModalOpen(true)}
+            className="px-4 py-2 rounded-xl bg-[#2C2E53] hover:bg-[#1B1C33] text-[#D4AF37] font-bold text-xs shadow-md transition flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            Nueva Solicitud de Trámite
+          </button>
+        </div>
       </div>
 
       {/* Filter and Search Bar */}
@@ -185,15 +209,25 @@ export const DocumentosSolicitadosView: React.FC = () => {
                   </select>
                 </td>
                 <td className="py-3 px-4 text-center">
-                  {req.status !== 'ENTREGADO' && (
+                  <div className="flex flex-col items-center gap-1.5 justify-center">
                     <button
-                      onClick={() => updateDocumentStatus(req.id, 'ENTREGADO')}
-                      className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] shadow-sm transition flex items-center gap-1 mx-auto"
+                      onClick={() => handlePrintRequest(req)}
+                      className="px-2.5 py-1 rounded-lg bg-[#2C2E53] hover:bg-[#1B1C33] text-[#D4AF37] font-bold text-[10px] shadow-sm transition flex items-center gap-1 mx-auto"
+                      title="Visualizar e Imprimir Formato Oficial CBA"
                     >
-                      <CheckCircle2 className="w-3 h-3" />
-                      Marcar Entregado
+                      <Printer className="w-3 h-3" />
+                      Imprimir Formato
                     </button>
-                  )}
+                    {req.status !== 'ENTREGADO' && (
+                      <button
+                        onClick={() => updateDocumentStatus(req.id, 'ENTREGADO')}
+                        className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] shadow-sm transition flex items-center gap-1 mx-auto"
+                      >
+                        <CheckCircle2 className="w-3 h-3" />
+                        Marcar Entregado
+                      </button>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}
@@ -303,6 +337,16 @@ export const DocumentosSolicitadosView: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* MODAL DE IMPRESIÓN DE FORMATOS OFICIALES */}
+      <OfficialFormatPrintModal
+        isOpen={isPrintModalOpen}
+        onClose={() => setIsPrintModalOpen(false)}
+        formatType={printFormatType}
+        student={printStudent}
+        studentsList={students}
+        onSelectStudent={(st) => setPrintStudent(st)}
+      />
     </div>
   );
 };

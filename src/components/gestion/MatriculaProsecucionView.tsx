@@ -114,7 +114,7 @@ export const MatriculaProsecucionView: React.FC = () => {
 
     sendNotification({
       title: 'Prosecución Escolar y Matriculación Formalizada',
-      message: `Se trasladaron y promovieron ${count} estudiante(s) desde ${selectedOriginGrade} hacia ${targetGrade} "${targetSection}". Expedientes sincronizados en Supabase.`,
+      message: `Se trasladaron y promovieron ${count} estudiante(s) desde ${selectedOriginGrade} hacia ${targetGrade} "${targetSection}". Expedientes sincronizados en la Base de Datos.`,
       category: 'INSTITUCIONAL',
       priority: 'ALTA',
       recipientRole: 'TODOS',
@@ -172,13 +172,7 @@ export const MatriculaProsecucionView: React.FC = () => {
       {/* Top Banner */}
       <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-cba-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#D4AF37]"></span>
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
-              Gestión Administrativa y Promoción Académica
-            </span>
-          </div>
-          <h2 className="text-xl font-extrabold text-[#2C2E53] mt-1">
+          <h2 className="text-xl font-extrabold text-[#2C2E53]">
             Prosecución y Matriculación de Estudiantes
           </h2>
           <p className="text-xs text-slate-500 max-w-3xl">
@@ -208,11 +202,11 @@ export const MatriculaProsecucionView: React.FC = () => {
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
             <span>
-              ¡Prosecución y matriculación ejecutada con éxito! Se promovieron <strong>{successCount} estudiante(s)</strong> hacia <strong>{targetGrade} "{targetSection}"</strong> y se actualizaron sus expedientes en la nube.
+              ¡Prosecución y matriculación ejecutada con éxito! Se promovieron <strong>{successCount} estudiante(s)</strong> hacia <strong>{targetGrade} "{targetSection}"</strong> y se actualizaron sus expedientes.
             </span>
           </div>
           <span className="text-[10px] uppercase font-black px-2 py-0.5 rounded bg-emerald-200 text-emerald-950">
-            Actualizado en Supabase
+            Actualizado en Base de Datos
           </span>
         </div>
       )}

@@ -12,6 +12,8 @@ dist
 dist-ssr
 *.local
 backup_v1/
+.local_db/
+*.zip
 .env
 .env.*
 !.env.example
@@ -26,3 +28,9 @@ backup_v1/
 *.njsproj
 *.sln
 *.sw?
+
+# Temporary and binary files
+supabase/.temp/
+tools/bin/
+*.exe
+

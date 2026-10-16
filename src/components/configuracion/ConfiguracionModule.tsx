@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { useTheme, THEMES_CATALOG, ThemePalette } from '../../context/ThemeContext';
-import { UserRole, EducationalLevel } from '../../types';
+import { useTheme } from '../../context/ThemeContext';
+import { LapsoConfig } from '../../types';
 import {
   Settings,
   Calendar,
@@ -11,11 +11,6 @@ import {
   AlertTriangle,
   School,
   Clock,
-  UserCheck,
-  UserPlus,
-  User,
-  Mail,
-  ShieldCheck,
   Layers,
   Save,
   Palette,
@@ -27,21 +22,18 @@ import {
   BookOpen,
   Check,
   RotateCcw,
-  ShieldX,
-  Key,
-  Copy,
-  Trash2,
-  SlidersHorizontal
+  SlidersHorizontal,
+  X,
+  ShieldCheck,
+  Edit3
 } from 'lucide-react';
-import { hasSubTabAccess, canConfigureSchool, ROLE_METADATA, normalizeCedulaUsername } from '../../utils/rbac';
-import { getDefaultAvatarForUser } from '../../utils/avatarCatalog';
-import { PasswordStrengthBar } from '../common/PasswordStrengthBar';
+import { hasSubTabAccess, canConfigureSchool } from '../../utils/rbac';
 import { ConfiguracionAvanzadaView } from './ConfiguracionAvanzadaView';
 import { ConfiguracionGeneralCEOView } from './ConfiguracionGeneralCEOView';
 
 interface ConfiguracionModuleProps {
-  activeSubTab?: 'LAPSOS' | 'ESTRUCTURA' | 'DOCENTES' | 'TEMAS' | 'CONFIG_CEO' | 'AVANZADA';
-  setActiveSubTab?: (subTab: 'LAPSOS' | 'ESTRUCTURA' | 'DOCENTES' | 'TEMAS' | 'CONFIG_CEO' | 'AVANZADA') => void;
+  activeSubTab?: 'LAPSOS' | 'ESTRUCTURA' | 'TEMAS' | 'CONFIG_CEO' | 'AVANZADA';
+  setActiveSubTab?: (subTab: 'LAPSOS' | 'ESTRUCTURA' | 'TEMAS' | 'CONFIG_CEO' | 'AVANZADA') => void;
 }
 
 export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
@@ -51,15 +43,12 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
   const {
     schoolYearConfig,
     toggleLapsoGrading,
+    updateLapsoConfig,
+    getLapsoGradingStatus,
     isLapsoOpenForGrading,
     activeLapso,
     currentRole,
-    currentUser,
-    users,
-    addUser,
-    registrationCodes,
-    createRegistrationCode,
-    deleteRegistrationCode
+    currentUser
   } = useApp();
   const {
     mode,
@@ -70,102 +59,18 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
     themesCatalog
   } = useTheme();
 
-  // Estados para códigos de registro generados por admin
-  const [copiedCodeId, setCopiedCodeId] = useState<string | null>(null);
-  const [selectedRoleForCode, setSelectedRoleForCode] = useState<'DOCENTE' | 'ASISTENTE' | 'SECRETARIA'>('DOCENTE');
-
-  // Estados para el formulario de nuevo usuario / docente
-  const [showRegisterForm, setShowRegisterForm] = useState(false);
-  const [newFullName, setNewFullName] = useState('');
-  const [newUsername, setNewUsername] = useState('');
-  const [newEmail, setNewEmail] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [newRole, setNewRole] = useState<UserRole>('DOCENTE');
-  const [newGender, setNewGender] = useState<'MASCULINO' | 'FEMENINO'>('FEMENINO');
-  const [newSelectedLevels, setNewSelectedLevels] = useState<EducationalLevel[]>(['MEDIA_GENERAL']);
-  const [newDefaultLevel, setNewDefaultLevel] = useState<EducationalLevel>('MEDIA_GENERAL');
-  const [newAdditionalRoles, setNewAdditionalRoles] = useState<UserRole[]>([]);
-
-  const toggleAdditionalRole = (role: UserRole) => {
-    setNewAdditionalRoles(prev => {
-      if (prev.includes(role)) {
-        return prev.filter(r => r !== role);
-      }
-      return [...prev, role];
-    });
-  };
-
-  const toggleNewUserLevel = (lvl: EducationalLevel) => {
-    setNewSelectedLevels(prev => {
-      let next: EducationalLevel[];
-      if (prev.includes(lvl)) {
-        if (prev.length === 1) return prev;
-        next = prev.filter(l => l !== lvl);
-      } else {
-        next = [...prev, lvl];
-      }
-      if (!next.includes(newDefaultLevel)) {
-        setNewDefaultLevel(next[0]);
-      }
-      return next;
-    });
-  };
-
-  const handleRegisterUser = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newFullName.trim() || !newUsername.trim() || !newEmail.trim() || !newPassword.trim()) {
-      return;
-    }
-
-    const defaultAvatar = getDefaultAvatarForUser({
-      gender: newGender,
-      role: newRole,
-      fullName: newFullName.trim()
-    });
-
-    let cleanUsername = newUsername.trim().toLowerCase();
-    if (newRole === 'REPRESENTANTE' || newRole === 'ESTUDIANTE' || cleanUsername.startsWith('v-') || cleanUsername.startsWith('e-') || /^[0-9]+$/.test(cleanUsername)) {
-      cleanUsername = normalizeCedulaUsername(cleanUsername) || cleanUsername;
-    }
-
-    await addUser({
-      fullName: newFullName.trim(),
-      username: cleanUsername,
-      email: newEmail.trim().toLowerCase(),
-      password: newPassword,
-      role: newRole,
-      roles: newAdditionalRoles.filter(r => r !== newRole),
-      gender: newGender,
-      defaultLevel: newDefaultLevel,
-      allowedLevels: newSelectedLevels,
-      active: true,
-      avatarUrl: defaultAvatar
-    });
-
-    setNewFullName('');
-    setNewUsername('');
-    setNewEmail('');
-    setNewPassword('');
-    setNewGender('FEMENINO');
-    setNewAdditionalRoles([]);
-    setNewSelectedLevels(['MEDIA_GENERAL']);
-    setNewDefaultLevel('MEDIA_GENERAL');
-    setShowRegisterForm(false);
-    handleSaveSettings();
-  };
-  
-  const allowedTabs = (['LAPSOS', 'ESTRUCTURA', 'DOCENTES', 'TEMAS', 'CONFIG_CEO', 'AVANZADA'] as const).filter(
+  const allowedTabs = (['LAPSOS', 'ESTRUCTURA', 'TEMAS', 'CONFIG_CEO', 'AVANZADA'] as const).filter(
     (t) => hasSubTabAccess(currentRole, 'CONFIGURACION', t)
   );
 
-  const [internalActiveTab, setInternalActiveTab] = useState<'LAPSOS' | 'ESTRUCTURA' | 'DOCENTES' | 'TEMAS' | 'CONFIG_CEO' | 'AVANZADA'>(() => {
+  const [internalActiveTab, setInternalActiveTab] = useState<'LAPSOS' | 'ESTRUCTURA' | 'TEMAS' | 'CONFIG_CEO' | 'AVANZADA'>(() => {
     return allowedTabs[0] || 'TEMAS';
   });
 
   const requestedTab = activeSubTab || internalActiveTab;
   const activeTab = allowedTabs.includes(requestedTab) ? requestedTab : (allowedTabs[0] || 'TEMAS');
 
-  const setActiveTab = (tab: 'LAPSOS' | 'ESTRUCTURA' | 'DOCENTES' | 'TEMAS' | 'CONFIG_CEO' | 'AVANZADA') => {
+  const setActiveTab = (tab: 'LAPSOS' | 'ESTRUCTURA' | 'TEMAS' | 'CONFIG_CEO' | 'AVANZADA') => {
     if (!allowedTabs.includes(tab)) return;
     if (setActiveSubTab) {
       setActiveSubTab(tab);
@@ -173,6 +78,29 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
     setInternalActiveTab(tab);
   };
   const [saveBanner, setSaveBanner] = useState(false);
+  const [editingLapso, setEditingLapso] = useState<LapsoConfig | null>(null);
+  const [editDeadlineDate, setEditDeadlineDate] = useState<string>('');
+  const [editDeadlineTime, setEditDeadlineTime] = useState<string>('23:59');
+  const [editAutoLock, setEditAutoLock] = useState<boolean>(true);
+
+  const handleOpenEditLapso = (lapso: LapsoConfig) => {
+    setEditingLapso(lapso);
+    setEditDeadlineDate(lapso.deadlineDate || lapso.endDate || '');
+    setEditDeadlineTime(lapso.deadlineTime || '23:59');
+    setEditAutoLock(lapso.autoLockEnabled ?? true);
+  };
+
+  const handleSaveLapsoDeadline = () => {
+    if (!editingLapso) return;
+    updateLapsoConfig(editingLapso.lapso, {
+      deadlineDate: editDeadlineDate,
+      deadlineTime: editDeadlineTime,
+      autoLockEnabled: editAutoLock
+    });
+    setEditingLapso(null);
+    setSaveBanner(true);
+    setTimeout(() => setSaveBanner(false), 3000);
+  };
 
   const handleSaveSettings = () => {
     setSaveBanner(true);
@@ -184,13 +112,7 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
       {/* Top Header */}
       <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-cba-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-slate-700"></span>
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
-              Parámetros y Control del Sistema
-            </span>
-          </div>
-          <h2 className="text-xl font-extrabold text-[#2C2E53] mt-1">Configuración Institucional</h2>
+          <h2 className="text-xl font-extrabold text-[#2C2E53]">Configuración Institucional</h2>
           <p className="text-xs text-slate-500">
             ADM: Administración de años escolares, apertura y bloqueo de ventanas evaluativas de lapso y catálogo escolar.
           </p>
@@ -222,19 +144,6 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
             >
               <Layers className={`w-3.5 h-3.5 shrink-0 ${activeTab === 'ESTRUCTURA' ? 'text-[#D4AF37]' : 'text-slate-400'}`} />
               <span>Grados y Secciones</span>
-            </button>
-          )}
-          {allowedTabs.includes('DOCENTES') && (
-            <button
-              onClick={() => setActiveTab('DOCENTES')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                activeTab === 'DOCENTES'
-                  ? 'bg-[#1B1C33] text-[#D4AF37] shadow-sm border border-[#D4AF37]/40 ring-1 ring-[#D4AF37]/30'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/50'
-              }`}
-            >
-              <UserCheck className={`w-3.5 h-3.5 shrink-0 ${activeTab === 'DOCENTES' ? 'text-[#D4AF37]' : 'text-slate-400'}`} />
-              <span>Carga Horaria y Docentes</span>
             </button>
           )}
           {allowedTabs.includes('TEMAS') && (
@@ -289,38 +198,55 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
       {/* VIEW 1: LAPSOS Y REGLA DE BLOQUEO TEMPORAL */}
       {activeTab === 'LAPSOS' && (
         <div className="space-y-6">
-          {/* Regla de negocio banner */}
-          <div
-            className={`p-4 rounded-xl border text-xs leading-relaxed flex items-start gap-3 transition-colors ${
-              isLapsoOpenForGrading
-                ? 'bg-emerald-50/70 border-emerald-200 text-emerald-950'
-                : 'bg-rose-50 border-rose-300 text-rose-950'
-            }`}
-          >
-            {isLapsoOpenForGrading ? (
-              <Unlock className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
-            ) : (
-              <Lock className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
-            )}
-            <div>
-              <span className="font-extrabold block text-sm mb-0.5">
-                Estado del Lapso {activeLapso}:{' '}
-                {isLapsoOpenForGrading ? 'HABILITADO PARA CARGA DOCENTE' : 'BLOQUEADO PARA CARGA'}
-              </span>
-              {isLapsoOpenForGrading ? (
-                <span>
-                  Los docentes pueden asentar calificaciones, literales e indicadores de logro normalmente en sus planillas.
-                </span>
-              ) : (
-                <span className="font-bold text-rose-700">
-                  Regla de negocio activa: Los docentes verán el banner de restricción reglamentario: <br />
-                  <code className="bg-rose-100 px-1.5 py-0.5 rounded font-mono font-black text-rose-900 text-[11px] mt-1 inline-block">
-                    ⛔ "No existen lapsos habilitados para la carga de registros."
-                  </code>
-                </span>
-              )}
-            </div>
-          </div>
+          {/* Regla de negocio banner evaluado en vivo */}
+          {(() => {
+            const currentLapsoStatus = getLapsoGradingStatus(activeLapso);
+            return (
+              <div
+                className={`p-4 rounded-xl border text-xs leading-relaxed flex items-start gap-3 transition-colors ${
+                  currentLapsoStatus.isOpen
+                    ? 'bg-emerald-50/70 border-emerald-200 text-emerald-950'
+                    : 'bg-rose-50 border-rose-300 text-rose-950'
+                }`}
+              >
+                {currentLapsoStatus.isOpen ? (
+                  <Unlock className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                ) : (
+                  <Lock className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+                )}
+                <div>
+                  <span className="font-extrabold block text-sm mb-0.5">
+                    Estado del Lapso {activeLapso}:{' '}
+                    {currentLapsoStatus.isOpen ? 'HABILITADO PARA CARGA DOCENTE' : 'BLOQUEADO PARA CARGA'}
+                  </span>
+                  {currentLapsoStatus.isOpen ? (
+                    <div>
+                      <span>
+                        Los docentes pueden asentar calificaciones, literales e indicadores de logro normalmente en sus planillas.
+                      </span>
+                      {currentLapsoStatus.deadlineStr && (
+                        <p className="mt-1 font-bold text-emerald-800 flex items-center gap-1.5">
+                          <Clock className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>Cierre programado automático: {currentLapsoStatus.deadlineStr}</span>
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="space-y-1">
+                      <span className="font-bold text-rose-700">
+                        Regla de negocio activa: Los docentes verán el banner de restricción reglamentario e inhabilitación de edición:
+                      </span>
+                      <code className="bg-rose-100 px-2 py-1 rounded font-mono font-black text-rose-900 text-[11px] block mt-0.5">
+                        ⛔ {currentLapsoStatus.isExpiredByDeadline
+                          ? `Plazo finalizado automáticamente el ${currentLapsoStatus.deadlineStr}. Edición bloqueada.`
+                          : 'No existen lapsos habilitados para la carga de registros por disposición de la Dirección.'}
+                      </code>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
 
           <div className="bg-white rounded-2xl border border-slate-200 shadow-cba-card overflow-hidden">
             <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
@@ -330,7 +256,7 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
                   Periodo Lectivo Activo: {schoolYearConfig.year}
                 </h3>
               </div>
-              <span className="text-xs text-slate-400 font-semibold">3 Lapsos Pedagógicos</span>
+              <span className="text-xs text-slate-400 font-semibold">3 Lapsos Pedagógicos CBA</span>
             </div>
 
             <div className="overflow-x-auto">
@@ -338,62 +264,183 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
               <thead className="bg-[#1B1C33] text-white uppercase text-[10px] tracking-wider font-extrabold">
                 <tr>
                   <th className="py-3.5 px-4">Lapso Académico</th>
-                  <th className="py-3.5 px-4">Fecha de Inicio</th>
-                  <th className="py-3.5 px-4">Fecha de Cierre</th>
-                  <th className="py-3.5 px-4 text-center">Ventana de Carga de Notas</th>
-                  <th className="py-3.5 px-4 text-center">Acción</th>
+                  <th className="py-3.5 px-4">Periodo Oficial</th>
+                  <th className="py-3.5 px-4">Cierre Programado</th>
+                  <th className="py-3.5 px-4 text-center">Estado del Libro Digital</th>
+                  <th className="py-3.5 px-4 text-center">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">
-                {schoolYearConfig.lapsos.map((l) => (
-                  <tr key={l.lapso} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-3.5 px-4">
-                      <p className="font-bold text-slate-900">{l.name}</p>
-                      {activeLapso === l.lapso && (
-                        <span className="text-[10px] text-[#D4AF37] font-extrabold block">
-                          ● Lapso en curso en interfaz
-                        </span>
-                      )}
-                    </td>
-                    <td className="py-3.5 px-4 font-mono">{l.startDate}</td>
-                    <td className="py-3.5 px-4 font-mono">{l.endDate}</td>
-                    <td className="py-3.5 px-4 text-center">
-                      {l.isGradingOpen ? (
-                        <span className="px-3 py-1 rounded-full text-[11px] font-extrabold bg-emerald-100 text-emerald-800 inline-flex items-center gap-1">
-                          <Unlock className="w-3 h-3" />
-                          Habilitado / Abierto
-                        </span>
-                      ) : (
-                        <span className="px-3 py-1 rounded-full text-[11px] font-extrabold bg-rose-100 text-rose-800 inline-flex items-center gap-1">
-                          <Lock className="w-3 h-3" />
-                          Cerrado / Bloqueado
-                        </span>
-                      )}
-                    </td>
-                    <td className="py-3.5 px-4 text-center">
-                      {canConfigureSchool(currentUser || currentRole) ? (
-                        <button
-                          onClick={() => toggleLapsoGrading(l.lapso)}
-                          className={`px-3 py-1.5 rounded-xl font-bold text-xs transition shadow-sm ${
-                            l.isGradingOpen
-                              ? 'bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200'
-                              : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
-                          }`}
-                        >
-                          {l.isGradingOpen ? 'Cerrar Lapso' : 'Abrir para Carga'}
-                        </button>
-                      ) : (
-                        <span className="text-[11px] text-slate-400 italic">
-                          Solo Dirección
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                {schoolYearConfig.lapsos.map((l) => {
+                  const status = getLapsoGradingStatus(l.lapso);
+                  return (
+                    <tr key={l.lapso} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-3.5 px-4">
+                        <p className="font-bold text-slate-900">{l.name}</p>
+                        {activeLapso === l.lapso && (
+                          <span className="text-[10px] text-[#D4AF37] font-extrabold block">
+                            ● Lapso en curso en interfaz
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-4 font-mono text-[11px] text-slate-600">
+                        {l.startDate} al {l.endDate}
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <div className="space-y-0.5">
+                          <div className="flex items-center gap-1 font-mono text-[11px] text-slate-800">
+                            <Calendar className="w-3 h-3 text-[#D4AF37]" />
+                            <span>{l.deadlineDate || l.endDate}</span>
+                            <span className="text-slate-400 font-sans">•</span>
+                            <Clock className="w-3 h-3 text-slate-400" />
+                            <span>{l.deadlineTime || '23:59'}</span>
+                          </div>
+                          <span className={`inline-block px-1.5 py-0.2 rounded text-[9px] font-bold ${
+                            l.autoLockEnabled ?? true
+                              ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                              : 'bg-slate-100 text-slate-500'
+                          }`}>
+                            {l.autoLockEnabled ?? true ? '⚡ Bloqueo Automático Activo' : 'Manual'}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-3.5 px-4 text-center">
+                        {status.isOpen ? (
+                          <span className="px-3 py-1 rounded-full text-[11px] font-extrabold bg-emerald-100 text-emerald-800 inline-flex items-center gap-1 shadow-2xs">
+                            <Unlock className="w-3 h-3" />
+                            Habilitado / Abierto
+                          </span>
+                        ) : status.isExpiredByDeadline ? (
+                          <span className="px-3 py-1 rounded-full text-[11px] font-extrabold bg-amber-100 text-amber-900 inline-flex items-center gap-1 shadow-2xs">
+                            <Clock className="w-3 h-3 text-amber-700" />
+                            Plazo Vencido (Automático)
+                          </span>
+                        ) : (
+                          <span className="px-3 py-1 rounded-full text-[11px] font-extrabold bg-rose-100 text-rose-800 inline-flex items-center gap-1 shadow-2xs">
+                            <Lock className="w-3 h-3" />
+                            Cerrado Manualmente
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-4 text-center">
+                        <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                          {canConfigureSchool(currentRole) && (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => toggleLapsoGrading(l.lapso)}
+                                className={`px-2.5 py-1.5 rounded-xl font-bold text-xs transition shadow-xs cursor-pointer ${
+                                  l.isGradingOpen
+                                    ? 'bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200'
+                                    : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
+                                }`}
+                                title="Conmutar estado manual de carga"
+                              >
+                                {l.isGradingOpen ? 'Cerrar' : 'Abrir'}
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => handleOpenEditLapso(l)}
+                                className="px-2.5 py-1.5 rounded-xl font-bold text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition shadow-xs flex items-center gap-1 cursor-pointer"
+                                title="Configurar fecha y hora límite de cierre"
+                              >
+                                <Edit3 className="w-3 h-3 text-[#D4AF37]" />
+                                <span>Configurar Plazo</span>
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
             </div>
           </div>
+
+          {/* Modal de Configuración de Cierre Programado */}
+          {editingLapso && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
+              <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-2xl p-6 space-y-5">
+                <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-5 h-5 text-[#D4AF37]" />
+                    <h3 className="font-black text-sm text-[#2C2E53] dark:text-white">
+                      Configurar Cierre Programado
+                    </h3>
+                  </div>
+                  <button
+                    onClick={() => setEditingLapso(null)}
+                    className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <div className="space-y-4 text-xs">
+                  <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
+                    <strong className="block text-slate-900 dark:text-white text-xs">{editingLapso.name}</strong>
+                    <span className="text-[11px] text-slate-500">
+                      Al llegar la fecha y hora seleccionada, el libro digital se bloqueará automáticamente a todos los docentes sin intervención manual.
+                    </span>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="font-bold text-slate-700 dark:text-slate-300">Fecha Límite de Cierre:</label>
+                    <input
+                      type="date"
+                      value={editDeadlineDate}
+                      onChange={(e) => setEditDeadlineDate(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono text-xs focus:ring-2 focus:ring-[#2C2E53] outline-none"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="font-bold text-slate-700 dark:text-slate-300">Hora Límite de Cierre (24h):</label>
+                    <input
+                      type="time"
+                      value={editDeadlineTime}
+                      onChange={(e) => setEditDeadlineTime(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono text-xs focus:ring-2 focus:ring-[#2C2E53] outline-none"
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-1">
+                    <input
+                      type="checkbox"
+                      id="check-auto-lock"
+                      checked={editAutoLock}
+                      onChange={(e) => setEditAutoLock(e.target.checked)}
+                      className="w-4 h-4 rounded text-[#2C2E53] focus:ring-[#2C2E53] cursor-pointer"
+                    />
+                    <label htmlFor="check-auto-lock" className="font-bold text-slate-800 dark:text-slate-200 cursor-pointer">
+                      Habilitar Bloqueo Automático al vencer el plazo
+                    </label>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                  <button
+                    type="button"
+                    onClick={() => setEditingLapso(null)}
+                    className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs transition cursor-pointer"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSaveLapsoDeadline}
+                    className="px-5 py-2 rounded-xl bg-[#2C2E53] hover:bg-[#1B1C33] text-[#D4AF37] font-black text-xs shadow-md transition cursor-pointer flex items-center gap-1.5"
+                  >
+                    <Save className="w-3.5 h-3.5" />
+                    <span>Guardar Plazo</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -434,535 +481,6 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
                 <li>• 4to Año y 5to Año (A, B)</li>
                 <li>• Escala Numérica 01 a 20</li>
               </ul>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* VIEW 3: DOCENTES Y REGISTRO DE PERSONAL */}
-      {activeTab === 'DOCENTES' && (
-        <div className="space-y-6">
-          {/* Header y Formulario de Registro de Nuevos Docentes / Usuarios */}
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-cba-card space-y-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4 gap-3">
-              <div>
-                <h3 className="font-extrabold text-base text-[#2C2E53] dark:text-white flex items-center gap-2">
-                  <UserPlus className="w-5 h-5 text-[#D4AF37]" />
-                  Registro Institucional de Nuevos Docentes y Personal
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                  Módulo administrativo para dar de alta cuentas docentes, asignación de rol, correo institucional y credenciales de acceso.
-                </p>
-              </div>
-
-              {canConfigureSchool(currentUser || currentRole) && (
-                <button
-                  onClick={() => setShowRegisterForm(!showRegisterForm)}
-                  className="px-4 py-2 bg-[#2C2E53] hover:bg-[#1B1C33] text-[#D4AF37] font-bold text-xs rounded-xl shadow-md transition flex items-center gap-2 shrink-0"
-                >
-                  <UserPlus className="w-4 h-4" />
-                  {showRegisterForm ? 'Ocultar Formulario' : '+ Registrar Nuevo Usuario / Docente'}
-                </button>
-              )}
-            </div>
-
-            {/* Formulario Desplegable de Registro */}
-            {showRegisterForm && canConfigureSchool(currentUser || currentRole) && (
-              <form onSubmit={handleRegisterUser} className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4 animate-in fade-in duration-200">
-                <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
-                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                  <span className="text-xs font-black uppercase tracking-wider text-slate-700">
-                    Datos de la Nueva Cuenta Institucional
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-xs">
-                  <div>
-                    <label className="block font-bold text-slate-700 mb-1">Nombre Completo *</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="Ej: Prof. Roberto Carlos Mendoza"
-                      value={newFullName}
-                      onChange={(e) => setNewFullName(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#2C2E53] focus:border-transparent outline-none font-medium"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold text-slate-700 mb-1">
-                      Nombre de Usuario *
-                      {(newRole === 'REPRESENTANTE' || newRole === 'ESTUDIANTE') && (
-                        <span className="text-[10px] text-amber-700 font-normal ml-1">
-                          (Usar Cédula de Identidad)
-                        </span>
-                      )}
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder={newRole === 'REPRESENTANTE' || newRole === 'ESTUDIANTE' ? "Ej: V-18452991 ó 18452991" : "Ej: rmendoza"}
-                      value={newUsername}
-                      onChange={(e) => setNewUsername(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#2C2E53] focus:border-transparent outline-none font-medium"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold text-slate-700 mb-1">Correo Institucional *</label>
-                    <input
-                      type="email"
-                      required
-                      placeholder="Ej: rmendoza@bellasartes.edu.ve"
-                      value={newEmail}
-                      onChange={(e) => setNewEmail(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#2C2E53] focus:border-transparent outline-none font-medium"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold text-slate-700 mb-1">Contraseña Inicial *</label>
-                    <input
-                      type="password"
-                      required
-                      placeholder="Contraseña segura"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#2C2E53] focus:border-transparent outline-none font-medium"
-                    />
-                    <PasswordStrengthBar
-                      password={newPassword}
-                      onGeneratePassword={(gen: string) => setNewPassword(gen)}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold text-slate-700 mb-1">Rol Principal *</label>
-                    <select
-                      value={newRole}
-                      onChange={(e) => {
-                        const r = e.target.value as UserRole;
-                        setNewRole(r);
-                        setNewAdditionalRoles(prev => prev.filter(ar => ar !== r));
-                      }}
-                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#2C2E53] focus:border-transparent outline-none font-bold"
-                    >
-                      <option value="DOCENTE">DOCENTE (Profesor Titular / Guía)</option>
-                      <option value="ASISTENTE">ASISTENTE (Asistencia y Disciplina)</option>
-                      <option value="SECRETARIA">SECRETARIA (Control de Estudios / Matrícula)</option>
-                      <option value="COORDINACION">COORDINACION (Control de Estudios)</option>
-                      <option value="DIRECTOR">DIRECTOR (Dirección General)</option>
-                      <option value="ADMINISTRADOR">ADMINISTRADOR (Administrador)</option>
-                      <option value="REPRESENTANTE">REPRESENTANTE (Padre / Tutor Legal)</option>
-                      <option value="ESTUDIANTE">ESTUDIANTE (Estudiante Regular)</option>
-                    </select>
-                  </div>
-
-                  {/* Asignación de Roles Múltiples / Funciones Adicionales */}
-                  <div className="md:col-span-3 space-y-2 bg-amber-500/10 p-3 rounded-xl border border-amber-400/40">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <label className="block font-bold text-slate-900 text-xs sm:text-sm">
-                          Funciones o Roles Adicionales Simultáneos (Agrupación de Privilegios)
-                        </label>
-                        <p className="text-[11px] text-slate-600">
-                          Seleccione si este miembro cumple funciones complementarias (ej. es Docente y a la vez Representante o Secretaria). El sistema agrupará todos sus privilegios automáticamente.
-                        </p>
-                      </div>
-                      <span className="text-[10px] font-bold text-amber-900 bg-amber-200/80 px-2 py-0.5 rounded-full border border-amber-300 shrink-0">
-                        {newAdditionalRoles.length} adicionales
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
-                      {(['DOCENTE', 'SECRETARIA', 'ASISTENTE', 'REPRESENTANTE', 'COORDINACION'] as UserRole[])
-                        .filter(r => r !== newRole)
-                        .map(r => {
-                          const isChecked = newAdditionalRoles.includes(r);
-                          return (
-                            <button
-                              type="button"
-                              key={r}
-                              onClick={() => toggleAdditionalRole(r)}
-                              className={`p-2 rounded-xl border text-left transition flex items-center justify-between gap-1.5 cursor-pointer ${
-                                isChecked
-                                  ? 'bg-[#1B1C33] text-[#D4AF37] border-[#D4AF37] shadow-xs'
-                                  : 'bg-white text-slate-700 border-slate-300 hover:border-slate-400'
-                              }`}
-                            >
-                              <div className="min-w-0">
-                                <span className="text-xs font-bold block truncate">{r}</span>
-                                <span className="text-[9px] block text-slate-400 dark:text-slate-400 truncate">
-                                  {r === 'REPRESENTANTE'
-                                    ? 'Acudiente'
-                                    : r === 'SECRETARIA'
-                                    ? 'Estudios'
-                                    : r === 'ASISTENTE'
-                                    ? 'Asistencia'
-                                    : r === 'DOCENTE'
-                                    ? 'Aula'
-                                    : 'Coordinación'}
-                                </span>
-                              </div>
-                              <div
-                                className={`w-4 h-4 rounded-md flex items-center justify-center shrink-0 border ${
-                                  isChecked
-                                    ? 'bg-[#D4AF37] text-slate-950 border-[#D4AF37]'
-                                    : 'border-slate-300 bg-slate-50'
-                                }`}
-                              >
-                                {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
-                              </div>
-                            </button>
-                          );
-                        })}
-                    </div>
-                  </div>
-
-                  {/* Subsistemas / Niveles Educativos Asignados */}
-                  <div className="md:col-span-2 space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
-                    <div className="flex items-center justify-between">
-                      <label className="block font-bold text-slate-800 text-xs sm:text-sm">
-                        Subsistemas / Niveles Educativos Asignados *
-                      </label>
-                      <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200">
-                        {newSelectedLevels.length} {newSelectedLevels.length === 1 ? 'nivel seleccionado' : 'niveles seleccionados'}
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                      {[
-                        {
-                          id: 'MEDIA_GENERAL' as EducationalLevel,
-                          title: 'Media General',
-                          scale: '01 a 20 pts',
-                          icon: GraduationCap
-                        },
-                        {
-                          id: 'PRIMARIA' as EducationalLevel,
-                          title: 'Primaria',
-                          scale: 'Literal A-E',
-                          icon: Layers
-                        },
-                        {
-                          id: 'INICIAL' as EducationalLevel,
-                          title: 'Inicial',
-                          scale: 'Cualitativa L/EP/I',
-                          icon: BookOpen
-                        }
-                      ].map((item) => {
-                        const isChecked = newSelectedLevels.includes(item.id);
-                        const Icon = item.icon;
-                        return (
-                          <button
-                            type="button"
-                            key={item.id}
-                            onClick={() => toggleNewUserLevel(item.id)}
-                            className={`p-2 rounded-xl border text-left transition flex items-center justify-between gap-2 cursor-pointer ${
-                              isChecked
-                                ? 'bg-[#1B1C33] text-white border-[#D4AF37] shadow-sm'
-                                : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
-                            }`}
-                          >
-                            <div className="flex items-center gap-2 min-w-0">
-                              <div
-                                className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
-                                  isChecked
-                                    ? 'bg-[#D4AF37]/20 text-[#D4AF37]'
-                                    : 'bg-slate-100 text-slate-500'
-                                }`}
-                              >
-                                <Icon className="w-4 h-4" />
-                              </div>
-                              <div className="min-w-0">
-                                <p className={`text-xs font-bold truncate ${isChecked ? 'text-white' : 'text-slate-800'}`}>
-                                  {item.title}
-                                </p>
-                                <p className={`text-[10px] truncate ${isChecked ? 'text-[#D4AF37]' : 'text-slate-400'}`}>
-                                  {item.scale}
-                                </p>
-                              </div>
-                            </div>
-
-                            <div
-                              className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 border ${
-                                isChecked
-                                  ? 'bg-[#D4AF37] border-[#D4AF37] text-slate-950'
-                                  : 'border-slate-300 bg-white'
-                              }`}
-                            >
-                              {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    <div className="pt-2 border-t border-slate-200/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                      <label className="block text-xs font-bold text-slate-700">
-                        Nivel Educativo Principal al Iniciar Sesión:
-                      </label>
-                      <select
-                        value={newDefaultLevel}
-                        onChange={(e) => setNewDefaultLevel(e.target.value as EducationalLevel)}
-                        className="px-3 py-1.5 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#2C2E53] outline-none font-bold text-xs text-slate-800 shrink-0"
-                      >
-                        {newSelectedLevels.map((lvl) => (
-                          <option key={lvl} value={lvl}>
-                            {lvl === 'MEDIA_GENERAL'
-                              ? 'Media General (01-20 pts)'
-                              : lvl === 'PRIMARIA'
-                              ? 'Educación Primaria'
-                              : 'Educación Inicial'}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block font-bold text-slate-700 mb-1">Sexo / Género (Avatar Predeterminado) *</label>
-                    <select
-                      value={newGender}
-                      onChange={(e) => setNewGender(e.target.value as 'MASCULINO' | 'FEMENINO')}
-                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#2C2E53] focus:border-transparent outline-none font-bold"
-                    >
-                      <option value="FEMENINO">Mujer (Femenino)</option>
-                      <option value="MASCULINO">Hombre (Masculino)</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-end gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowRegisterForm(false)}
-                    className="px-4 py-2 text-slate-600 hover:text-slate-900 font-bold"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-5 py-2 bg-[#2C2E53] hover:bg-[#1B1C33] text-[#D4AF37] font-black rounded-xl shadow-md transition flex items-center gap-2"
-                  >
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                    Registrar Cuenta en Sistema
-                  </button>
-                </div>
-              </form>
-            )}
-
-            {/* Listado de Cuentas Registradas */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between text-xs border-b border-slate-100 dark:border-slate-800 pb-2">
-                <span className="font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                  Cuentas Institucionales Activas en la Base de Datos ({users.length})
-                </span>
-                <span className="text-slate-400 dark:text-slate-500">Año Escolar 2026-2027</span>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                {users.map((u) => {
-                  const roleMeta = ROLE_METADATA[u.role];
-                  return (
-                    <div
-                      key={u.id}
-                      className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/60 hover:bg-white dark:hover:bg-slate-900 transition-colors flex items-start justify-between gap-3 shadow-xs"
-                    >
-                      <div className="flex items-start gap-3 min-w-0">
-                        <img
-                          src={u.avatarUrl || getDefaultAvatarForUser(u)}
-                          alt={u.fullName}
-                          className="w-10 h-10 rounded-full object-contain border border-slate-300 dark:border-slate-700 shrink-0 bg-white dark:bg-slate-800"
-                        />
-                        <div className="space-y-1 min-w-0">
-                          <p className="font-bold text-slate-900 dark:text-slate-100 leading-tight truncate">
-                            {u.fullName}
-                          </p>
-                          <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 font-mono flex-wrap">
-                            <span className="flex items-center gap-1">
-                              <User className="w-3 h-3 text-slate-400 dark:text-slate-500" />
-                              {u.username}
-                            </span>
-                            <span>•</span>
-                            <span className="flex items-center gap-1 truncate max-w-[190px] sm:max-w-[260px]">
-                              <Mail className="w-3 h-3 text-slate-400 dark:text-slate-500 shrink-0" />
-                              <span className="truncate">{u.email}</span>
-                            </span>
-                          </div>
-                          {/* Niveles Asignados */}
-                          {u.allowedLevels && u.allowedLevels.length > 0 && (
-                            <div className="flex items-center gap-1 flex-wrap pt-0.5">
-                              {u.allowedLevels.map(lvl => (
-                                <span
-                                  key={lvl}
-                                  className={`text-[9px] font-extrabold px-1.5 py-0.2 rounded border ${
-                                    lvl === u.defaultLevel
-                                      ? 'bg-amber-100 dark:bg-amber-950/40 text-amber-900 dark:text-amber-300 border-amber-300 dark:border-amber-700/60'
-                                      : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
-                                  }`}
-                                  title={lvl === u.defaultLevel ? 'Nivel Principal' : 'Nivel Habilitado'}
-                                >
-                                  {lvl === 'MEDIA_GENERAL' ? 'Media' : lvl === 'PRIMARIA' ? 'Primaria' : 'Inicial'}
-                                  {lvl === u.defaultLevel && ' ★'}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col items-end gap-1 shrink-0">
-                        <span
-                          className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border whitespace-nowrap ${
-                            roleMeta?.badgeBg || 'bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border-slate-300 dark:border-slate-700'
-                          }`}
-                        >
-                          {roleMeta?.badge || u.role}
-                        </span>
-                        {u.roles && u.roles.length > 0 && (
-                          <div className="flex flex-wrap gap-1 justify-end max-w-[140px]">
-                            {u.roles.map(r => (
-                              <span
-                                key={r}
-                                className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-400/15 text-amber-900 dark:text-amber-300 border border-amber-400/30"
-                                title={`Función adicional agrupada: ${r}`}
-                              >
-                                + {r}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Panel de Códigos de Autorización para Auto-Registro de Docentes / Asistentes / Secretarias */}
-            <div className="pt-6 border-t border-slate-200 dark:border-slate-800 space-y-4">
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent dark:from-amber-500/15 dark:via-amber-500/10 dark:to-slate-900 border border-amber-400/30 dark:border-amber-500/30 p-4 sm:p-5 rounded-2xl shadow-xs">
-                <div className="flex items-start sm:items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1E2038] to-[#2C2E53] border border-[#D4AF37]/30 text-[#D4AF37] flex items-center justify-center font-bold shrink-0 shadow-sm">
-                    <Key className="w-5 h-5 text-[#D4AF37]" />
-                  </div>
-                  <div>
-                    <h4 className="font-extrabold text-sm text-[#2C2E53] dark:text-amber-300">
-                      Códigos de Autorización para Auto-Registro (Uso Único)
-                    </h4>
-                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5 max-w-xl">
-                      Entregue un código a un nuevo docente, asistente o secretaria. Cada código tiene un solo uso y se eliminará de inmediato una vez registrado el usuario.
-                    </p>
-                  </div>
-                </div>
-
-                {canConfigureSchool(currentUser || currentRole) && (
-                  <div className="flex flex-wrap items-center gap-2.5 self-stretch sm:self-center shrink-0">
-                    <div className="relative">
-                      <select
-                        value={selectedRoleForCode}
-                        onChange={(e) => setSelectedRoleForCode(e.target.value as 'DOCENTE' | 'ASISTENTE' | 'SECRETARIA')}
-                        className="appearance-none pl-3.5 pr-8 py-2 bg-white dark:bg-slate-900 border border-amber-300/80 dark:border-amber-500/40 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-100 shadow-xs outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-[#D4AF37] transition cursor-pointer"
-                      >
-                        <option value="DOCENTE">Rol: DOCENTE</option>
-                        <option value="ASISTENTE">Rol: ASISTENTE</option>
-                        <option value="SECRETARIA">Rol: SECRETARIA</option>
-                      </select>
-                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400 dark:text-slate-400">
-                        <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
-                        </svg>
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const newC = createRegistrationCode(selectedRoleForCode);
-                        setCopiedCodeId(newC.id);
-                        navigator.clipboard.writeText(newC.code).catch(() => {});
-                        setTimeout(() => setCopiedCodeId(null), 3000);
-                      }}
-                      className="px-4 py-2 bg-gradient-to-r from-[#1E2038] to-[#2C2E53] hover:from-[#151627] hover:to-[#222442] text-[#D4AF37] border border-[#D4AF37]/40 text-xs font-black rounded-xl shadow-md hover:shadow-lg active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer shrink-0"
-                    >
-                      <Sparkles className="w-4 h-4 text-[#D4AF37] animate-pulse" />
-                      <span>Generar Código</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Lista de códigos generados */}
-              {registrationCodes.length === 0 ? (
-                <div className="p-6 bg-slate-50 dark:bg-slate-900/60 border border-dashed border-slate-200 dark:border-slate-800 rounded-xl text-center">
-                  <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                    No hay códigos de autorización activos pendientes por uso. Genere un nuevo código cuando requiera autorizar a un nuevo docente o miembro del personal.
-                  </p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                  {registrationCodes.map((code) => {
-                    const isCopied = copiedCodeId === code.id;
-                    return (
-                      <div
-                        key={code.id}
-                        className="p-3 rounded-xl border bg-white dark:bg-slate-900 border-amber-200/80 dark:border-amber-500/25 shadow-xs hover:border-[#D4AF37] dark:hover:border-[#D4AF37] transition-all flex items-center justify-between gap-2"
-                      >
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <code className="font-mono font-black text-xs text-[#2C2E53] dark:text-amber-300 tracking-wider">
-                              {code.code}
-                            </code>
-                            <span className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded ${
-                              code.allowedRole === 'SECRETARIA'
-                                ? 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-800 dark:text-indigo-300'
-                                : code.allowedRole === 'ASISTENTE'
-                                ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300'
-                                : 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300'
-                            }`}>
-                              {code.allowedRole || 'TODOS'}
-                            </span>
-                          </div>
-                          <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 truncate flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
-                            <span>Uso único disponible</span>
-                          </p>
-                        </div>
-
-                        <div className="flex items-center gap-1 shrink-0">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              navigator.clipboard.writeText(code.code).catch(() => {});
-                              setCopiedCodeId(code.id);
-                              setTimeout(() => setCopiedCodeId(null), 2500);
-                            }}
-                            className={`p-1.5 rounded-lg border text-xs font-bold transition shrink-0 cursor-pointer ${
-                              isCopied
-                                ? 'bg-emerald-600 text-white border-emerald-600'
-                                : 'bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
-                            }`}
-                            title="Copiar código al portapapeles"
-                          >
-                            {isCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                          </button>
-                          {canConfigureSchool(currentUser || currentRole) && (
-                            <button
-                              type="button"
-                              onClick={() => deleteRegistrationCode(code.id)}
-                              className="p-1.5 rounded-lg border border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-950/30 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 text-xs font-bold transition shrink-0 cursor-pointer"
-                              title="Revocar / Eliminar código de autorización"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
             </div>
           </div>
         </div>

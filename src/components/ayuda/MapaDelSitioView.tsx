@@ -229,13 +229,7 @@ export const MapaDelSitioView: React.FC<MapaDelSitioViewProps> = ({ onNavigate }
       {/* Top Banner */}
       <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-cba-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#D4AF37]"></span>
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
-              Directorio Integral del Sistema SICE-CBA
-            </span>
-          </div>
-          <h2 className="text-xl font-extrabold text-[#2C2E53] mt-1">Mapa del Sitio y Auditoría de Rutas</h2>
+          <h2 className="text-xl font-extrabold text-[#2C2E53]">Mapa del Sitio y Auditoría de Rutas</h2>
           <p className="text-xs text-slate-500">
             Vista general del contenido del sitio con catálogo de permisos por rol institucional (ADM, UCE, DOC).
           </p>

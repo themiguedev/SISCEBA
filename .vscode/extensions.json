@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    "bradlc.vscode-tailwindcss",
+    "oxc.oxc-vscode",
+    "esbenp.prettier-vscode",
+    "dsznajder.es7-react-js-snippets",
+    "formulahendry.auto-rename-tag",
+    "formulahendry.auto-close-tag",
+    "usernamehw.errorlens",
+    "eamodio.gitlens"
+  ]
+}

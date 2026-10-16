@@ -11,10 +11,13 @@ import {
   Mail,
   ShieldCheck,
   X,
-  UserPlus
+  UserPlus,
+  RotateCcw,
+  KeyRound
 } from 'lucide-react';
 import { LogoSeasonalAccessory } from './LogoSeasonalAccessory';
 import { SelfRegisterModal } from './SelfRegisterModal';
+import { ResetAccountModal } from './ResetAccountModal';
 
 interface LoginViewProps {
   onLoginSuccess?: () => void;
@@ -41,6 +44,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
   const [successInfoMsg, setSuccessInfoMsg] = useState('');
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false);
   const [userFocused, setUserFocused] = useState(false);
   const [passFocused, setPassFocused] = useState(false);
 
@@ -238,7 +242,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
             )}
           </div>
 
-          {/* Opciones prácticas: Recordar y Ayuda */}
+          {/* Opciones prácticas: Recordar, Restablecer y Ayuda */}
           <div className="flex items-center justify-between pt-0.5 text-[11px] text-slate-500">
             <label className="flex items-center gap-1.5 cursor-pointer hover:text-[#2C2E53] transition select-none">
               <input
@@ -252,10 +256,11 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
 
             <button
               type="button"
-              onClick={() => setShowHelpModal(true)}
-              className="text-slate-500 hover:text-[#2C2E53] hover:underline transition-colors cursor-pointer"
+              onClick={() => setShowResetModal(true)}
+              className="text-[#2C2E53] hover:text-[#141525] font-semibold hover:underline transition-colors flex items-center gap-1 cursor-pointer"
             >
-              ¿Ayuda para acceder?
+              <RotateCcw className="w-3 h-3 text-[#D4AF37]" />
+              <span>¿Olvidó su clave?</span>
             </button>
           </div>
 
@@ -285,15 +290,23 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
               {loginState === 'IDLE' && <span>INGRESAR</span>}
             </button>
 
-            {/* Botón de Auto-Registro Institucional */}
-            <div className="pt-1 text-center">
+            {/* Acciones Secundarias: Auto-Registro y Soporte */}
+            <div className="pt-1 grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => setShowRegisterModal(true)}
-                className="w-full py-2 px-3 rounded-[2px] border border-slate-200 hover:border-[#D4AF37]/60 bg-slate-50 hover:bg-slate-100 text-[#2C2E53] hover:text-[#1B1C33] text-[11px] font-bold transition flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                className="py-2 px-2.5 rounded-[2px] border border-slate-200 hover:border-[#D4AF37]/60 bg-slate-50 hover:bg-slate-100 text-[#2C2E53] hover:text-[#1B1C33] text-[10px] sm:text-[11px] font-bold transition flex items-center justify-center gap-1 shadow-xs cursor-pointer truncate"
               >
-                <UserPlus className="w-3.5 h-3.5 text-[#D4AF37]" />
-                <span>¿Nuevo personal? Regístrese aquí</span>
+                <UserPlus className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
+                <span className="truncate">Nuevo Registro</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowHelpModal(true)}
+                className="py-2 px-2.5 rounded-[2px] border border-slate-200 hover:border-[#D4AF37]/60 bg-slate-50 hover:bg-slate-100 text-[#2C2E53] hover:text-[#1B1C33] text-[10px] sm:text-[11px] font-bold transition flex items-center justify-center gap-1 shadow-xs cursor-pointer truncate"
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
+                <span className="truncate">Ayuda / Soporte</span>
               </button>
             </div>
           </div>
@@ -340,7 +353,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
 
             <button
               onClick={() => setShowHelpModal(false)}
-              className="w-full py-2 bg-[#2C2E53] hover:bg-[#1B1C33] text-[#D4AF37] border border-[#D4AF37]/40 text-xs font-bold rounded-lg transition shadow-md"
+              className="w-full py-2 bg-[#2C2E53] hover:bg-[#1B1C33] text-[#D4AF37] border border-[#D4AF37]/40 text-xs font-bold rounded-lg transition shadow-md cursor-pointer"
             >
               Entendido
             </button>
@@ -355,6 +368,17 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
         onSuccess={(registeredUser) => {
           setUserInput(registeredUser);
           setSuccessInfoMsg(`¡Registro completado para @${registeredUser}! Ingrese con su contraseña creada.`);
+          setErrorMsg('');
+        }}
+      />
+
+      {/* Modal de Restablecimiento de Contraseña / Cuenta con Código */}
+      <ResetAccountModal
+        isOpen={showResetModal}
+        onClose={() => setShowResetModal(false)}
+        onSuccess={(recoveredUser) => {
+          setUserInput(recoveredUser);
+          setSuccessInfoMsg(`¡Contraseña restablecida con éxito para @${recoveredUser}! Ingrese con su nueva clave.`);
           setErrorMsg('');
         }}
       />

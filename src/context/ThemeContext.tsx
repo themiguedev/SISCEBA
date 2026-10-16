@@ -122,7 +122,9 @@ export const THEMES_CATALOG: ThemeDefinition[] = [
   }
 ];
 
-interface ThemeContextType {
+export type FontSizeScale = 'normal' | 'large' | 'extra-large';
+
+export interface ThemeContextType {
   mode: ThemeMode;
   setMode: (mode: ThemeMode) => void;
   palette: ThemePalette;
@@ -133,12 +135,23 @@ interface ThemeContextType {
   currentTheme: ThemeDefinition;
   // Tematización estacional 100% automática según el mes
   currentMonthConfig: MonthSeasonalConfig;
+  // Accesibilidad y Ergonomía
+  fontSize: FontSizeScale;
+  setFontSize: (size: FontSizeScale) => void;
+  highContrast: boolean;
+  setHighContrast: (enabled: boolean) => void;
+  reducedMotion: boolean;
+  setReducedMotion: (enabled: boolean) => void;
+  resetAccessibility: () => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 const STORAGE_MODE_KEY = 'sisceba_theme_mode';
 const STORAGE_PALETTE_KEY = 'sisceba_theme_palette';
+const STORAGE_FONT_SIZE_KEY = 'sisceba_font_size';
+const STORAGE_HIGH_CONTRAST_KEY = 'sisceba_high_contrast';
+const STORAGE_REDUCED_MOTION_KEY = 'sisceba_reduced_motion';
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Tematización estacional 100% automática según la fecha real del calendario
   const currentMonthConfig = useMemo(() => {
@@ -185,6 +198,40 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return false;
   });
 
+  // 4. Estados de Accesibilidad y Ergonomía
+  const [fontSize, setFontSizeState] = useState<FontSizeScale>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_FONT_SIZE_KEY);
+      if (saved === 'normal' || saved === 'large' || saved === 'extra-large') {
+        return saved;
+      }
+    } catch {
+      // Ignorar
+    }
+    return 'normal';
+  });
+
+  const [highContrast, setHighContrastState] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(STORAGE_HIGH_CONTRAST_KEY) === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const [reducedMotion, setReducedMotionState] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_REDUCED_MOTION_KEY);
+      if (saved !== null) return saved === 'true';
+    } catch {
+      // Ignorar
+    }
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    }
+    return false;
+  });
+
   useEffect(() => {
     if (typeof window === 'undefined' || !window.matchMedia) return;
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -227,7 +274,40 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
-  // 4. Sincronización con el DOM (clase dark y atributos data-theme y variables CSS)
+  const setFontSize = (size: FontSizeScale) => {
+    setFontSizeState(size);
+    try {
+      localStorage.setItem(STORAGE_FONT_SIZE_KEY, size);
+    } catch {
+      // Ignorar
+    }
+  };
+
+  const setHighContrast = (enabled: boolean) => {
+    setHighContrastState(enabled);
+    try {
+      localStorage.setItem(STORAGE_HIGH_CONTRAST_KEY, String(enabled));
+    } catch {
+      // Ignorar
+    }
+  };
+
+  const setReducedMotion = (enabled: boolean) => {
+    setReducedMotionState(enabled);
+    try {
+      localStorage.setItem(STORAGE_REDUCED_MOTION_KEY, String(enabled));
+    } catch {
+      // Ignorar
+    }
+  };
+
+  const resetAccessibility = () => {
+    setFontSize('normal');
+    setHighContrast(false);
+    setReducedMotion(false);
+  };
+
+  // 5. Sincronización con el DOM (clase dark y atributos data-theme, accesibilidad y variables CSS)
   useEffect(() => {
     const root = document.documentElement;
     if (isDark) {
@@ -236,8 +316,17 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       root.classList.remove('dark');
     }
 
+    if (highContrast) {
+      root.classList.add('high-contrast');
+    } else {
+      root.classList.remove('high-contrast');
+    }
+
     root.setAttribute('data-theme', palette);
     root.setAttribute('data-mode', isDark ? 'dark' : 'light');
+    root.setAttribute('data-font-size', fontSize);
+    root.setAttribute('data-high-contrast', String(highContrast));
+    root.setAttribute('data-reduced-motion', String(reducedMotion));
 
     const themeDef = THEMES_CATALOG.find((t) => t.id === palette) || THEMES_CATALOG[0];
     root.style.setProperty('--theme-primary', themeDef.primaryColor);
@@ -253,7 +342,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     root.setAttribute('data-season-month', currentMonthConfig.month.toString());
     root.style.setProperty('--season-accent', currentMonthConfig.accentColor);
     root.style.setProperty('--season-glow', currentMonthConfig.accentGlow);
-  }, [isDark, palette, currentMonthConfig]);
+  }, [isDark, palette, currentMonthConfig, fontSize, highContrast, reducedMotion]);
 
   const currentTheme = useMemo(() => {
     return THEMES_CATALOG.find((t) => t.id === palette) || THEMES_CATALOG[0];
@@ -270,7 +359,14 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         toggleMode,
         themesCatalog: THEMES_CATALOG,
         currentTheme,
-        currentMonthConfig
+        currentMonthConfig,
+        fontSize,
+        setFontSize,
+        highContrast,
+        setHighContrast,
+        reducedMotion,
+        setReducedMotion,
+        resetAccessibility
       }}
     >
       {children}

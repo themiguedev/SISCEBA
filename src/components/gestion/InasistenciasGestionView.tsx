@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { DailyAttendanceRecord } from '../../types';
+import { DailyAttendanceRecord, SubjectAttendanceAccumulated } from '../../types';
 import {
   Calendar,
   CheckCircle2,
@@ -11,7 +11,10 @@ import {
   Filter,
   Users,
   Layers,
-  BookOpen
+  BookOpen,
+  Bell,
+  ShieldAlert,
+  Send
 } from 'lucide-react';
 
 export const InasistenciasGestionView: React.FC = () => {
@@ -21,16 +24,23 @@ export const InasistenciasGestionView: React.FC = () => {
     markDailyAttendance,
     accumulatedAttendance,
     activeLapso,
-    currentSection
+    currentSection,
+    sendNotification
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'DIARIA' | 'GENERAL'>('DIARIA');
   const [selectedDate, setSelectedDate] = useState<string>('2026-09-17');
   const [saveBanner, setSaveBanner] = useState(false);
+  const [citacionSentBanner, setCitacionSentBanner] = useState<string | null>(null);
 
   // Filter students by section
   const sectionStudents = students.filter(
     (s) => `${s.grade} ${s.section}`.toLowerCase() === currentSection.toLowerCase()
+  );
+
+  // Detección automática de estudiantes que superan o rozan el 25% de inasistencias en el lapso
+  const atRiskAccumulated = accumulatedAttendance.filter(
+    (acc) => acc.lapso === activeLapso && (acc.exceedsLimit || acc.absencePercentage >= 25)
   );
 
   const handleStatusChange = (studentId: string, status: DailyAttendanceRecord['status']) => {
@@ -49,19 +59,32 @@ export const InasistenciasGestionView: React.FC = () => {
     setTimeout(() => setSaveBanner(false), 4000);
   };
 
+  const handleNotifyCitacion = (acc: SubjectAttendanceAccumulated) => {
+    const stu = students.find((s) => s.id === acc.studentId);
+    sendNotification({
+      title: `⚠️ CITACIÓN URGENTE: Superación del Límite del 25% de Inasistencias`,
+      message: `Estimado representante de ${acc.studentName}: Se le cita de carácter obligatorio ante la Coordinación Pedagógica debido a que el alumno ha acumulado un ${acc.absencePercentage.toFixed(1)}% de faltas injustificadas (${acc.unjustifiedAbsences} clases), excediendo el límite reglamentario del 25%.`,
+      category: 'ASISTENCIA',
+      priority: 'ALTA',
+      recipientRole: 'REPRESENTANTE',
+      recipientName: stu?.representativeName,
+      studentName: acc.studentName,
+      actionTab: 'GESTION',
+      actionSubTab: 'INASISTENCIAS',
+      deliveryChannels: ['PORTAL', 'EMAIL', 'SMS_WHATSAPP']
+    });
+
+    setCitacionSentBanner(acc.studentName);
+    setTimeout(() => setCitacionSentBanner(null), 4000);
+  };
+
   return (
     <div className="space-y-6">
       {/* Top Header */}
       <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-cba-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#D4AF37]"></span>
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
-              Control Escolar y Asistencia
-            </span>
-          </div>
-          <h2 className="text-xl font-extrabold text-[#2C2E53] mt-1">Gestión de Inasistencias</h2>
-          <p className="text-xs text-slate-500">
+          <h2 className="text-xl font-extrabold text-[#2C2E53]">Gestión de Inasistencias</h2>
+          <p className="text-xs text-slate-500 mt-1">
             ADM / DOC: Registro diario de asistencia y control acumulativo de inasistencias por materia (límite del 25%).
           </p>
         </div>
@@ -93,10 +116,42 @@ export const InasistenciasGestionView: React.FC = () => {
         </div>
       </div>
 
+      {/* Alert Banners */}
+      {citacionSentBanner && (
+        <div className="p-4 rounded-xl bg-purple-50 border border-purple-200 text-purple-900 text-xs font-bold flex items-center gap-2 animate-in fade-in">
+          <Bell className="w-4 h-4 text-purple-600" />
+          ¡Citación reglamentaria despachada con éxito al representante legal de {citacionSentBanner} (Portal, WhatsApp/SMS y Correo)!
+        </div>
+      )}
+
       {saveBanner && (
         <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2 animate-in fade-in">
           <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-          ¡Registros de asistencia guardados y sincronizados correctamente!
+          ¡Registros de asistencia guardados y sincronizados correctamente! Notificaciones automáticas despachadas a los representantes con novedades.
+        </div>
+      )}
+
+      {/* Alerta Automática del 25% de Inasistencias */}
+      {atRiskAccumulated.length > 0 && (
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-rose-500/10 via-rose-500/5 to-amber-500/10 border-2 border-rose-500/30 text-rose-950 dark:text-rose-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+          <div className="flex items-center gap-3">
+            <ShieldAlert className="w-6 h-6 text-rose-600 shrink-0" />
+            <div>
+              <span className="font-extrabold text-xs sm:text-sm block text-rose-900 dark:text-rose-100">
+                ⚠️ Alerta Reglamentaria: {atRiskAccumulated.length} estudiante(s) superan el 25% de inasistencias en el Lapso {activeLapso}
+              </span>
+              <p className="text-[11px] text-rose-800 dark:text-rose-300 mt-0.5">
+                Conforme al Reglamento de Evaluación CBA, superar el 25% de inasistencias injustificadas compromete la aprobación de la materia. Las alertas han sido despachadas automáticamente.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setActiveTab('GENERAL')}
+            className="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs shadow-sm transition shrink-0"
+          >
+            Ver Cuadro de Riesgo
+          </button>
         </div>
       )}
 
@@ -250,6 +305,7 @@ export const InasistenciasGestionView: React.FC = () => {
                   <th className="py-3.5 px-4 text-center">Faltas Justificadas</th>
                   <th className="py-3.5 px-4 text-center">% Inasistencia</th>
                   <th className="py-3.5 px-4 text-center">Condición</th>
+                  <th className="py-3.5 px-4 text-center">Acción / Citación</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">
@@ -285,6 +341,21 @@ export const InasistenciasGestionView: React.FC = () => {
                         <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200">
                           Regular
                         </span>
+                      )}
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                      {acc.exceedsLimit ? (
+                        <button
+                          type="button"
+                          onClick={() => handleNotifyCitacion(acc)}
+                          className="px-2.5 py-1 rounded-lg bg-[#2C2E53] hover:bg-[#1B1C33] text-[#D4AF37] font-extrabold text-[10px] shadow-sm transition inline-flex items-center gap-1 cursor-pointer"
+                          title="Despachar citación al representante por canales digitales"
+                        >
+                          <Send className="w-3 h-3 text-[#D4AF37]" />
+                          <span>Despachar Citación</span>
+                        </button>
+                      ) : (
+                        <span className="text-[10px] text-slate-400 italic">No requerida</span>
                       )}
                     </td>
                   </tr>

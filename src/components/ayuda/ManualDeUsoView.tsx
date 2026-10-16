@@ -259,7 +259,7 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
       id: 'guia-5',
       title: 'Pases por Retraso y Control de Portería',
       category: 'Gestión',
-      roleRequired: 'ASISTENTE',
+      roleRequired: 'COORDINACION',
       summary: 'Emisión de boletas de retraso con ticket térmico o PDF para el control de puntualidad a primera hora.',
       targetTab: 'GESTION',
       targetSubTab: 'PASES',
@@ -294,7 +294,7 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
       id: 'guia-6',
       title: 'Registro de Incidencias de Conducta y Disciplina',
       category: 'Gestión',
-      roleRequired: 'ASISTENTE',
+      roleRequired: 'SECRETARIA',
       summary: 'Asentamiento formal de llamados de atención, compromisos de convivencia o reconocimientos positivos.',
       targetTab: 'GESTION',
       targetSubTab: 'CONDUCTAS',
@@ -401,7 +401,7 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
       title: 'Creación de Personal y Códigos de Auto-Registro',
       category: 'Institucional',
       roleRequired: 'ADMINISTRADOR',
-      summary: 'Alta de docentes, asistentes y personal con credenciales seguras o emisión de códigos de verificación.',
+      summary: 'Alta de docentes, secretarias y personal con credenciales seguras o emisión de códigos de verificación.',
       targetTab: 'CONFIGURACION',
       targetSubTab: 'DOCENTES',
       icon: Users,
@@ -482,20 +482,12 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
       highlight: 'El sistema valida automáticamente las notas para evitar que se introduzcan números en Inicial o Primaria.'
     },
     {
-      id: 'faq-role-3',
-      question: '¿Qué responsabilidades tiene el rol de Asistente?',
-      category: 'Operatividad',
-      role: 'ASISTENTE',
-      answer: 'El rol de Asistente está enfocado en la vida operativa y disciplina diaria: emisión de Pases por Retraso en portería, toma y seguimiento de Asistencias de aula y registro en el Historial de Conductas. No posee permisos de carga de calificaciones académicas.',
-      highlight: 'Permite agilizar el ingreso a clases por la mañana y resguardar la puntualidad.'
-    },
-    {
       id: 'faq-role-4',
       question: '¿Qué responsabilidades tiene el rol de Secretaría?',
-      category: 'Secretaría & Matrícula',
+      category: 'Secretaría & Asistencia',
       role: 'SECRETARIA',
-      answer: 'El rol de Secretaría se encarga de las admisiones e inscripciones de estudiantes, custodia del padrón y expedientes de matrícula, solicitud y emisión de constancias de estudio o notas certificadas, y consulta de sábanas y nóminas oficiales.',
-      highlight: 'Toda emisión de constancia valida antes que el estudiante no cuente con bloqueo administrativo.'
+      answer: 'El rol de Secretaría se encarga del registro y control diario de inasistencias de los estudiantes, asentamiento formal en el historial de conducta y disciplina escolar, y consulta de nóminas oficiales.',
+      highlight: 'Permite llevar un seguimiento disciplinario y control diario de asistencia riguroso.'
     },
     {
       id: 'faq-role-5',
@@ -664,7 +656,7 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
               <Filter className="w-3 h-3" />
               {currentRole === 'ADMINISTRADOR' ? 'Vista de rol:' : 'Tu rol institucional:'}
             </span>
-            {(['DOCENTE', 'SECRETARIA', 'ASISTENTE', 'COORDINACION', 'DIRECTOR', 'ADMINISTRADOR', 'REPRESENTANTE', 'ESTUDIANTE'] as UserRole[])
+            {(['DOCENTE', 'SECRETARIA', 'COORDINACION', 'DIRECTOR', 'ADMINISTRADOR', 'REPRESENTANTE', 'ESTUDIANTE'] as UserRole[])
               .filter((r) => currentRole === 'ADMINISTRADOR' || r === currentRole)
               .map((r) => {
                 const isSelected = selectedRole === r;

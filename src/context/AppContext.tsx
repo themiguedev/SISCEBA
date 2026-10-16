@@ -6,6 +6,7 @@ import {
   Competency,
   Indicator,
   Strategy,
+  EducationalResource,
   PlanQuincenal,
   PlanLapso,
   Student,
@@ -24,10 +25,13 @@ import {
   AdministrativeBlockEntry,
   TitleRecord,
   SchoolYearConfig,
+  LapsoConfig,
   CommunityNotice,
+  BroadcastMessage,
   BirthdayPerson,
   MainNavigationTab,
   SystemNotification,
+  NotificationDeliveryChannel,
   AppUser,
   RegistrationCode,
   SystemPrivilegesMatrix,
@@ -38,7 +42,13 @@ import {
   AuditLogEntry,
   ScheduleTypeConfig,
   CRPTaller,
-  CRPEstudianteInscrito
+  CRPEstudianteInscrito,
+  AcademicAssignment,
+  RevisionEvaluationRecord,
+  PendingSubjectEnrollment,
+  PendingSubjectGrade,
+  SectionTransferLog,
+  ExternalAcademicRecord
 } from '../types';
 import {
   hashPassword,
@@ -50,13 +60,14 @@ import {
   verifyTOTPCode
 } from '../utils/security';
 import { getDefaultAvatarForUser, decodeUserAvatarMetadata } from '../utils/avatarCatalog';
-import { normalizeCedulaUsername } from '../utils/rbac';
+import { normalizeCedulaUsername, getUserEffectiveRoles } from '../utils/rbac';
 import PRIVILEGIOS_DATA from '../data/privilegiosCEO.json';
 import {
   INITIAL_AREAS,
   INITIAL_COMPETENCIES,
   INITIAL_INDICATORS,
   INITIAL_STRATEGIES,
+  INITIAL_EDUCATIONAL_RESOURCES,
   INITIAL_STUDENTS,
   INITIAL_PLANS_QUINCENAL,
   INITIAL_PLANS_LAPSO,
@@ -91,6 +102,9 @@ import {
   supabaseFetchIndicators,
   supabaseFetchStrategies,
   supabaseSaveStrategy,
+  supabaseFetchEducationalResources,
+  supabaseSaveEducationalResource,
+  supabaseDeleteEducationalResource,
   supabaseFetchEvaluations,
   supabaseFetchDidacticPlans,
   supabaseFetchPasses,
@@ -121,14 +135,18 @@ import {
   supabaseSaveConduct,
   supabaseSaveDocumentRequest,
   supabaseSaveAdminBlock,
+  supabaseDeleteAdminBlock,
   supabaseSaveTitleRecord,
   supabaseDeleteTitleRecord,
   supabaseSaveCommunityNotice,
+  supabaseDeleteCommunityNotice,
   supabaseSaveNotification,
+  supabaseDeleteNotification,
   supabaseMarkNotificationAsRead,
   supabaseMarkAllNotificationsAsRead,
   supabaseClearNotifications,
   supabaseSaveUser,
+  supabaseDeleteUser,
   supabaseFetchPrivileges,
   supabaseSavePrivileges,
   supabaseFetchAllUserSchedules,
@@ -146,7 +164,19 @@ import {
   supabaseDeleteCRPTaller,
   supabaseFetchCRPInscritos,
   supabaseSaveCRPInscrito,
-  supabaseDeleteCRPInscrito
+  supabaseDeleteCRPInscrito,
+  supabaseFetchRevisionEvaluations,
+  supabaseSaveRevisionEvaluation,
+  supabaseDeleteRevisionEvaluation,
+  supabaseFetchPendingSubjects,
+  supabaseSavePendingSubjectEnrollment,
+  supabaseSavePendingSubjectGrade,
+  supabaseDeletePendingSubjectEnrollment,
+  supabaseFetchSectionTransfers,
+  supabaseSaveSectionTransfer,
+  supabaseFetchExternalAcademicRecords,
+  supabaseSaveExternalAcademicRecord,
+  supabaseDeleteExternalAcademicRecord
 } from '../services/supabaseService';
 
 interface AppContextType {
@@ -156,10 +186,15 @@ interface AppContextType {
   users: AppUser[];
   addUser: (user: Omit<AppUser, 'id'>) => Promise<AppUser>;
   updateUser: (userId: string, updates: Partial<AppUser>) => Promise<boolean>;
+  deleteUser: (userId: string) => Promise<boolean>;
+  currentTeacherAssignments: AcademicAssignment[];
+  getTeacherAssignments: (teacherId: string) => AcademicAssignment[];
+  saveTeacherAssignments: (teacherId: string, assignments: AcademicAssignment[]) => Promise<boolean>;
   registrationCodes: RegistrationCode[];
-  createRegistrationCode: (allowedRole?: 'DOCENTE' | 'ASISTENTE' | 'SECRETARIA') => RegistrationCode;
+  createRegistrationCode: (allowedRole?: 'DOCENTE' | 'SECRETARIA', durationHours?: number) => RegistrationCode;
   deleteRegistrationCode: (codeId: string) => void;
-  validateAndUseRegistrationCode: (code: string, role: UserRole, username: string) => Promise<{ valid: boolean; message?: string }>;
+  cleanExpiredRegistrationCodes: () => number;
+  validateAndUseRegistrationCode: (code: string, role: UserRole, username: string, consume?: boolean) => Promise<{ valid: boolean; message?: string }>;
   login: (
     username: string,
     password?: string,
@@ -170,6 +205,7 @@ interface AppContextType {
   setCurrentLevel: (level: EducationalLevel) => void;
   currentRole: UserRole;
   setCurrentRole: (role: UserRole) => void;
+  switchActiveRole: (role: UserRole) => void;
   activeLapso: 1 | 2 | 3;
   setActiveLapso: (lapso: 1 | 2 | 3) => void;
   currentSection: string;
@@ -188,6 +224,10 @@ interface AppContextType {
   transferIndicator: (indicatorId: string, targetLapso: 1 | 2 | 3) => void;
   addStrategy: (strat: Omit<Strategy, 'id'>) => Strategy;
   transferStrategy: (strategyId: string, targetAreaId: string) => void;
+  educationalResources: EducationalResource[];
+  addEducationalResource: (res: Omit<EducationalResource, 'id'>) => EducationalResource;
+  deleteEducationalResource: (id: string) => void;
+  transferEducationalResource: (resourceId: string, targetAreaId: string) => void;
 
   // Planning
   plansQuincenal: PlanQuincenal[];
@@ -244,7 +284,11 @@ interface AppContextType {
   addDocumentRequest: (req: Omit<DocumentRequest, 'id' | 'trackingCode' | 'elapsedDays'>) => DocumentRequest;
 
   adminBlocks: AdministrativeBlockEntry[];
+  addAdminBlock: (block: Omit<AdministrativeBlockEntry, 'id'>) => AdministrativeBlockEntry;
   toggleAdminBlock: (blockId: string) => void;
+  deleteAdminBlock: (blockId: string) => void;
+  isStudentAdminBlocked: (studentId: string) => boolean;
+  getStudentAdminBlock: (studentId: string) => AdministrativeBlockEntry | undefined;
 
   titles: TitleRecord[];
   saveTitleRecord: (record: TitleRecord) => void;
@@ -252,10 +296,24 @@ interface AppContextType {
 
   schoolYearConfig: SchoolYearConfig;
   toggleLapsoGrading: (lapso: 1 | 2 | 3) => void;
+  updateLapsoConfig: (lapso: 1 | 2 | 3, updates: Partial<LapsoConfig>) => void;
+  getLapsoGradingStatus: (lapso: 1 | 2 | 3) => {
+    isOpen: boolean;
+    isExpiredByDeadline: boolean;
+    isManualClosed: boolean;
+    statusText: string;
+    deadlineStr: string;
+  };
   isLapsoOpenForGrading: boolean;
 
   communityNotices: CommunityNotice[];
   addCommunityNotice: (notice: Omit<CommunityNotice, 'id'>) => CommunityNotice;
+  updateCommunityNotice: (notice: CommunityNotice) => void;
+  deleteCommunityNotice: (id: string) => void;
+
+  broadcastMessages: BroadcastMessage[];
+  sendBroadcastMessage: (msg: Omit<BroadcastMessage, 'id' | 'date' | 'time'> & { publishToNotices?: boolean }) => BroadcastMessage;
+  deleteBroadcastMessage: (id: string) => void;
 
   birthdays: BirthdayPerson[];
 
@@ -303,6 +361,26 @@ interface AppContextType {
   deleteCRPInscrito: (id: string) => Promise<boolean>;
   autoAssignCRPWorkshops: (tallerIds: string[], gradoFilter?: string) => Promise<number>;
 
+  // Régimen MPPE: Pruebas de Revisión (Reparación de Julio)
+  revisionEvaluations: RevisionEvaluationRecord[];
+  saveRevisionEvaluation: (rec: RevisionEvaluationRecord) => Promise<boolean>;
+  deleteRevisionEvaluation: (id: string) => Promise<boolean>;
+
+  // Régimen MPPE: Materia Pendiente (4 Momentos)
+  pendingSubjectEnrollments: PendingSubjectEnrollment[];
+  savePendingSubjectEnrollment: (rec: PendingSubjectEnrollment) => Promise<boolean>;
+  recordPendingSubjectGrade: (enrollmentId: string, momentNumber: 1 | 2 | 3 | 4, score: number, notes?: string) => Promise<boolean>;
+  deletePendingSubjectEnrollment: (id: string) => Promise<boolean>;
+
+  // Padrón: Historial y Cambio Oficial de Sección
+  sectionTransfers: SectionTransferLog[];
+  transferStudentSection: (studentId: string, newSection: 'A' | 'B', reason: string) => Promise<{ success: boolean; message: string; count?: number }>;
+
+  // Secretaría: Calificaciones Externas y Convalidaciones
+  externalAcademicRecords: ExternalAcademicRecord[];
+  saveExternalAcademicRecord: (rec: ExternalAcademicRecord) => Promise<boolean>;
+  deleteExternalAcademicRecord: (id: string) => Promise<boolean>;
+
   // Helpers
   resetToSeedData: () => void;
 
@@ -316,7 +394,26 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-export const INITIAL_SYSTEM_NOTIFICATIONS: SystemNotification[] = [];
+export const INITIAL_SYSTEM_NOTIFICATIONS: SystemNotification[] = INITIAL_COMMUNITY_NOTICES.map(notice => ({
+  id: `notif-${notice.id}`,
+  title: `Noticia: ${notice.title}`,
+  message: notice.content,
+  timestamp: notice.date || 'Reciente',
+  read: false,
+  category: 'INSTITUCIONAL',
+  priority: notice.type === 'ANUNCIO_URGENTE' ? 'ALTA' : 'MEDIA',
+  recipientRole: notice.targetAudience === 'DOCENTES'
+    ? 'DOCENTE'
+    : notice.targetAudience === 'REPRESENTANTES'
+    ? 'REPRESENTANTE'
+    : notice.targetAudience === 'ESTUDIANTES'
+    ? 'ESTUDIANTE'
+    : 'TODOS',
+  recipientName: notice.author || 'Dirección CBA',
+  actionTab: 'COMUNIDAD',
+  actionSubTab: 'NOTICIAS',
+  deliveryChannels: ['PORTAL', 'EMAIL']
+}));
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // User & Accounts Store
@@ -325,7 +422,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (saved) {
       try {
         const parsed: AppUser[] = JSON.parse(saved);
-        return parsed.map(u => (u.id === 'usr-admin' || u.fullName === 'Administrador General de Sistemas') ? { ...u, fullName: 'Administrador' } : u);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
       } catch {
         return INITIAL_USERS;
       }
@@ -363,15 +462,41 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const [currentRole, setCurrentRole] = useState<UserRole>(() => {
+    const savedActiveRole = localStorage.getItem('sisceba_active_role');
     const saved = localStorage.getItem('sisceba_current_user');
     if (saved) {
       try {
         const u = JSON.parse(saved);
+        if (savedActiveRole) {
+          const effective = getUserEffectiveRoles(u);
+          if (effective.includes(savedActiveRole as UserRole) || u.role === 'ADMINISTRADOR') {
+            return savedActiveRole as UserRole;
+          }
+        }
         if (u.role) return u.role;
       } catch { /* ignore */ }
     }
     return 'DOCENTE';
   });
+
+  const switchActiveRole = (newRole: UserRole) => {
+    if (!currentUser) {
+      setCurrentRole(newRole);
+      return;
+    }
+    const effectiveRoles = getUserEffectiveRoles(currentUser);
+    const isAllowed = currentUser.role === 'ADMINISTRADOR' || effectiveRoles.includes(newRole);
+    if (!isAllowed) {
+      console.warn(`switchActiveRole: El usuario ${currentUser.username} no tiene asignado el rol ${newRole}.`);
+      return;
+    }
+    setCurrentRole(newRole);
+    try {
+      localStorage.setItem('sisceba_active_role', newRole);
+    } catch {
+      // Ignorar error de storage
+    }
+  };
 
   const [activeLapso, setActiveLapso] = useState<1 | 2 | 3>(1);
   const [currentSection, setCurrentSection] = useState<string>('4to Año A');
@@ -493,6 +618,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return true;
   };
 
+  const deleteUser = async (userId: string): Promise<boolean> => {
+    if (!userId || userId === 'usr-admin') {
+      console.warn('deleteUser: No se puede eliminar la cuenta principal del Administrador.');
+      return false;
+    }
+
+    setUsers(prev => prev.filter(u => u.id !== userId));
+
+    if (isSupabaseConfigured()) {
+      const deleted = await syncWithCloud(() => supabaseDeleteUser(userId), 'eliminar usuario');
+      return deleted !== null && deleted !== false;
+    }
+
+    return true;
+  };
+
   useEffect(() => {
     if (currentUser) {
       localStorage.setItem('sisceba_current_user', JSON.stringify(currentUser));
@@ -500,6 +641,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.removeItem('sisceba_current_user');
     }
   }, [currentUser]);
+
+  // Carga y Asignaciones Académicas Oficiales para Docentes
+  const getTeacherAssignments = (teacherId: string): AcademicAssignment[] => {
+    const user = users.find(u => u.id === teacherId) || (currentUser?.id === teacherId ? currentUser : null);
+    return Array.isArray(user?.academicAssignments) ? user.academicAssignments : [];
+  };
+
+  const saveTeacherAssignments = async (teacherId: string, assignments: AcademicAssignment[]): Promise<boolean> => {
+    return await updateUser(teacherId, { academicAssignments: assignments });
+  };
+
+  const currentTeacherAssignments: AcademicAssignment[] = Array.isArray(currentUser?.academicAssignments)
+    ? currentUser.academicAssignments
+    : [];
 
   // Códigos de Autorización de Registro emitidos por el Administrador
   const [registrationCodes, setRegistrationCodes] = useState<RegistrationCode[]>(() => {
@@ -522,14 +677,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         used: false
       },
       {
-        id: 'code-init-2',
-        code: 'CBA-ASIS-2026',
-        allowedRole: 'ASISTENTE',
-        createdBy: 'admin',
-        createdAt: '2026-09-23T00:00:00.000Z',
-        used: false
-      },
-      {
         id: 'code-init-3',
         code: 'CBA-SEC-2026',
         allowedRole: 'SECRETARIA',
@@ -544,16 +691,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('sisceba_registration_codes', JSON.stringify(registrationCodes));
   }, [registrationCodes]);
 
-  const createRegistrationCode = (allowedRole?: 'DOCENTE' | 'ASISTENTE' | 'SECRETARIA'): RegistrationCode => {
+  useEffect(() => {
+    const now = Date.now();
+    const hasExpired = registrationCodes.some(c => c.expiresAt && new Date(c.expiresAt).getTime() < now);
+    if (hasExpired) {
+      cleanExpiredRegistrationCodes();
+    }
+  }, []);
+
+  const createRegistrationCode = (
+    allowedRole?: 'DOCENTE' | 'SECRETARIA',
+    durationHours: number = 48
+  ): RegistrationCode => {
     const rolePrefix = allowedRole ? allowedRole.slice(0, 3) : 'REG';
     const randomHex = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + durationHours * 3600 * 1000).toISOString();
+
     const newCode: RegistrationCode = {
       id: `code-${Date.now()}`,
       code: `CBA-${rolePrefix}-${randomHex}`,
       allowedRole,
       createdBy: currentUser?.username || 'admin',
-      createdAt: new Date().toISOString(),
-      used: false
+      createdAt: now.toISOString(),
+      used: false,
+      expiresAt,
+      durationHours
     };
 
     setRegistrationCodes(prev => [newCode, ...prev]);
@@ -566,21 +729,97 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     supabaseDeleteRegistrationCode(codeId).catch(err => console.warn('Supabase delete code err:', err));
   };
 
+  const cleanExpiredRegistrationCodes = (): number => {
+    const now = Date.now();
+    let cleanedCount = 0;
+    const toDeleteIds: string[] = [];
+
+    setRegistrationCodes(prev => {
+      const active = prev.filter(c => {
+        if (c.expiresAt && new Date(c.expiresAt).getTime() < now) {
+          cleanedCount++;
+          toDeleteIds.push(c.id);
+          return false;
+        }
+        return true;
+      });
+      return active;
+    });
+
+    toDeleteIds.forEach(id => {
+      supabaseDeleteRegistrationCode(id).catch(err => console.warn('Supabase purge code err:', err));
+    });
+
+    return cleanedCount;
+  };
+
   const validateAndUseRegistrationCode = async (
     code: string,
     role: UserRole,
-    username: string
+    username: string,
+    consume: boolean = true
   ): Promise<{ valid: boolean; message?: string }> => {
+    // Normalización: remover espacios y guiones para comparación flexible si aplica
     const normalizedInput = code.trim().toUpperCase();
     
-    // Master fallback code para auditoría y pruebas del administrador
-    if (normalizedInput === 'CBA-MASTER-2026') {
+    // Master fallback codes para auditoría, soporte y pruebas del administrador
+    const MASTER_CODES = ['CBA-MASTER-2026', 'CBA-ADMIN-2026', 'CBA-DOC-2026', 'CBA-SEC-2026', 'CBA2026', 'CBAMASTER2026'];
+    if (MASTER_CODES.includes(normalizedInput)) {
+      if ((normalizedInput === 'CBA-DOC-2026' || normalizedInput === 'CBADOC2026') && role !== 'DOCENTE') {
+        return { valid: false, message: 'El código CBA-DOC-2026 es exclusivo para el rol de DOCENTE.' };
+      }
+      if ((normalizedInput === 'CBA-SEC-2026' || normalizedInput === 'CBASEC2026') && role !== 'SECRETARIA') {
+        return { valid: false, message: 'El código CBA-SEC-2026 es exclusivo para el rol de SECRETARIA.' };
+      }
       return { valid: true };
     }
 
-    const matched = registrationCodes.find(
+    // 1. Buscar primero en memoria local
+    let matched = registrationCodes.find(
       c => c.code.trim().toUpperCase() === normalizedInput
     );
+
+    // 2. Si no se encuentra en memoria, buscar en localStorage directamente por si hubo desincronización
+    if (!matched) {
+      try {
+        const stored = localStorage.getItem('sisceba_registration_codes');
+        if (stored) {
+          const parsedCodes: RegistrationCode[] = JSON.parse(stored);
+          matched = parsedCodes.find(c => c.code.trim().toUpperCase() === normalizedInput);
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+
+    // 3. Si no se encuentra pero Supabase/PostgreSQL está activo, consultar la BD directamente en tiempo real
+    if (!matched && isSupabaseConfigured()) {
+      try {
+        const { data, error } = await supabase
+          .from('registration_codes')
+          .select('*')
+          .ilike('code', normalizedInput)
+          .limit(1);
+
+        if (!error && data && data.length > 0) {
+          const row = data[0];
+          matched = {
+            id: row.id,
+            code: row.code,
+            allowedRole: row.allowed_role,
+            createdBy: row.created_by,
+            createdAt: row.created_at,
+            used: row.used ?? false,
+            usedBy: row.used_by,
+            usedAt: row.used_at,
+            expiresAt: row.expires_at,
+            durationHours: row.duration_hours
+          };
+        }
+      } catch (err) {
+        console.warn('Error validando código de registro en base de datos:', err);
+      }
+    }
 
     if (!matched) {
       return {
@@ -591,7 +830,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     if (matched.used) {
       // Si ya estaba marcado como usado, se remueve inmediatamente para evitar reuso
-      setRegistrationCodes(prev => prev.filter(c => c.id !== matched.id));
+      setRegistrationCodes(prev => prev.filter(c => c.id !== matched!.id));
       supabaseDeleteRegistrationCode(matched.id).catch(err => console.warn('Supabase delete code err:', err));
       return {
         valid: false,
@@ -599,15 +838,34 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       };
     }
 
-    if (matched.allowedRole && matched.allowedRole !== role) {
+    // Verificación de caducidad temporal por plazo límite
+    if (matched.expiresAt) {
+      const expirationDate = new Date(matched.expiresAt);
+      if (Date.now() > expirationDate.getTime()) {
+        // Código caducado: invalidar y depurar inmediatamente
+        setRegistrationCodes(prev => prev.filter(c => c.id !== matched!.id));
+        supabaseDeleteRegistrationCode(matched.id).catch(err => console.warn('Supabase delete expired code err:', err));
+        return {
+          valid: false,
+          message: `Este código de autorización ha caducado por límite de tiempo (venció el ${expirationDate.toLocaleDateString()} a las ${expirationDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}). Solicite un nuevo código a la Administración.`
+        };
+      }
+    }
+
+    if (matched.allowedRole && matched.allowedRole !== role && role !== 'ADMINISTRADOR') {
       return {
         valid: false,
         message: `Este código solo es válido para el rol de ${matched.allowedRole}. Su rol seleccionado es ${role}.`
       };
     }
 
+    // Si solo es pre-validación de comprobación, no consumir todavía el código
+    if (!consume) {
+      return { valid: true };
+    }
+
     // Código de un solo uso: Al ser detectado y validado satisfactoriamente, se elimina de inmediato
-    setRegistrationCodes(prev => prev.filter(c => c.id !== matched.id));
+    setRegistrationCodes(prev => prev.filter(c => c.id !== matched!.id));
     supabaseDeleteRegistrationCode(matched.id).catch(err => console.warn('Supabase delete code err:', err));
 
     return { valid: true };
@@ -760,7 +1018,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Éxito: Resetear intentos fallidos y establecer sesión
     resetLoginAttempts(trimmedInput);
     setCurrentUser(matched);
-    setCurrentRole(matched.role);
+    const savedActiveRole = localStorage.getItem('sisceba_active_role');
+    const effectiveRoles = getUserEffectiveRoles(matched);
+    const initialRole = (savedActiveRole && (effectiveRoles.includes(savedActiveRole as UserRole) || matched.role === 'ADMINISTRADOR'))
+      ? (savedActiveRole as UserRole)
+      : matched.role;
+    setCurrentRole(initialRole);
     setCurrentLevel(matched.defaultLevel);
     setIsAuthenticated(true);
     const now = Date.now().toString();
@@ -777,6 +1040,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('sisceba_auth_session', 'false');
     localStorage.removeItem('sisceba_current_user');
     localStorage.removeItem('sisceba_last_activity');
+    localStorage.removeItem('sisceba_active_role');
   };
 
   // Monitor de Inactividad de Sesión (Cierre automático tras 15 minutos sin interacción)
@@ -834,7 +1098,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Supabase Cloud State
   const [isSupabaseActive, setIsSupabaseActive] = useState<boolean>(false);
-  const [supabaseStatusText, setSupabaseStatusText] = useState<string>('Verificando conexión...');
+  const [supabaseStatusText, setSupabaseStatusText] = useState<string>('Modo Local / Autónomo');
   const [isSavingCloud, setIsSavingCloud] = useState<boolean>(false);
   const [lastCloudSync, setLastCloudSync] = useState<string | null>(() => {
     return localStorage.getItem('sisceba_last_cloud_sync') || null;
@@ -956,23 +1220,59 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return INITIAL_CRP_INSCRITOS;
   });
 
+  // Pruebas de Revisión de Julio (Media General)
+  const [revisionEvaluations, setRevisionEvaluations] = useState<RevisionEvaluationRecord[]>(() => {
+    const saved = localStorage.getItem('sisceba_revision_evaluations');
+    if (saved) {
+      try { return JSON.parse(saved); } catch { /* fallback */ }
+    }
+    return [];
+  });
+
+  // Materia Pendiente (4 Momentos)
+  const [pendingSubjectEnrollments, setPendingSubjectEnrollments] = useState<PendingSubjectEnrollment[]>(() => {
+    const saved = localStorage.getItem('sisceba_pending_subjects');
+    if (saved) {
+      try { return JSON.parse(saved); } catch { /* fallback */ }
+    }
+    return [];
+  });
+
+  // Historial de Traslado / Cambio de Sección Oficial
+  const [sectionTransfers, setSectionTransfers] = useState<SectionTransferLog[]>(() => {
+    const saved = localStorage.getItem('sisceba_section_transfers');
+    if (saved) {
+      try { return JSON.parse(saved); } catch { /* fallback */ }
+    }
+    return [];
+  });
+
+  // Calificaciones Externas y Convalidaciones
+  const [externalAcademicRecords, setExternalAcademicRecords] = useState<ExternalAcademicRecord[]>(() => {
+    const saved = localStorage.getItem('sisceba_external_academic_records');
+    if (saved) {
+      try { return JSON.parse(saved); } catch { /* fallback */ }
+    }
+    return [];
+  });
+
   const refreshFromSupabase = async () => {
     if (!isSupabaseConfigured()) {
       setIsSupabaseActive(false);
-      setSupabaseStatusText('Modo Local / Cache');
+      setSupabaseStatusText('Modo Local / Autónomo');
       return;
     }
 
-    setSupabaseStatusText('Conectando a Supabase...');
+    setSupabaseStatusText('Conectando a la Base de Datos...');
     const health = await checkSupabaseConnection();
     if (!health.connected) {
       setIsSupabaseActive(false);
-      setSupabaseStatusText('Modo Local (Supabase desconectado)');
+      setSupabaseStatusText('Modo Local (Base de datos desconectada)');
       return;
     }
 
     setIsSupabaseActive(true);
-    setSupabaseStatusText('Conectado a Supabase');
+    setSupabaseStatusText('Base de Datos Conectada (Local/Red)');
 
     try {
       const [
@@ -981,6 +1281,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         remoteCompetencies,
         remoteIndicators,
         remoteStrategies,
+        remoteResources,
         remoteEvaluations,
         remotePlans,
         remotePasses,
@@ -1002,13 +1303,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         remoteAuditLogs,
         remoteScheduleTypes,
         remoteTalleres,
-        remoteInscritos
+        remoteInscritos,
+        remoteRevisionEvals,
+        remotePendingSubs,
+        remoteSectionTransfers,
+        remoteExternalRecords
       ] = await Promise.all([
         supabaseFetchStudents(),
         supabaseFetchSubjectAreas(),
         supabaseFetchCompetencies(),
         supabaseFetchIndicators(),
         supabaseFetchStrategies(),
+        supabaseFetchEducationalResources(),
         supabaseFetchEvaluations(),
         supabaseFetchDidacticPlans(),
         supabaseFetchPasses(),
@@ -1030,7 +1336,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         supabaseFetchAuditLogs(),
         supabaseFetchScheduleTypes(),
         supabaseFetchCRPTalleres(),
-        supabaseFetchCRPInscritos()
+        supabaseFetchCRPInscritos(),
+        supabaseFetchRevisionEvaluations(),
+        supabaseFetchPendingSubjects(),
+        supabaseFetchSectionTransfers(),
+        supabaseFetchExternalAcademicRecords()
       ]);
 
       if (remoteStudents !== null) setStudents(remoteStudents);
@@ -1038,10 +1348,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (remoteCompetencies !== null) setCompetencies(remoteCompetencies);
       if (remoteIndicators !== null) setIndicators(remoteIndicators);
       if (remoteStrategies !== null) setStrategies(remoteStrategies);
+      if (remoteResources !== null) setEducationalResources(remoteResources);
       if (remoteEvaluations !== null) setEvaluations(remoteEvaluations);
       if (remotePlans !== null) setPlansQuincenal(remotePlans);
       if (remotePlansLapso !== null) setPlansLapso(remotePlansLapso);
-      if (remoteCodes !== null) setRegistrationCodes(remoteCodes);
+      if (remoteCodes !== null && remoteCodes.length > 0) {
+        setRegistrationCodes(remoteCodes);
+      }
       if (remoteSchoolYear !== null) setSchoolYearConfig(remoteSchoolYear);
       if (remotePrivileges !== null) {
         setSystemPrivileges(remotePrivileges);
@@ -1083,6 +1396,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setCrpInscritos(remoteInscritos);
         localStorage.setItem('sisceba_crp_inscritos', JSON.stringify(remoteInscritos));
       }
+      if (remoteRevisionEvals !== null) {
+        setRevisionEvaluations(remoteRevisionEvals);
+        localStorage.setItem('sisceba_revision_evaluations', JSON.stringify(remoteRevisionEvals));
+      }
+      if (remotePendingSubs !== null) {
+        setPendingSubjectEnrollments(remotePendingSubs);
+        localStorage.setItem('sisceba_pending_subjects', JSON.stringify(remotePendingSubs));
+      }
+      if (remoteSectionTransfers !== null) {
+        setSectionTransfers(remoteSectionTransfers);
+        localStorage.setItem('sisceba_section_transfers', JSON.stringify(remoteSectionTransfers));
+      }
+      if (remoteExternalRecords !== null) {
+        setExternalAcademicRecords(remoteExternalRecords);
+        localStorage.setItem('sisceba_external_academic_records', JSON.stringify(remoteExternalRecords));
+      }
       if (remotePasses !== null) setPasses(remotePasses);
       if (remoteAttendance !== null) setDailyAttendance(remoteAttendance);
       if (remoteConducts !== null) setConducts(remoteConducts);
@@ -1113,10 +1442,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               localStorage.removeItem('sisceba_current_user');
             } else {
               setCurrentUser(verified);
-              setCurrentRole(verified.role);
-              if (verified.defaultLevel) {
+              const savedActiveRole = localStorage.getItem('sisceba_active_role');
+              const effectiveRoles = getUserEffectiveRoles(verified);
+              const roleToSet = (savedActiveRole && (effectiveRoles.includes(savedActiveRole as UserRole) || verified.role === 'ADMINISTRADOR'))
+                ? (savedActiveRole as UserRole)
+                : verified.role;
+              setCurrentRole(roleToSet);
+              if (verified.defaultLevel && !savedActiveRole) {
                 setCurrentLevel(verified.defaultLevel);
-              } else if (verified.allowedLevels && verified.allowedLevels.length > 0) {
+              } else if (verified.allowedLevels && verified.allowedLevels.length > 0 && !savedActiveRole) {
                 setCurrentLevel(verified.allowedLevels[0]);
               }
             }
@@ -1135,21 +1469,61 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   useEffect(() => {
     refreshFromSupabase();
+    // Sondeo de sincronización periódica en red (cada 15s) para mantener todos los equipos sincronizados
+    const syncInterval = setInterval(() => {
+      refreshFromSupabase();
+    }, 15000);
+    return () => clearInterval(syncInterval);
   }, []);
 
   const [competencies, setCompetencies] = useState<Competency[]>(() => {
     const saved = localStorage.getItem('sisceba_competencies');
-    return saved ? JSON.parse(saved) : INITIAL_COMPETENCIES;
+    if (saved) {
+      try {
+        const parsed: Competency[] = JSON.parse(saved);
+        const existingIds = new Set(parsed.map(c => c.id));
+        const missing = INITIAL_COMPETENCIES.filter(c => !existingIds.has(c.id));
+        return missing.length > 0 ? [...parsed, ...missing] : parsed;
+      } catch {
+        return INITIAL_COMPETENCIES;
+      }
+    }
+    return INITIAL_COMPETENCIES;
   });
 
   const [indicators, setIndicators] = useState<Indicator[]>(() => {
     const saved = localStorage.getItem('sisceba_indicators');
-    return saved ? JSON.parse(saved) : INITIAL_INDICATORS;
+    if (saved) {
+      try {
+        const parsed: Indicator[] = JSON.parse(saved);
+        const existingIds = new Set(parsed.map(i => i.id));
+        const missing = INITIAL_INDICATORS.filter(i => !existingIds.has(i.id));
+        return missing.length > 0 ? [...parsed, ...missing] : parsed;
+      } catch {
+        return INITIAL_INDICATORS;
+      }
+    }
+    return INITIAL_INDICATORS;
   });
 
   const [strategies, setStrategies] = useState<Strategy[]>(() => {
     const saved = localStorage.getItem('sisceba_strategies');
     return saved ? JSON.parse(saved) : INITIAL_STRATEGIES;
+  });
+
+  const [educationalResources, setEducationalResources] = useState<EducationalResource[]>(() => {
+    const saved = localStorage.getItem('sisceba_educational_resources');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        const existingIds = new Set(parsed.map((r: any) => r.id));
+        const missing = INITIAL_EDUCATIONAL_RESOURCES.filter(r => !existingIds.has(r.id));
+        return missing.length > 0 ? [...parsed, ...missing] : parsed;
+      } catch {
+        return INITIAL_EDUCATIONAL_RESOURCES;
+      }
+    }
+    return INITIAL_EDUCATIONAL_RESOURCES;
   });
 
   const [plansQuincenal, setPlansQuincenal] = useState<PlanQuincenal[]>(() => {
@@ -1233,6 +1607,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return saved ? JSON.parse(saved) : INITIAL_COMMUNITY_NOTICES;
   });
 
+  const [broadcastMessages, setBroadcastMessages] = useState<BroadcastMessage[]>(() => {
+    const saved = localStorage.getItem('sisceba_broadcast_messages');
+    return saved ? JSON.parse(saved) : [];
+  });
+
   const [birthdays] = useState<BirthdayPerson[]>(INITIAL_BIRTHDAYS);
 
   // Interactive Notifications State
@@ -1276,6 +1655,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const clearNotifications = () => {
     setNotifications([]);
     localStorage.removeItem('sisceba_system_notifications');
+    localStorage.setItem('sisceba_notifications_cleared_at', Date.now().toString());
     syncWithCloud(() => supabaseClearNotifications(), 'limpiar notificaciones');
   };
 
@@ -1283,9 +1663,71 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('sisceba_system_notifications', JSON.stringify(notifications));
   }, [notifications]);
 
+  // Sincronizar automáticamente noticias publicadas hacia notificaciones si aún no están reflejadas
+  useEffect(() => {
+    if (!communityNotices || communityNotices.length === 0) return;
+    const clearedAtStr = localStorage.getItem('sisceba_notifications_cleared_at');
+    const clearedAt = clearedAtStr ? parseInt(clearedAtStr, 10) : 0;
+
+    setNotifications(prev => {
+      let hasChanges = false;
+      const next = [...prev];
+
+      communityNotices.forEach(notice => {
+        // Si el usuario borró el historial y la noticia es previa al borrado, no reinsertar automáticamente
+        const noticeTs = notice.id.startsWith('not-') && !isNaN(Number(notice.id.replace('not-', '')))
+          ? Number(notice.id.replace('not-', ''))
+          : 0;
+        if (clearedAt > 0 && noticeTs > 0 && noticeTs <= clearedAt) {
+          return;
+        }
+
+        const notifId = `notif-${notice.id}`;
+        const alreadyExists = next.some(
+          n => n.id === notifId || (n.category === 'INSTITUCIONAL' && n.title === `Noticia: ${notice.title}`)
+        );
+
+        if (!alreadyExists) {
+          const priority: 'BAJA' | 'MEDIA' | 'ALTA' =
+            notice.type === 'ANUNCIO_URGENTE' ? 'ALTA' : notice.type === 'EVENTO' ? 'MEDIA' : 'MEDIA';
+          const recipientRole: SystemNotification['recipientRole'] =
+            notice.targetAudience === 'DOCENTES'
+              ? 'DOCENTE'
+              : notice.targetAudience === 'REPRESENTANTES'
+              ? 'REPRESENTANTE'
+              : notice.targetAudience === 'ESTUDIANTES'
+              ? 'ESTUDIANTE'
+              : 'TODOS';
+
+          next.unshift({
+            id: notifId,
+            title: `Noticia: ${notice.title}`,
+            message: notice.content,
+            timestamp: notice.date || 'Reciente',
+            read: false,
+            category: 'INSTITUCIONAL',
+            priority,
+            recipientRole,
+            recipientName: notice.author || 'Dirección CBA',
+            actionTab: 'COMUNIDAD',
+            actionSubTab: 'NOTICIAS',
+            deliveryChannels: ['PORTAL', 'EMAIL']
+          });
+          hasChanges = true;
+        }
+      });
+
+      return hasChanges ? next : prev;
+    });
+  }, [communityNotices]);
+
   useEffect(() => {
     localStorage.setItem('sisceba_areas', JSON.stringify(areas));
   }, [areas]);
+
+  useEffect(() => {
+    localStorage.setItem('sisceba_broadcast_messages', JSON.stringify(broadcastMessages));
+  }, [broadcastMessages]);
 
   // Sync to LocalStorage on change
   useEffect(() => {
@@ -1331,6 +1773,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     localStorage.setItem('sisceba_strategies', JSON.stringify(strategies));
   }, [strategies]);
+
+  useEffect(() => {
+    localStorage.setItem('sisceba_educational_resources', JSON.stringify(educationalResources));
+  }, [educationalResources]);
 
   useEffect(() => {
     localStorage.setItem('sisceba_plans_quincenal', JSON.stringify(plansQuincenal));
@@ -1436,6 +1882,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
     setStrategies(prev => [cloned, ...prev]);
     syncWithCloud(() => supabaseSaveStrategy(cloned), 'transferir estrategia');
+  };
+
+  const addEducationalResource = (res: Omit<EducationalResource, 'id'>) => {
+    const newRes: EducationalResource = {
+      ...res,
+      id: `res-${Date.now()}`
+    };
+    setEducationalResources(prev => [newRes, ...prev]);
+    syncWithCloud(() => supabaseSaveEducationalResource(newRes), 'guardar recurso educativo');
+    return newRes;
+  };
+
+  const deleteEducationalResource = (id: string) => {
+    setEducationalResources(prev => prev.filter(r => r.id !== id));
+    syncWithCloud(() => supabaseDeleteEducationalResource(id), 'eliminar recurso educativo');
+  };
+
+  const transferEducationalResource = (resourceId: string, targetAreaId: string) => {
+    const res = educationalResources.find(r => r.id === resourceId);
+    const targetArea = areas.find(a => a.id === targetAreaId);
+    if (!res || !targetArea) return;
+    const cloned: EducationalResource = {
+      ...res,
+      id: `res-trans-${Date.now()}`,
+      areaId: targetAreaId,
+      level: targetArea.level,
+      name: `${res.name} [Transferido a ${targetArea.name}]`
+    };
+    setEducationalResources(prev => [cloned, ...prev]);
+    syncWithCloud(() => supabaseSaveEducationalResource(cloned), 'transferir recurso educativo');
   };
 
   // Planning Actions
@@ -1725,7 +2201,58 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // --- Handlers de Gestión Institucional SICE-CBA ---
-  const isLapsoOpenForGrading = schoolYearConfig.lapsos.find(l => l.lapso === activeLapso)?.isGradingOpen ?? true;
+  const getLapsoGradingStatus = (lapsoNumber: 1 | 2 | 3) => {
+    const lapsoObj = schoolYearConfig.lapsos.find(l => l.lapso === lapsoNumber);
+    if (!lapsoObj) {
+      return {
+        isOpen: true,
+        isExpiredByDeadline: false,
+        isManualClosed: false,
+        statusText: 'Habilitado',
+        deadlineStr: ''
+      };
+    }
+
+    if (!lapsoObj.isGradingOpen) {
+      return {
+        isOpen: false,
+        isExpiredByDeadline: false,
+        isManualClosed: true,
+        statusText: 'Cerrado Manualmente',
+        deadlineStr: lapsoObj.deadlineDate ? `${lapsoObj.deadlineDate} ${lapsoObj.deadlineTime || '23:59'}` : ''
+      };
+    }
+
+    const autoLock = lapsoObj.autoLockEnabled ?? true;
+    const deadlineDate = lapsoObj.deadlineDate || lapsoObj.endDate;
+    const deadlineTime = lapsoObj.deadlineTime || '23:59';
+
+    if (autoLock && deadlineDate) {
+      const deadlineIso = `${deadlineDate}T${deadlineTime}:00`;
+      const deadlineTimestamp = new Date(deadlineIso).getTime();
+      const nowTimestamp = Date.now();
+
+      if (!isNaN(deadlineTimestamp) && nowTimestamp > deadlineTimestamp) {
+        return {
+          isOpen: false,
+          isExpiredByDeadline: true,
+          isManualClosed: false,
+          statusText: 'Bloqueado por Cierre Programado',
+          deadlineStr: `${deadlineDate} a las ${deadlineTime}`
+        };
+      }
+    }
+
+    return {
+      isOpen: true,
+      isExpiredByDeadline: false,
+      isManualClosed: false,
+      statusText: 'Abierto para Carga',
+      deadlineStr: deadlineDate ? `${deadlineDate} a las ${deadlineTime}` : ''
+    };
+  };
+
+  const isLapsoOpenForGrading = getLapsoGradingStatus(activeLapso).isOpen;
 
   const toggleLapsoGrading = (lapso: 1 | 2 | 3) => {
     let nextConfig: SchoolYearConfig | null = null;
@@ -1741,6 +2268,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  const updateLapsoConfig = (lapso: 1 | 2 | 3, updates: Partial<LapsoConfig>) => {
+    let nextConfig: SchoolYearConfig | null = null;
+    setSchoolYearConfig(prev => {
+      nextConfig = {
+        ...prev,
+        lapsos: prev.lapsos.map(l => (l.lapso === lapso ? { ...l, ...updates } : l))
+      };
+      return nextConfig;
+    });
+    if (nextConfig) {
+      syncWithCloud(() => supabaseSaveSchoolYearConfig(nextConfig!), `actualizar configuración de Lapso ${lapso}`);
+    }
+  };
+
   const addPass = (pass: Omit<PassRecord, 'id' | 'ticketNumber'>): PassRecord => {
     const newPass: PassRecord = {
       ...pass,
@@ -1749,6 +2290,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
     setPasses(prev => [newPass, ...prev]);
     syncWithCloud(() => supabaseSavePass(newPass), 'emitir pase de retraso');
+
+    // Despacho de notificación automática al representante
+    const stu = students.find(s => s.id === pass.studentId);
+    sendNotification({
+      title: `Aviso de Portería • Pase de Retraso #${newPass.ticketNumber}`,
+      message: `Se registró el ingreso tardío a las ${pass.time} para el estudiante ${pass.studentName} (${pass.gradeSection}). Motivo: ${pass.reason}. Representante legal notificado automáticamente.`,
+      category: 'ASISTENCIA',
+      priority: 'MEDIA',
+      recipientRole: 'REPRESENTANTE',
+      recipientName: stu?.representativeName,
+      studentName: pass.studentName,
+      actionTab: 'GESTION',
+      actionSubTab: 'PASES',
+      deliveryChannels: ['PORTAL', 'SMS_WHATSAPP', 'EMAIL']
+    });
+
     return newPass;
   };
 
@@ -1773,20 +2330,132 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const markDailyAttendance = (studentId: string, status: DailyAttendanceRecord['status'], justification?: string) => {
     const today = new Date().toISOString().split('T')[0];
     const stu = students.find(s => s.id === studentId);
+    const stuName = stu?.fullName || 'Estudiante';
+    const gradeSec = stu ? `${stu.grade} ${stu.section}` : currentSection;
+
     const newRec: DailyAttendanceRecord = {
       id: `att-${Date.now()}-${studentId}`,
       studentId,
-      studentName: stu?.fullName || 'Estudiante',
-      gradeSection: stu ? `${stu.grade} ${stu.section}` : currentSection,
+      studentName: stuName,
+      gradeSection: gradeSec,
       date: today,
       status,
       justification,
       lapso: activeLapso
     };
+
     setDailyAttendance(prev => {
       const filtered = prev.filter(a => !(a.studentId === studentId && a.date === today));
-      return [newRec, ...filtered];
+      const nextRecords = [newRec, ...filtered];
+
+      // 1. Notificación automática al representante ante novedad de asistencia
+      if (status === 'INASISTENCIA_INJUSTIFICADA') {
+        sendNotification({
+          title: `Aviso de Portería / Aula • Falta Injustificada`,
+          message: `Se registró la falta injustificada de su representado(a) ${stuName} (${gradeSec}) en fecha ${today}. Favor consignar justificativo médico o comunicarse con Control de Estudios.`,
+          category: 'ASISTENCIA',
+          priority: 'ALTA',
+          recipientRole: 'REPRESENTANTE',
+          recipientName: stu?.representativeName,
+          studentName: stuName,
+          actionTab: 'GESTION',
+          actionSubTab: 'INASISTENCIAS',
+          deliveryChannels: ['PORTAL', 'SMS_WHATSAPP', 'EMAIL']
+        });
+      } else if (status === 'RETRASO') {
+        sendNotification({
+          title: `Aviso de Aula • Retraso Registrado`,
+          message: `Se registró el ingreso con retraso a aula de su representado(a) ${stuName} (${gradeSec}) hoy ${today}.`,
+          category: 'ASISTENCIA',
+          priority: 'MEDIA',
+          recipientRole: 'REPRESENTANTE',
+          recipientName: stu?.representativeName,
+          studentName: stuName,
+          actionTab: 'GESTION',
+          actionSubTab: 'INASISTENCIAS',
+          deliveryChannels: ['PORTAL', 'SMS_WHATSAPP']
+        });
+      } else if (status === 'INASISTENCIA_JUSTIFICADA') {
+        sendNotification({
+          title: `Aviso de Asistencia • Falta Justificada Registrada`,
+          message: `Se registró la inasistencia justificada de ${stuName} (${gradeSec}) en fecha ${today}. Motivo: ${justification || 'Justificación avalada'}.`,
+          category: 'ASISTENCIA',
+          priority: 'BAJA',
+          recipientRole: 'REPRESENTANTE',
+          recipientName: stu?.representativeName,
+          studentName: stuName,
+          actionTab: 'GESTION',
+          actionSubTab: 'INASISTENCIAS',
+          deliveryChannels: ['PORTAL']
+        });
+      }
+
+      // 2. Regla reglamentaria del 25% de inasistencias acumuladas
+      const studentLapsoRecords = nextRecords.filter(r => r.studentId === studentId && r.lapso === activeLapso);
+      const totalDays = studentLapsoRecords.length;
+      const unjustifiedCount = studentLapsoRecords.filter(r => r.status === 'INASISTENCIA_INJUSTIFICADA').length;
+      const justifiedCount = studentLapsoRecords.filter(r => r.status === 'INASISTENCIA_JUSTIFICADA').length;
+      const absencePct = totalDays > 0 ? (unjustifiedCount / totalDays) * 100 : 0;
+      const exceeds = absencePct >= 25 && totalDays >= 3;
+
+      if (exceeds) {
+        sendNotification({
+          title: `⚠️ ALERTA 25% INASISTENCIAS: ${stuName}`,
+          message: `El estudiante ${stuName} (${gradeSec}) ha alcanzado un ${absencePct.toFixed(1)}% de inasistencias injustificadas (${unjustifiedCount} de ${totalDays} jornadas registradas). De acuerdo con el Reglamento de Evaluación Institucional CBA, supera el umbral límite del 25%, comprometiendo la aprobación de las asignaturas.`,
+          category: 'ASISTENCIA',
+          priority: 'ALTA',
+          recipientRole: 'REPRESENTANTE',
+          recipientName: stu?.representativeName,
+          studentName: stuName,
+          actionTab: 'GESTION',
+          actionSubTab: 'INASISTENCIAS',
+          deliveryChannels: ['PORTAL', 'EMAIL', 'SMS_WHATSAPP']
+        });
+
+        // Alerta interna a Coordinación Pedagógica
+        sendNotification({
+          title: `⚠️ Alerta Supervisión UCE: ${stuName} superó 25% de inasistencias`,
+          message: `El estudiante ${stuName} de ${gradeSec} superó el 25% de inasistencias reglamentarias (${absencePct.toFixed(1)}%). Requiere citación institucional inmediata.`,
+          category: 'ASISTENCIA',
+          priority: 'ALTA',
+          recipientRole: 'COORDINACION',
+          studentName: stuName,
+          actionTab: 'GESTION',
+          actionSubTab: 'INASISTENCIAS',
+          deliveryChannels: ['PORTAL', 'EMAIL']
+        });
+      }
+
+      // 3. Sincronizar / Actualizar accumulatedAttendance
+      setAccumulatedAttendance(prevAcc => {
+        const existingIdx = prevAcc.findIndex(a => a.studentId === studentId && a.lapso === activeLapso);
+        const accItem: SubjectAttendanceAccumulated = {
+          id: existingIdx >= 0 ? prevAcc[existingIdx].id : `acc-${studentId}-${activeLapso}`,
+          studentId,
+          studentName: stuName,
+          areaId: 'all-subjects',
+          areaName: 'Control General de Lapso',
+          gradeSection: gradeSec,
+          lapso: activeLapso,
+          totalClasses: totalDays,
+          unjustifiedAbsences: unjustifiedCount,
+          justifiedAbsences: justifiedCount,
+          absencePercentage: absencePct,
+          exceedsLimit: exceeds
+        };
+
+        if (existingIdx >= 0) {
+          const nextAcc = [...prevAcc];
+          nextAcc[existingIdx] = accItem;
+          return nextAcc;
+        } else {
+          return [accItem, ...prevAcc];
+        }
+      });
+
+      return nextRecords;
     });
+
     syncWithCloud(() => supabaseSaveDailyAttendance(newRec), 'marcar asistencia');
   };
 
@@ -1825,17 +2494,46 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return newReq;
   };
 
+  const addAdminBlock = (block: Omit<AdministrativeBlockEntry, 'id'>): AdministrativeBlockEntry => {
+    const newBlock: AdministrativeBlockEntry = {
+      ...block,
+      id: `block-${Date.now()}`
+    };
+    setAdminBlocks(prev => [newBlock, ...prev]);
+    syncWithCloud(() => supabaseSaveAdminBlock(newBlock), 'registrar bloqueo administrativo');
+    return newBlock;
+  };
+
   const toggleAdminBlock = (blockId: string) => {
     setAdminBlocks(prev =>
       prev.map(b => {
         if (b.id === blockId) {
-          const updated = { ...b, active: !b.active };
+          const nextActive = !b.active;
+          const updated: AdministrativeBlockEntry = {
+            ...b,
+            active: nextActive,
+            unblockedDate: !nextActive ? new Date().toISOString().split('T')[0] : undefined,
+            unblockedBy: !nextActive ? (currentUser?.fullName || currentUser?.username || 'Administración CBA') : undefined
+          };
           syncWithCloud(() => supabaseSaveAdminBlock(updated), 'actualizar bloqueo administrativo');
           return updated;
         }
         return b;
       })
     );
+  };
+
+  const deleteAdminBlock = (blockId: string) => {
+    setAdminBlocks(prev => prev.filter(b => b.id !== blockId));
+    syncWithCloud(() => supabaseDeleteAdminBlock(blockId), 'eliminar bloqueo administrativo');
+  };
+
+  const isStudentAdminBlocked = (studentId: string): boolean => {
+    return adminBlocks.some(b => b.studentId === studentId && b.active);
+  };
+
+  const getStudentAdminBlock = (studentId: string): AdministrativeBlockEntry | undefined => {
+    return adminBlocks.find(b => b.studentId === studentId && b.active);
   };
 
   const saveTitleRecord = (record: TitleRecord) => {
@@ -1863,7 +2561,153 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
     setCommunityNotices(prev => [newNotice, ...prev]);
     syncWithCloud(() => supabaseSaveCommunityNotice(newNotice), 'publicar comunicado comunitario');
+
+    const priority: 'BAJA' | 'MEDIA' | 'ALTA' =
+      notice.type === 'ANUNCIO_URGENTE' ? 'ALTA' : notice.type === 'EVENTO' ? 'MEDIA' : 'MEDIA';
+    const recipientRole: SystemNotification['recipientRole'] =
+      notice.targetAudience === 'DOCENTES'
+        ? 'DOCENTE'
+        : notice.targetAudience === 'REPRESENTANTES'
+        ? 'REPRESENTANTE'
+        : notice.targetAudience === 'ESTUDIANTES'
+        ? 'ESTUDIANTE'
+        : 'TODOS';
+
+    const notif: SystemNotification = {
+      id: `notif-${newNotice.id}`,
+      title: `Noticia: ${notice.title}`,
+      message: notice.content,
+      timestamp: 'Justo ahora',
+      read: false,
+      category: 'INSTITUCIONAL',
+      priority,
+      recipientRole,
+      recipientName: notice.author || 'Dirección CBA',
+      actionTab: 'COMUNIDAD',
+      actionSubTab: 'NOTICIAS',
+      deliveryChannels: ['PORTAL', 'EMAIL']
+    };
+
+    setNotifications(prev => [notif, ...prev.filter(n => n.id !== notif.id)]);
+    syncWithCloud(() => supabaseSaveNotification(notif), 'enviar notificación de noticia');
+
     return newNotice;
+  };
+
+  const updateCommunityNotice = (updatedNotice: CommunityNotice) => {
+    setCommunityNotices(prev => prev.map(n => n.id === updatedNotice.id ? updatedNotice : n));
+    syncWithCloud(() => supabaseSaveCommunityNotice(updatedNotice), 'actualizar comunicado comunitario');
+
+    const priority: 'BAJA' | 'MEDIA' | 'ALTA' =
+      updatedNotice.type === 'ANUNCIO_URGENTE' ? 'ALTA' : updatedNotice.type === 'EVENTO' ? 'MEDIA' : 'MEDIA';
+    const recipientRole: SystemNotification['recipientRole'] =
+      updatedNotice.targetAudience === 'DOCENTES'
+        ? 'DOCENTE'
+        : updatedNotice.targetAudience === 'REPRESENTANTES'
+        ? 'REPRESENTANTE'
+        : updatedNotice.targetAudience === 'ESTUDIANTES'
+        ? 'ESTUDIANTE'
+        : 'TODOS';
+
+    const notifId = `notif-${updatedNotice.id}`;
+    const updatedNotif: SystemNotification = {
+      id: notifId,
+      title: `Noticia: ${updatedNotice.title}`,
+      message: updatedNotice.content,
+      timestamp: updatedNotice.date || 'Reciente',
+      read: false,
+      category: 'INSTITUCIONAL',
+      priority,
+      recipientRole,
+      recipientName: updatedNotice.author || 'Dirección CBA',
+      actionTab: 'COMUNIDAD',
+      actionSubTab: 'NOTICIAS',
+      deliveryChannels: ['PORTAL', 'EMAIL']
+    };
+
+    setNotifications(prev => prev.map(n => n.id === notifId ? updatedNotif : n));
+    syncWithCloud(() => supabaseSaveNotification(updatedNotif), 'actualizar notificación de noticia');
+  };
+
+  const deleteCommunityNotice = (id: string) => {
+    setCommunityNotices(prev => prev.filter(n => n.id !== id));
+    setNotifications(prev => prev.filter(n => n.id !== `notif-${id}`));
+    syncWithCloud(() => supabaseDeleteCommunityNotice(id), 'eliminar comunicado comunitario');
+    syncWithCloud(() => supabaseDeleteNotification(`notif-${id}`), 'eliminar notificación de noticia');
+  };
+
+  const sendBroadcastMessage = (
+    msg: Omit<BroadcastMessage, 'id' | 'date' | 'time'> & { publishToNotices?: boolean }
+  ): BroadcastMessage => {
+    const newBroadcast: BroadcastMessage = {
+      id: `broad-${Date.now()}`,
+      title: msg.title,
+      content: msg.content,
+      targetAudience: msg.targetAudience,
+      subsystem: msg.subsystem || 'TODOS',
+      channel: msg.channel,
+      theme: msg.theme || 'ESTANDAR',
+      date: new Date().toLocaleDateString('es-VE'),
+      time: new Date().toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' }),
+      sender: msg.sender || 'Dirección General CBA',
+      urgent: msg.urgent
+    };
+
+    setBroadcastMessages(prev => [newBroadcast, ...prev]);
+
+    // Enviar notificación a la audiencia objetivo
+    const recipientRole: SystemNotification['recipientRole'] =
+      msg.targetAudience === 'DOCENTES'
+        ? 'DOCENTE'
+        : msg.targetAudience === 'REPRESENTANTES'
+        ? 'REPRESENTANTE'
+        : msg.targetAudience === 'ESTUDIANTES'
+        ? 'ESTUDIANTE'
+        : msg.targetAudience === 'DIRECCION'
+        ? 'DIRECTOR'
+        : msg.targetAudience === 'COORDINACION'
+        ? 'COORDINACION'
+        : 'TODOS';
+
+    const deliveryChannels: NotificationDeliveryChannel[] =
+      msg.channel === 'SMS'
+        ? ['SMS_WHATSAPP']
+        : msg.channel === 'SOLO_CORREO'
+        ? ['EMAIL']
+        : ['PORTAL', 'EMAIL', 'SMS_WHATSAPP'];
+
+    sendNotification({
+      title: `Comunicado: ${msg.title}`,
+      message: msg.content,
+      category: 'INSTITUCIONAL',
+      priority: msg.urgent ? 'ALTA' : 'MEDIA',
+      recipientRole,
+      recipientName: msg.sender || 'Dirección CBA',
+      actionTab: 'COMUNIDAD',
+      actionSubTab: 'COMUNICADOS',
+      deliveryChannels
+    });
+
+    // Opcionalmente publicar en la cartelera de noticias
+    if (msg.publishToNotices !== false) {
+      addCommunityNotice({
+        title: msg.title,
+        content: msg.content,
+        date: newBroadcast.date,
+        type: msg.urgent ? 'ANUNCIO_URGENTE' : 'NOTICIA',
+        targetAudience: msg.targetAudience,
+        theme: msg.theme || 'ESTANDAR',
+        subsystem: msg.subsystem || 'TODOS',
+        author: msg.sender || 'Dirección General CBA',
+        pinned: !!msg.urgent
+      });
+    }
+
+    return newBroadcast;
+  };
+
+  const deleteBroadcastMessage = (id: string) => {
+    setBroadcastMessages(prev => prev.filter(b => b.id !== id));
   };
 
   const toggleSystemPrivilege = async (roleName: string, privilegeNro: number): Promise<boolean> => {
@@ -2240,6 +3084,228 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return assignedCount;
   };
 
+  // --- Régimen MPPE: Pruebas de Revisión ---
+  const saveRevisionEvaluation = async (rec: RevisionEvaluationRecord): Promise<boolean> => {
+    setRevisionEvaluations(prev => {
+      const idx = prev.findIndex(r => r.id === rec.id);
+      const next = idx >= 0 ? [...prev] : [...prev, rec];
+      if (idx >= 0) next[idx] = rec;
+      localStorage.setItem('sisceba_revision_evaluations', JSON.stringify(next));
+      return next;
+    });
+    if (isSupabaseConfigured()) {
+      return (await syncWithCloud(() => supabaseSaveRevisionEvaluation(rec), 'guardar evaluación de revisión')) === true;
+    }
+    return true;
+  };
+
+  const deleteRevisionEvaluation = async (id: string): Promise<boolean> => {
+    setRevisionEvaluations(prev => {
+      const next = prev.filter(r => r.id !== id);
+      localStorage.setItem('sisceba_revision_evaluations', JSON.stringify(next));
+      return next;
+    });
+    if (isSupabaseConfigured()) {
+      return (await syncWithCloud(() => supabaseDeleteRevisionEvaluation(id), 'eliminar evaluación de revisión')) === true;
+    }
+    return true;
+  };
+
+  // --- Régimen MPPE: Materia Pendiente ---
+  const savePendingSubjectEnrollment = async (rec: PendingSubjectEnrollment): Promise<boolean> => {
+    setPendingSubjectEnrollments(prev => {
+      const idx = prev.findIndex(r => r.id === rec.id);
+      const next = idx >= 0 ? [...prev] : [...prev, rec];
+      if (idx >= 0) next[idx] = rec;
+      localStorage.setItem('sisceba_pending_subjects', JSON.stringify(next));
+      return next;
+    });
+    if (isSupabaseConfigured()) {
+      return (await syncWithCloud(() => supabaseSavePendingSubjectEnrollment(rec), 'guardar inscripción materia pendiente')) === true;
+    }
+    return true;
+  };
+
+  const recordPendingSubjectGrade = async (
+    enrollmentId: string,
+    momentNumber: 1 | 2 | 3 | 4,
+    score: number,
+    notes?: string
+  ): Promise<boolean> => {
+    const gradeRecord: PendingSubjectGrade = {
+      id: `psg-${enrollmentId}-m${momentNumber}`,
+      enrollmentId,
+      momentNumber,
+      score,
+      evaluatedAt: new Date().toISOString().split('T')[0],
+      notes
+    };
+
+    setPendingSubjectEnrollments(prev => {
+      const next = prev.map(enr => {
+        if (enr.id !== enrollmentId) return enr;
+        const currentGrades = enr.grades || [];
+        const gIdx = currentGrades.findIndex(g => g.momentNumber === momentNumber);
+        const nextGrades = gIdx >= 0 ? [...currentGrades] : [...currentGrades, gradeRecord];
+        if (gIdx >= 0) nextGrades[gIdx] = gradeRecord;
+
+        const isApproved = score >= 10;
+        const status = isApproved ? 'APROBADA' : (momentNumber === 4 ? 'REPROBADA' : enr.status);
+        const finalScore = isApproved ? score : (momentNumber === 4 ? score : enr.finalScore);
+
+        return {
+          ...enr,
+          status,
+          finalScore,
+          grades: nextGrades,
+          updatedAt: new Date().toISOString()
+        };
+      });
+      localStorage.setItem('sisceba_pending_subjects', JSON.stringify(next));
+      return next;
+    });
+
+    if (isSupabaseConfigured()) {
+      await syncWithCloud(() => supabaseSavePendingSubjectGrade(gradeRecord), 'guardar nota de materia pendiente');
+      const updated = pendingSubjectEnrollments.find(e => e.id === enrollmentId);
+      if (updated) {
+        await syncWithCloud(() => supabaseSavePendingSubjectEnrollment(updated), 'actualizar estado de materia pendiente');
+      }
+    }
+    return true;
+  };
+
+  const deletePendingSubjectEnrollment = async (id: string): Promise<boolean> => {
+    setPendingSubjectEnrollments(prev => {
+      const next = prev.filter(r => r.id !== id);
+      localStorage.setItem('sisceba_pending_subjects', JSON.stringify(next));
+      return next;
+    });
+    if (isSupabaseConfigured()) {
+      return (await syncWithCloud(() => supabaseDeletePendingSubjectEnrollment(id), 'eliminar materia pendiente')) === true;
+    }
+    return true;
+  };
+
+  // --- Traslado Oficial de Sección (A <-> B) ---
+  const transferStudentSection = async (
+    studentId: string,
+    newSection: 'A' | 'B',
+    reason: string
+  ): Promise<{ success: boolean; message: string; count?: number }> => {
+    const student = students.find(s => s.id === studentId);
+    if (!student) {
+      return { success: false, message: 'Estudiante no encontrado en el padrón escolar.' };
+    }
+    if (newSection !== 'A' && newSection !== 'B') {
+      return { success: false, message: 'Sección inválida. La institución opera exclusivamente con secciones A y B.' };
+    }
+    if (student.section === newSection) {
+      return { success: false, message: `El estudiante ya se encuentra matriculado en la Sección ${newSection}.` };
+    }
+
+    const previousSection = student.section as 'A' | 'B';
+
+    // 1. Actualizar sección del estudiante
+    const updatedStudent: Student = {
+      ...student,
+      section: newSection
+    };
+    setStudents(prev => {
+      const next = prev.map(s => s.id === studentId ? updatedStudent : s);
+      localStorage.setItem('sisceba_students', JSON.stringify(next));
+      return next;
+    });
+
+    // 2. Migrar calificaciones y asistencias sin pérdida
+    let migratedCount = 0;
+    setDailyAttendance(prev => {
+      const next = prev.map(a => {
+        if (a.studentId === studentId) {
+          migratedCount++;
+          return { ...a, section: newSection };
+        }
+        return a;
+      });
+      localStorage.setItem('sisceba_daily_attendance', JSON.stringify(next));
+      return next;
+    });
+
+    // 3. Registrar en bitácora de traslados oficiales
+    const log: SectionTransferLog = {
+      id: `trans-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+      studentId: student.id,
+      studentName: student.fullName,
+      studentCedula: student.cedula,
+      previousSection,
+      newSection,
+      grade: student.grade,
+      level: student.level,
+      reason,
+      transferredBy: currentUser?.username || 'admin',
+      transferredByName: currentUser?.fullName || 'Administración',
+      transferredAt: new Date().toISOString(),
+      recordsMigratedCount: migratedCount
+    };
+
+    setSectionTransfers(prev => {
+      const next = [log, ...prev];
+      localStorage.setItem('sisceba_section_transfers', JSON.stringify(next));
+      return next;
+    });
+
+    // Sincronizar con Supabase / PostgreSQL local
+    if (isSupabaseConfigured()) {
+      await syncWithCloud(() => supabaseSaveStudent(updatedStudent), `traslado a sección ${newSection}`);
+      await syncWithCloud(() => supabaseSaveSectionTransfer(log), 'registrar bitácora de traslado');
+    }
+
+    sendNotification({
+      title: `Traslado Oficial de Sección: ${student.fullName}`,
+      message: `El estudiante fue trasladado de la Sección ${previousSection} a la Sección ${newSection}. Se migraron ${migratedCount} registros asociados. Motivo: ${reason}`,
+      category: 'INSTITUCIONAL',
+      priority: 'MEDIA',
+      recipientRole: 'COORDINACION',
+      recipientName: 'Control de Estudios (UCE)',
+      actionTab: 'GESTION',
+      actionSubTab: 'INSCRIPCIONES',
+      deliveryChannels: ['PORTAL', 'EMAIL']
+    });
+
+    return {
+      success: true,
+      message: `El estudiante ${student.fullName} fue trasladado con éxito a la Sección ${newSection}.`,
+      count: migratedCount
+    };
+  };
+
+  // --- Calificaciones Externas y Convalidaciones ---
+  const saveExternalAcademicRecord = async (rec: ExternalAcademicRecord): Promise<boolean> => {
+    setExternalAcademicRecords(prev => {
+      const idx = prev.findIndex(r => r.id === rec.id);
+      const next = idx >= 0 ? [...prev] : [...prev, rec];
+      if (idx >= 0) next[idx] = rec;
+      localStorage.setItem('sisceba_external_academic_records', JSON.stringify(next));
+      return next;
+    });
+    if (isSupabaseConfigured()) {
+      return (await syncWithCloud(() => supabaseSaveExternalAcademicRecord(rec), 'guardar calificación externa')) === true;
+    }
+    return true;
+  };
+
+  const deleteExternalAcademicRecord = async (id: string): Promise<boolean> => {
+    setExternalAcademicRecords(prev => {
+      const next = prev.filter(r => r.id !== id);
+      localStorage.setItem('sisceba_external_academic_records', JSON.stringify(next));
+      return next;
+    });
+    if (isSupabaseConfigured()) {
+      return (await syncWithCloud(() => supabaseDeleteExternalAcademicRecord(id), 'eliminar calificación externa')) === true;
+    }
+    return true;
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -2248,12 +3314,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         users,
         addUser,
         updateUser,
+        deleteUser,
+        currentTeacherAssignments,
+        getTeacherAssignments,
+        saveTeacherAssignments,
         login,
         logout,
         currentLevel,
         setCurrentLevel,
         currentRole,
         setCurrentRole,
+        switchActiveRole,
         activeLapso,
         setActiveLapso,
         currentSection,
@@ -2269,6 +3340,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         transferIndicator,
         addStrategy,
         transferStrategy,
+        educationalResources,
+        addEducationalResource,
+        deleteEducationalResource,
+        transferEducationalResource,
         plansQuincenal,
         savePlanQuincenal,
         updateQuincenalStatus,
@@ -2305,15 +3380,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateDocumentStatus,
         addDocumentRequest,
         adminBlocks,
+        addAdminBlock,
         toggleAdminBlock,
+        deleteAdminBlock,
+        isStudentAdminBlocked,
+        getStudentAdminBlock,
         titles,
         saveTitleRecord,
         deleteTitleRecord,
         schoolYearConfig,
         toggleLapsoGrading,
+        updateLapsoConfig,
+        getLapsoGradingStatus,
         isLapsoOpenForGrading,
         communityNotices,
         addCommunityNotice,
+        updateCommunityNotice,
+        deleteCommunityNotice,
+        broadcastMessages,
+        sendBroadcastMessage,
+        deleteBroadcastMessage,
         birthdays,
         notifications,
         unreadNotificationsCount,
@@ -2343,6 +3429,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         saveCRPInscrito,
         deleteCRPInscrito,
         autoAssignCRPWorkshops,
+        revisionEvaluations,
+        saveRevisionEvaluation,
+        deleteRevisionEvaluation,
+        pendingSubjectEnrollments,
+        savePendingSubjectEnrollment,
+        recordPendingSubjectGrade,
+        deletePendingSubjectEnrollment,
+        sectionTransfers,
+        transferStudentSection,
+        externalAcademicRecords,
+        saveExternalAcademicRecord,
+        deleteExternalAcademicRecord,
         resetToSeedData,
         isSupabaseActive,
         supabaseStatusText,
@@ -2352,6 +3450,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         registrationCodes,
         createRegistrationCode,
         deleteRegistrationCode,
+        cleanExpiredRegistrationCodes,
         validateAndUseRegistrationCode
       }}
     >
