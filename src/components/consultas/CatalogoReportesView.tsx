@@ -60,12 +60,12 @@ export const CatalogoReportesView: React.FC<CatalogoReportesViewProps> = ({
   // Estado para el panel de configuración de filtros del reporte seleccionado (idéntico a C.E.O.)
   const [selectedReportForFilter, setSelectedReportForFilter] = useState<ReporteItem | null>(null);
 
-  // Parámetros de filtros de reporte (idénticos a la pantalla de C.E.O. "LITERALES POR RANGO")
-  const [filtroAno, setFiltroAno] = useState<string>('2026 - 2027');
-  const [filtroLapso, setFiltroLapso] = useState<number>(1);
-  const [filtroGrado, setFiltroGrado] = useState<string>('1er Grado');
-  const [filtroSeccion, setFiltroSeccion] = useState<'A' | 'B' | 'TODAS'>('A');
-  const [filtroPromedio, setFiltroPromedio] = useState<string>('Mismo');
+  // Parámetros de filtros de reporte (idénticos a las pantallas de C.E.O.)
+  const [filtroAno, setFiltroAno] = useState<string>('');
+  const [filtroLapso, setFiltroLapso] = useState<number>(0);
+  const [filtroGrado, setFiltroGrado] = useState<string>('');
+  const [filtroSeccion, setFiltroSeccion] = useState<'A' | 'B' | 'TODAS' | ''>('');
+  const [filtroPromedio, setFiltroPromedio] = useState<string>('Interno');
   const [filtroNotaMin, setFiltroNotaMin] = useState<string>('');
   const [filtroNotaMax, setFiltroNotaMax] = useState<string>('');
   const [filtroSexo, setFiltroSexo] = useState<string>('Todos');
@@ -125,18 +125,11 @@ export const CatalogoReportesView: React.FC<CatalogoReportesViewProps> = ({
   // Manejador de apertura del panel de filtros de un reporte (idéntico a la acción en C.E.O.)
   const openFilterPanel = (reporte: ReporteItem) => {
     setSelectedReportForFilter(reporte);
-    if (reporte.nivel === 'INICIAL') {
-      setFiltroGrado('Preescolar 1');
-    } else if (reporte.nivel === 'PRIMARIA') {
-      setFiltroGrado('1er Grado');
-    } else if (reporte.nivel === 'MEDIA_GENERAL') {
-      setFiltroGrado('1er Año');
-    } else {
-      setFiltroGrado('1er Grado');
-    }
-    setFiltroSeccion('A');
-    setFiltroLapso(1);
-    setFiltroPromedio('Mismo');
+    setFiltroAno('');
+    setFiltroLapso(0);
+    setFiltroGrado('');
+    setFiltroSeccion('');
+    setFiltroPromedio('Interno');
     setFiltroNotaMin('');
     setFiltroNotaMax('');
     setFiltroSexo('Todos');
@@ -358,8 +351,9 @@ export const CatalogoReportesView: React.FC<CatalogoReportesViewProps> = ({
                       onChange={(e) => setFiltroAno(e.target.value)}
                       className="w-full max-w-xl px-3 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-bold focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer"
                     >
-                      <option value="2026 - 2027">2026 - 2027</option>
+                      <option value="">Año Escolar</option>
                       <option value="2025 - 2026">2025 - 2026</option>
+                      <option value="2026 - 2027">2026 - 2027</option>
                       <option value="2024 - 2025">2024 - 2025</option>
                     </select>
                   </td>
@@ -376,6 +370,7 @@ export const CatalogoReportesView: React.FC<CatalogoReportesViewProps> = ({
                       onChange={(e) => setFiltroLapso(Number(e.target.value))}
                       className="w-full max-w-xl px-3 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-bold focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer"
                     >
+                      <option value={0}>Lapso</option>
                       <option value={1}>Lapso 1</option>
                       <option value={2}>Lapso 2</option>
                       <option value={3}>Lapso 3</option>
@@ -394,6 +389,7 @@ export const CatalogoReportesView: React.FC<CatalogoReportesViewProps> = ({
                       onChange={(e) => setFiltroGrado(e.target.value)}
                       className="w-full max-w-xl px-3 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-bold focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer"
                     >
+                      <option value="">Grado</option>
                       {availableGradesForSelectedReport.map((g) => (
                         <option key={g} value={g}>{g}</option>
                       ))}
@@ -409,9 +405,10 @@ export const CatalogoReportesView: React.FC<CatalogoReportesViewProps> = ({
                   <td className="py-2.5 px-5">
                     <select
                       value={filtroSeccion}
-                      onChange={(e) => setFiltroSeccion(e.target.value as 'A' | 'B' | 'TODAS')}
+                      onChange={(e) => setFiltroSeccion(e.target.value as 'A' | 'B' | 'TODAS' | '')}
                       className="w-full max-w-xl px-3 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-bold focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer"
                     >
+                      <option value="">Sección</option>
                       <option value="A">Sección "A"</option>
                       <option value="B">Sección "B"</option>
                       <option value="TODAS">Todas las Secciones</option>
@@ -430,46 +427,49 @@ export const CatalogoReportesView: React.FC<CatalogoReportesViewProps> = ({
                       onChange={(e) => setFiltroPromedio(e.target.value)}
                       className="w-full max-w-xl px-3 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-bold focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer"
                     >
-                      <option value="Mismo">Mismo</option>
                       <option value="Interno">Interno</option>
+                      <option value="Mismo">Mismo</option>
                       <option value="Definitivo">Definitivo</option>
                     </select>
                   </td>
                 </tr>
 
-                {/* 6. Nota Mínima */}
-                <tr className="border-b border-slate-200 dark:border-slate-800">
-                  <td className="py-3 px-5 font-bold text-slate-700 dark:text-slate-300 bg-slate-50/60 dark:bg-slate-800/30">
-                    Nota Mínima
-                  </td>
-                  <td className="py-2.5 px-5">
-                    <input
-                      type="text"
-                      maxLength={4}
-                      value={filtroNotaMin}
-                      onChange={(e) => setFiltroNotaMin(e.target.value)}
-                      placeholder="01 / A"
-                      className="w-20 px-2.5 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-mono text-center font-bold focus:outline-none focus:ring-1 focus:ring-orange-500"
-                    />
-                  </td>
-                </tr>
+                {/* 6 y 7. Nota Mínima y Nota Máxima (Exclusivo para reportes por rango) */}
+                {selectedReportForFilter.nombre.toLowerCase().includes('rango') && (
+                  <>
+                    <tr className="border-b border-slate-200 dark:border-slate-800">
+                      <td className="py-3 px-5 font-bold text-slate-700 dark:text-slate-300 bg-slate-50/60 dark:bg-slate-800/30">
+                        Nota Mínima
+                      </td>
+                      <td className="py-2.5 px-5">
+                        <input
+                          type="text"
+                          maxLength={4}
+                          value={filtroNotaMin}
+                          onChange={(e) => setFiltroNotaMin(e.target.value)}
+                          placeholder="01 / A"
+                          className="w-20 px-2.5 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-mono text-center font-bold focus:outline-none focus:ring-1 focus:ring-orange-500"
+                        />
+                      </td>
+                    </tr>
 
-                {/* 7. Nota Máxima */}
-                <tr className="border-b border-slate-200 dark:border-slate-800">
-                  <td className="py-3 px-5 font-bold text-slate-700 dark:text-slate-300 bg-slate-50/60 dark:bg-slate-800/30">
-                    Nota Máxima
-                  </td>
-                  <td className="py-2.5 px-5">
-                    <input
-                      type="text"
-                      maxLength={4}
-                      value={filtroNotaMax}
-                      onChange={(e) => setFiltroNotaMax(e.target.value)}
-                      placeholder="20 / E"
-                      className="w-20 px-2.5 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-mono text-center font-bold focus:outline-none focus:ring-1 focus:ring-orange-500"
-                    />
-                  </td>
-                </tr>
+                    <tr className="border-b border-slate-200 dark:border-slate-800">
+                      <td className="py-3 px-5 font-bold text-slate-700 dark:text-slate-300 bg-slate-50/60 dark:bg-slate-800/30">
+                        Nota Máxima
+                      </td>
+                      <td className="py-2.5 px-5">
+                        <input
+                          type="text"
+                          maxLength={4}
+                          value={filtroNotaMax}
+                          onChange={(e) => setFiltroNotaMax(e.target.value)}
+                          placeholder="20 / E"
+                          className="w-20 px-2.5 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-mono text-center font-bold focus:outline-none focus:ring-1 focus:ring-orange-500"
+                        />
+                      </td>
+                    </tr>
+                  </>
+                )}
 
                 {/* 8. Sexo */}
                 <tr className="border-b border-slate-200 dark:border-slate-800">
@@ -783,9 +783,9 @@ export const CatalogoReportesView: React.FC<CatalogoReportesViewProps> = ({
           reporte={activeReporteModal}
           studentsList={students}
           onPrintIncrement={handlePrintIncrement}
-          initialGrade={filtroGrado}
-          initialSection={filtroSeccion as 'A' | 'B' | 'TODAS'}
-          initialLapso={filtroLapso}
+          initialGrade={filtroGrado || (availableGradesForSelectedReport[0] || '1er Grado')}
+          initialSection={(filtroSeccion as 'A' | 'B' | 'TODAS') || 'A'}
+          initialLapso={filtroLapso > 0 ? filtroLapso : 1}
           filtroSexo={filtroSexo}
           filtroNotaMin={filtroNotaMin}
           filtroNotaMax={filtroNotaMax}
