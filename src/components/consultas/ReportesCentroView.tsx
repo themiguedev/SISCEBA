@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   Calendar
 } from 'lucide-react';
+import { CatalogoReportesView } from './CatalogoReportesView';
 import { EvaluationRecord, Student } from '../../types';
 
 interface ReportesCentroViewProps {
@@ -35,7 +36,7 @@ export const ReportesCentroView: React.FC<ReportesCentroViewProps> = ({
   const students = overrideStudents || ctxStudents;
   const isAdmin = currentRole === 'ADMINISTRADOR';
 
-  const [activeSubOption, setActiveSubOption] = useState<'BOLETIN' | 'FORMATOS' | 'SABANA'>('BOLETIN');
+  const [activeSubOption, setActiveSubOption] = useState<'CATALOGO' | 'BOLETIN' | 'FORMATOS'>('CATALOGO');
   const [selectedStudentId, setSelectedStudentId] = useState<string>(() => {
     return (isFamilyOrStudent ? scopedStudents[0]?.id : students[0]?.id) || '';
   });
@@ -84,6 +85,18 @@ export const ReportesCentroView: React.FC<ReportesCentroViewProps> = ({
       <div className="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-slate-900 p-2 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm no-print">
         <div className="flex items-center gap-1.5 flex-wrap">
           <button
+            onClick={() => setActiveSubOption('CATALOGO')}
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition ${
+              activeSubOption === 'CATALOGO'
+                ? 'bg-[#2C2E53] text-[#D4AF37] shadow-sm'
+                : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+            }`}
+          >
+            <Printer className="w-4 h-4" />
+            <span>Catálogo Oficial de Reportes (C.E.O.)</span>
+          </button>
+
+          <button
             onClick={() => setActiveSubOption('BOLETIN')}
             className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition ${
               activeSubOption === 'BOLETIN'
@@ -92,7 +105,7 @@ export const ReportesCentroView: React.FC<ReportesCentroViewProps> = ({
             }`}
           >
             <GraduationCap className="w-4 h-4" />
-            <span>Boletín Informativo de Calificaciones</span>
+            <span>Boletín Informativo en Vivo</span>
           </button>
 
           {!isFamilyOrStudent && (
@@ -111,7 +124,7 @@ export const ReportesCentroView: React.FC<ReportesCentroViewProps> = ({
         </div>
 
         {/* Student Selector for Document issuance */}
-        {!isFamilyOrStudent && (
+        {!isFamilyOrStudent && activeSubOption !== 'CATALOGO' && (
           <div className="flex items-center gap-2">
             <span className="text-[11px] font-bold text-slate-500">Estudiante:</span>
             <select
@@ -134,6 +147,19 @@ export const ReportesCentroView: React.FC<ReportesCentroViewProps> = ({
           </div>
         )}
       </div>
+
+      {/* VIEW: CATÁLOGO OFICIAL DE REPORTES C.E.O. (reg_opciones_reportes.php) */}
+      {activeSubOption === 'CATALOGO' && (
+        <CatalogoReportesView
+          students={students}
+          onNavigateToBoletin={(subsystem) => {
+            setActiveSubOption('BOLETIN');
+          }}
+          onOpenOficialFormat={(formatType) => {
+            handleOpenFormat(formatType);
+          }}
+        />
+      )}
 
       {/* VIEW: BOLETÍN INFORMATIVO OFICIAL */}
       {activeSubOption === 'BOLETIN' && (
