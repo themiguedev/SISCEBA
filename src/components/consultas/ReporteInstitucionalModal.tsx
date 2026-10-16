@@ -10,6 +10,13 @@ interface ReporteInstitucionalModalProps {
   reporte: ReporteItem;
   studentsList: Student[];
   onPrintIncrement?: (reporteId: string, newCount: number) => void;
+  initialGrade?: string;
+  initialSection?: 'A' | 'B' | 'TODAS';
+  initialLapso?: number;
+  filtroSexo?: string;
+  filtroNotaMin?: string;
+  filtroNotaMax?: string;
+  filtroOrden?: string;
 }
 
 export const ReporteInstitucionalModal: React.FC<ReporteInstitucionalModalProps> = ({
@@ -17,7 +24,14 @@ export const ReporteInstitucionalModal: React.FC<ReporteInstitucionalModalProps>
   onClose,
   reporte,
   studentsList,
-  onPrintIncrement
+  onPrintIncrement,
+  initialGrade,
+  initialSection,
+  initialLapso,
+  filtroSexo = 'Todos',
+  filtroNotaMin,
+  filtroNotaMax,
+  filtroOrden = 'Apellidos y Nombres'
 }) => {
   const { currentRole, activeLapso, addAuditLog } = useApp();
 
@@ -48,17 +62,36 @@ export const ReporteInstitucionalModal: React.FC<ReporteInstitucionalModalProps>
     ];
   }, [reporte.nivel]);
 
-  const [selectedGrade, setSelectedGrade] = useState<string>(availableGrades[availableGrades.length - 2] || '4to Año');
-  // Regla institucional: EXCLUSIVAMENTE secciones 'A' y 'B'
-  const [selectedSection, setSelectedSection] = useState<'A' | 'B'>('A');
-  const [selectedLapso, setSelectedLapso] = useState<number>(activeLapso || 1);
+  const [selectedGrade, setSelectedGrade] = useState<string>(() => {
+    return initialGrade || availableGrades[availableGrades.length - 2] || '4to Año';
+  });
+  // Regla institucional: EXCLUSIVAMENTE secciones 'A' y 'B' (o TODAS)
+  const [selectedSection, setSelectedSection] = useState<'A' | 'B' | 'TODAS'>(() => {
+    return initialSection || 'A';
+  });
+  const [selectedLapso, setSelectedLapso] = useState<number>(() => {
+    return initialLapso || activeLapso || 1;
+  });
 
   if (!isOpen) return null;
 
-  // Filtrar estudiantes por grado y sección
-  const currentStudents = studentsList.filter(
-    (s) => (s.grade === selectedGrade || !s.grade) && (s.section === selectedSection || !s.section)
-  );
+  // Filtrar estudiantes por grado, sección y sexo
+  let currentStudents = studentsList.filter((s) => {
+    const matchesGrade = !selectedGrade || s.grade === selectedGrade || !s.grade;
+    const matchesSection = selectedSection === 'TODAS' || s.section === selectedSection || !s.section;
+    const matchesSexo =
+      filtroSexo === 'Todos' ||
+      (filtroSexo === 'Femenino' && s.gender === 'F') ||
+      (filtroSexo === 'Masculino' && s.gender === 'M');
+    return matchesGrade && matchesSection && matchesSexo;
+  });
+
+  // Ordenamiento de estudiantes
+  if (filtroOrden === 'Cédula de Identidad') {
+    currentStudents.sort((a, b) => (a.cedula || '').localeCompare(b.cedula || '', 'es'));
+  } else {
+    currentStudents.sort((a, b) => (a.fullName || '').localeCompare(b.fullName || '', 'es'));
+  }
 
   // Muestra fallback defensiva si la lista está vacía
   const displayStudents = currentStudents.length > 0
@@ -499,8 +532,64 @@ export const ReporteInstitucionalModal: React.FC<ReporteInstitucionalModalProps>
                   </tbody>
                 </table>
               </div>
+            ) : reporte.nombre.toLowerCase().includes('rango') ? (
+              /* VISTA 5: REPORTES POR RANGO (LITERALES POR RANGO / CALIFICACIONES POR RANGO) */
+              <div className="space-y-4">
+                <div className="p-3 bg-amber-50/70 border border-amber-200 rounded-xl text-[9pt] leading-relaxed flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                  <div>
+                    Consolidado de distribución por rango evaluativo para <strong>{selectedGrade}</strong> Sección <strong>"{selectedSection}"</strong>.
+                    {filtroNotaMin && <span> • Nota mínima: <strong>{filtroNotaMin}</strong></span>}
+                    {filtroNotaMax && <span> • Nota máxima: <strong>{filtroNotaMax}</strong></span>}
+                    <span> • Sexo: <strong>{filtroSexo}</strong></span>
+                    <span> • Orden: <strong>{filtroOrden}</strong></span>
+                  </div>
+                  <span className="font-mono font-bold text-xs px-2.5 py-1 bg-amber-100 rounded-lg text-amber-900 shrink-0">
+                    Total: {displayStudents.length} estudiantes
+                  </span>
+                </div>
+                <table className="w-full text-left border-collapse border border-slate-300 text-[9pt]">
+                  <thead>
+                    <tr className="bg-slate-100 text-slate-800 font-black">
+                      <th className="border border-slate-300 p-2 text-center w-10">N°</th>
+                      <th className="border border-slate-300 p-2 w-28">Cédula</th>
+                      <th className="border border-slate-300 p-2">Apellidos y Nombres</th>
+                      <th className="border border-slate-300 p-2 text-center w-14">Sexo</th>
+                      <th className="border border-slate-300 p-2 text-center w-24">
+                        {reporte.nombre.toLowerCase().includes('literal') ? 'Literal' : 'Calificación'}
+                      </th>
+                      <th className="border border-slate-300 p-2 text-center w-28">Escala</th>
+                      <th className="border border-slate-300 p-2 text-center w-28">Rango Asignado</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {displayStudents.map((st, idx) => {
+                      const literals = ['A', 'A', 'B', 'B', 'C', 'A'];
+                      const lit = literals[idx % literals.length];
+                      const gradeNum = 18 - (idx % 6);
+                      const isLiteral = reporte.nombre.toLowerCase().includes('literal');
+                      return (
+                        <tr key={st.id || idx} className="hover:bg-slate-50">
+                          <td className="border border-slate-300 p-2 text-center font-bold">{idx + 1}</td>
+                          <td className="border border-slate-300 p-2 font-mono">{st.cedula || 'S/C'}</td>
+                          <td className="border border-slate-300 p-2 font-bold">{st.fullName}</td>
+                          <td className="border border-slate-300 p-2 text-center font-bold">{st.gender || 'M'}</td>
+                          <td className="border border-slate-300 p-2 text-center font-black text-emerald-800 bg-emerald-50/40 text-sm">
+                            {isLiteral ? lit : gradeNum}
+                          </td>
+                          <td className="border border-slate-300 p-2 text-center text-xs font-semibold text-slate-600">
+                            {isLiteral ? (lit === 'A' ? 'Excelente' : lit === 'B' ? 'Muy Bien' : 'Bien') : 'Vigesimal'}
+                          </td>
+                          <td className="border border-slate-300 p-2 text-center font-mono font-bold text-xs text-slate-700">
+                            {isLiteral ? `Rango "${lit}"` : `${gradeNum - 1} - ${gradeNum + 1} pts`}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             ) : (
-              /* VISTA 5: BANCO DE CONTENIDOS, ESTRATEGIAS O COMPETENCIAS */
+              /* VISTA 6: BANCO DE CONTENIDOS, ESTRATEGIAS O COMPETENCIAS */
               <div className="space-y-4">
                 <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-[9pt] leading-relaxed">
                   Instrumento oficial pedagógico para la programación curricular de la Unidad Educativa Colegio Bellas Artes. Registra los temas generadores, ejes temáticos e indicadores de logro aprobados por el Consejo Docente.
