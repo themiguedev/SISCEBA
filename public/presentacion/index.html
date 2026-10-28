@@ -495,6 +495,93 @@
       flex: 1;
     }
 
+    /* 4-Column Minimalist Cards (Tareas Recurrentes) */
+    .card-grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .task-card {
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .task-card:hover {
+      background: rgba(212, 175, 55, 0.04);
+      border-color: var(--cba-gold);
+      transform: translateY(-2px);
+    }
+
+    .task-card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .task-card-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      flex-shrink: 0;
+    }
+
+    .task-card-title {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: #FFFFFF;
+      line-height: 1.25;
+    }
+
+    .task-card-subtitle {
+      font-size: 10px;
+      color: var(--cba-gold);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .task-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      overflow-y: auto;
+      flex: 1;
+      padding-right: 4px;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 7px;
+      font-size: 11.2px;
+      line-height: 1.38;
+      color: #CBD5E1;
+    }
+
+    .task-item-bullet {
+      color: var(--cba-gold);
+      font-size: 11px;
+      line-height: 1.3;
+      flex-shrink: 0;
+    }
+
     .feature-card {
       background: rgba(255, 255, 255, 0.025);
       border: 1px solid rgba(255, 255, 255, 0.08);
@@ -885,8 +972,157 @@
       </div>
     </section>
 
-    <!-- DIAPOSITIVA 5: Normativa Legal MPPE y Roles Blindados -->
-    <section class="slide" data-index="4" data-category="DOCENTES DIRECTIVA">
+    <!-- DIAPOSITIVA 5: Tareas Recurrentes Automatizadas por Rol -->
+    <section class="slide" data-index="4" data-category="DIRECTIVA DOCENTES">
+      <div class="slide-tag">Operatividad Diaria y por Lapso <span class="audience-pill-tag">Tareas Recurrentes</span></div>
+      <h2 class="slide-title">Automatización de Tareas Recurrentes por Rol</h2>
+      <p class="slide-subtitle">Centralización de reportes, estadísticas, control de Grupos CRP y Doble Pensum (MPPE vs CBA):</p>
+
+      <div class="card-grid-4">
+        <!-- Directora -->
+        <div class="task-card">
+          <div class="task-card-header">
+            <div class="task-card-icon" style="background: rgba(212, 175, 55, 0.15); color: #FBBF24; border: 1px solid rgba(212, 175, 55, 0.3);">
+              🏛️
+            </div>
+            <div>
+              <div class="task-card-title">Directora</div>
+              <div class="task-card-subtitle">Supervisión Institucional</div>
+            </div>
+          </div>
+          <ul class="task-list">
+            <li class="task-item">
+              <span class="task-item-bullet">✦</span>
+              <span><strong>Estrategias evaluadas:</strong> Reporte consolidado por curso y por docente.</span>
+            </li>
+            <li class="task-item">
+              <span class="task-item-bullet">✦</span>
+              <span><strong>Asistencia & conducta:</strong> Registros por curso y por estudiante.</span>
+            </li>
+            <li class="task-item">
+              <span class="task-item-bullet">✦</span>
+              <span><strong>Doble Pensum:</strong> Calificaciones con <strong>Promedio MPPE y Promedio CBA</strong> (por alumno y curso).</span>
+            </li>
+            <li class="task-item">
+              <span class="task-item-bullet">✦</span>
+              <span><strong>Cuadros estadísticos:</strong> Calificaciones, asistencia y conducta por curso.</span>
+            </li>
+            <li class="task-item">
+              <span class="task-item-bullet">✦</span>
+              <span><strong>Grupos CRP:</strong> Nómina de inscritos y reporte de carga de notas.</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Coord. Inicial -->
+        <div class="task-card">
+          <div class="task-card-header">
+            <div class="task-card-icon" style="background: rgba(59, 130, 246, 0.15); color: #60A5FA; border: 1px solid rgba(59, 130, 246, 0.3);">
+              🧸
+            </div>
+            <div>
+              <div class="task-card-title">Coord. Inicial</div>
+              <div class="task-card-subtitle">Maternal & Preescolar</div>
+            </div>
+          </div>
+          <ul class="task-list">
+            <li class="task-item">
+              <span class="task-item-bullet">✦</span>
+              <span><strong>Indicadores evaluados:</strong> Reporte curricular de logros alcanzados.</span>
+            </li>
+            <li class="task-item">
+              <span class="task-item-bullet">✦</span>
+              <span><strong>Indicadores Actitudinales:</strong> Registro formativo del desarrollo socioemocional.</span>
+            </li>
+            <li class="task-item">
+              <span class="task-item-bullet">✦</span>
+              <span><strong>Consultas de evaluación:</strong> Vista por estudiante y por curso.</span>
+            </li>
+            <li class="task-item">
+              <span class="task-item-bullet">✦</span>
+              <span><strong>Cuadros estadísticos:</strong> Valoración de indicadores por estudiante y curso.</span>
+            </li>
+            <li class="task-item">
+              <span class="task-item-bullet">✦</span>
+              <span><strong>Escala Literal:</strong> Evaluación <code>A</code> - <code>E</code> sin notas numéricas.</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Coord. Primaria -->
+        <div class="task-card">
+          <div class="task-card-header">
+            <div class="task-card-icon" style="background: rgba(16, 185, 129, 0.15); color: #34D399; border: 1px solid rgba(16, 185, 129, 0.3);">
+              🌱
+            </div>
+            <div>
+              <div class="task-card-title">Coord. Primaria</div>
+              <div class="task-card-subtitle">1.° a 6.° Grado</div>
+            </div>
+          </div>
+          <ul class="task-list">
+            <li class="task-item">
+              <span class="task-item-bullet">✦</span>
+              <span><strong>Indicadores evaluados:</strong> Registro por curso y por docente.</span>
+            </li>
+            <li class="task-item">
+              <span class="task-item-bullet">✦</span>
+              <span><strong>Asistencia & conducta:</strong> Registros por curso y por estudiante.</span>
+            </li>
+            <li class="task-item">
+              <span class="task-item-bullet">✦</span>
+              <span><strong>Doble Pensum:</strong> Calificaciones con <strong>Promedio MPPE y Promedio CBA</strong> (por alumno y curso).</span>
+            </li>
+            <li class="task-item">
+              <span class="task-item-bullet">✦</span>
+              <span><strong>Cuadros estadísticos:</strong> Rendimiento, asistencia y conducta por curso.</span>
+            </li>
+            <li class="task-item">
+              <span class="task-item-bullet">✦</span>
+              <span><strong>Cualitativa / Formativa:</strong> Registro de competencias (<code>L</code>, <code>P/EP</code>, <code>I</code>).</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Coord. Media General -->
+        <div class="task-card">
+          <div class="task-card-header">
+            <div class="task-card-icon" style="background: rgba(168, 85, 247, 0.15); color: #C084FC; border: 1px solid rgba(168, 85, 247, 0.3);">
+              🎓
+            </div>
+            <div>
+              <div class="task-card-title">Coord. Media General</div>
+              <div class="task-card-subtitle">1.° a 5.° Año</div>
+            </div>
+          </div>
+          <ul class="task-list">
+            <li class="task-item">
+              <span class="task-item-bullet">✦</span>
+              <span><strong>Estrategias evaluadas:</strong> Registro por curso y por docente.</span>
+            </li>
+            <li class="task-item">
+              <span class="task-item-bullet">✦</span>
+              <span><strong>Asistencia & conducta:</strong> Registros por curso y por estudiante.</span>
+            </li>
+            <li class="task-item">
+              <span class="task-item-bullet">✦</span>
+              <span><strong>Doble Pensum:</strong> Calificaciones con <strong>Promedio MPPE y Promedio CBA</strong> (por alumno y curso).</span>
+            </li>
+            <li class="task-item">
+              <span class="task-item-bullet">✦</span>
+              <span><strong>Cuadros estadísticos:</strong> Rendimiento vigesimal (01-20), asistencia y disciplina.</span>
+            </li>
+            <li class="task-item">
+              <span class="task-item-bullet">✦</span>
+              <span><strong>Grupos CRP:</strong> Nóminas de inscritos y reporte de carga de notas.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- DIAPOSITIVA 6: Normativa Legal MPPE y Roles Blindados -->
+    <section class="slide" data-index="5" data-category="DOCENTES DIRECTIVA">
       <div class="slide-tag">Reglas de Negocio Oficiales MPPE <span class="audience-pill-tag">Pedagógico & Roles</span></div>
       <h2 class="slide-title">Escalas Evaluativas Oficiales y Roles de Personal</h2>
       <p class="slide-subtitle">Alineación exacta con las normativas del Ministerio y segregación de responsabilidades:</p>
@@ -938,8 +1174,8 @@
       </div>
     </section>
 
-    <!-- DIAPOSITIVA 6: Infraestructura y Ruta hacia los Servidores del Plantel -->
-    <section class="slide" data-index="5" data-category="ALL">
+    <!-- DIAPOSITIVA 7: Infraestructura y Ruta hacia los Servidores del Plantel -->
+    <section class="slide" data-index="6" data-category="ALL">
       <div class="hero-layout">
         <div>
           <div class="slide-tag">Plan de Despliegue · CBA 2026 <span class="audience-pill-tag">Ruta Metódica</span></div>
@@ -975,7 +1211,7 @@
   <!-- Bottom Bar -->
   <footer class="bottom-bar">
     <div style="display: flex; align-items: center; gap: 8px;">
-      <span class="slide-counter" id="slideCounter">1 / 6</span>
+      <span class="slide-counter" id="slideCounter">1 / 7</span>
     </div>
 
     <div class="progress-track">
