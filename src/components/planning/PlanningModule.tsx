@@ -46,45 +46,6 @@ export const PlanningModule: React.FC<PlanningModuleProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Subtabs Bar - Adaptable y visible completa */}
-      <div className="flex flex-wrap items-center gap-1.5 pb-2 border-b border-slate-200 dark:border-slate-800">
-        {subTabs.map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeSubTab === tab.id;
-          const activeStyle =
-            currentLevel === 'INICIAL'
-              ? 'bg-[#241E15] text-amber-300 border border-amber-400/50 shadow-sm'
-              : currentLevel === 'PRIMARIA'
-              ? 'bg-[#142621] text-teal-300 border border-teal-400/50 shadow-sm'
-              : 'bg-[#1A1D36] text-indigo-300 border border-indigo-400/50 shadow-sm';
-          const iconColor =
-            currentLevel === 'INICIAL'
-              ? 'text-amber-400'
-              : currentLevel === 'PRIMARIA'
-              ? 'text-teal-400'
-              : 'text-indigo-400';
-
-          return (
-            <button
-              key={tab.id}
-              onClick={() => {
-                if (tab.id !== 'DISENADOR_OFICIAL') {
-                  setDesignerPlanId(undefined);
-                }
-                setActiveSubTab(tab.id);
-              }}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
-                isActive
-                  ? activeStyle
-                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
-              }`}
-            >
-              <Icon className={`w-3.5 h-3.5 ${isActive ? iconColor : 'text-slate-400'}`} />
-              {tab.label}
-            </button>
-          );
-        })}
-      </div>
 
       {/* Subtab Contents */}
       {activeSubTab === 'DISENADOR_OFICIAL' && (

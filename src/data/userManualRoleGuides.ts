@@ -470,7 +470,7 @@ export const ROLE_SPECIFIC_MANUALS: Record<UserRole, DetailedRoleGuide> = {
           'Haz clic en Consultas → Boletín Informativo.',
           'Observa las valoraciones en cada asignatura correspondientes al lapso en curso.',
           'Lee atentamente las observaciones de desempeño redactadas por los profesores.',
-          'Puedes guardar una copia o imprimir el boletín oficial si lo deseas.'
+          'Consulta el avance pedagógico y notas procesales directamente en pantalla.'
         ]
       },
       {

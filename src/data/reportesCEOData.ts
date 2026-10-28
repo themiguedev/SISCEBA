@@ -22,6 +22,13 @@ export interface ReporteItem {
   codigoReporte?: string;
   ambitoDocente?: boolean;
   ambitoControlEstudios?: boolean;
+  url?: string;
+  orden?: number;
+  visible?: 'SI' | 'NO';
+  fondoCabecera?: string;
+  letrasCabecera?: string;
+  fondoFilaPar?: string;
+  fondoFilaImpar?: string;
 }
 
 /**
@@ -470,9 +477,16 @@ export const CATALOGO_REPORTES_CEO: ReporteItem[] = [
     categoriaLabel: 'Reportes Administrador del Sistema',
     impresionesDefault: 11,
     nivel: 'TODOS',
-    descripcion: 'Expediente acumulativo integral del alumno: salud, antropometría, representante y procedencia.',
+    descripcion: 'UCE: Fichas de los Alumnos',
     tipoAccion: 'DOCUMENTO_INSTITUCIONAL',
     codigoReporte: 'ADM-FA-37',
+    url: 'uce_reporte_fichas_alumnos.php',
+    orden: 0,
+    visible: 'SI',
+    fondoCabecera: '79,130,187',
+    letrasCabecera: '255,255,255',
+    fondoFilaPar: '255,255,255',
+    fondoFilaImpar: '223,232,244',
   },
   {
     id: 'adm-hoja-autoevaluaciones',
@@ -645,10 +659,55 @@ export const CATALOGO_REPORTES_CEO: ReporteItem[] = [
     categoriaLabel: 'Reportes Administrador del Sistema',
     impresionesDefault: 17,
     nivel: 'TODOS',
-    descripcion: 'Nómina oficial de aula en orden alfabético, cédula de identidad y género para pase de asistencia.',
+    descripcion: 'COOR: Listado de Estudiantes por Sección',
     tipoAccion: 'DOCUMENTO_INSTITUCIONAL',
     codigoReporte: 'ADM-LES-52',
     ambitoDocente: true,
+    url: 'coor_reporte_alumnos_seccion.php',
+    orden: 1,
+    visible: 'SI',
+    fondoCabecera: '79,130,187',
+    letrasCabecera: '255,255,255',
+    fondoFilaPar: '255,255,255',
+    fondoFilaImpar: '223,232,244',
+  },
+  {
+    id: 'adm-docente-listado-estudiantes-seccion',
+    nombre: 'Listado de Estudiantes por Sección',
+    categoria: 'ADMINISTRADOR',
+    categoriaLabel: 'Reportes Administrador del Sistema',
+    impresionesDefault: 24,
+    nivel: 'TODOS',
+    descripcion: 'DOCENTE: Listado de Estudiantes por Sección',
+    tipoAccion: 'DOCUMENTO_INSTITUCIONAL',
+    codigoReporte: 'ADM-DOC-LES-52',
+    ambitoDocente: true,
+    url: 'doc_reporte_alumnos_seccion.php',
+    orden: 1,
+    visible: 'SI',
+    fondoCabecera: '79,130,187',
+    letrasCabecera: '255,255,255',
+    fondoFilaPar: '255,255,255',
+    fondoFilaImpar: '223,232,244',
+  },
+  {
+    id: 'adm-guia-listado-estudiantes-seccion',
+    nombre: 'Listado de Estudiantes por Sección',
+    categoria: 'ADMINISTRADOR',
+    categoriaLabel: 'Reportes Administrador del Sistema',
+    impresionesDefault: 30,
+    nivel: 'TODOS',
+    descripcion: 'GUIA: Listado de Estudiantes por Sección',
+    tipoAccion: 'DOCUMENTO_INSTITUCIONAL',
+    codigoReporte: 'ADM-GUIA-LES-52',
+    ambitoDocente: true,
+    url: 'guia_reporte_alumnos_seccion.php',
+    orden: 1,
+    visible: 'SI',
+    fondoCabecera: '255,255,255',
+    letrasCabecera: '0,0,0',
+    fondoFilaPar: '255,255,255',
+    fondoFilaImpar: '255,255,255',
   },
   {
     id: 'adm-listado-estudiantes-seccion-materias',
@@ -705,7 +764,7 @@ export const CATALOGO_REPORTES_CEO: ReporteItem[] = [
     categoriaLabel: 'Reportes Administrador del Sistema',
     impresionesDefault: 938,
     nivel: 'PRIMARIA',
-    descripcion: 'Sábana consolidada de literales por aula y materia para cierre de lapso en Primaria.',
+    descripcion: 'Sábana oficial de literales por sección y promedio M.P.P.E. con distribución de indicadores (Logrado, Avanzado, En Proceso, Iniciado) en Primaria.',
     tipoAccion: 'DOCUMENTO_INSTITUCIONAL',
     codigoReporte: 'ADM-LPS-57',
     ambitoDocente: true,
@@ -821,10 +880,17 @@ export const CATALOGO_REPORTES_CEO: ReporteItem[] = [
     categoriaLabel: 'Reportes Administrador del Sistema',
     impresionesDefault: 18,
     nivel: 'MEDIA_GENERAL',
-    descripcion: 'Listado consolidado de promedios cuantitativos de notas por sección y grado.',
+    descripcion: 'UCE: promedios',
     tipoAccion: 'DOCUMENTO_INSTITUCIONAL',
     codigoReporte: 'ADM-PROM-67',
     ambitoControlEstudios: true,
+    url: 'uce_reporte_promedios.php',
+    orden: 0,
+    visible: 'SI',
+    fondoCabecera: '79,130,187',
+    letrasCabecera: '255,255,255',
+    fondoFilaPar: '255,255,255',
+    fondoFilaImpar: '223,232,244',
   },
   {
     id: 'adm-promedios-seccion-consejo-curso',
@@ -1141,3 +1207,78 @@ export function resetReportesImpresiones(): Record<string, number> {
   }
   return defaults;
 }
+
+export const STORAGE_KEY_REPORTES_CONFIG = 'siscba_reportes_config_map_v1';
+
+export interface ReporteConfigOverrides {
+  nombre?: string;
+  url?: string;
+  orden?: number;
+  visible?: 'SI' | 'NO';
+  descripcion?: string;
+  fondoCabecera?: string;
+  letrasCabecera?: string;
+  fondoFilaPar?: string;
+  fondoFilaImpar?: string;
+}
+
+/**
+ * Obtiene el mapa de configuraciones personalizadas de reportes guardadas en el navegador
+ */
+export function getReportesConfigMap(): Record<string, ReporteConfigOverrides> {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_REPORTES_CONFIG);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (typeof parsed === 'object' && parsed !== null) {
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.error('Error leyendo configuraciones de reportes:', e);
+  }
+  return {};
+}
+
+/**
+ * Guarda o actualiza la configuración personalizada de un reporte
+ */
+export function saveReporteConfig(reporteId: string, overrides: ReporteConfigOverrides): Record<string, ReporteConfigOverrides> {
+  const current = getReportesConfigMap();
+  current[reporteId] = {
+    ...(current[reporteId] || {}),
+    ...overrides
+  };
+  try {
+    localStorage.setItem(STORAGE_KEY_REPORTES_CONFIG, JSON.stringify(current));
+  } catch (e) {
+    console.error('Error guardando configuración de reporte:', e);
+  }
+  return current;
+}
+
+/**
+ * Retorna el catálogo completo con las configuraciones personalizadas aplicadas
+ */
+export function getMergedReportesCatalog(): ReporteItem[] {
+  const configs = getReportesConfigMap();
+  return CATALOGO_REPORTES_CEO.map((item) => {
+    const custom = configs[item.id];
+    if (!custom) return item;
+    return {
+      ...item,
+      ...custom,
+      // Respetar visibilidad y orden si fueron modificados
+      nombre: custom.nombre ?? item.nombre,
+      url: custom.url ?? item.url,
+      orden: custom.orden !== undefined ? custom.orden : item.orden,
+      visible: custom.visible ?? item.visible,
+      descripcion: custom.descripcion ?? item.descripcion,
+      fondoCabecera: custom.fondoCabecera ?? item.fondoCabecera,
+      letrasCabecera: custom.letrasCabecera ?? item.letrasCabecera,
+      fondoFilaPar: custom.fondoFilaPar ?? item.fondoFilaPar,
+      fondoFilaImpar: custom.fondoFilaImpar ?? item.fondoFilaImpar,
+    };
+  });
+}
+

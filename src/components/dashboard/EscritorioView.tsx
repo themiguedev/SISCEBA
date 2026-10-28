@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useApp } from '../../context/AppContext';
 import {
   Monitor,
@@ -37,9 +38,12 @@ import {
   MapPin,
   CalendarCheck,
   ChevronRight,
-  Filter
+  Filter,
+  Users,
+  Info,
+  School
 } from 'lucide-react';
-import { EducationalLevel, UserSchedule, ScheduleBlock, ScheduleDay, AcademicAssignment, LEVEL_GRADES_CATALOG } from '../../types';
+import { EducationalLevel, UserSchedule, ScheduleBlock, ScheduleDay, AcademicAssignment, LEVEL_GRADES_CATALOG, Student } from '../../types';
 import { OFFICIAL_AVATARS, getDefaultAvatarForUser } from '../../utils/avatarCatalog';
 import { PasswordStrengthBar } from '../common/PasswordStrengthBar';
 import { ROLE_METADATA } from '../../utils/rbac';
@@ -50,6 +54,255 @@ interface EscritorioViewProps {
   activeSubTab?: EscritorioTab;
   setActiveSubTab?: (tab: EscritorioTab) => void;
 }
+
+/**
+ * Genera una grilla institucional de horario semanal pedagógico oficial
+ * como respaldo cuando aún no se han cargado bloques de docentes específicos.
+ */
+const generateInstitutionalCurriculumSchedule = (child: Student): (ScheduleBlock & { teacherName?: string })[] => {
+  const days: ScheduleDay[] = ['LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES'];
+  const gradeSecStr = `${child.grade} Sección ${child.section}`;
+  const blocks: (ScheduleBlock & { teacherName?: string })[] = [];
+
+  if (child.level === 'MEDIA_GENERAL') {
+    const isJunior = child.grade.includes('1') || child.grade.includes('2');
+    const isSenior = child.grade.includes('4') || child.grade.includes('5');
+
+    const periods = [
+      { p: 1, s: '07:00', e: '07:45' },
+      { p: 2, s: '07:45', e: '08:30' },
+      { p: 3, s: '08:45', e: '09:30' },
+      { p: 4, s: '09:30', e: '10:15' },
+      { p: 5, s: '10:45', e: '11:30' },
+      { p: 6, s: '11:30', e: '12:15' },
+      { p: 7, s: '12:15', e: '13:00' },
+      { p: 8, s: '13:00', e: '13:30' }
+    ];
+
+    const weeklyMap: Record<ScheduleDay, { name: string; color: string; room: string; teacher?: string }[]> = {
+      LUNES: [
+        { name: 'Matemáticas', color: 'indigo', room: 'Aula 14', teacher: 'Prof. Pedro Valera' },
+        { name: 'Matemáticas', color: 'indigo', room: 'Aula 14', teacher: 'Prof. Pedro Valera' },
+        { name: 'Castellano y Literatura', color: 'rose', room: 'Aula 14', teacher: 'Lic. Carmen Silva' },
+        { name: 'Castellano y Literatura', color: 'rose', room: 'Aula 14', teacher: 'Lic. Carmen Silva' },
+        { name: 'Educación Física', color: 'teal', room: 'Cancha Techada', teacher: 'Prof. Roberto Gómez' },
+        { name: 'Educación Física', color: 'teal', room: 'Cancha Techada', teacher: 'Prof. Roberto Gómez' },
+        { name: 'Orientación y Convivencia', color: 'amber', room: 'Aula 14', teacher: 'Lic. Elena Ramos' },
+        { name: 'Estudio Dirigido', color: 'slate', room: 'Aula 14', teacher: 'Prof. Asesor de Sección' }
+      ],
+      MARTES: [
+        { name: isJunior ? 'Ciencias Naturales' : 'Física', color: 'blue', room: isJunior ? 'Aula 14' : 'Lab. de Ciencias', teacher: 'Prof. Luis Zambrano' },
+        { name: isJunior ? 'Ciencias Naturales' : 'Física', color: 'blue', room: isJunior ? 'Aula 14' : 'Lab. de Ciencias', teacher: 'Prof. Luis Zambrano' },
+        { name: 'Inglés', color: 'violet', room: 'Aula 14', teacher: 'Prof. Andrea Márquez' },
+        { name: 'Inglés', color: 'violet', room: 'Aula 14', teacher: 'Prof. Andrea Márquez' },
+        { name: isJunior ? 'Arte y Patrimonio' : 'Biología', color: 'emerald', room: isJunior ? 'Aula de Arte' : 'Lab. de Biología', teacher: 'Lic. Daniel Peña' },
+        { name: isJunior ? 'Arte y Patrimonio' : 'Biología', color: 'emerald', room: isJunior ? 'Aula de Arte' : 'Lab. de Biología', teacher: 'Lic. Daniel Peña' },
+        { name: 'Geografía, Historia y Ciudadanía', color: 'amber', room: 'Aula 14', teacher: 'Prof. Rafael Colmenares' },
+        { name: 'Geografía, Historia y Ciudadanía', color: 'amber', room: 'Aula 14', teacher: 'Prof. Rafael Colmenares' }
+      ],
+      MIERCOLES: [
+        { name: isJunior ? 'Matemáticas' : 'Química', color: isJunior ? 'indigo' : 'emerald', room: isJunior ? 'Aula 14' : 'Lab. de Química', teacher: 'Prof. Víctor Mendoza' },
+        { name: isJunior ? 'Matemáticas' : 'Química', color: isJunior ? 'indigo' : 'emerald', room: isJunior ? 'Aula 14' : 'Lab. de Química', teacher: 'Prof. Víctor Mendoza' },
+        { name: 'Matemáticas', color: 'indigo', room: 'Aula 14', teacher: 'Prof. Pedro Valera' },
+        { name: 'Castellano y Literatura', color: 'rose', room: 'Aula 14', teacher: 'Lic. Carmen Silva' },
+        { name: isSenior ? 'Formación para la Soberanía Nal.' : 'Arte y Patrimonio', color: isSenior ? 'slate' : 'violet', room: 'Aula 14', teacher: 'Cap. Andrés Torrealba' },
+        { name: isSenior ? 'Formación para la Soberanía Nal.' : 'Arte y Patrimonio', color: isSenior ? 'slate' : 'violet', room: 'Aula 14', teacher: 'Cap. Andrés Torrealba' },
+        { name: 'Grupos CRP / Robótica', color: 'teal', room: 'Lab. STEAM', teacher: 'Prof. Carlos Mendoza' },
+        { name: 'Grupos CRP / Robótica', color: 'teal', room: 'Lab. STEAM', teacher: 'Prof. Carlos Mendoza' }
+      ],
+      JUEVES: [
+        { name: 'Geografía, Historia y Ciudadanía', color: 'amber', room: 'Aula 14', teacher: 'Prof. Rafael Colmenares' },
+        { name: isJunior ? 'Ciencias Naturales' : 'Física', color: 'blue', room: 'Aula 14', teacher: 'Prof. Luis Zambrano' },
+        { name: 'Inglés', color: 'violet', room: 'Aula 14', teacher: 'Prof. Andrea Márquez' },
+        { name: 'Matemáticas', color: 'indigo', room: 'Aula 14', teacher: 'Prof. Pedro Valera' },
+        { name: isJunior ? 'Educación Física' : 'Química', color: isJunior ? 'teal' : 'emerald', room: isJunior ? 'Cancha' : 'Lab. de Química', teacher: 'Prof. Víctor Mendoza' },
+        { name: isJunior ? 'Educación Física' : 'Química', color: isJunior ? 'teal' : 'emerald', room: isJunior ? 'Cancha' : 'Lab. de Química', teacher: 'Prof. Víctor Mendoza' },
+        { name: 'Proyecto de Investigación', color: 'blue', room: 'Aula 14', teacher: 'Lic. Elena Ramos' },
+        { name: 'Atención Pedagógica UCE', color: 'slate', room: 'Aula 14', teacher: 'Coordinación Media General' }
+      ],
+      VIERNES: [
+        { name: isJunior ? 'Castellano' : 'Biología', color: isJunior ? 'rose' : 'emerald', room: 'Aula 14', teacher: 'Lic. Daniel Peña' },
+        { name: 'Matemáticas', color: 'indigo', room: 'Aula 14', teacher: 'Prof. Pedro Valera' },
+        { name: 'Castellano y Literatura', color: 'rose', room: 'Aula 14', teacher: 'Lic. Carmen Silva' },
+        { name: 'Proyecto Socio-Comunitario', color: 'blue', room: 'Aula 14', teacher: 'Prof. Asesor CBA' },
+        { name: 'Encuentro Cultural y Deportivo', color: 'teal', room: 'Patio Central', teacher: 'Comité Deportivo CBA' },
+        { name: 'Encuentro Cultural y Deportivo', color: 'teal', room: 'Patio Central', teacher: 'Comité Deportivo CBA' },
+        { name: 'Cierre y Convivencia Escolar', color: 'amber', room: 'Aula 14', teacher: 'Docente Guía de Sección' },
+        { name: 'Tutoría Pedagógica', color: 'slate', room: 'Aula 14', teacher: 'Docente Titular' }
+      ]
+    };
+
+    days.forEach(day => {
+      const daySlots = weeklyMap[day] || [];
+      daySlots.forEach((slot, idx) => {
+        const time = periods[idx];
+        if (!time) return;
+        blocks.push({
+          id: `child-mg-${day}-${time.p}`,
+          day,
+          periodIndex: time.p,
+          startTime: time.s,
+          endTime: time.e,
+          subjectName: slot.name,
+          level: 'MEDIA_GENERAL',
+          gradeSection: gradeSecStr,
+          classroom: slot.room,
+          color: slot.color,
+          teacherName: slot.teacher
+        });
+      });
+    });
+  } else if (child.level === 'PRIMARIA') {
+    const periods = [
+      { p: 1, s: '07:00', e: '07:45' },
+      { p: 2, s: '07:45', e: '08:30' },
+      { p: 3, s: '08:45', e: '09:30' },
+      { p: 4, s: '10:00', e: '10:45' },
+      { p: 5, s: '10:45', e: '11:30' },
+      { p: 6, s: '11:30', e: '12:15' }
+    ];
+
+    const weeklyMap: Record<ScheduleDay, { name: string; color: string; room: string; teacher?: string }[]> = {
+      LUNES: [
+        { name: 'Lengua y Comunicación', color: 'rose', room: `Salón ${child.grade}`, teacher: 'Docente de Grado' },
+        { name: 'Lengua y Comunicación', color: 'rose', room: `Salón ${child.grade}`, teacher: 'Docente de Grado' },
+        { name: 'Matemáticas para la Vida', color: 'indigo', room: `Salón ${child.grade}`, teacher: 'Docente de Grado' },
+        { name: 'Ciencias de la Naturaleza', color: 'emerald', room: `Salón ${child.grade}`, teacher: 'Docente de Grado' },
+        { name: 'Ciencias Sociales e Identidad', color: 'amber', room: `Salón ${child.grade}`, teacher: 'Docente de Grado' },
+        { name: 'Lectura Guiada y Valores', color: 'blue', room: 'Biblioteca CBA', teacher: 'Docente de Grado' }
+      ],
+      MARTES: [
+        { name: 'Matemáticas para la Vida', color: 'indigo', room: `Salón ${child.grade}`, teacher: 'Docente de Grado' },
+        { name: 'Matemáticas para la Vida', color: 'indigo', room: `Salón ${child.grade}`, teacher: 'Docente de Grado' },
+        { name: 'Lengua y Comunicación', color: 'rose', room: `Salón ${child.grade}`, teacher: 'Docente de Grado' },
+        { name: 'Educación Física y Deporte', color: 'teal', room: 'Cancha Escolar', teacher: 'Prof. de Educación Física' },
+        { name: 'Educación Estética: Artes Plásticas', color: 'violet', room: 'Taller de Arte', teacher: 'Especialista en Arte' },
+        { name: 'Educación Estética: Música', color: 'amber', room: 'Salón de Música', teacher: 'Prof. de Música' }
+      ],
+      MIERCOLES: [
+        { name: 'Ciencias de la Naturaleza y Tecnología', color: 'emerald', room: `Salón ${child.grade}`, teacher: 'Docente de Grado' },
+        { name: 'Ciencias de la Naturaleza y Tecnología', color: 'emerald', room: `Salón ${child.grade}`, teacher: 'Docente de Grado' },
+        { name: 'Matemáticas para la Vida', color: 'indigo', room: `Salón ${child.grade}`, teacher: 'Docente de Grado' },
+        { name: 'Lengua y Comunicación', color: 'rose', room: `Salón ${child.grade}`, teacher: 'Docente de Grado' },
+        { name: 'Inglés Inicial Lúdico', color: 'violet', room: `Salón ${child.grade}`, teacher: 'Prof. de Idiomas' },
+        { name: 'Ajedrez Escolar y Lógica', color: 'indigo', room: 'Aula de Ajedrez', teacher: 'Instructor de Ajedrez' }
+      ],
+      JUEVES: [
+        { name: 'Lengua y Comunicación', color: 'rose', room: `Salón ${child.grade}`, teacher: 'Docente de Grado' },
+        { name: 'Lengua y Comunicación', color: 'rose', room: `Salón ${child.grade}`, teacher: 'Docente de Grado' },
+        { name: 'Ciencias Sociales y Geografía', color: 'amber', room: `Salón ${child.grade}`, teacher: 'Docente de Grado' },
+        { name: 'Educación Física y Deporte', color: 'teal', room: 'Cancha Escolar', teacher: 'Prof. de Educación Física' },
+        { name: 'Matemáticas para la Vida', color: 'indigo', room: `Salón ${child.grade}`, teacher: 'Docente de Grado' },
+        { name: 'Informática Educativa', color: 'blue', room: 'Aula de Computación', teacher: 'Especialista en Sistemas' }
+      ],
+      VIERNES: [
+        { name: 'Proyecto de Aprendizaje Integrado', color: 'blue', room: `Salón ${child.grade}`, teacher: 'Docente de Grado' },
+        { name: 'Proyecto de Aprendizaje Integrado', color: 'blue', room: `Salón ${child.grade}`, teacher: 'Docente de Grado' },
+        { name: 'Matemáticas Recreativas', color: 'indigo', room: `Salón ${child.grade}`, teacher: 'Docente de Grado' },
+        { name: 'Tradiciones Culturales y Folklore', color: 'violet', room: 'Patio Central', teacher: 'Comité Cultural' },
+        { name: 'Cierre Pedagógico Semanal', color: 'rose', room: `Salón ${child.grade}`, teacher: 'Docente de Grado' },
+        { name: 'Convivencia y Habilidades para la Vida', color: 'teal', room: `Salón ${child.grade}`, teacher: 'Docente de Grado' }
+      ]
+    };
+
+    days.forEach(day => {
+      const daySlots = weeklyMap[day] || [];
+      daySlots.forEach((slot, idx) => {
+        const time = periods[idx];
+        if (!time) return;
+        blocks.push({
+          id: `child-pri-${day}-${time.p}`,
+          day,
+          periodIndex: time.p,
+          startTime: time.s,
+          endTime: time.e,
+          subjectName: slot.name,
+          level: 'PRIMARIA',
+          gradeSection: gradeSecStr,
+          classroom: slot.room,
+          color: slot.color,
+          teacherName: slot.teacher
+        });
+      });
+    });
+  } else {
+    // INICIAL
+    const periods = [
+      { p: 1, s: '07:00', e: '07:45' },
+      { p: 2, s: '07:45', e: '08:30' },
+      { p: 3, s: '08:45', e: '09:30' },
+      { p: 4, s: '10:00', e: '10:45' },
+      { p: 5, s: '10:45', e: '11:30' },
+      { p: 6, s: '11:30', e: '12:15' }
+    ];
+
+    const weeklyMap: Record<ScheduleDay, { name: string; color: string; room: string; teacher?: string }[]> = {
+      LUNES: [
+        { name: 'Bienvenida, Cantos y Ronda Matutina', color: 'blue', room: 'Salón Infantil', teacher: 'Maestra Titular' },
+        { name: 'Formación Personal, Social y Valores', color: 'rose', room: 'Salón Infantil', teacher: 'Maestra Titular' },
+        { name: 'Relación con los Componentes del Ambiente', color: 'emerald', room: 'Rincón de Ciencias', teacher: 'Maestra Titular' },
+        { name: 'Expresión Plástica y Dibujo Libre', color: 'violet', room: 'Mesa de Trabajo', teacher: 'Maestra Titular' },
+        { name: 'Psicomotricidad y Juegos en Ronda', color: 'teal', room: 'Patio Infantil', teacher: 'Prof. de Educación Física' },
+        { name: 'Cierre Afectivo y Despedida', color: 'amber', room: 'Salón Infantil', teacher: 'Maestra Titular' }
+      ],
+      MARTES: [
+        { name: 'Bienvenida y Hábitos de Convivencia', color: 'blue', room: 'Salón Infantil', teacher: 'Maestra Titular' },
+        { name: 'Nociones Lógicas y Figuras Geométricas', color: 'indigo', room: 'Salón Infantil', teacher: 'Maestra Titular' },
+        { name: 'Cuidado de las Plantas y Medio Ambiente', color: 'emerald', room: 'Huerto Escolar', teacher: 'Maestra Titular' },
+        { name: 'Modelado con Plastilina y Motricidad', color: 'rose', room: 'Mesa de Trabajo', teacher: 'Maestra Titular' },
+        { name: 'Educación Física y Coordinación', color: 'teal', room: 'Patio Infantil', teacher: 'Prof. de Educación Física' },
+        { name: 'Hora del Cuento y Cierre', color: 'amber', room: 'Rincón de Lectura', teacher: 'Maestra Titular' }
+      ],
+      MIERCOLES: [
+        { name: 'Bienvenida y Cantos Tradicionales', color: 'blue', room: 'Salón Infantil', teacher: 'Maestra Titular' },
+        { name: 'Lenguaje Oral, Rimas y Trabalenguas', color: 'rose', room: 'Salón Infantil', teacher: 'Maestra Titular' },
+        { name: 'Pequeños Científicos y Texturas', color: 'emerald', room: 'Rincón de Ciencias', teacher: 'Maestra Titular' },
+        { name: 'Expresión Musical y Ritmo Infantil', color: 'violet', room: 'Salón de Música', teacher: 'Prof. de Música' },
+        { name: 'Ajedrez Infantil Lúdico', color: 'indigo', room: 'Salón Infantil', teacher: 'Instructor de Ajedrez' },
+        { name: 'Cierre del Día y Despedida', color: 'amber', room: 'Salón Infantil', teacher: 'Maestra Titular' }
+      ],
+      JUEVES: [
+        { name: 'Bienvenida y Asignación de Roles', color: 'blue', room: 'Salón Infantil', teacher: 'Maestra Titular' },
+        { name: 'Identidad Familiar y Ciudadana', color: 'rose', room: 'Salón Infantil', teacher: 'Maestra Titular' },
+        { name: 'Mi Cuerpo y Vida Saludable', color: 'emerald', room: 'Salón Infantil', teacher: 'Maestra Titular' },
+        { name: 'Pintura Dactilar y Collage Creativo', color: 'violet', room: 'Mesa de Trabajo', teacher: 'Maestra Titular' },
+        { name: 'Circuitos Psicomotores y Equilibrio', color: 'teal', room: 'Patio Infantil', teacher: 'Prof. de Educación Física' },
+        { name: 'Ronda de Canciones y Despedida', color: 'amber', room: 'Salón Infantil', teacher: 'Maestra Titular' }
+      ],
+      VIERNES: [
+        { name: 'Bienvenida y Saludo a la Bandera', color: 'blue', room: 'Patio Central', teacher: 'Maestra Titular' },
+        { name: 'Títeres, Teatro y Expresión Gestual', color: 'rose', room: 'Rincón de Expresión', teacher: 'Maestra Titular' },
+        { name: 'Juegos Sensoriales y Acuáticos', color: 'emerald', room: 'Área de Juegos', teacher: 'Maestra Titular' },
+        { name: 'Manualidades y Expresión Libre', color: 'violet', room: 'Mesa de Trabajo', teacher: 'Maestra Titular' },
+        { name: 'Recreación Compartida Guiada', color: 'teal', room: 'Patio Infantil', teacher: 'Comité de Inicial' },
+        { name: 'Compartir Semanal y Cierre Afectivo', color: 'amber', room: 'Salón Infantil', teacher: 'Maestra Titular' }
+      ]
+    };
+
+    days.forEach(day => {
+      const daySlots = weeklyMap[day] || [];
+      daySlots.forEach((slot, idx) => {
+        const time = periods[idx];
+        if (!time) return;
+        blocks.push({
+          id: `child-ini-${day}-${time.p}`,
+          day,
+          periodIndex: time.p,
+          startTime: time.s,
+          endTime: time.e,
+          subjectName: slot.name,
+          level: 'INICIAL',
+          gradeSection: gradeSecStr,
+          classroom: slot.room,
+          color: slot.color,
+          teacherName: slot.teacher
+        });
+      });
+    });
+  }
+
+  return blocks;
+};
 
 export const EscritorioView: React.FC<EscritorioViewProps> = ({
   activeSubTab,
@@ -65,15 +318,135 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
     currentUserSchedule,
     saveUserSchedule,
     isSupabaseActive,
-    isSavingCloud
+    isSavingCloud,
+    students,
+    scheduleTypes,
+    areas,
+    schoolData
   } = useApp();
   const [internalActiveTab, setInternalActiveTab] = useState<EscritorioTab>('DASHBOARD');
 
-  // Estados para el Horario Institucional del Usuario
+  // Estados para el Horario Institucional y de Representados
   const [scheduleDayFilter, setScheduleDayFilter] = useState<'TODOS' | ScheduleDay>('TODOS');
+  const [selectedChildId, setSelectedChildId] = useState<string>('');
   const [isEditingSchedule, setIsEditingSchedule] = useState(false);
   const [showAddBlockModal, setShowAddBlockModal] = useState(false);
   const [scheduleSavedToast, setScheduleSavedToast] = useState(false);
+
+  // Detección de estudiantes representados para el rol de REPRESENTANTE
+  const representedStudents = useMemo(() => {
+    if (currentRole !== 'REPRESENTANTE') return [];
+
+    const repName = currentUser?.fullName?.toLowerCase().trim() || '';
+    const repEmail = currentUser?.email?.toLowerCase().trim() || '';
+    const repCedula = currentUser?.cedula?.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || '';
+    const repUsername = currentUser?.username?.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || '';
+
+    const matched = (students || []).filter((s) => {
+      const sRepName = s.representativeName?.toLowerCase().trim() || '';
+      const sRepEmail = s.representativeEmail?.toLowerCase().trim() || '';
+      const sMotherCedula = s.motherInfo?.cedula?.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || '';
+      const sFatherCedula = s.fatherInfo?.cedula?.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || '';
+      const sMotherEmail = s.motherInfo?.correo?.toLowerCase().trim() || '';
+      const sFatherEmail = s.fatherInfo?.correo?.toLowerCase().trim() || '';
+
+      return (
+        (repCedula && (sMotherCedula === repCedula || sFatherCedula === repCedula)) ||
+        (repUsername && (sMotherCedula === repUsername || sFatherCedula === repUsername)) ||
+        (repEmail && (sRepEmail === repEmail || sMotherEmail === repEmail || sFatherEmail === repEmail)) ||
+        (repName && (sRepName.includes(repName) || repName.includes(sRepName)))
+      );
+    });
+
+    if (matched.length > 0) return matched;
+
+    // Si es el Administrador simulando el rol de Representante
+    if (currentUser?.role === 'ADMINISTRADOR' && students && students.length > 0) {
+      return students.slice(0, 3);
+    }
+
+    return [];
+  }, [currentRole, currentUser, students]);
+
+  // Detección de estudiante si el rol activo es ESTUDIANTE
+  const currentStudent = useMemo(() => {
+    if (currentRole !== 'ESTUDIANTE') return null;
+
+    const normCedula = currentUser?.cedula?.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || '';
+    const normUsername = currentUser?.username?.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || '';
+    const userEmail = currentUser?.email?.toLowerCase().trim() || '';
+    const userFullName = currentUser?.fullName?.toLowerCase().trim() || '';
+
+    const matched = (students || []).filter((s) => {
+      const studentCedula = s.cedula?.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || '';
+      const studentEmail = s.representativeEmail?.toLowerCase().trim() || '';
+      const studentName = s.fullName?.toLowerCase().trim() || '';
+
+      return (
+        (normCedula && studentCedula === normCedula) ||
+        (normUsername && studentCedula === normUsername) ||
+        (normUsername && normUsername === s.id.toLowerCase()) ||
+        (userEmail && studentEmail === userEmail) ||
+        (userFullName && studentName === userFullName)
+      );
+    });
+
+    if (matched.length > 0) return matched[0];
+    if (currentUser?.role === 'ADMINISTRADOR' && students && students.length > 0) {
+      return students[0];
+    }
+    return null;
+  }, [currentRole, currentUser, students]);
+
+  // Función para obtener bloques de horario de un estudiante (directos, de docentes o curriculares)
+  const getChildScheduleBlocks = (child: Student): (ScheduleBlock & { teacherName?: string })[] => {
+    const cleanStr = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const cleanGrade = cleanStr(child.grade || '');
+    const cleanSec = cleanStr(child.section || '');
+    const targetGS = cleanStr(`${child.grade} ${child.section}`);
+
+    const collected: (ScheduleBlock & { teacherName?: string })[] = [];
+
+    // 1. Bloques directos guardados para el estudiante por su ID o Cédula
+    const directSched = (userSchedules || []).find(
+      s => s.userId === child.id || (child.cedula && s.userId === child.cedula)
+    );
+    if (directSched && Array.isArray(directSched.blocks) && directSched.blocks.length > 0) {
+      directSched.blocks.forEach(b => collected.push({ ...b }));
+    }
+
+    // 2. Bloques registrados por los docentes que coincidan con el Grado y Sección del alumno
+    (userSchedules || []).forEach(sched => {
+      if (sched.userId === child.id || sched.userId === child.cedula) return;
+      const teacherUser = (users || []).find(u => u.id === sched.userId);
+      (sched.blocks || []).forEach(b => {
+        if (!b.gradeSection) return;
+        const bGS = cleanStr(b.gradeSection);
+        const matchesGrade = cleanGrade ? bGS.includes(cleanGrade) : false;
+        const matchesSection = cleanSec ? bGS.includes(cleanSec) : true;
+        const matchesLevel = !b.level || b.level === child.level;
+
+        if ((bGS.includes(targetGS) || (matchesGrade && matchesSection)) && matchesLevel) {
+          const exists = collected.some(
+            c => c.day === b.day && (c.periodIndex === b.periodIndex || c.startTime === b.startTime)
+          );
+          if (!exists) {
+            collected.push({
+              ...b,
+              teacherName: teacherUser ? teacherUser.fullName : undefined
+            });
+          }
+        }
+      });
+    });
+
+    if (collected.length > 0) {
+      return collected;
+    }
+
+    // 3. Respaldo oficial según pensum curricular del colegio
+    return generateInstitutionalCurriculumSchedule(child);
+  };
 
   // Formulario de nuevo bloque de clase / labor
   const [blockDay, setBlockDay] = useState<ScheduleDay>('LUNES');
@@ -379,53 +752,6 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
           </div>
         </div>
 
-        {/* Subtabs Pill Switcher - Adaptable y visible sin recortes */}
-        <div className="w-full sm:w-auto flex flex-wrap items-center bg-slate-100/90 dark:bg-slate-800/80 p-1.5 rounded-xl border border-slate-200 dark:border-slate-700/60 shadow-inner gap-1">
-          <button
-            onClick={() => setActiveTab('DASHBOARD')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-              activeTab === 'DASHBOARD'
-                ? 'bg-white dark:bg-[#1B1C33] text-[#2C2E53] dark:text-sky-300 shadow-sm border border-slate-200 dark:border-sky-400/40 ring-1 ring-slate-900/5'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/60'
-            }`}
-          >
-            <Monitor className={`w-3.5 h-3.5 ${activeTab === 'DASHBOARD' ? 'text-[#2C2E53] dark:text-sky-400' : 'text-slate-500'}`} />
-            Tablero Principal
-          </button>
-          <button
-            onClick={() => setActiveTab('PERFIL')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-              activeTab === 'PERFIL'
-                ? 'bg-white dark:bg-[#1B1C33] text-[#2C2E53] dark:text-sky-300 shadow-sm border border-slate-200 dark:border-sky-400/40 ring-1 ring-slate-900/5'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/60'
-            }`}
-          >
-            <User className={`w-3.5 h-3.5 ${activeTab === 'PERFIL' ? 'text-[#2C2E53] dark:text-sky-400' : 'text-slate-500'}`} />
-            Mi Perfil
-          </button>
-          <button
-            onClick={() => setActiveTab('HORARIO')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-              activeTab === 'HORARIO'
-                ? 'bg-white dark:bg-[#1B1C33] text-[#2C2E53] dark:text-amber-300 shadow-sm border border-[#D4AF37]/50 dark:border-amber-400/40 ring-1 ring-amber-500/10'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/60'
-            }`}
-          >
-            <Clock className={`w-3.5 h-3.5 ${activeTab === 'HORARIO' ? 'text-[#D4AF37] dark:text-amber-400' : 'text-slate-500'}`} />
-            Mi Horario
-          </button>
-          <button
-            onClick={() => setActiveTab('SUGERENCIAS')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-              activeTab === 'SUGERENCIAS'
-                ? 'bg-white dark:bg-[#1B1C33] text-[#2C2E53] dark:text-sky-300 shadow-sm border border-slate-200 dark:border-sky-400/40 ring-1 ring-slate-900/5'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/60'
-            }`}
-          >
-            <Lightbulb className={`w-3.5 h-3.5 ${activeTab === 'SUGERENCIAS' ? 'text-amber-500 dark:text-sky-400' : 'text-slate-500'}`} />
-            Ideas y Sugerencias
-          </button>
-        </div>
       </div>
 
       {/* VIEW: DASHBOARD TABLERO */}
@@ -1354,14 +1680,527 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
 
       {/* VIEW: MI HORARIO DE CLASES / LABORES (CONEXIÓN DIRECTA CON BASE DE DATOS) */}
       {activeTab === 'HORARIO' && (() => {
+        const isRepresentative = currentRole === 'REPRESENTANTE';
+        const isStudent = currentRole === 'ESTUDIANTE';
+        const isFamilyOrStudent = isRepresentative || isStudent;
+        const days: ScheduleDay[] = ['LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES'];
+
+        // VISTA PARA REPRESENTANTE O ESTUDIANTE: Visualización de Horario del Hijo/a o Alumno
+        if (isFamilyOrStudent) {
+          const activeChild: Student | null = isRepresentative
+            ? (representedStudents.find(s => s.id === selectedChildId) || representedStudents[0] || null)
+            : currentStudent;
+
+          if (!activeChild) {
+            return (
+              <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 shadow-cba-card text-center max-w-xl mx-auto space-y-4 my-8">
+                <div className="w-16 h-16 rounded-2xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto border border-amber-200 dark:border-amber-800/60 shadow-inner">
+                  <Users className="w-8 h-8" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-[#2C2E53] dark:text-white">
+                    {isRepresentative ? 'Sin Representados Vinculados' : 'Estudiante No Encontrado'}
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
+                    {isRepresentative
+                      ? 'No se encontraron alumnos registrados asociados a su cuenta de representante legal. Si acaba de formalizar la inscripción en el plantel, por favor confirme que su cédula o correo coincidan con los datos de inscripción o consulte en Coordinación.'
+                      : 'No se encontró una ficha de alumno asociada a este usuario en la base de datos actual.'}
+                  </p>
+                </div>
+                <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl text-xs text-slate-600 dark:text-slate-300 font-mono inline-block border border-slate-200 dark:border-slate-700">
+                  Usuario en sesión: <strong className="text-slate-800 dark:text-white">{currentUser?.fullName}</strong> (@{currentUser?.username})
+                </div>
+              </div>
+            );
+          }
+
+          const childBlocks = getChildScheduleBlocks(activeChild);
+
+          const blocksByDay = days.reduce((acc, day) => {
+            acc[day] = childBlocks
+              .filter(b => b.day === day)
+              .sort((a, b) => a.periodIndex - b.periodIndex || a.startTime.localeCompare(b.startTime));
+            return acc;
+          }, {} as Record<ScheduleDay, (ScheduleBlock & { teacherName?: string })[]>);
+
+          const now = new Date();
+          const dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+          const currentDayStr = dayNames[now.getDay()];
+          const currentDayUpper: ScheduleDay | null = ['LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES'][now.getDay() - 1] as ScheduleDay || null;
+          const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+          const activeCurrentBlock = currentDayUpper
+            ? childBlocks.find(b => {
+                if (b.day !== currentDayUpper) return false;
+                const [sH, sM] = (b.startTime || '00:00').split(':').map(Number);
+                const [eH, eM] = (b.endTime || '23:59').split(':').map(Number);
+                const startMin = (sH || 0) * 60 + (sM || 0);
+                const endMin = (eH || 0) * 60 + (eM || 0);
+                return currentMinutes >= startMin && currentMinutes <= endMin;
+              })
+            : null;
+
+          const isRecessTime = (() => {
+            if (!currentDayUpper) return false;
+            if (activeChild.level === 'MEDIA_GENERAL') {
+              return currentMinutes >= (10 * 60 + 15) && currentMinutes <= (10 * 60 + 45);
+            }
+            return currentMinutes >= (9 * 60 + 30) && currentMinutes <= (10 * 60);
+          })();
+
+          const uniqueSubjects = Array.from(new Set(childBlocks.map(b => b.subjectName))).map(subName => {
+            const sample = childBlocks.find(blk => blk.subjectName === subName)!;
+            const count = childBlocks.filter(blk => blk.subjectName === subName).length;
+            return {
+              name: subName,
+              color: sample.color || 'blue',
+              count,
+              hoursWeekly: Math.round((count * 45) / 60 * 10) / 10,
+              room: sample.classroom || 'Aula General',
+              teacher: sample.teacherName || 'Docente Titular Asignado'
+            };
+          });
+
+          const totalHours = childBlocks.length;
+
+          return (
+            <div className="space-y-6">
+              {/* SELECTOR DE HIJO / REPRESENTADO (Si tiene más de 1 hijo) */}
+              {isRepresentative && representedStudents.length > 1 && (
+                <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 no-print">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-[#D4AF37] flex items-center justify-center font-bold">
+                      <Users className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-black text-[#2C2E53] dark:text-white uppercase tracking-wider">
+                        Seleccionar Hijo(a) / Representado(a):
+                      </h4>
+                      <p className="text-[11px] text-slate-500">
+                        Tiene {representedStudents.length} representados registrados en la institución
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                    {representedStudents.map(child => (
+                      <button
+                        key={child.id}
+                        type="button"
+                        onClick={() => setSelectedChildId(child.id)}
+                        className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer shadow-xs ${
+                          activeChild.id === child.id
+                            ? 'bg-gradient-to-r from-[#2C2E53] to-[#1B1C33] text-[#D4AF37] ring-2 ring-[#D4AF37]/50'
+                            : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300'
+                        }`}
+                      >
+                        <GraduationCap className="w-3.5 h-3.5" />
+                        <span>{child.fullName}</span>
+                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/20 text-[#D4AF37]">
+                          {child.grade} "{child.section}"
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* CARD PRINCIPAL DE IDENTIFICACIÓN DEL HORARIO */}
+              <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-cba-card flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div className="space-y-1.5">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-[#D4AF37] bg-[#2C2E53] px-2.5 py-0.5 rounded-md shadow-2xs">
+                      {isRepresentative ? 'Horario de Clases de mi Representado(a)' : 'Mi Horario de Clases CBA'}
+                    </span>
+                    <span className="text-[10px] font-mono font-bold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">
+                      Año Escolar 2026 - 2027
+                    </span>
+                    <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 px-2.5 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
+                      {activeChild.level === 'MEDIA_GENERAL'
+                        ? 'Educación Media General'
+                        : activeChild.level === 'PRIMARIA'
+                        ? 'Educación Primaria'
+                        : 'Educación Inicial'}
+                    </span>
+                  </div>
+
+                  <h3 className="text-xl font-black text-[#2C2E53] dark:text-white flex flex-wrap items-center gap-2">
+                    <span>{activeChild.fullName}</span>
+                    <span className="text-sm font-extrabold text-[#D4AF37] bg-[#2C2E53]/10 dark:bg-[#D4AF37]/10 px-2.5 py-0.5 rounded-lg border border-[#D4AF37]/30">
+                      {activeChild.grade} • Sección "{activeChild.section}"
+                    </span>
+                  </h3>
+
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
+                    <span className="flex items-center gap-1.5">
+                      <FileText className="w-3.5 h-3.5 text-slate-400" />
+                      Cédula / Código: <strong className="font-mono text-slate-700 dark:text-slate-200">{activeChild.cedula}</strong>
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-slate-400" />
+                      Turno: <strong className="text-slate-700 dark:text-slate-200">
+                        {activeChild.level === 'MEDIA_GENERAL'
+                          ? 'Diurno Regular (07:00 a 13:30 • 8 Bloques de 45m)'
+                          : 'Integral Matutino (07:00 a 12:15 • 6 Bloques de 45m)'}
+                      </strong>
+                    </span>
+                    {isRepresentative && activeChild.representativeName && (
+                      <span className="flex items-center gap-1.5">
+                        <User className="w-3.5 h-3.5 text-slate-400" />
+                        Representante Legal: <strong className="text-slate-700 dark:text-slate-200">{activeChild.representativeName}</strong>
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {!isRepresentative && (
+                  <div className="flex items-center gap-2 w-full md:w-auto no-print">
+                    <button
+                      type="button"
+                      onClick={() => window.print()}
+                      className="w-full md:w-auto px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#2C2E53] to-[#1B1C33] hover:from-[#1B1C33] hover:to-slate-900 text-[#D4AF37] font-bold text-xs shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer border border-[#D4AF37]/30"
+                      title="Imprimir copia oficial del horario escolar"
+                    >
+                      <Printer className="w-4 h-4 text-[#D4AF37]" />
+                      <span>Imprimir Horario Oficial</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* BANNER DINÁMICO DE ESTADO EN TIEMPO REAL */}
+              {activeCurrentBlock ? (
+                <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-amber-950 dark:text-amber-200 text-xs font-bold flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 shadow-xs animate-in fade-in">
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-3 h-3 rounded-full bg-amber-500 animate-ping shrink-0" />
+                    <span>
+                      Actividad en curso ahora ({activeCurrentBlock.startTime} - {activeCurrentBlock.endTime}):{' '}
+                      <strong className="text-amber-900 dark:text-amber-100 font-black">{activeCurrentBlock.subjectName}</strong>
+                      {' • '}{activeCurrentBlock.classroom || 'Aula General'}
+                      {activeCurrentBlock.teacherName && ` (Prof. ${activeCurrentBlock.teacherName})`}
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-200 dark:bg-amber-900/60 text-amber-900 dark:text-amber-200 border border-amber-300 dark:border-amber-700 shrink-0">
+                    En Aula • Hora {activeCurrentBlock.periodIndex}
+                  </span>
+                </div>
+              ) : isRecessTime ? (
+                <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-emerald-950 dark:text-emerald-200 text-xs font-bold flex items-center gap-2.5 shadow-xs">
+                  <Clock className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <span>
+                    Momento de Recreo / Merienda y Esparcimiento Guiado en las áreas recreativas del plantel.
+                  </span>
+                </div>
+              ) : null}
+
+              {/* TOOLBAR DE FILTRO POR DÍA */}
+              <div className="bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 shadow-sm no-print">
+                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+                  <Filter className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  <span className="text-xs font-bold text-slate-600 dark:text-slate-300 mr-1">Filtrar Día:</span>
+                  <button
+                    type="button"
+                    onClick={() => setScheduleDayFilter('TODOS')}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+                      scheduleDayFilter === 'TODOS'
+                        ? 'bg-[#2C2E53] text-[#D4AF37] shadow-sm'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    Semana Completa ({totalHours} Clases)
+                  </button>
+                  {days.map(d => {
+                    const dayCount = childBlocks.filter(b => b.day === d).length;
+                    return (
+                      <button
+                        key={d}
+                        type="button"
+                        onClick={() => setScheduleDayFilter(d)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+                          scheduleDayFilter === d
+                            ? 'bg-[#2C2E53] text-[#D4AF37] shadow-sm'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                        }`}
+                      >
+                        {d} ({dayCount})
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="text-xs text-slate-500 font-medium">
+                  Carga escolar: <strong className="text-slate-800 dark:text-slate-200 font-black">{totalHours} sesiones</strong> ({uniqueSubjects.length} asignaturas)
+                </div>
+              </div>
+
+              {/* GRILLA SEMANAL VISUAL (Lunes a Viernes) */}
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                {days.map(day => {
+                  const dayBlocks = blocksByDay[day] || [];
+                  const isFilteredOut = scheduleDayFilter !== 'TODOS' && scheduleDayFilter !== day;
+                  if (isFilteredOut) return null;
+
+                  return (
+                    <div
+                      key={day}
+                      className={`bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col overflow-hidden transition-all ${
+                        scheduleDayFilter === day ? 'md:col-span-5' : ''
+                      }`}
+                    >
+                      {/* Encabezado del Día */}
+                      <div className="p-3 bg-gradient-to-r from-slate-50 to-slate-100/70 dark:from-slate-800/80 dark:to-slate-800/40 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <CalendarCheck className="w-4 h-4 text-[#D4AF37]" />
+                          <h4 className="font-extrabold text-xs text-slate-800 dark:text-white tracking-wide">
+                            {day}
+                          </h4>
+                        </div>
+                        <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                          {dayBlocks.length} {dayBlocks.length === 1 ? 'bloque' : 'bloques'}
+                        </span>
+                      </div>
+
+                      {/* Bloques del Día */}
+                      <div className="p-3 space-y-2.5 flex-1 min-h-[140px] bg-slate-50/30 dark:bg-slate-950/20">
+                        {dayBlocks.length === 0 ? (
+                          <div className="h-full flex flex-col items-center justify-center text-center p-4 text-slate-400">
+                            <Clock className="w-6 h-6 text-slate-300 dark:text-slate-700 mb-1 stroke-1" />
+                            <p className="text-[11px] italic">Sin actividades asignadas</p>
+                          </div>
+                        ) : (
+                          dayBlocks.map((block) => {
+                            const [startH, startM] = (block.startTime || '00:00').split(':').map(Number);
+                            const [endH, endM] = (block.endTime || '23:59').split(':').map(Number);
+                            const blockStartMin = (startH || 0) * 60 + (startM || 0);
+                            const blockEndMin = (endH || 0) * 60 + (endM || 0);
+
+                            const isCurrentBlock =
+                              currentDayStr === day &&
+                              currentMinutes >= blockStartMin &&
+                              currentMinutes <= blockEndMin;
+
+                            const colorClasses =
+                              block.color === 'emerald'
+                                ? 'border-emerald-300 dark:border-emerald-800 bg-emerald-50/70 dark:bg-emerald-950/40 text-emerald-950 dark:text-emerald-200'
+                                : block.color === 'indigo'
+                                ? 'border-indigo-300 dark:border-indigo-800 bg-indigo-50/70 dark:bg-indigo-950/40 text-indigo-950 dark:text-indigo-200'
+                                : block.color === 'violet'
+                                ? 'border-violet-300 dark:border-violet-800 bg-violet-50/70 dark:bg-violet-950/40 text-violet-950 dark:text-violet-200'
+                                : block.color === 'amber'
+                                ? 'border-amber-300 dark:border-amber-800 bg-amber-50/70 dark:bg-amber-950/40 text-amber-950 dark:text-amber-200'
+                                : block.color === 'rose'
+                                ? 'border-rose-300 dark:border-rose-800 bg-rose-50/70 dark:bg-rose-950/40 text-rose-950 dark:text-rose-200'
+                                : block.color === 'teal'
+                                ? 'border-teal-300 dark:border-teal-800 bg-teal-50/70 dark:bg-teal-950/40 text-teal-950 dark:text-teal-200'
+                                : 'border-blue-300 dark:border-blue-800 bg-blue-50/70 dark:bg-blue-950/40 text-blue-950 dark:text-blue-200';
+
+                            const isBeforeRecess =
+                              (activeChild.level === 'MEDIA_GENERAL' && block.periodIndex === 4) ||
+                              ((activeChild.level === 'PRIMARIA' || activeChild.level === 'INICIAL') && block.periodIndex === 3);
+
+                            return (
+                              <React.Fragment key={block.id}>
+                                <div
+                                  className={`p-3 rounded-xl border ${colorClasses} shadow-xs relative transition-all duration-200 hover:shadow-md ${
+                                    isCurrentBlock
+                                      ? 'ring-2 ring-[#D4AF37] ring-offset-1 shadow-md bg-amber-50/90 dark:bg-amber-950/60'
+                                      : ''
+                                  }`}
+                                >
+                                  <div className="flex items-start justify-between gap-1 mb-1">
+                                    <div className="flex items-center gap-1">
+                                      <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-white/90 dark:bg-slate-900/90 shadow-2xs">
+                                        {block.startTime} - {block.endTime}
+                                      </span>
+                                      {isCurrentBlock && (
+                                        <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-[#D4AF37] text-slate-950 flex items-center gap-0.5 animate-pulse shadow-2xs">
+                                          <Sparkles className="w-2.5 h-2.5" />
+                                          En Curso
+                                        </span>
+                                      )}
+                                    </div>
+                                    <span className="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-white/70 dark:bg-slate-900/70">
+                                      Hora {block.periodIndex}
+                                    </span>
+                                  </div>
+
+                                  <h5 className="font-extrabold text-xs leading-tight mb-1 text-slate-900 dark:text-white">
+                                    {block.subjectName}
+                                  </h5>
+
+                                  <div className="space-y-0.5 text-[11px] text-slate-600 dark:text-slate-300 font-medium">
+                                    {block.teacherName && (
+                                      <div className="flex items-center gap-1">
+                                        <User className="w-3 h-3 text-slate-400 shrink-0" />
+                                        <span className="truncate">{block.teacherName}</span>
+                                      </div>
+                                    )}
+                                    <div className="flex items-center gap-1">
+                                      <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+                                      <span className="truncate">{block.classroom || 'Aula General'}</span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {isBeforeRecess && (
+                                  <div className="py-1 px-2.5 rounded-lg bg-gradient-to-r from-amber-100/80 to-amber-50/60 dark:from-amber-950/50 dark:to-amber-900/30 border border-amber-200/80 dark:border-amber-800/50 flex items-center justify-between text-[10px] font-bold text-amber-800 dark:text-amber-300">
+                                    <span className="flex items-center gap-1.5">
+                                      ☕ Recreo / Merienda Guiada
+                                    </span>
+                                    <span className="font-mono text-[9px]">
+                                      {activeChild.level === 'MEDIA_GENERAL' ? '10:15 - 10:45' : '09:30 - 10:00'}
+                                    </span>
+                                  </div>
+                                )}
+                              </React.Fragment>
+                            );
+                          })
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* RESUMEN DE ASIGNATURAS Y DOCENTES (no-print) */}
+              <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3 no-print">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="w-4 h-4 text-[#D4AF37]" />
+                    <h4 className="text-xs font-black uppercase text-[#2C2E53] dark:text-white tracking-wider">
+                      Cátedras y Asignaturas Oficiales del Curso ({uniqueSubjects.length})
+                    </h4>
+                  </div>
+                  <span className="text-[11px] font-mono text-slate-500">
+                    {totalHours} sesiones pedagógicas / semana
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                  {uniqueSubjects.map(sub => (
+                    <div
+                      key={sub.name}
+                      className="p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 flex items-start justify-between gap-2"
+                    >
+                      <div className="space-y-0.5 min-w-0">
+                        <p className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">
+                          {sub.name}
+                        </p>
+                        <p className="text-[10px] text-slate-500 truncate flex items-center gap-1">
+                          <User className="w-3 h-3 text-slate-400" />
+                          <span>{sub.teacher}</span>
+                        </p>
+                        <p className="text-[10px] text-slate-400 truncate flex items-center gap-1">
+                          <MapPin className="w-3 h-3 text-slate-400" />
+                          <span>{sub.room}</span>
+                        </p>
+                      </div>
+                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 shrink-0">
+                        {sub.count} {sub.count === 1 ? 'hora' : 'horas'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* FORMATO OFICIAL IMPRESO (@media print) */}
+              <div className="hidden print:block p-6 bg-white text-slate-900 space-y-4">
+                <div className="border-b-2 border-slate-900 pb-3 flex items-start justify-between gap-4">
+                  <div>
+                    <h2 className="text-sm font-black uppercase tracking-wide">República Bolivariana de Venezuela</h2>
+                    <h3 className="text-xs font-bold uppercase">Ministerio del Poder Popular para la Educación</h3>
+                    <h4 className="text-sm font-black text-[#1B1C33] mt-1">U.E. COLEGIO BELÉN SAN JUAN (SISCEBA)</h4>
+                    <p className="text-[10px] font-mono text-slate-600">
+                      Código DEA: {schoolData?.dea || 'OD-05241503'} • RIF: {schoolData?.rif || 'J-31456789-0'} • Circuito 05
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[11px] font-black uppercase px-2.5 py-1 bg-slate-100 border border-slate-300 rounded block">
+                      HORARIO OFICIAL DE CLASES
+                    </span>
+                    <span className="text-[10px] font-mono text-slate-500 mt-1 block">
+                      Año Lectivo 2026 - 2027
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-3 bg-slate-50 border border-slate-300 rounded-lg grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <p><strong>Estudiante:</strong> {activeChild.fullName}</p>
+                    <p><strong>Cédula / Escolar:</strong> {activeChild.cedula}</p>
+                    <p><strong>Curso / Grado:</strong> {activeChild.grade} — Sección "{activeChild.section}"</p>
+                  </div>
+                  <div>
+                    <p><strong>Nivel / Subsistema:</strong> {activeChild.level.replace('_', ' ')}</p>
+                    <p><strong>Representante Legal:</strong> {activeChild.representativeName || currentUser?.fullName || 'Registrado'}</p>
+                    <p><strong>Jornada:</strong> {activeChild.level === 'MEDIA_GENERAL' ? 'Diurno Regular (07:00 a 13:30)' : 'Integral Matutino (07:00 a 12:15)'}</p>
+                  </div>
+                </div>
+
+                <table className="w-full text-center text-[10px] border-collapse border border-slate-400 mt-3">
+                  <thead>
+                    <tr className="bg-slate-100 font-black uppercase">
+                      <th className="p-1.5 border border-slate-400 w-24">Hora / Bloque</th>
+                      {days.map(d => (
+                        <th key={d} className="p-1.5 border border-slate-400">{d}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(activeChild.level === 'MEDIA_GENERAL' ? [1, 2, 3, 4, 5, 6, 7, 8] : [1, 2, 3, 4, 5, 6]).map(periodNum => (
+                      <tr key={periodNum}>
+                        <td className="p-1 border border-slate-400 font-mono font-bold bg-slate-50">
+                          Bloque {periodNum}
+                        </td>
+                        {days.map(d => {
+                          const blk = (blocksByDay[d] || []).find(b => b.periodIndex === periodNum);
+                          return (
+                            <td key={d} className="p-1 border border-slate-400 align-middle">
+                              {blk ? (
+                                <div>
+                                  <strong className="block text-[10px] leading-tight">{blk.subjectName}</strong>
+                                  <span className="block text-[8px] text-slate-600 font-mono">{blk.classroom || 'Aula'}</span>
+                                  {blk.teacherName && (
+                                    <span className="block text-[8px] text-slate-500 italic">{blk.teacherName}</span>
+                                  )}
+                                </div>
+                              ) : (
+                                <span className="text-slate-400 text-[9px]">—</span>
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                <div className="pt-8 grid grid-cols-3 gap-6 text-center text-[10px] font-bold">
+                  <div className="border-t border-slate-500 pt-1">
+                    <p>Prof. Carlos R. Méndez P.</p>
+                    <p className="font-normal text-slate-500">Director General</p>
+                  </div>
+                  <div className="border-t border-slate-500 pt-1">
+                    <p>Coordinación Pedagógica</p>
+                    <p className="font-normal text-slate-500">Sello Institucional CBA</p>
+                  </div>
+                  <div className="border-t border-slate-500 pt-1">
+                    <p>Firma del Representante</p>
+                    <p className="font-normal text-slate-500">Conformidad y Recepción</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        }
+
+        // VISTA PARA PERSONAL / DOCENTES / ADMINISTRADORES (existente)
         const schedule = currentUserSchedule || {
           userId: currentUser?.id || 'usr-default',
           userRole: currentRole,
           schoolYear: '2026 - 2027',
           blocks: []
         };
-
-        const days: ScheduleDay[] = ['LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES'];
 
         const filteredBlocks = scheduleDayFilter === 'TODOS'
           ? schedule.blocks
@@ -1642,7 +2481,7 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
             </div>
 
             {/* MODAL: AÑADIR NUEVO BLOQUE AL HORARIO */}
-            {showAddBlockModal && (
+            {showAddBlockModal && typeof document !== 'undefined' && createPortal(
               <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
                 <div className="bg-white rounded-2xl max-w-lg w-full p-6 border border-slate-200 shadow-2xl animate-in fade-in zoom-in-95">
                   <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
@@ -1842,7 +2681,8 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
                     </div>
                   </form>
                 </div>
-              </div>
+              </div>,
+              document.body
             )}
           </div>
         );

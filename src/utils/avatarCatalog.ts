@@ -355,6 +355,8 @@ export function encodeUserAvatarWithMetadata(data: {
   role?: string;
   roles?: string[];
   allowedLevels?: string[];
+  grade?: string;
+  section?: 'A' | 'B';
 }): string {
   // Encontrar si coincide con un preset oficial para guardarlo como ID liviano
   let avatarRef = data.avatarUrl || '';
@@ -375,6 +377,8 @@ export function encodeUserAvatarWithMetadata(data: {
     r: data.role || null,
     rs: data.roles && data.roles.length > 0 ? data.roles : null,
     al: data.allowedLevels || null,
+    gr: data.grade || null,
+    sec: data.section || null,
     a: avatarRef
   };
 
@@ -396,6 +400,8 @@ export function decodeUserAvatarMetadata(rawAvatarUrl?: string | null): {
   role?: string;
   roles?: string[];
   allowedLevels?: string[];
+  grade?: string;
+  section?: 'A' | 'B';
 } {
   if (!rawAvatarUrl) {
     return { avatarUrl: '' };
@@ -422,7 +428,9 @@ export function decodeUserAvatarMetadata(rawAvatarUrl?: string | null): {
         receiveMessages: meta.rm ?? true,
         role: meta.r || undefined,
         roles: Array.isArray(meta.rs) ? meta.rs : undefined,
-        allowedLevels: meta.al || undefined
+        allowedLevels: meta.al || undefined,
+        grade: meta.gr || undefined,
+        section: meta.sec || undefined
       };
     } catch {
       return { avatarUrl: rawAvatarUrl };

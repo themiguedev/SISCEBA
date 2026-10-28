@@ -1,6 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import { MainNavigationTab, NotificationCategory, SystemNotification } from '../../types';
+import { isNotificationVisibleForRole } from '../../utils/rbac';
 import {
   Bell,
   CheckCheck,
@@ -25,7 +26,9 @@ export const NotificationCenterPopover: React.FC<NotificationCenterPopoverProps>
     unreadNotificationsCount,
     markNotificationAsRead,
     markAllNotificationsAsRead,
-    clearNotifications
+    clearNotifications,
+    currentRole,
+    currentUser
   } = useApp();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -47,10 +50,16 @@ export const NotificationCenterPopover: React.FC<NotificationCenterPopoverProps>
     };
   }, [isOpen]);
 
-  const filteredNotifications = notifications.filter(n => {
-    if (selectedCategory === 'ALL') return true;
-    return n.category === selectedCategory;
-  });
+  const roleNotifications = useMemo(() => {
+    return notifications.filter(n => isNotificationVisibleForRole(n, currentRole, currentUser));
+  }, [notifications, currentRole, currentUser]);
+
+  const filteredNotifications = useMemo(() => {
+    return roleNotifications.filter(n => {
+      if (selectedCategory === 'ALL') return true;
+      return n.category === selectedCategory;
+    });
+  }, [roleNotifications, selectedCategory]);
 
   const getCategoryIcon = (category: NotificationCategory) => {
     switch (category) {
@@ -130,7 +139,7 @@ export const NotificationCenterPopover: React.FC<NotificationCenterPopoverProps>
                   <span className="hidden sm:inline">Leer todas</span>
                 </button>
               )}
-              {notifications.length > 0 && (
+              {roleNotifications.length > 0 && (
                 <button
                   type="button"
                   onClick={clearNotifications}
@@ -158,7 +167,7 @@ export const NotificationCenterPopover: React.FC<NotificationCenterPopoverProps>
               >
                 <span>Todas</span>
                 <span className="text-[9px] sm:text-[10px] px-1 py-0.2 rounded-full bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-300 font-semibold">
-                  {notifications.length}
+                  {roleNotifications.length}
                 </span>
               </button>
 
@@ -264,7 +273,7 @@ export const NotificationCenterPopover: React.FC<NotificationCenterPopoverProps>
                       </span>
                       {notif.recipientRole && (
                         <span className="px-1.5 py-0.2 rounded bg-slate-100 dark:bg-[#2C2E53] text-slate-600 dark:text-slate-300 font-semibold">
-                          Para: {notif.recipientRole.toLowerCase()}
+                          Para: {notif.recipientRole === 'ADMIN_DIRECCION' ? 'admin y dirección' : notif.recipientRole.toLowerCase()}
                         </span>
                       )}
                       {/* Delivery channels */}

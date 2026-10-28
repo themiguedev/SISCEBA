@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useApp } from '../../context/AppContext';
 import { DocumentRequest } from '../../types';
 import {
@@ -237,7 +238,7 @@ export const DocumentosSolicitadosView: React.FC = () => {
       </div>
 
       {/* CREATE MODAL */}
-      {isCreateModalOpen && (
+      {isCreateModalOpen && typeof document !== 'undefined' && createPortal(
         <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 animate-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
@@ -335,7 +336,8 @@ export const DocumentosSolicitadosView: React.FC = () => {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* MODAL DE IMPRESIÓN DE FORMATOS OFICIALES */}

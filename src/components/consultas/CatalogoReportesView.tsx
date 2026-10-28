@@ -5,7 +5,10 @@ import {
   CategoriaReporte,
   ReporteItem,
   getReportesImpresionesMap,
-  incrementReporteImpresiones
+  incrementReporteImpresiones,
+  getMergedReportesCatalog,
+  saveReporteConfig,
+  ReporteConfigOverrides
 } from '../../data/reportesCEOData';
 import { Student } from '../../types';
 import { OfficialFormatType } from '../common/OfficialFormatPrintModal';
@@ -25,7 +28,10 @@ import {
   Award,
   CheckCircle2,
   Clock,
-  ArrowLeft
+  ArrowLeft,
+  Edit3,
+  Sliders,
+  Settings
 } from 'lucide-react';
 
 interface CatalogoReportesViewProps {
@@ -40,6 +46,9 @@ export const CatalogoReportesView: React.FC<CatalogoReportesViewProps> = ({
   onOpenOficialFormat
 }) => {
   const { currentRole, addAuditLog } = useApp();
+
+  // Catálogo reactivo con configuraciones persistidas en navegador
+  const [catalogItems, setCatalogItems] = useState<ReporteItem[]>(() => getMergedReportesCatalog());
 
   // Mapa de impresiones persistido
   const [impresionesMap, setImpresionesMap] = useState<Record<string, number>>(() => {
@@ -60,6 +69,99 @@ export const CatalogoReportesView: React.FC<CatalogoReportesViewProps> = ({
   // Estado para el panel de configuración de filtros del reporte seleccionado (idéntico a C.E.O.)
   const [selectedReportForFilter, setSelectedReportForFilter] = useState<ReporteItem | null>(null);
 
+  // Estado para el panel de MODIFICAR REGISTRO (idéntico a la captura de Fichas de los Alumnos)
+  const [selectedReportForEdit, setSelectedReportForEdit] = useState<ReporteItem | null>(null);
+  const [editNombre, setEditNombre] = useState<string>('');
+  const [editUrl, setEditUrl] = useState<string>('');
+  const [editOrden, setEditOrden] = useState<number | string>(0);
+  const [editVisible, setEditVisible] = useState<'SI' | 'NO'>('SI');
+  const [editDescripcion, setEditDescripcion] = useState<string>('');
+  const [editFondoCabecera, setEditFondoCabecera] = useState<string>('79,130,187');
+  const [editLetrasCabecera, setEditLetrasCabecera] = useState<string>('255,255,255');
+  const [editFondoFilaPar, setEditFondoFilaPar] = useState<string>('255,255,255');
+  const [editFondoFilaImpar, setEditFondoFilaImpar] = useState<string>('223,232,244');
+  const [saveSuccessMsg, setSaveSuccessMsg] = useState<string | null>(null);
+
+  // Helpers de color (conversión entre 'R,G,B', 'rgb(...)', y '#HEX')
+  const rgbStringToHex = (rgbStr: string): string => {
+    const parts = (rgbStr || '').split(',').map((p) => parseInt(p.trim(), 10));
+    if (parts.length < 3 || parts.some(isNaN)) return '#4F82BB';
+    const r = Math.max(0, Math.min(255, parts[0]));
+    const g = Math.max(0, Math.min(255, parts[1]));
+    const b = Math.max(0, Math.min(255, parts[2]));
+    return '#' + [r, g, b].map((x) => x.toString(16).padStart(2, '0')).join('');
+  };
+
+  const hexToRgbString = (hex: string): string => {
+    const clean = hex.replace('#', '');
+    if (clean.length !== 6) return '79,130,187';
+    const r = parseInt(clean.substring(0, 2), 16);
+    const g = parseInt(clean.substring(2, 4), 16);
+    const b = parseInt(clean.substring(4, 6), 16);
+    return `${r},${g},${b}`;
+  };
+
+  const toCssRgb = (rgbStr: string, fallback: string = '#4F82BB'): string => {
+    const parts = (rgbStr || '').split(',').map((p) => parseInt(p.trim(), 10));
+    if (parts.length < 3 || parts.some(isNaN)) return fallback;
+    return `rgb(${parts[0]}, ${parts[1]}, ${parts[2]})`;
+  };
+
+  // Apertura del panel de MODIFICAR REGISTRO con valores del reporte
+  const openModificarRegistro = (reporte: ReporteItem) => {
+    setSelectedReportForEdit(reporte);
+    setSelectedReportForFilter(null);
+    setEditNombre(reporte.nombre || '');
+    setEditUrl(reporte.url || `uce_reporte_${reporte.id.replace(/^adm-/, '').replace(/-/g, '_')}.php`);
+    setEditOrden(reporte.orden !== undefined ? reporte.orden : 0);
+    setEditVisible(reporte.visible || 'SI');
+    setEditDescripcion(reporte.descripcion || '');
+    setEditFondoCabecera(reporte.fondoCabecera || '79,130,187');
+    setEditLetrasCabecera(reporte.letrasCabecera || '255,255,255');
+    setEditFondoFilaPar(reporte.fondoFilaPar || '255,255,255');
+    setEditFondoFilaImpar(reporte.fondoFilaImpar || '223,232,244');
+    setSaveSuccessMsg(null);
+  };
+
+  // Guardado de MODIFICAR REGISTRO con persistencia
+  const handleGuardarModificacion = () => {
+    if (!selectedReportForEdit) return;
+
+    const parsedOrden = typeof editOrden === 'number' ? editOrden : parseInt(String(editOrden), 10);
+    const overrides: ReporteConfigOverrides = {
+      nombre: editNombre.trim() || selectedReportForEdit.nombre,
+      url: editUrl.trim() || selectedReportForEdit.url || `uce_reporte_${selectedReportForEdit.id.replace(/^adm-/, '').replace(/-/g, '_')}.php`,
+      orden: isNaN(parsedOrden) ? 0 : parsedOrden,
+      visible: editVisible,
+      descripcion: editDescripcion.trim(),
+      fondoCabecera: editFondoCabecera.trim() || '79,130,187',
+      letrasCabecera: editLetrasCabecera.trim() || '255,255,255',
+      fondoFilaPar: editFondoFilaPar.trim() || '255,255,255',
+      fondoFilaImpar: editFondoFilaImpar.trim() || '223,232,244'
+    };
+
+    saveReporteConfig(selectedReportForEdit.id, overrides);
+    const updatedCatalog = getMergedReportesCatalog();
+    setCatalogItems(updatedCatalog);
+
+    const updatedSelected = updatedCatalog.find((r) => r.id === selectedReportForEdit.id);
+    if (updatedSelected) {
+      setSelectedReportForEdit(updatedSelected);
+    }
+
+    if (addAuditLog) {
+      addAuditLog(
+        `MODIFICAR_REGISTRO_${selectedReportForEdit.codigoReporte || selectedReportForEdit.id}`,
+        `Se modificaron los parámetros del reporte "${editNombre}" (Url: ${editUrl}, Orden: ${editOrden}, Visible: ${editVisible})`
+      );
+    }
+
+    setSaveSuccessMsg('Registro modificado exitosamente en el sistema.');
+    setTimeout(() => {
+      setSaveSuccessMsg(null);
+    }, 4500);
+  };
+
   // Parámetros de filtros de reporte (idénticos a las pantallas de C.E.O.)
   const [filtroAno, setFiltroAno] = useState<string>('');
   const [filtroLapso, setFiltroLapso] = useState<number>(0);
@@ -73,7 +175,7 @@ export const CatalogoReportesView: React.FC<CatalogoReportesViewProps> = ({
 
   // Filtrado y ordenamiento de reportes
   const filteredReportes = useMemo(() => {
-    let list = [...CATALOGO_REPORTES_CEO];
+    let list = [...catalogItems];
 
     // Filtro por categoría
     if (activeCategory === 'ADMINISTRADOR') {
@@ -166,6 +268,20 @@ export const CatalogoReportesView: React.FC<CatalogoReportesViewProps> = ({
 
   // Manejador de emisión / generación física del reporte
   const handlePrintClick = (reporte: ReporteItem) => {
+    // Si es sabana de promedios, abrir en ReporteInstitucionalModal para disponer de la barra interactiva de Consejo de Curso (Previo vs Definitivo), Lapsos y filtros avanzados
+    if (reporte.id === 'adm-promedios-seccion-sabana' || reporte.id === 'adm-promedios') {
+      const next = incrementReporteImpresiones(reporte.id);
+      setImpresionesMap((prev) => ({ ...prev, [reporte.id]: next }));
+      if (addAuditLog) {
+        addAuditLog(
+          `EMISION_REPORTE_${reporte.codigoReporte || reporte.id}`,
+          `Generación de Sábana de Promedios por Sección: ${reporte.nombre}`
+        );
+      }
+      setActiveReporteModal(reporte);
+      return;
+    }
+
     // Si tiene un formato oficial asociado y se pasó callback
     if (reporte.formatoOficialId && onOpenOficialFormat) {
       const next = incrementReporteImpresiones(reporte.id);
@@ -216,6 +332,18 @@ export const CatalogoReportesView: React.FC<CatalogoReportesViewProps> = ({
     }
   };
 
+  if (currentRole !== 'ADMINISTRADOR') {
+    return (
+      <div className="p-8 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <Printer className="w-10 h-10 text-[#D4AF37] mx-auto mb-3 opacity-80" />
+        <h3 className="text-base font-bold text-slate-800 dark:text-white">Acceso Reservado</h3>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-md mx-auto">
+          El Catálogo Oficial de Reportes (C.E.O.) está disponible únicamente para usuarios con el rol de Administrador.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-5 animate-in fade-in duration-200">
       {/* TÍTULO Y DESCRIPCIÓN (IDÉNTICO A C.E.O.) */}
@@ -225,8 +353,10 @@ export const CatalogoReportesView: React.FC<CatalogoReportesViewProps> = ({
             <h1 className="text-xl sm:text-2xl font-black text-[#2C2E53] dark:text-white flex items-center gap-2">
               <span>Reportes</span>
             </h1>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-              Visualice los reportes o informes existentes en el sistema.
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">
+              {activeCategory === 'ADMINISTRADOR'
+                ? 'ADM: Administra los reportes del sistema'
+                : 'Visualice los reportes o informes existentes en el sistema.'}
             </p>
           </div>
 
@@ -242,6 +372,7 @@ export const CatalogoReportesView: React.FC<CatalogoReportesViewProps> = ({
             onClick={() => {
               setActiveCategory('ADMINISTRADOR');
               setSelectedReportForFilter(null);
+              setSelectedReportForEdit(null);
               setCurrentPage(1);
             }}
             className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all border ${
@@ -250,13 +381,14 @@ export const CatalogoReportesView: React.FC<CatalogoReportesViewProps> = ({
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200'
             }`}
           >
-            Administrador del Sistema ({CATALOGO_REPORTES_CEO.filter((r) => r.categoria === 'ADMINISTRADOR').length})
+            Administrador del Sistema ({catalogItems.filter((r) => r.categoria === 'ADMINISTRADOR').length})
           </button>
 
           <button
             onClick={() => {
               setActiveCategory('TODOS');
               setSelectedReportForFilter(null);
+              setSelectedReportForEdit(null);
               setCurrentPage(1);
             }}
             className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all border ${
@@ -265,13 +397,14 @@ export const CatalogoReportesView: React.FC<CatalogoReportesViewProps> = ({
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200'
             }`}
           >
-            Todos los Reportes ({CATALOGO_REPORTES_CEO.length})
+            Todos los Reportes ({catalogItems.length})
           </button>
 
           <button
             onClick={() => {
               setActiveCategory('DOCENTE');
               setSelectedReportForFilter(null);
+              setSelectedReportForEdit(null);
               setCurrentPage(1);
             }}
             className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all border ${
@@ -280,13 +413,14 @@ export const CatalogoReportesView: React.FC<CatalogoReportesViewProps> = ({
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200'
             }`}
           >
-            Reportes Docente ({CATALOGO_REPORTES_CEO.filter((r) => r.categoria === 'DOCENTE' || r.ambitoDocente).length})
+            Reportes Docente ({catalogItems.filter((r) => r.categoria === 'DOCENTE' || r.ambitoDocente).length})
           </button>
 
           <button
             onClick={() => {
               setActiveCategory('CONTROL_EVALUACION');
               setSelectedReportForFilter(null);
+              setSelectedReportForEdit(null);
               setCurrentPage(1);
             }}
             className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all border ${
@@ -295,13 +429,304 @@ export const CatalogoReportesView: React.FC<CatalogoReportesViewProps> = ({
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200'
             }`}
           >
-            Control y Evaluación ({CATALOGO_REPORTES_CEO.filter((r) => r.categoria === 'CONTROL_EVALUACION' || r.ambitoControlEstudios).length})
+            Control y Evaluación ({catalogItems.filter((r) => r.categoria === 'CONTROL_EVALUACION' || r.ambitoControlEstudios).length})
           </button>
         </div>
       </div>
 
-      {/* CASO A: PANEL OFICIAL DE FILTROS DEL REPORTE (IDÉNTICO A LA CAPTURA "LITERALES POR RANGO") */}
-      {selectedReportForFilter ? (
+      {/* CASO A: PANEL MODIFICAR REGISTRO (IDÉNTICO A LA CAPTURA DE FICHAS DE LOS ALUMNOS) */}
+      {selectedReportForEdit ? (
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-cba-card overflow-hidden animate-in fade-in duration-150">
+          {/* ENCABEZADO CON TÍTULO EN MAYÚSCULAS Y SUBRAYADO NARANJA (EXACTO A LA CAPTURA) */}
+          <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-white">
+                  Reportes
+                </h1>
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-0.5 font-medium">
+                  ADM: Administra los reportes del sistema
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    openFilterPanel(selectedReportForEdit);
+                    setSelectedReportForEdit(null);
+                  }}
+                  className="px-3.5 py-1.5 bg-[#2C2E53] hover:bg-[#1f203b] text-[#D4AF37] font-bold text-xs rounded transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                  title="Configurar parámetros de filtro y emitir documento"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  <span>Filtros y Emisión</span>
+                </button>
+                <button
+                  onClick={() => setSelectedReportForEdit(null)}
+                  className="px-3.5 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-700 shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Ver Reportes Disponibles</span>
+                </button>
+              </div>
+            </div>
+
+            {/* SEPARADOR NARANJA Y SUBTÍTULO MODIFICAR REGISTRO */}
+            <div className="mt-4 border-b-2 border-orange-500 pb-1 w-full">
+              <h2 className="text-xs sm:text-sm font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
+                MODIFICAR REGISTRO
+              </h2>
+            </div>
+          </div>
+
+          {/* BARRA DE BOTONES SUPERIOR */}
+          <div className="px-5 py-3 bg-slate-50/70 dark:bg-slate-800/40 border-b border-slate-200 dark:border-slate-800 flex items-center gap-2">
+            <button
+              onClick={handleGuardarModificacion}
+              className="px-4 py-1.5 bg-orange-500 hover:bg-orange-600 text-white font-extrabold text-xs rounded shadow-xs transition active:scale-95 cursor-pointer"
+            >
+              Modificar
+            </button>
+            <button
+              onClick={() => setSelectedReportForEdit(null)}
+              className="px-4 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 font-bold text-xs rounded transition active:scale-95 cursor-pointer"
+            >
+              Atras
+            </button>
+          </div>
+
+          {/* MENSAJE DE ÉXITO */}
+          {saveSuccessMsg && (
+            <div className="mx-5 mt-4 p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 text-xs font-bold flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <span>{saveSuccessMsg}</span>
+            </div>
+          )}
+
+          {/* FORMULARIO TABULAR EXACTO AL DE LA CAPTURA */}
+          <div className="overflow-x-auto p-1 sm:p-4">
+            <table className="w-full text-left text-xs border-collapse">
+              <tbody>
+                {/* 1. Nombre */}
+                <tr className="border-b border-slate-200 dark:border-slate-800">
+                  <td className="w-48 sm:w-56 py-3.5 px-4 font-bold text-slate-700 dark:text-slate-300 align-middle">
+                    Nombre
+                  </td>
+                  <td className="py-2.5 px-4">
+                    <input
+                      type="text"
+                      value={editNombre}
+                      onChange={(e) => setEditNombre(e.target.value)}
+                      className="w-full max-w-2xl px-3 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-medium focus:outline-none focus:ring-1 focus:ring-orange-500"
+                    />
+                  </td>
+                </tr>
+
+                {/* 2. Url */}
+                <tr className="border-b border-slate-200 dark:border-slate-800">
+                  <td className="py-3.5 px-4 font-bold text-slate-700 dark:text-slate-300 align-middle">
+                    Url
+                  </td>
+                  <td className="py-2.5 px-4">
+                    <input
+                      type="text"
+                      value={editUrl}
+                      onChange={(e) => setEditUrl(e.target.value)}
+                      className="w-full max-w-2xl px-3 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-orange-500"
+                    />
+                  </td>
+                </tr>
+
+                {/* 3. Orden */}
+                <tr className="border-b border-slate-200 dark:border-slate-800">
+                  <td className="py-3.5 px-4 font-bold text-slate-700 dark:text-slate-300 align-middle">
+                    Orden
+                  </td>
+                  <td className="py-2.5 px-4">
+                    <input
+                      type="number"
+                      value={editOrden}
+                      onChange={(e) => setEditOrden(e.target.value)}
+                      className="w-24 px-3 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-mono font-bold focus:outline-none focus:ring-1 focus:ring-orange-500"
+                    />
+                  </td>
+                </tr>
+
+                {/* 4. Visible */}
+                <tr className="border-b border-slate-200 dark:border-slate-800">
+                  <td className="py-3.5 px-4 font-bold text-slate-700 dark:text-slate-300 align-middle">
+                    Visible
+                  </td>
+                  <td className="py-2.5 px-4">
+                    <select
+                      value={editVisible}
+                      onChange={(e) => setEditVisible(e.target.value as 'SI' | 'NO')}
+                      className="w-full max-w-2xl px-3 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-bold focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer"
+                    >
+                      <option value="SI">SI</option>
+                      <option value="NO">NO</option>
+                    </select>
+                  </td>
+                </tr>
+
+                {/* 5. Descripción */}
+                <tr className="border-b border-slate-200 dark:border-slate-800">
+                  <td className="py-3.5 px-4 font-bold text-slate-700 dark:text-slate-300 align-top">
+                    <div>Descripción</div>
+                    <div className="text-[11px] text-slate-400 dark:text-slate-500 font-normal mt-0.5">
+                      Ingrese una breve descripción.
+                    </div>
+                  </td>
+                  <td className="py-2.5 px-4">
+                    <textarea
+                      rows={3}
+                      value={editDescripcion}
+                      onChange={(e) => setEditDescripcion(e.target.value)}
+                      className="w-full max-w-2xl px-3 py-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-orange-500 resize-y"
+                    />
+                  </td>
+                </tr>
+
+                {/* 6. Fondo Cabecera */}
+                <tr className="border-b border-slate-200 dark:border-slate-800">
+                  <td className="py-3.5 px-4 font-bold text-slate-700 dark:text-slate-300 align-middle">
+                    Fondo Cabecera
+                  </td>
+                  <td className="py-2.5 px-4">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={editFondoCabecera}
+                        onChange={(e) => setEditFondoCabecera(e.target.value)}
+                        placeholder="79,130,187"
+                        className="w-32 px-3 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-orange-500"
+                      />
+                      <label
+                        className="w-7 h-7 rounded border border-slate-400 dark:border-slate-600 shadow-2xs cursor-pointer shrink-0 transition hover:scale-105 inline-block"
+                        style={{ backgroundColor: toCssRgb(editFondoCabecera, '#4F82BB') }}
+                        title="Seleccionar color interactivo"
+                      >
+                        <input
+                          type="color"
+                          className="sr-only"
+                          value={rgbStringToHex(editFondoCabecera)}
+                          onChange={(e) => setEditFondoCabecera(hexToRgbString(e.target.value))}
+                        />
+                      </label>
+                    </div>
+                  </td>
+                </tr>
+
+                {/* 7. Letras Cabecera */}
+                <tr className="border-b border-slate-200 dark:border-slate-800">
+                  <td className="py-3.5 px-4 font-bold text-slate-700 dark:text-slate-300 align-middle">
+                    Letras Cabecera
+                  </td>
+                  <td className="py-2.5 px-4">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={editLetrasCabecera}
+                        onChange={(e) => setEditLetrasCabecera(e.target.value)}
+                        placeholder="255,255,255"
+                        className="w-32 px-3 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-orange-500"
+                      />
+                      <label
+                        className="w-7 h-7 rounded border border-slate-400 dark:border-slate-600 shadow-2xs cursor-pointer shrink-0 transition hover:scale-105 inline-block"
+                        style={{ backgroundColor: toCssRgb(editLetrasCabecera, '#FFFFFF') }}
+                        title="Seleccionar color interactivo"
+                      >
+                        <input
+                          type="color"
+                          className="sr-only"
+                          value={rgbStringToHex(editLetrasCabecera)}
+                          onChange={(e) => setEditLetrasCabecera(hexToRgbString(e.target.value))}
+                        />
+                      </label>
+                    </div>
+                  </td>
+                </tr>
+
+                {/* 8. Fondo Fila Par */}
+                <tr className="border-b border-slate-200 dark:border-slate-800">
+                  <td className="py-3.5 px-4 font-bold text-slate-700 dark:text-slate-300 align-middle">
+                    Fondo Fila Par
+                  </td>
+                  <td className="py-2.5 px-4">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={editFondoFilaPar}
+                        onChange={(e) => setEditFondoFilaPar(e.target.value)}
+                        placeholder="255,255,255"
+                        className="w-32 px-3 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-orange-500"
+                      />
+                      <label
+                        className="w-7 h-7 rounded border border-slate-400 dark:border-slate-600 shadow-2xs cursor-pointer shrink-0 transition hover:scale-105 inline-block"
+                        style={{ backgroundColor: toCssRgb(editFondoFilaPar, '#FFFFFF') }}
+                        title="Seleccionar color interactivo"
+                      >
+                        <input
+                          type="color"
+                          className="sr-only"
+                          value={rgbStringToHex(editFondoFilaPar)}
+                          onChange={(e) => setEditFondoFilaPar(hexToRgbString(e.target.value))}
+                        />
+                      </label>
+                    </div>
+                  </td>
+                </tr>
+
+                {/* 9. Fondo Fila Impar */}
+                <tr className="border-b border-slate-200 dark:border-slate-800">
+                  <td className="py-3.5 px-4 font-bold text-slate-700 dark:text-slate-300 align-middle">
+                    Fondo Fila Impar
+                  </td>
+                  <td className="py-2.5 px-4">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={editFondoFilaImpar}
+                        onChange={(e) => setEditFondoFilaImpar(e.target.value)}
+                        placeholder="223,232,244"
+                        className="w-32 px-3 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-orange-500"
+                      />
+                      <label
+                        className="w-7 h-7 rounded border border-slate-400 dark:border-slate-600 shadow-2xs cursor-pointer shrink-0 transition hover:scale-105 inline-block"
+                        style={{ backgroundColor: toCssRgb(editFondoFilaImpar, '#DFE8F4') }}
+                        title="Seleccionar color interactivo"
+                      >
+                        <input
+                          type="color"
+                          className="sr-only"
+                          value={rgbStringToHex(editFondoFilaImpar)}
+                          onChange={(e) => setEditFondoFilaImpar(hexToRgbString(e.target.value))}
+                        />
+                      </label>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          {/* BARRA DE BOTONES INFERIOR */}
+          <div className="px-5 py-3 bg-slate-50/70 dark:bg-slate-800/40 border-t border-slate-200 dark:border-slate-800 flex items-center gap-2">
+            <button
+              onClick={handleGuardarModificacion}
+              className="px-4 py-1.5 bg-orange-500 hover:bg-orange-600 text-white font-extrabold text-xs rounded shadow-xs transition active:scale-95 cursor-pointer"
+            >
+              Modificar
+            </button>
+            <button
+              onClick={() => setSelectedReportForEdit(null)}
+              className="px-4 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 font-bold text-xs rounded transition active:scale-95 cursor-pointer"
+            >
+              Atras
+            </button>
+          </div>
+        </div>
+      ) : selectedReportForFilter ? (
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-cba-card overflow-hidden animate-in fade-in duration-150">
           {/* ENCABEZADO CON TÍTULO EN MAYÚSCULAS Y SUBRAYADO NARANJA */}
           <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
@@ -311,13 +736,27 @@ export const CatalogoReportesView: React.FC<CatalogoReportesViewProps> = ({
               </h2>
             </div>
 
-            <button
-              onClick={() => setSelectedReportForFilter(null)}
-              className="px-3.5 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-700 shadow-2xs transition flex items-center gap-1.5"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Ver Reportes Disponibles</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  openModificarRegistro(selectedReportForFilter);
+                  setSelectedReportForFilter(null);
+                }}
+                className="px-3.5 py-1.5 rounded border border-orange-300 dark:border-orange-800 bg-orange-50 dark:bg-orange-950/30 text-orange-700 dark:text-orange-300 text-xs font-bold hover:bg-orange-100 dark:hover:bg-orange-900/40 shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
+                title="Modificar registro de configuración del reporte"
+              >
+                <Edit3 className="w-3.5 h-3.5 text-orange-600" />
+                <span>Modificar Registro</span>
+              </button>
+
+              <button
+                onClick={() => setSelectedReportForFilter(null)}
+                className="px-3.5 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-700 shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Ver Reportes Disponibles</span>
+              </button>
+            </div>
           </div>
 
           {/* BARRA DE BOTONES SUPERIOR */}
@@ -439,32 +878,34 @@ export const CatalogoReportesView: React.FC<CatalogoReportesViewProps> = ({
                   <>
                     <tr className="border-b border-slate-200 dark:border-slate-800">
                       <td className="py-3 px-5 font-bold text-slate-700 dark:text-slate-300 bg-slate-50/60 dark:bg-slate-800/30">
-                        Nota Mínima
+                        <div>Nota Mínima / Cota Inferior</div>
+                        <div className="text-[10px] font-normal text-slate-500">Admite decimales (ej. 95.5 para diplomas)</div>
                       </td>
                       <td className="py-2.5 px-5">
                         <input
                           type="text"
-                          maxLength={4}
+                          maxLength={6}
                           value={filtroNotaMin}
                           onChange={(e) => setFiltroNotaMin(e.target.value)}
-                          placeholder="01 / A"
-                          className="w-20 px-2.5 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-mono text-center font-bold focus:outline-none focus:ring-1 focus:ring-orange-500"
+                          placeholder="95.5 / 01 / A"
+                          className="w-28 px-2.5 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-mono text-center font-bold focus:outline-none focus:ring-1 focus:ring-orange-500"
                         />
                       </td>
                     </tr>
 
                     <tr className="border-b border-slate-200 dark:border-slate-800">
                       <td className="py-3 px-5 font-bold text-slate-700 dark:text-slate-300 bg-slate-50/60 dark:bg-slate-800/30">
-                        Nota Máxima
+                        <div>Nota Máxima / Cota Superior</div>
+                        <div className="text-[10px] font-normal text-slate-500">Admite decimales (ej. 100.0)</div>
                       </td>
                       <td className="py-2.5 px-5">
                         <input
                           type="text"
-                          maxLength={4}
+                          maxLength={6}
                           value={filtroNotaMax}
                           onChange={(e) => setFiltroNotaMax(e.target.value)}
-                          placeholder="20 / E"
-                          className="w-20 px-2.5 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-mono text-center font-bold focus:outline-none focus:ring-1 focus:ring-orange-500"
+                          placeholder="100.0 / 20 / E"
+                          className="w-28 px-2.5 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-mono text-center font-bold focus:outline-none focus:ring-1 focus:ring-orange-500"
                         />
                       </td>
                     </tr>
@@ -596,21 +1037,26 @@ export const CatalogoReportesView: React.FC<CatalogoReportesViewProps> = ({
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-[11px] font-black uppercase text-slate-700 dark:text-slate-300 tracking-wider">
-                  {/* Columna Descripción */}
+                  {/* Columna Nombre */}
                   <th
                     onClick={() => toggleSort('nombre')}
-                    className="p-3.5 cursor-pointer hover:text-orange-500 transition select-none"
+                    className="p-3.5 cursor-pointer hover:text-orange-500 transition select-none w-1/3"
                   >
                     <div className="flex items-center justify-between">
-                      <span>Descripción del Reporte</span>
+                      <span>Nombre del Reporte</span>
                       <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
                     </div>
+                  </th>
+
+                  {/* Columna Descripción */}
+                  <th className="p-3.5 text-slate-700 dark:text-slate-300">
+                    <span>Descripción</span>
                   </th>
 
                   {/* Columna Impresiones */}
                   <th
                     onClick={() => toggleSort('impresiones')}
-                    className="p-3.5 w-32 text-right cursor-pointer hover:text-orange-500 transition select-none"
+                    className="p-3.5 w-28 text-right cursor-pointer hover:text-orange-500 transition select-none"
                   >
                     <div className="flex items-center justify-end gap-1.5">
                       <span>Impresiones</span>
@@ -618,16 +1064,16 @@ export const CatalogoReportesView: React.FC<CatalogoReportesViewProps> = ({
                     </div>
                   </th>
 
-                  {/* Columna Imprimir */}
-                  <th className="p-3.5 w-24 text-center">
-                    <span>Imprimir</span>
+                  {/* Columna Acciones */}
+                  <th className="p-3.5 w-28 text-center">
+                    <span>Acciones</span>
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
                 {paginatedReportes.length === 0 ? (
                   <tr>
-                    <td colSpan={3} className="p-8 text-center text-slate-400 italic">
+                    <td colSpan={4} className="p-8 text-center text-slate-400 italic">
                       No se encontraron reportes que coincidan con la búsqueda.
                     </td>
                   </tr>
@@ -637,58 +1083,78 @@ export const CatalogoReportesView: React.FC<CatalogoReportesViewProps> = ({
                     return (
                       <tr
                         key={reporte.id}
-                        onClick={() => openFilterPanel(reporte)}
+                        onClick={() => openModificarRegistro(reporte)}
                         className="hover:bg-amber-50/50 dark:hover:bg-slate-800/50 transition-colors group cursor-pointer"
-                        title="Haga clic para configurar filtros y emitir reporte"
+                        title="Haga clic para ver y modificar el registro de este reporte"
                       >
-                        {/* Descripción */}
-                        <td className="p-3.5">
-                          <div className="flex items-start gap-2.5">
-                            <div className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 shrink-0 mt-0.5 group-hover:bg-[#2C2E53] group-hover:text-[#D4AF37] transition">
+                        {/* Nombre del Reporte */}
+                        <td className="p-3.5 align-middle">
+                          <div className="flex items-center gap-2.5">
+                            <div className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 shrink-0 group-hover:bg-[#2C2E53] group-hover:text-[#D4AF37] transition">
                               <FileText className="w-4 h-4" />
                             </div>
-                            <div>
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-[13px] group-hover:text-orange-600 dark:group-hover:text-orange-400 transition">
-                                  {reporte.nombre}
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openModificarRegistro(reporte);
+                                }}
+                                className="font-bold text-[#337ab7] hover:text-[#1d5987] dark:text-sky-400 dark:hover:text-sky-300 hover:underline cursor-pointer text-xs sm:text-[13px] transition"
+                                title="Haga clic para modificar el registro de este reporte"
+                              >
+                                {reporte.nombre}
+                              </span>
+                              {reporte.codigoReporte && (
+                                <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
+                                  {reporte.codigoReporte}
                                 </span>
-                                {reporte.codigoReporte && (
-                                  <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
-                                    {reporte.codigoReporte}
-                                  </span>
-                                )}
-                                {reporte.nivel !== 'TODOS' && (
-                                  <span className="text-[9.5pt] sm:text-[10px] font-extrabold px-2 py-0.2 rounded-full bg-cyan-500/10 text-cyan-700 dark:text-cyan-300">
-                                    {reporte.nivel === 'INICIAL' ? 'Inicial' : reporte.nivel === 'PRIMARIA' ? 'Primaria' : 'Media General'}
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
-                                {reporte.descripcion}
-                              </p>
+                              )}
+                              {reporte.nivel !== 'TODOS' && (
+                                <span className="text-[9.5pt] sm:text-[10px] font-extrabold px-2 py-0.2 rounded-full bg-cyan-500/10 text-cyan-700 dark:text-cyan-300">
+                                  {reporte.nivel === 'INICIAL' ? 'Inicial' : reporte.nivel === 'PRIMARIA' ? 'Primaria' : 'Media General'}
+                                </span>
+                              )}
                             </div>
                           </div>
                         </td>
 
+                        {/* Descripción (Exacto a la captura de C.E.O.) */}
+                        <td className="p-3.5 text-slate-700 dark:text-slate-300 text-xs font-medium align-middle">
+                          {reporte.descripcion}
+                        </td>
+
                         {/* Impresiones */}
-                        <td className="p-3.5 text-right font-mono font-bold text-slate-800 dark:text-slate-200">
+                        <td className="p-3.5 text-right font-mono font-bold text-slate-800 dark:text-slate-200 align-middle">
                           <span className="inline-block px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800">
                             {impressions}
                           </span>
                         </td>
 
-                        {/* Botón Imprimir (Exacto a las capturas C.E.O.) */}
-                        <td className="p-3.5 text-center">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              openFilterPanel(reporte);
-                            }}
-                            className="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition active:scale-95 inline-flex items-center justify-center shadow-2xs"
-                            title={`Configurar e imprimir reporte: ${reporte.nombre}`}
-                          >
-                            <Printer className="w-4 h-4 text-slate-700 dark:text-slate-200" />
-                          </button>
+                        {/* Botones de Acción (Modificar Registro y Emitir Reporte) */}
+                        <td className="p-3.5 text-center align-middle">
+                          <div className="flex items-center justify-center gap-1.5">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openModificarRegistro(reporte);
+                              }}
+                              className="p-1.5 rounded-lg text-slate-500 hover:text-orange-600 dark:text-slate-400 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-slate-800 transition active:scale-95 inline-flex items-center justify-center shadow-2xs"
+                              title={`Modificar registro: ${reporte.nombre}`}
+                            >
+                              <Edit3 className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                            </button>
+
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openFilterPanel(reporte);
+                              }}
+                              className="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition active:scale-95 inline-flex items-center justify-center shadow-2xs"
+                              title={`Configurar e imprimir reporte: ${reporte.nombre}`}
+                            >
+                              <Printer className="w-4 h-4 text-slate-700 dark:text-slate-200" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );

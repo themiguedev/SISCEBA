@@ -1,4 +1,4 @@
-import { UserRole, MainNavigationTab, EducationalLevel, AppUser } from '../types';
+import { UserRole, MainNavigationTab, EducationalLevel, AppUser, SystemNotification } from '../types';
 
 /**
  * Obtiene todos los roles efectivos acumulados de un usuario o rol.
@@ -227,7 +227,7 @@ export const ALL_LEVEL_SUBTABS: string[] = [
 export const ROLE_SUBTAB_PERMISSIONS: Record<UserRole, Partial<Record<MainNavigationTab, string[]>>> = {
   ADMINISTRADOR: {
     ESCRITORIO: ['DASHBOARD', 'PERFIL', 'HORARIO', 'SUGERENCIAS'],
-    GESTION: ['INSCRIPCIONES', 'PASES', 'INASISTENCIAS', 'CONDUCTAS', 'DOCUMENTOS', 'BLOQUEO', 'TITULOS', 'MATRICULA', 'TALLERES_CRP', 'USUARIOS'],
+    GESTION: ['TAREAS_RECURRENTES', 'INSCRIPCIONES', 'PASES', 'INASISTENCIAS', 'CONDUCTAS', 'DOCUMENTOS', 'BLOQUEO', 'TITULOS', 'MATRICULA', 'TALLERES_CRP', 'USUARIOS'],
     INICIAL: ALL_LEVEL_SUBTABS,
     PRIMARIA: ALL_LEVEL_SUBTABS,
     MEDIA_GENERAL: ALL_LEVEL_SUBTABS,
@@ -238,7 +238,7 @@ export const ROLE_SUBTAB_PERMISSIONS: Record<UserRole, Partial<Record<MainNaviga
   },
   DIRECTOR: {
     ESCRITORIO: ['DASHBOARD', 'PERFIL', 'HORARIO', 'SUGERENCIAS'],
-    GESTION: ['INSCRIPCIONES', 'PASES', 'INASISTENCIAS', 'CONDUCTAS', 'DOCUMENTOS', 'BLOQUEO', 'TITULOS', 'TALLERES_CRP'], // Matrícula y Prosecución exclusiva de Administrador
+    GESTION: ['TAREAS_RECURRENTES', 'INSCRIPCIONES', 'PASES', 'INASISTENCIAS', 'CONDUCTAS', 'DOCUMENTOS', 'BLOQUEO', 'TITULOS', 'TALLERES_CRP'], // Matrícula y Prosecución exclusiva de Administrador
     INICIAL: ALL_LEVEL_SUBTABS,
     PRIMARIA: ALL_LEVEL_SUBTABS,
     MEDIA_GENERAL: ALL_LEVEL_SUBTABS,
@@ -249,7 +249,7 @@ export const ROLE_SUBTAB_PERMISSIONS: Record<UserRole, Partial<Record<MainNaviga
   },
   COORDINACION: {
     ESCRITORIO: ['DASHBOARD', 'PERFIL', 'HORARIO', 'SUGERENCIAS'],
-    GESTION: ['INSCRIPCIONES', 'PASES', 'INASISTENCIAS', 'CONDUCTAS', 'DOCUMENTOS', 'TITULOS', 'TALLERES_CRP'], // Bloqueo reservado a Director/Admin, Matrícula reservada a Admin
+    GESTION: ['TAREAS_RECURRENTES', 'INSCRIPCIONES', 'PASES', 'INASISTENCIAS', 'CONDUCTAS', 'DOCUMENTOS', 'TITULOS', 'TALLERES_CRP'], // Bloqueo reservado a Director/Admin, Matrícula reservada a Admin
     INICIAL: ALL_LEVEL_SUBTABS,
     PRIMARIA: ALL_LEVEL_SUBTABS,
     MEDIA_GENERAL: ALL_LEVEL_SUBTABS,
@@ -260,7 +260,7 @@ export const ROLE_SUBTAB_PERMISSIONS: Record<UserRole, Partial<Record<MainNaviga
   },
   COORDINADOR: {
     ESCRITORIO: ['DASHBOARD', 'PERFIL', 'HORARIO', 'SUGERENCIAS'],
-    GESTION: ['INSCRIPCIONES', 'PASES', 'INASISTENCIAS', 'CONDUCTAS', 'DOCUMENTOS', 'TITULOS', 'TALLERES_CRP'],
+    GESTION: ['TAREAS_RECURRENTES', 'INSCRIPCIONES', 'PASES', 'INASISTENCIAS', 'CONDUCTAS', 'DOCUMENTOS', 'TITULOS', 'TALLERES_CRP'],
     INICIAL: ALL_LEVEL_SUBTABS,
     PRIMARIA: ALL_LEVEL_SUBTABS,
     MEDIA_GENERAL: ALL_LEVEL_SUBTABS,
@@ -544,5 +544,72 @@ export const getStaffRoleForUser = (user: AppUser | null | undefined): UserRole 
   if (staffRoles.includes(user.role)) return user.role;
   const match = user.roles?.find(r => staffRoles.includes(r));
   return match || 'DOCENTE';
+};
+
+/**
+ * Determina si una notificación corresponde a un evento de inscripción o matriculación escolar.
+ */
+export const isEnrollmentNotification = (notif: Partial<SystemNotification> | null | undefined): boolean => {
+  if (!notif) return false;
+  if (notif.recipientRole === 'ADMIN_DIRECCION') return true;
+
+  const title = (notif.title || '').toLowerCase();
+  const msg = (notif.message || '').toLowerCase();
+
+  // Excluir traslados de sección que no son inscripciones de nuevo ingreso
+  if (title.includes('traslado') || msg.includes('trasladado')) {
+    return false;
+  }
+
+  // Identificar inscripción formal o matrícula
+  if (notif.actionSubTab === 'INSCRIPCIONES') {
+    return true;
+  }
+
+  return title.includes('inscripci') || msg.includes('ha sido inscrito');
+};
+
+/**
+ * Valida si una notificación es visible para un rol o usuario específico.
+ * 
+ * Regla Mandatoria Institucional:
+ * Las notificaciones de inscripción escolar SOLO deben llegar a los roles de Administrador (ADMINISTRADOR) y Dirección (DIRECTOR).
+ */
+export const isNotificationVisibleForRole = (
+  notif: SystemNotification | null | undefined,
+  roleOrUser: UserRole | (Partial<AppUser> & { role?: UserRole }) | null | undefined,
+  userOverride?: (Partial<AppUser> & { role?: UserRole }) | null | undefined
+): boolean => {
+  if (!notif || (!roleOrUser && !userOverride)) return false;
+
+  const target = userOverride || roleOrUser;
+  const effectiveRoles = getUserEffectiveRoles(target);
+
+  // 1. Regla Mandatoria: Notificaciones de inscripción escolar son exclusivas para ADMINISTRADOR y DIRECTOR
+  if (isEnrollmentNotification(notif)) {
+    return effectiveRoles.some(r => r === 'ADMINISTRADOR' || r === 'DIRECTOR');
+  }
+
+  // 2. Destinatarios explícitos múltiples (array)
+  if (Array.isArray(notif.recipientRoles) && notif.recipientRoles.length > 0) {
+    return notif.recipientRoles.some(targetRole => effectiveRoles.includes(targetRole));
+  }
+
+  // 3. Destinatario ADMIN_DIRECCION
+  if (notif.recipientRole === 'ADMIN_DIRECCION') {
+    return effectiveRoles.some(r => r === 'ADMINISTRADOR' || r === 'DIRECTOR');
+  }
+
+  // 4. Destinatario global (TODOS)
+  if (!notif.recipientRole || notif.recipientRole === 'TODOS') {
+    return true;
+  }
+
+  // 5. Destinatario por rol específico
+  return effectiveRoles.some(r => {
+    if (notif.recipientRole === r) return true;
+    if (notif.recipientRole === 'COORDINACION' && (r === 'COORDINACION' || r === 'COORDINADOR')) return true;
+    return false;
+  });
 };
 

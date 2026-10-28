@@ -96,8 +96,33 @@ function generateStudentRows(list, sec) {
   }).join(',\n');
 }
 
+function generateStudentUserRows(list, sec) {
+  return list.map(s => {
+    const userId = `usr-stu-med-1${sec.toLowerCase()}-${String(s.nro).padStart(2, '0')}`;
+    const normUser = s.cedula.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const rawDigits = s.cedula.replace(/[^0-9]/g, '') || 'cba2026';
+    const fullName = `${s.apellidos} ${s.nombres}`.trim();
+    const email = `${normUser}@estudiante.cba`;
+    const gender = s.gender === 'F' ? 'FEMENINO' : 'MASCULINO';
+    const metaObj = {
+      g: gender,
+      c: s.cedula,
+      r: 'ESTUDIANTE',
+      al: ['MEDIA_GENERAL'],
+      gr: '1er Año',
+      sec: sec,
+      a: ''
+    };
+    const avatarMeta = `cba-meta:${JSON.stringify(metaObj)}`;
+    return `('${userId}', '${normUser}', '${rawDigits}', '${fullName}', '${email}', 'ESTUDIANTE', 'MEDIA_GENERAL', true, '${avatarMeta}', '[]'::jsonb)`;
+  }).join(',\n');
+}
+
 const studentsA_SQL = generateStudentRows(seccionA, 'A');
 const studentsB_SQL = generateStudentRows(seccionB, 'B');
+
+const studentUsersA_SQL = generateStudentUserRows(seccionA, 'A');
+const studentUsersB_SQL = generateStudentUserRows(seccionB, 'B');
 
 const newStudentsSection = `-- 1. ESTUDIANTES INSTITUCIONALES (1er Año Media General Secciones A y B)
 INSERT INTO students (id, cedula, full_name, gender, birth_date, level, grade, section, representative_name, representative_email, representative_phone, status, pending_subjects, avatar_url)
@@ -120,5 +145,15 @@ seedContent = seedContent.replace(
   newStudentsSection
 );
 
+// Reemplazar la sección app_users para incluir docentes + los 62 estudiantes
+const studentUsersBlock = `,\n-- CUENTAS DE USUARIO PARA ESTUDIANTES (1er Año Sección A y B)\n${studentUsersA_SQL},\n${studentUsersB_SQL}`;
+
+if (!seedContent.includes('usr-stu-med-1a-01')) {
+  seedContent = seedContent.replace(
+    /\('usr-doc-lreyes'[\s\S]*?'\[\{"id":"asig-1a-rob"[\s\S]*?\}\]'::jsonb\)/,
+    match => `${match}${studentUsersBlock}`
+  );
+}
+
 fs.writeFileSync(seedFile, seedContent, 'utf-8');
-console.log('✅ supabase/seed.sql actualizado exitosamente con los 62 estudiantes oficiales.');
+console.log('✅ supabase/seed.sql actualizado exitosamente con los 62 estudiantes oficiales y sus cuentas de app_users.');

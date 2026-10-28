@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { PlanQuincenal, PlanStatus } from '../../types';
 import { canApprovePlans } from '../../utils/rbac';
+import { SharePlanModal } from './SharePlanModal';
 import {
   Calendar,
   CheckCircle2,
@@ -16,7 +17,8 @@ import {
   Check,
   MessageSquare,
   FileCheck,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Share2
 } from 'lucide-react';
 
 interface PlanQuincenalViewProps {
@@ -42,6 +44,7 @@ export const PlanQuincenalView: React.FC<PlanQuincenalViewProps> = ({
   const levelPlans = plansQuincenal.filter(p => p.level === currentLevel);
   const [selectedPlanId, setSelectedPlanId] = useState<string>(levelPlans[0]?.id || '');
   const [isEditing, setIsEditing] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   // Active Plan
   const activePlan = levelPlans.find(p => p.id === selectedPlanId) || levelPlans[0];
@@ -262,6 +265,15 @@ export const PlanQuincenalView: React.FC<PlanQuincenalViewProps> = ({
                   >
                     <FileEdit className="w-3.5 h-3.5" />
                     Editar Plan
+                  </button>
+
+                  <button
+                    onClick={() => setIsShareModalOpen(true)}
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#1E8E3E] hover:bg-[#167030] text-white font-bold rounded-xl text-xs transition-colors shadow-sm"
+                    title="Conectar con Google Classroom o Compartir"
+                  >
+                    <Share2 className="w-3.5 h-3.5 text-white" />
+                    <span>Classroom / Compartir</span>
                   </button>
 
                   {/* Send to Revision (Docente action) */}
@@ -586,6 +598,16 @@ export const PlanQuincenalView: React.FC<PlanQuincenalViewProps> = ({
             Crear el primer plan quincenal
           </button>
         </div>
+      )}
+
+      {/* Share / Google Classroom Modal */}
+      {activePlan && (
+        <SharePlanModal
+          plan={activePlan}
+          areaName={levelAreas.find(a => a.id === activePlan.areaId)?.name || 'Área General'}
+          isOpen={isShareModalOpen}
+          onClose={() => setIsShareModalOpen(false)}
+        />
       )}
     </div>
   );

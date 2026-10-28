@@ -18,8 +18,7 @@ import {
   ArrowLeftRight,
   Briefcase,
   Users,
-  Eye,
-  BarChart3
+  Eye
 } from 'lucide-react';
 import { SeasonalAccessoryIcon } from '../auth/LogoSeasonalAccessory';
 import { ThemeSwitcherDropdown } from './ThemeSwitcherDropdown';
@@ -104,21 +103,21 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
       label: 'Educación Inicial',
       sub: 'Salas 3, 4 y 5 Años',
       icon: '🧸',
-      badge: 'Literal (A-E)',
+      badge: '',
       color: 'from-amber-500 to-orange-500'
     },
     PRIMARIA: {
       label: 'Educación Primaria',
       sub: '1° a 6° Grado',
       icon: '🎒',
-      badge: 'Cualitativa (L, P, I)',
+      badge: '',
       color: 'from-emerald-500 to-teal-500'
     },
     MEDIA_GENERAL: {
       label: 'Media General',
       sub: '1° a 5° Año',
       icon: '🎓',
-      badge: 'Numérica (01-20)',
+      badge: '',
       color: 'from-blue-500 to-indigo-500'
     }
   };
@@ -214,34 +213,11 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
                       <div className="text-left">
                         <div className="flex items-center gap-1.5">
                           <span className={isSelected ? 'text-white font-black' : ''}>{lvl.replace('_', ' ')}</span>
-                          {isSelected && (
-                            <span className="hidden 2xl:inline text-[9px] px-1.5 py-0.2 rounded bg-[#D4AF37]/20 text-[#D4AF37] font-extrabold">
-                              {data.badge}
-                            </span>
-                          )}
                         </div>
                       </div>
                     </button>
                   );
                 })}
-
-                {/* Acceso Directo al Módulo de Consultas y Reportes */}
-                {hasTabAccess(currentRole, 'CONSULTAS') && (
-                  <button
-                    type="button"
-                    onClick={() => onNavigate?.('CONSULTAS', 'RENDIMIENTO')}
-                    className={`flex items-center gap-1.5 px-2 xl:px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 whitespace-nowrap cursor-pointer ${
-                      activeTab === 'CONSULTAS'
-                        ? 'bg-[#2C2E53] text-[#D4AF37] shadow-md border border-[#D4AF37]/50 scale-[1.01]'
-                        : 'text-slate-400 hover:text-slate-200 hover:bg-[#1B1C33]'
-                    }`}
-                    title="Módulo de Consultas y Reportes Institucionales"
-                  >
-                    <BarChart3 className="w-3.5 h-3.5 text-[#D4AF37]" />
-                    <span className="hidden xl:inline">Consultas & Reportes</span>
-                    <span className="xl:hidden">Consultas</span>
-                  </button>
-                )}
               </div>
             );
           }
@@ -266,9 +242,6 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
                 <span className="text-base group-hover:scale-110 transition-transform">{data.icon}</span>
                 <span className="text-xs font-black text-[#D4AF37] tracking-wider uppercase">
                   {data.label}
-                </span>
-                <span className="hidden md:inline text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30">
-                  {data.badge}
                 </span>
               </button>
             );

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useApp } from '../../context/AppContext';
 import { UserRole, EducationalLevel } from '../../types';
 import { getDefaultAvatarForUser } from '../../utils/avatarCatalog';
@@ -229,7 +230,7 @@ export const SelfRegisterModal: React.FC<SelfRegisterModalProps> = ({
     }
   };
 
-  return (
+  const modalContent = (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/75 backdrop-blur-xs animate-in fade-in duration-200">
       <div className="relative w-full max-w-xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh] animate-in zoom-in-95 duration-200">
         
@@ -846,4 +847,8 @@ export const SelfRegisterModal: React.FC<SelfRegisterModalProps> = ({
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined'
+    ? createPortal(modalContent, document.body)
+    : modalContent;
 };

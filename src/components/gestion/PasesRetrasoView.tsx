@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useApp } from '../../context/AppContext';
 import { PassRecord } from '../../types';
 import {
@@ -206,7 +207,7 @@ export const PasesRetrasoView: React.FC = () => {
       </div>
 
       {/* CREATE PASS MODAL */}
-      {isCreateModalOpen && (
+      {isCreateModalOpen && typeof document !== 'undefined' && createPortal(
         <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 animate-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
@@ -288,11 +289,12 @@ export const PasesRetrasoView: React.FC = () => {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* PRINTABLE PASS TICKET PREVIEW MODAL */}
-      {activeTicketToPrint && (
+      {activeTicketToPrint && typeof document !== 'undefined' && createPortal(
         <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 print-modal-container print:p-0 print:static print:bg-white print:text-slate-900 print:backdrop-blur-none">
           <div className="bg-white text-slate-900 rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-300 print:shadow-none print:border-none print:p-0 print:w-full print:max-w-full animate-in zoom-in-95 duration-200">
             {/* Modal Non-print Header */}
@@ -459,7 +461,8 @@ export const PasesRetrasoView: React.FC = () => {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

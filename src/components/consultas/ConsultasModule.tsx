@@ -267,95 +267,20 @@ export const ConsultasModule: React.FC<ConsultasModuleProps> = ({
             </button>
           )}
 
-          {/* Botón de Impresión según Submódulo */}
-          <button
-            onClick={() => window.print()}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#2C2E53] hover:bg-[#1E2038] text-[#D4AF37] font-bold text-xs transition border border-[#2C2E53] shadow-xs"
-            title="Imprimir vista actual en formato oficial"
-          >
-            <Printer className="w-3.5 h-3.5" />
-            <span>Imprimir</span>
-          </button>
+          {/* Botón de Impresión según Submódulo (Restringido para rol Representante) */}
+          {currentRole !== 'REPRESENTANTE' && (
+            <button
+              onClick={() => window.print()}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#2C2E53] hover:bg-[#1E2038] text-[#D4AF37] font-bold text-xs transition border border-[#2C2E53] shadow-xs"
+              title="Imprimir vista actual en formato oficial"
+            >
+              <Printer className="w-3.5 h-3.5" />
+              <span>Imprimir</span>
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Subtabs Navigation Bar */}
-      <div className="flex flex-wrap items-center gap-1.5 p-1.5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-        {/* 1. Rendimiento / Sábana de Notas */}
-        {allowedTabs.includes('RENDIMIENTO') && (
-          <button
-            onClick={() => setActiveTab('RENDIMIENTO')}
-            className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
-              activeTab === 'RENDIMIENTO'
-                ? 'bg-[#14232B] text-cyan-300 shadow-sm border border-cyan-500/40 ring-1 ring-cyan-500/20'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
-            }`}
-          >
-            <FileSpreadsheet className={`w-4 h-4 shrink-0 ${activeTab === 'RENDIMIENTO' ? 'text-cyan-400' : 'text-slate-400'}`} />
-            <span>{isFamilyOrStudent ? 'Mis Calificaciones' : 'Sábana & Rendimiento'}</span>
-          </button>
-        )}
-
-        {/* 2. Boletín / Reportes Oficiales */}
-        {allowedTabs.includes('BOLETIN') && (
-          <button
-            onClick={() => setActiveTab('BOLETIN')}
-            className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
-              activeTab === 'BOLETIN'
-                ? 'bg-[#14232B] text-cyan-300 shadow-sm border border-cyan-500/40 ring-1 ring-cyan-500/20'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
-            }`}
-          >
-            <GraduationCap className={`w-4 h-4 shrink-0 ${activeTab === 'BOLETIN' ? 'text-cyan-400' : 'text-slate-400'}`} />
-            <span>Centro de Reportes & Boletines</span>
-          </button>
-        )}
-
-        {/* 3. Asistencia y Pases */}
-        {allowedTabs.includes('ASISTENCIA') && (
-          <button
-            onClick={() => setActiveTab('ASISTENCIA')}
-            className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
-              activeTab === 'ASISTENCIA'
-                ? 'bg-[#14232B] text-cyan-300 shadow-sm border border-cyan-500/40 ring-1 ring-cyan-500/20'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
-            }`}
-          >
-            <Clock className={`w-4 h-4 shrink-0 ${activeTab === 'ASISTENCIA' ? 'text-cyan-400' : 'text-slate-400'}`} />
-            <span>{isFamilyOrStudent ? 'Mi Asistencia y Pases' : 'Asistencia & Inasistencias LOE'}</span>
-          </button>
-        )}
-
-        {/* 4. Estadísticas y Semáforo UCE */}
-        {allowedTabs.includes('ESTADISTICAS') && (
-          <button
-            onClick={() => setActiveTab('ESTADISTICAS')}
-            className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
-              activeTab === 'ESTADISTICAS'
-                ? 'bg-[#14232B] text-cyan-300 shadow-sm border border-cyan-500/40 ring-1 ring-cyan-500/20'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
-            }`}
-          >
-            <BarChart3 className={`w-4 h-4 shrink-0 ${activeTab === 'ESTADISTICAS' ? 'text-cyan-400' : 'text-slate-400'}`} />
-            <span>Analítica & Semáforo UCE</span>
-          </button>
-        )}
-
-        {/* 5. Nóminas, Expedientes y Horarios */}
-        {allowedTabs.includes('NOMINAS') && (
-          <button
-            onClick={() => setActiveTab('NOMINAS')}
-            className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
-              activeTab === 'NOMINAS'
-                ? 'bg-[#14232B] text-cyan-300 shadow-sm border border-cyan-500/40 ring-1 ring-cyan-500/20'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
-            }`}
-          >
-            <Users className={`w-4 h-4 shrink-0 ${activeTab === 'NOMINAS' ? 'text-cyan-400' : 'text-slate-400'}`} />
-            <span>Nóminas, Docentes & Horarios</span>
-          </button>
-        )}
-      </div>
 
       {/* KPI Summary Strip */}
       {!isFamilyOrStudent && (

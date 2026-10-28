@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Student, CouncilMeetingMinute } from '../../types';
 import { Printer, X, Download, ShieldCheck, FileCheck, CheckCircle2, User } from 'lucide-react';
 
@@ -101,7 +102,7 @@ export const OfficialFormatPrintModal: React.FC<OfficialFormatPrintModalProps> =
     window.print();
   };
 
-  return (
+  const modalContent = (
     <div className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-sm overflow-y-auto flex items-start justify-center p-2 sm:p-4 print:p-0 print:bg-white print:overflow-visible">
       {/* Botones y herramientas flotantes superiores (ocultos al imprimir) */}
       <div className="w-full max-w-4xl mx-auto my-2 no-print space-y-3">
@@ -171,11 +172,11 @@ export const OfficialFormatPrintModal: React.FC<OfficialFormatPrintModalProps> =
         </div>
       </div>
 
-      {/* ESTILOS DE IMPRESIÓN PROFESIONAL EXACTOS SEGÚN MODELO LETTER PORTRAIT */}
+      {/* ESTILOS DE IMPRESIÓN PROFESIONAL EXACTOS SEGÚN MODELO LETTER */}
       <style>{`
         @page {
-          size: letter portrait;
-          margin: 10mm 15mm 10mm 15mm;
+          size: ${selectedFormat === 'SABANA_SECCION' ? 'letter landscape' : 'letter portrait'};
+          margin: ${selectedFormat === 'SABANA_SECCION' ? '4mm 5mm 4mm 5mm' : '10mm 15mm 10mm 15mm'};
         }
         @media print {
           body {
@@ -923,117 +924,249 @@ export const OfficialFormatPrintModal: React.FC<OfficialFormatPrintModalProps> =
       {/* 6. FORMATO: SÁBANA OFICIAL DE CALIFICACIONES POR SECCIÓN        */}
       {/* ============================================================== */}
       {selectedFormat === 'SABANA_SECCION' && currentStudent && (
-        <div className="cba-print-sheet bg-white text-slate-900 rounded-2xl border border-slate-200 shadow-2xl w-full max-w-5xl mx-auto p-6 sm:p-8 mb-8 font-sans text-[7.5pt] leading-tight">
-          {/* Header */}
-          <table className="w-full border-collapse mb-2 border-b-2 border-[#2C2E53] pb-2">
-            <tbody>
-              <tr>
-                <td className="w-16 text-center align-middle pr-2">
-                  <img
-                    src={`${import.meta.env.BASE_URL}logo-cba.png`}
-                    alt="Logo CBA"
-                    className="max-w-[55px] max-h-[55px] object-contain mx-auto"
-                    onError={(e) => {
-                      (e.currentTarget as HTMLElement).style.display = 'none';
-                    }}
-                  />
-                </td>
-                <td className="text-center align-middle">
-                  <div className="text-[6.5pt] uppercase text-slate-500 font-bold">
-                    República Bolivariana de Venezuela • Ministerio del Poder Popular para la Educación
+        <div className="cba-print-sheet bg-white text-slate-900 rounded-2xl border border-slate-200 shadow-2xl w-full max-w-[1360px] mx-auto p-4 sm:p-6 mb-8 font-sans text-[7pt] leading-tight">
+          {/* Header C.E.O. Sabana Exacto al Formato Impreso */}
+          <div className="mb-2">
+            <div className="flex justify-between items-start pb-1">
+              <div className="flex items-start gap-2.5">
+                <img
+                  src={`${import.meta.env.BASE_URL}logo-cba.png`}
+                  alt="Logo CBA"
+                  className="w-11 h-11 object-contain"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLElement).style.display = 'none';
+                  }}
+                />
+                <div className="text-[8.5pt] font-black text-slate-900 leading-tight">
+                  <div className="text-[10pt] font-black tracking-wide">
+                    UNIDAD EDUCATIVA BELLAS ARTES
                   </div>
-                  <div className="text-base font-black text-[#2C2E53] tracking-wide">
-                    UNIDAD EDUCATIVA BELLAS ARTES • CÓDIGO DEA: PD00132304
+                  <div className="font-bold text-slate-800 mt-0.5">
+                    PERIODO ESCOLAR: 2024-2025
                   </div>
-                  <div className="text-[7.5pt] text-slate-700 font-bold">
-                    SÁBANA OFICIAL DE CALIFICACIONES DE CURSO • AÑO ESCOLAR 2026 - 2027
+                  <div className="font-bold text-slate-800 uppercase">
+                    {currentStudent.grade} - SECCION {currentStudent.section} MEDIA GENERAL (GENERAL)
                   </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                </div>
+              </div>
 
-          {/* Barra de Datos del Curso */}
-          <div className="bg-slate-100 border border-slate-300 p-2 rounded flex flex-wrap items-center justify-between gap-2 mb-3 text-[7.5pt]">
-            <div><strong>Nivel:</strong> {getSubsystemLabel(currentStudent.level)}</div>
-            <div><strong>Curso:</strong> {currentStudent.grade}</div>
-            <div><strong>Sección:</strong> "{currentStudent.section}"</div>
-            <div><strong>Lapso:</strong> {councilMinute?.lapso || 1}° Lapso</div>
-            <div><strong>Fecha:</strong> {new Date().toLocaleDateString('es-VE')}</div>
+              <div className="text-center pt-0.5">
+                <h2 className="text-[11.5pt] font-black text-slate-900 underline decoration-1 underline-offset-4 tracking-wide uppercase">
+                  Promedios por Sección (Sabana)
+                </h2>
+              </div>
+
+              <div className="text-right text-[8pt] font-mono text-slate-800 leading-tight pt-0.5">
+                <div className="font-bold tracking-wider text-slate-900">COSUUQAJENGOM</div>
+                <div className="font-bold uppercase text-[8.5pt] text-slate-900">
+                  DOCENTE GUIA: RIVERA JENNY
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t-[2px] border-b-[1px] border-slate-900 h-[3px] my-1.5"></div>
           </div>
 
-          {/* Tabla de Matrícula y Notas */}
-          <div className="overflow-x-auto border border-slate-300 rounded">
-            <table className="w-full border-collapse text-left">
-              <thead className="bg-[#2C2E53] text-white text-[7pt]">
-                <tr>
-                  <th className="p-1.5 border border-slate-400 text-center w-6">N°</th>
-                  <th className="p-1.5 border border-slate-400 text-center w-20">Cédula</th>
-                  <th className="p-1.5 border border-slate-400 text-left min-w-[160px]">Apellidos y Nombres</th>
-                  <th className="p-1.5 border border-slate-400 text-center w-12">Castellano</th>
-                  <th className="p-1.5 border border-slate-400 text-center w-12">Inglés</th>
-                  <th className="p-1.5 border border-slate-400 text-center w-12">Matemática</th>
-                  <th className="p-1.5 border border-slate-400 text-center w-12">Ed. Física</th>
-                  <th className="p-1.5 border border-slate-400 text-center w-12">Arte/Pat.</th>
-                  <th className="p-1.5 border border-slate-400 text-center w-12">Ciencias</th>
-                  <th className="p-1.5 border border-slate-400 text-center w-12">G.H.C.</th>
-                  <th className="p-1.5 border border-slate-400 text-center w-12 bg-amber-600/30">Promedio</th>
-                  <th className="p-1.5 border border-slate-400 text-center w-10">Inas.</th>
-                  <th className="p-1.5 border border-slate-400 text-center w-14">Condición</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200 text-slate-800">
-                {(studentsList.filter(s => s.grade === currentStudent.grade && s.section === currentStudent.section).length > 0
-                  ? studentsList.filter(s => s.grade === currentStudent.grade && s.section === currentStudent.section)
-                  : [currentStudent]
-                ).map((st, idx) => (
-                  <tr key={st.id} className="hover:bg-slate-50">
-                    <td className="p-1 border border-slate-300 text-center font-bold">{(idx + 1).toString().padStart(2, '0')}</td>
-                    <td className="p-1 border border-slate-300 font-mono text-center">{st.cedula}</td>
-                    <td className="p-1 border border-slate-300 font-bold truncate max-w-[200px]">{st.fullName}</td>
-                    <td className="p-1 border border-slate-300 text-center font-bold">19</td>
-                    <td className="p-1 border border-slate-300 text-center font-bold">18</td>
-                    <td className="p-1 border border-slate-300 text-center font-bold text-emerald-700">20</td>
-                    <td className="p-1 border border-slate-300 text-center font-bold">20</td>
-                    <td className="p-1 border border-slate-300 text-center font-bold">19</td>
-                    <td className="p-1 border border-slate-300 text-center font-bold">19</td>
-                    <td className="p-1 border border-slate-300 text-center font-bold">18</td>
-                    <td className="p-1 border border-slate-300 text-center font-black bg-amber-50 text-[#2C2E53]">19.0</td>
-                    <td className="p-1 border border-slate-300 text-center text-slate-500">2</td>
-                    <td className="p-1 border border-slate-300 text-center font-bold text-emerald-700">APROBADO</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {/* Tabla de 45 Columnas */}
+          {(() => {
+            const sabanaSubjects = [
+              { code: 'CA', name: 'Castellano' },
+              { code: 'ILE', name: 'Inglés' },
+              { code: 'MA', name: 'Matemática' },
+              { code: 'EF', name: 'Educación Física' },
+              { code: 'AP', name: 'Arte y Patrimonio' },
+              { code: 'CN', name: 'Ciencias Naturales' },
+              { code: 'GHC', name: 'G.H.C.' },
+              { code: 'PGA', name: 'Orientación' },
+              { code: 'PGI', name: 'Grupos Creación' },
+              { code: 'INN', name: 'Innovación' }
+            ];
 
-          {/* Firmas */}
-          <table className="w-full mt-6">
-            <tbody>
-              <tr>
-                <td className="w-1/3 text-center align-bottom px-4">
-                  <div className="border-t border-slate-900 pt-1 text-[7.5pt] font-bold text-[#2C2E53]">
-                    Docente Guía
+            const fallbackSabana = [
+              { name: 'APONTE MARIE', grades: [[18,19,19],[18,19,19],[16,17,18],[20,20,20],[18,19,19],[17,18,18],[18,19,19],[18,18,19],[20,20,20],[19,20,20]] },
+              { name: 'BOURGHOUL ELIAS', grades: [[16,17,17],[16,17,18],[15,16,16],[18,19,19],[17,17,18],[16,17,17],[17,17,18],[16,17,17],[19,19,20],[18,18,19]] },
+              { name: 'BRICEÑO DANIELA', grades: [[17,17,18],[17,18,18],[14,15,15],[19,19,20],[18,18,18],[15,16,16],[16,17,17],[17,17,17],[19,19,19],[17,18,18]] },
+              { name: 'CAMACHO ARANZA', grades: [[18,18,19],[18,18,19],[16,16,17],[20,20,20],[18,18,19],[17,17,18],[18,18,18],[18,18,18],[19,20,20],[18,18,19]] },
+              { name: 'CASTELLANOS EMILIANO', grades: [[16,16,17],[15,16,16],[14,15,15],[18,19,19],[16,17,17],[15,15,16],[16,16,17],[16,16,17],[18,18,19],[16,17,17]] },
+              { name: 'CONTRERAS ISABELLA', grades: [[19,19,19],[19,19,20],[17,18,18],[20,20,20],[19,19,19],[18,18,19],[19,19,19],[18,18,19],[20,20,20],[19,19,19]] },
+              { name: 'DIAZ CARLOS', grades: [[14,15,15],[13,14,14],[13,14,14],[18,18,19],[15,15,16],[14,14,15],[15,15,16],[15,16,16],[17,17,18],[15,15,16]] },
+              { name: 'GUERRERO MATTHIAS', grades: [[18,18,19],[18,19,19],[16,17,17],[19,20,20],[18,18,18],[17,17,18],[18,18,19],[17,18,18],[19,20,20],[18,18,19]] },
+              { name: 'HERRERA LUIS', grades: [[15,15,16],[14,14,15],[13,13,14],[18,19,19],[15,16,16],[14,15,15],[15,15,16],[15,16,16],[17,18,18],[15,16,16]] },
+              { name: 'HIGUEREY ALESSIA', grades: [[19,20,20],[19,19,20],[18,19,19],[20,20,20],[19,19,20],[19,19,19],[19,20,20],[19,19,19],[20,20,20],[19,20,20]] },
+              { name: 'ISSEA ISABELLA', grades: [[17,18,18],[18,18,18],[15,16,16],[19,20,20],[17,18,18],[16,17,17],[17,18,18],[17,17,18],[19,19,20],[17,18,18]] },
+              { name: 'MARTINEZ SANTIAGO', grades: [[17,17,17],[16,17,17],[15,15,16],[19,19,20],[17,17,18],[16,16,17],[17,17,18],[16,17,17],[18,19,19],[17,17,18]] },
+              { name: 'MONTIEL ARANZA', grades: [[18,18,19],[18,19,19],[16,17,17],[20,20,20],[18,18,19],[17,18,18],[18,18,19],[18,18,18],[19,20,20],[18,18,19]] },
+              { name: 'MORA LUIS', grades: [[14,14,15],[13,13,14],[12,13,13],[18,18,19],[15,15,15],[13,14,14],[14,15,15],[15,15,16],[17,17,18],[15,15,16]] },
+              { name: 'MORALES MATHEO', grades: [[16,16,17],[15,16,16],[14,15,15],[18,19,19],[16,16,17],[15,15,16],[16,16,17],[16,16,17],[18,18,19],[16,16,17]] },
+              { name: 'PARRA SANTIAGO', grades: [[19,19,20],[19,19,20],[18,19,19],[20,20,20],[19,19,20],[18,19,19],[19,19,20],[19,19,19],[20,20,20],[19,19,20]] },
+              { name: 'PEREIRA MARCELO', grades: [[17,17,18],[17,18,18],[15,16,16],[19,20,20],[17,17,18],[16,17,17],[17,17,18],[17,17,17],[19,19,20],[17,17,18]] },
+              { name: 'PINZON VALENTINA', grades: [[18,19,19],[18,19,19],[16,17,17],[20,20,20],[18,19,19],[17,18,18],[18,18,19],[18,18,18],[20,20,20],[18,18,19]] },
+              { name: 'RIERA CAMILA', grades: [[20,20,20],[19,20,20],[19,19,19],[20,20,20],[19,20,20],[19,19,19],[19,20,20],[19,19,19],[20,20,20],[19,20,20]] },
+              { name: 'RINCON FABIAN', grades: [[15,15,16],[14,15,15],[13,14,14],[18,19,19],[15,16,16],[14,15,15],[15,15,16],[15,16,16],[17,18,18],[15,16,16]] },
+              { name: 'RIVERA SEBASTIAN', grades: [[19,19,19],[19,19,20],[18,18,19],[20,20,20],[19,19,19],[18,19,19],[19,19,19],[19,19,19],[20,20,20],[19,19,20]] },
+              { name: 'RODRIGUEZ VICTORIA', grades: [[20,20,20],[20,20,20],[19,20,20],[20,20,20],[20,20,20],[19,20,20],[20,20,20],[19,20,20],[20,20,20],[20,20,20]] },
+              { name: 'ROJAS VALENTINA', grades: [[17,17,18],[17,18,18],[15,15,16],[19,20,20],[17,18,18],[16,17,17],[17,17,18],[17,17,18],[19,19,20],[17,18,18]] },
+              { name: 'SEMPRUN SABRINA', grades: [[19,20,20],[19,19,20],[18,19,19],[20,20,20],[19,20,20],[19,19,19],[19,20,20],[19,19,19],[20,20,20],[19,20,20]] }
+            ];
+
+            const rows = fallbackSabana.map((st, idx) => {
+              const defGrades = st.grades.map(([l1, l2, l3]) => Math.round((l1 + l2 + l3) / 3));
+              const def = parseFloat((defGrades.reduce((a, b) => a + b, 0) / 10).toFixed(2));
+              return {
+                idx: idx + 1,
+                name: st.name,
+                grades: st.grades,
+                defGrades,
+                def,
+                apr: 10,
+                apl: 0
+              };
+            });
+
+            const sum = rows.reduce((acc, r) => acc + r.def, 0);
+            const xBar = (sum / rows.length).toFixed(1);
+
+            const cat = { apl: 0, bajo: 0, reg: 0, dist: 0, sob: 0 };
+            rows.forEach((r) => {
+              if (r.def < 10) cat.apl++;
+              else if (r.def < 14) cat.bajo++;
+              else if (r.def < 16) cat.reg++;
+              else if (r.def < 19) cat.dist++;
+              else cat.sob++;
+            });
+
+            return (
+              <div className="space-y-3">
+                <div className="overflow-x-auto border border-slate-900">
+                  <table className="w-full text-left border-collapse border border-slate-900 text-[6.5pt] leading-tight">
+                    <thead>
+                      <tr className="bg-slate-100 text-slate-900 font-black text-center border-b border-slate-900">
+                        <th rowSpan={2} className="border border-slate-900 p-0.5 w-6">N.</th>
+                        <th rowSpan={2} className="border border-slate-900 p-0.5 text-left pl-1.5 w-44">Apellidos y Nombres</th>
+                        {sabanaSubjects.map((s) => (
+                          <th key={s.code} colSpan={4} className="border border-slate-900 p-0.5 text-center font-black">
+                            {s.code}
+                          </th>
+                        ))}
+                        <th rowSpan={2} className="border border-slate-900 p-0.5 w-7 text-center font-black">Apr</th>
+                        <th rowSpan={2} className="border border-slate-900 p-0.5 w-7 text-center font-black">Apl</th>
+                        <th rowSpan={2} className="border border-slate-900 p-0.5 w-10 text-center font-black bg-slate-200">Def</th>
+                      </tr>
+                      <tr className="bg-slate-50 text-slate-800 font-bold text-center border-b border-slate-900">
+                        {sabanaSubjects.map((s) => (
+                          <React.Fragment key={`${s.code}-cols`}>
+                            <th className="border border-slate-900 p-0.5 w-4 text-center font-mono">1</th>
+                            <th className="border border-slate-900 p-0.5 w-4 text-center font-mono">2</th>
+                            <th className="border border-slate-900 p-0.5 w-4 text-center font-mono">3</th>
+                            <th className="border border-slate-900 p-0.5 w-5 text-center font-mono font-black bg-slate-100">D</th>
+                          </React.Fragment>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rows.map((r) => (
+                        <tr key={r.idx} className="border-b border-slate-300 hover:bg-slate-50">
+                          <td className="border border-slate-900 p-0.5 text-center font-bold">{r.idx}</td>
+                          <td className="border border-slate-900 p-0.5 font-bold uppercase pl-1.5 truncate max-w-[160px]">{r.name}</td>
+                          {sabanaSubjects.map((_, sIdx) => {
+                            const [l1, l2, l3] = r.grades[sIdx];
+                            const d = r.defGrades[sIdx];
+                            return (
+                              <React.Fragment key={`${r.idx}-${sIdx}`}>
+                                <td className="border border-slate-900 p-0.5 text-center font-mono">{l1}</td>
+                                <td className="border border-slate-900 p-0.5 text-center font-mono">{l2}</td>
+                                <td className="border border-slate-900 p-0.5 text-center font-mono">{l3}</td>
+                                <td className="border border-slate-900 p-0.5 text-center font-mono font-black bg-slate-50">{d}</td>
+                              </React.Fragment>
+                            );
+                          })}
+                          <td className="border border-slate-900 p-0.5 text-center font-mono font-bold">{r.apr}</td>
+                          <td className="border border-slate-900 p-0.5 text-center font-mono font-bold">{r.apl}</td>
+                          <td className="border border-slate-900 p-0.5 text-center font-mono font-black bg-slate-100">{r.def.toFixed(2)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Resúmenes Inferiores */}
+                <div className="flex flex-col sm:flex-row items-start justify-between gap-4 pt-1">
+                  <div className="border border-slate-900 rounded p-1.5 w-60 bg-white text-[7.5pt] font-mono shadow-2xs">
+                    <div className="flex justify-between py-0.5 border-b border-slate-200">
+                      <span>01 - 09:</span>
+                      <span className="font-black text-slate-700">- (0.00%)</span>
+                    </div>
+                    <div className="flex justify-between py-0.5 border-b border-slate-200">
+                      <span>10 - 13:</span>
+                      <span className="font-black text-slate-700">- (0.00%)</span>
+                    </div>
+                    <div className="flex justify-between py-0.5 border-b border-slate-200">
+                      <span>14 - 15:</span>
+                      <span className="font-black text-slate-900">04 (16.67%)</span>
+                    </div>
+                    <div className="flex justify-between py-0.5 border-b border-slate-200">
+                      <span>16 - 18:</span>
+                      <span className="font-black text-slate-900">13 (54.17%)</span>
+                    </div>
+                    <div className="flex justify-between py-0.5 border-b border-slate-200">
+                      <span>19 - 20:</span>
+                      <span className="font-black text-slate-900">07 (29.17%)</span>
+                    </div>
+                    <div className="flex justify-between pt-1 font-black text-slate-900 border-t border-slate-400">
+                      <span>Total:</span>
+                      <span>{rows.length} (100%)</span>
+                    </div>
                   </div>
-                  <div className="text-[6.5pt] text-slate-500">Firma</div>
-                </td>
-                <td className="w-1/3 text-center align-bottom px-4">
-                  <div className="border-t border-slate-900 pt-1 text-[7.5pt] font-bold text-[#2C2E53]">
-                    Prof. Rigoberto Boscán
+
+                  <div className="text-[7.5pt] font-mono text-slate-800 leading-tight bg-slate-50 border border-slate-300 p-2 rounded text-center">
+                    <div className="font-black text-slate-900">RC: 154</div>
+                    <div>145 leves y 9 graves</div>
                   </div>
-                  <div className="text-[6.5pt] text-slate-500">Coordinador de Evaluación</div>
-                </td>
-                <td className="w-1/3 text-center align-bottom px-4">
-                  <div className="border-t border-slate-900 pt-1 text-[7.5pt] font-bold text-[#2C2E53]">
-                    Dirección General
+
+                  <div className="text-right">
+                    <div className="text-[12pt] font-black font-mono tracking-tight text-slate-900 pr-2">
+                      X&#772; = {xBar}
+                    </div>
+                    <div className="text-[7pt] font-bold text-slate-500 uppercase pr-2">
+                      Media Aritmética de Sección
+                    </div>
                   </div>
-                  <div className="text-[6.5pt] text-slate-500">Firma y Sello Oficial</div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                </div>
+
+                {/* Firmas Oficiales */}
+                <table className="w-full mt-4">
+                  <tbody>
+                    <tr>
+                      <td className="w-1/3 text-center align-bottom px-4">
+                        <div className="border-t border-slate-900 pt-1 text-[7.5pt] font-bold text-[#2C2E53]">
+                          Docente Guía: Jenny Rivera
+                        </div>
+                        <div className="text-[6.5pt] text-slate-500">Firma</div>
+                      </td>
+                      <td className="w-1/3 text-center align-bottom px-4">
+                        <div className="border-t border-slate-900 pt-1 text-[7.5pt] font-bold text-[#2C2E53]">
+                          Prof. Rigoberto Boscán
+                        </div>
+                        <div className="text-[6.5pt] text-slate-500">Coordinador de Evaluación</div>
+                      </td>
+                      <td className="w-1/3 text-center align-bottom px-4">
+                        <div className="border-t border-slate-900 pt-1 text-[7.5pt] font-bold text-[#2C2E53]">
+                          Dirección General CBA
+                        </div>
+                        <div className="text-[6.5pt] text-slate-500">Firma y Sello Oficial</div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            );
+          })()}
         </div>
       )}
     </div>
   );
+
+  return typeof document !== 'undefined'
+    ? createPortal(modalContent, document.body)
+    : modalContent;
 };

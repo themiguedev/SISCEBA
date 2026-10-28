@@ -117,7 +117,8 @@ export const MatriculaProsecucionView: React.FC = () => {
       message: `Se trasladaron y promovieron ${count} estudiante(s) desde ${selectedOriginGrade} hacia ${targetGrade} "${targetSection}". Expedientes sincronizados en la Base de Datos.`,
       category: 'INSTITUCIONAL',
       priority: 'ALTA',
-      recipientRole: 'TODOS',
+      recipientRole: 'ADMIN_DIRECCION',
+      recipientRoles: ['ADMINISTRADOR', 'DIRECTOR'],
       actionTab: 'GESTION',
       actionSubTab: 'MATRICULA',
       deliveryChannels: ['PORTAL']
@@ -152,7 +153,8 @@ export const MatriculaProsecucionView: React.FC = () => {
         message: `El alumno ${student.fullName} ha sido promovido exitosamente a ${targetGrade} "${targetSection}".`,
         category: 'INSTITUCIONAL',
         priority: 'MEDIA',
-        recipientRole: 'COORDINACION',
+        recipientRole: 'ADMIN_DIRECCION',
+        recipientRoles: ['ADMINISTRADOR', 'DIRECTOR'],
         actionTab: 'GESTION',
         actionSubTab: 'MATRICULA',
         deliveryChannels: ['PORTAL']

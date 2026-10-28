@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useApp } from '../../context/AppContext';
 import { EducationalResource, ResourceCategory } from '../../types';
 import {
@@ -298,7 +299,7 @@ export const EducationalResourcesBank: React.FC = () => {
       )}
 
       {/* CREATE MODAL */}
-      {isCreateModalOpen && (
+      {isCreateModalOpen && typeof document !== 'undefined' && createPortal(
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 animate-in fade-in">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
@@ -425,11 +426,12 @@ export const EducationalResourcesBank: React.FC = () => {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* TRANSFER MODAL */}
-      {transferTarget && (
+      {transferTarget && typeof document !== 'undefined' && createPortal(
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
             <h3 className="font-black text-sm text-[#2C2E53] mb-2 flex items-center gap-2">
@@ -473,7 +475,8 @@ export const EducationalResourcesBank: React.FC = () => {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

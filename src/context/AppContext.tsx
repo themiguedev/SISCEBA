@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import {
   EducationalLevel,
   UserRole,
@@ -48,7 +48,11 @@ import {
   PendingSubjectEnrollment,
   PendingSubjectGrade,
   SectionTransferLog,
-  ExternalAcademicRecord
+  ExternalAcademicRecord,
+  BulletinObservationTemplate,
+  SpecializedSkillRecord,
+  StrategyWeightAudit,
+  PensumComparativeReport
 } from '../types';
 import {
   hashPassword,
@@ -60,7 +64,7 @@ import {
   verifyTOTPCode
 } from '../utils/security';
 import { getDefaultAvatarForUser, decodeUserAvatarMetadata } from '../utils/avatarCatalog';
-import { normalizeCedulaUsername, getUserEffectiveRoles } from '../utils/rbac';
+import { normalizeCedulaUsername, getUserEffectiveRoles, isNotificationVisibleForRole } from '../utils/rbac';
 import PRIVILEGIOS_DATA from '../data/privilegiosCEO.json';
 import {
   INITIAL_AREAS,
@@ -94,6 +98,10 @@ import {
   INITIAL_CRP_TALLERES,
   INITIAL_CRP_INSCRITOS
 } from '../data/seedData';
+import {
+  INITIAL_OBSERVATION_TEMPLATES,
+  INITIAL_SPECIALIZED_SKILLS
+} from '../data/recurrentesData';
 import { supabase, isSupabaseConfigured, checkSupabaseConnection } from '../lib/supabaseClient';
 import {
   supabaseFetchStudents,
@@ -187,6 +195,7 @@ interface AppContextType {
   addUser: (user: Omit<AppUser, 'id'>) => Promise<AppUser>;
   updateUser: (userId: string, updates: Partial<AppUser>) => Promise<boolean>;
   deleteUser: (userId: string) => Promise<boolean>;
+  syncStudentUsers: (targetStudents?: Student[], currentUsersList?: AppUser[]) => Promise<{ created: number; updated: number }>;
   currentTeacherAssignments: AcademicAssignment[];
   getTeacherAssignments: (teacherId: string) => AcademicAssignment[];
   saveTeacherAssignments: (teacherId: string, assignments: AcademicAssignment[]) => Promise<boolean>;
@@ -220,6 +229,7 @@ interface AppContextType {
 
   addCompetency: (comp: Omit<Competency, 'id'>) => Competency;
   addIndicator: (ind: Omit<Indicator, 'id'>) => Indicator;
+  updateIndicator: (ind: Indicator) => void;
   transferCompetency: (competencyId: string, targetLapso: 1 | 2 | 3) => void;
   transferIndicator: (indicatorId: string, targetLapso: 1 | 2 | 3) => void;
   addStrategy: (strat: Omit<Strategy, 'id'>) => Strategy;
@@ -380,6 +390,23 @@ interface AppContextType {
   externalAcademicRecords: ExternalAcademicRecord[];
   saveExternalAcademicRecord: (rec: ExternalAcademicRecord) => Promise<boolean>;
   deleteExternalAcademicRecord: (id: string) => Promise<boolean>;
+
+  // Tareas Recurrentes: Observaciones de Boletín y Habilidades Especializadas
+  observationTemplates: BulletinObservationTemplate[];
+  saveObservationTemplate: (template: BulletinObservationTemplate) => Promise<boolean>;
+  deleteObservationTemplate: (id: string) => Promise<boolean>;
+
+  specializedSkills: SpecializedSkillRecord[];
+  saveSpecializedSkill: (rec: SpecializedSkillRecord) => Promise<boolean>;
+  deleteSpecializedSkill: (id: string) => Promise<boolean>;
+
+  calculateStudentPensumAverages: (studentId: string, lapso: 1 | 2 | 3) => {
+    averageMppe: number;
+    averageCba: number;
+    mppeDetails: { areaId: string; areaName: string; score: number | string }[];
+    cbaDetails: { areaId: string; areaName: string; score: number | string }[];
+  };
+  auditMediaGeneralStrategyWeights: (grade: string, section: 'A' | 'B', lapso: 1 | 2 | 3) => StrategyWeightAudit[];
 
   // Helpers
   resetToSeedData: () => void;
@@ -632,6 +659,78 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     return true;
+  };
+
+  const syncStudentUsers = async (
+    targetStudents?: Student[],
+    currentUsersList?: AppUser[]
+  ): Promise<{ created: number; updated: number }> => {
+    const stus = targetStudents || students;
+    const usrList = currentUsersList || users;
+    let createdCount = 0;
+    let updatedCount = 0;
+    const newUsersToSave: AppUser[] = [];
+
+    for (const s of stus) {
+      if (!s.cedula) continue;
+      const normCed = normalizeCedulaUsername(s.cedula);
+      if (!normCed) continue;
+
+      const rawDigits = s.cedula.replace(/[^0-9]/g, '') || 'cba2026';
+      const existing = usrList.find(
+        u =>
+          normalizeCedulaUsername(u.username) === normCed ||
+          (u.cedula && normalizeCedulaUsername(u.cedula) === normCed) ||
+          u.id === `usr-${s.id}`
+      );
+
+      if (!existing) {
+        const studentUser: AppUser = {
+          id: `usr-${s.id}`,
+          username: normCed,
+          cedula: s.cedula,
+          password: rawDigits,
+          fullName: s.fullName,
+          email: `${normCed}@estudiante.cba`,
+          role: 'ESTUDIANTE',
+          defaultLevel: s.level || 'MEDIA_GENERAL',
+          allowedLevels: [s.level || 'MEDIA_GENERAL'],
+          active: s.status === 'REGULAR',
+          gender: s.gender === 'F' ? 'FEMENINO' : 'MASCULINO',
+          grade: s.grade,
+          section: (s.section === 'B' ? 'B' : 'A') as 'A' | 'B',
+          avatarUrl: getDefaultAvatarForUser({
+            gender: s.gender === 'F' ? 'FEMENINO' : 'MASCULINO',
+            role: 'ESTUDIANTE',
+            fullName: s.fullName
+          })
+        };
+        newUsersToSave.push(studentUser);
+        createdCount++;
+        syncWithCloud(() => supabaseSaveUser(studentUser), `crear usuario estudiante ${s.fullName}`);
+      } else if (existing.role === 'ESTUDIANTE' && (!existing.grade || !existing.section || !existing.cedula)) {
+        const updatedStudentUser: AppUser = {
+          ...existing,
+          cedula: existing.cedula || s.cedula,
+          grade: existing.grade || s.grade,
+          section: existing.section || ((s.section === 'B' ? 'B' : 'A') as 'A' | 'B')
+        };
+        newUsersToSave.push(updatedStudentUser);
+        updatedCount++;
+        syncWithCloud(() => supabaseSaveUser(updatedStudentUser), `actualizar usuario estudiante ${s.fullName}`);
+      }
+    }
+
+    if (newUsersToSave.length > 0) {
+      setUsers(prev => {
+        const map = new Map<string, AppUser>();
+        prev.forEach(u => map.set(u.id, u));
+        newUsersToSave.forEach(u => map.set(u.id, u));
+        return Array.from(map.values());
+      });
+    }
+
+    return { created: createdCount, updated: updatedCount };
   };
 
   useEffect(() => {
@@ -888,12 +987,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     const normalizedCedulaInput = normalizeCedulaUsername(userInput);
+    const rawDigitsInput = userInput.replace(/[^0-9]/g, '');
 
     let matched = users.find(
       u =>
         u.username.toLowerCase() === trimmedInput ||
         u.email.toLowerCase() === trimmedInput ||
-        (normalizedCedulaInput && normalizeCedulaUsername(u.username) === normalizedCedulaInput)
+        (normalizedCedulaInput && normalizeCedulaUsername(u.username) === normalizedCedulaInput) ||
+        (rawDigitsInput && u.username.replace(/[^0-9]/g, '') === rawDigitsInput) ||
+        (u.cedula && normalizeCedulaUsername(u.cedula) === normalizedCedulaInput)
     );
 
     // Si Supabase está configurado, validamos directamente contra la tabla app_users en tiempo real
@@ -1256,6 +1358,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return [];
   });
 
+  // Observaciones Predefinidas para Boletines
+  const [observationTemplates, setObservationTemplates] = useState<BulletinObservationTemplate[]>(() => {
+    const saved = localStorage.getItem('sisceba_observation_templates');
+    if (saved) {
+      try { return JSON.parse(saved); } catch { /* fallback */ }
+    }
+    return INITIAL_OBSERVATION_TEMPLATES;
+  });
+
+  // Registro de Habilidades Especializadas (Lectoescritura, Proyecto de Vida, Orientación y Convivencia)
+  const [specializedSkills, setSpecializedSkills] = useState<SpecializedSkillRecord[]>(() => {
+    const saved = localStorage.getItem('sisceba_specialized_skills');
+    if (saved) {
+      try { return JSON.parse(saved); } catch { /* fallback */ }
+    }
+    return INITIAL_SPECIALIZED_SKILLS;
+  });
+
   const refreshFromSupabase = async () => {
     if (!isSupabaseConfigured()) {
       setIsSupabaseActive(false);
@@ -1461,6 +1581,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             localStorage.removeItem('sisceba_current_user');
           }
         }
+
+        // Si hay estudiantes registrados en la matrícula que aún no tienen cuenta de usuario, auto-aprovisionarlos
+        const effectiveStudents = remoteStudents || students;
+        const effectiveUsers = remoteUsers || users;
+        if (effectiveStudents && effectiveStudents.length > 0) {
+          const unsynced = effectiveStudents.filter(s => {
+            const norm = normalizeCedulaUsername(s.cedula);
+            return norm && !effectiveUsers.some(u => normalizeCedulaUsername(u.username) === norm);
+          });
+          if (unsynced.length > 0) {
+            syncStudentUsers(effectiveStudents, effectiveUsers);
+          }
+        }
       }
     } catch (e) {
       console.warn('Aviso durante la sincronización inicial con Supabase:', e);
@@ -1629,7 +1762,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return INITIAL_SYSTEM_NOTIFICATIONS;
   });
 
-  const unreadNotificationsCount = notifications.filter(n => !n.read).length;
+  const unreadNotificationsCount = useMemo(() => {
+    return notifications.filter(
+      n => !n.read && isNotificationVisibleForRole(n, currentRole, currentUser)
+    ).length;
+  }, [notifications, currentRole, currentUser]);
 
   const sendNotification = (notif: Omit<SystemNotification, 'id' | 'timestamp' | 'read'>) => {
     const newNotif: SystemNotification = {
@@ -1648,8 +1785,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const markAllNotificationsAsRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-    syncWithCloud(() => supabaseMarkAllNotificationsAsRead(), 'marcar todas las notificaciones leídas');
+    const visibleIds = new Set(
+      notifications
+        .filter(n => isNotificationVisibleForRole(n, currentRole, currentUser))
+        .map(n => n.id)
+    );
+    setNotifications(prev => prev.map(n => visibleIds.has(n.id) ? ({ ...n, read: true }) : n));
+    visibleIds.forEach(id => {
+      syncWithCloud(() => supabaseMarkNotificationAsRead(id), 'marcar notificación leída');
+    });
   };
 
   const clearNotifications = () => {
@@ -1831,6 +1975,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return newInd;
   };
 
+  const updateIndicator = (ind: Indicator) => {
+    setIndicators(prev => prev.map(i => i.id === ind.id ? ind : i));
+    syncWithCloud(() => supabaseSaveIndicator(ind), 'actualizar indicador');
+  };
+
   const transferCompetency = (competencyId: string, targetLapso: 1 | 2 | 3) => {
     const comp = competencies.find(c => c.id === competencyId);
     if (!comp) return;
@@ -1987,6 +2136,40 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
     setStudents(prev => [newStudent, ...prev]);
     syncWithCloud(() => supabaseSaveStudent(newStudent), 'inscribir estudiante');
+
+    // Auto-crear cuenta institucional de usuario para el estudiante
+    if (newStudent.cedula) {
+      const normCed = normalizeCedulaUsername(newStudent.cedula);
+      if (normCed) {
+        const rawDigits = newStudent.cedula.replace(/[^0-9]/g, '') || 'cba2026';
+        const studentUser: AppUser = {
+          id: `usr-${newStudent.id}`,
+          username: normCed,
+          cedula: newStudent.cedula,
+          password: rawDigits,
+          fullName: newStudent.fullName,
+          email: `${normCed}@estudiante.cba`,
+          role: 'ESTUDIANTE',
+          defaultLevel: newStudent.level || 'MEDIA_GENERAL',
+          allowedLevels: [newStudent.level || 'MEDIA_GENERAL'],
+          active: newStudent.status === 'REGULAR',
+          gender: newStudent.gender === 'F' ? 'FEMENINO' : 'MASCULINO',
+          grade: newStudent.grade,
+          section: (newStudent.section === 'B' ? 'B' : 'A') as 'A' | 'B',
+          avatarUrl: getDefaultAvatarForUser({
+            gender: newStudent.gender === 'F' ? 'FEMENINO' : 'MASCULINO',
+            role: 'ESTUDIANTE',
+            fullName: newStudent.fullName
+          })
+        };
+        setUsers(prev => {
+          if (prev.some(u => normalizeCedulaUsername(u.username) === normCed)) return prev;
+          return [studentUser, ...prev];
+        });
+        syncWithCloud(() => supabaseSaveUser(studentUser), `crear usuario estudiante ${newStudent.fullName}`);
+      }
+    }
+
     return newStudent;
   };
 
@@ -3306,6 +3489,153 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return true;
   };
 
+  // --- Tareas Recurrentes: Observaciones de Boletín y Habilidades Especializadas ---
+  const saveObservationTemplate = async (template: BulletinObservationTemplate): Promise<boolean> => {
+    setObservationTemplates(prev => {
+      const idx = prev.findIndex(t => t.id === template.id);
+      const next = idx >= 0 ? [...prev] : [...prev, template];
+      if (idx >= 0) next[idx] = template;
+      localStorage.setItem('sisceba_observation_templates', JSON.stringify(next));
+      return next;
+    });
+    return true;
+  };
+
+  const deleteObservationTemplate = async (id: string): Promise<boolean> => {
+    setObservationTemplates(prev => {
+      const next = prev.filter(t => t.id !== id);
+      localStorage.setItem('sisceba_observation_templates', JSON.stringify(next));
+      return next;
+    });
+    return true;
+  };
+
+  const saveSpecializedSkill = async (rec: SpecializedSkillRecord): Promise<boolean> => {
+    setSpecializedSkills(prev => {
+      const idx = prev.findIndex(r => r.id === rec.id);
+      const next = idx >= 0 ? [...prev] : [...prev, rec];
+      if (idx >= 0) next[idx] = rec;
+      localStorage.setItem('sisceba_specialized_skills', JSON.stringify(next));
+      return next;
+    });
+    return true;
+  };
+
+  const deleteSpecializedSkill = async (id: string): Promise<boolean> => {
+    setSpecializedSkills(prev => {
+      const next = prev.filter(r => r.id !== id);
+      localStorage.setItem('sisceba_specialized_skills', JSON.stringify(next));
+      return next;
+    });
+    return true;
+  };
+
+  const calculateStudentPensumAverages = (studentId: string, lapso: 1 | 2 | 3) => {
+    const student = students.find(s => s.id === studentId);
+    if (!student) {
+      return { averageMppe: 0, averageCba: 0, mppeDetails: [], cbaDetails: [] };
+    }
+    const studentLevelAreas = areas.filter(a => a.level === student.level);
+    const cbaAreas = studentLevelAreas;
+
+    const mppeDetails: { areaId: string; areaName: string; score: number | string }[] = [];
+    const cbaDetails: { areaId: string; areaName: string; score: number | string }[] = [];
+
+    let sumMppe = 0;
+    let countMppe = 0;
+    let sumCba = 0;
+    let countCba = 0;
+
+    cbaAreas.forEach(area => {
+      const ev = evaluations.find(
+        e => e.studentId === studentId && e.areaId === area.id && e.lapso === lapso
+      );
+      const isMppe = area.type === 'REGULAR';
+
+      let scoreVal: number | string = '--';
+      if (student.level === 'MEDIA_GENERAL') {
+        let num = ev?.scoreNumeric;
+        if (num === undefined && ev?.scoreLiteral) {
+          const mapLiteralToNum: Record<string, number> = { A: 20, B: 17, C: 14, D: 11, E: 8 };
+          num = mapLiteralToNum[ev.scoreLiteral] ?? 14;
+        }
+        if (num !== undefined) {
+          scoreVal = num;
+          sumCba += num;
+          countCba++;
+          if (isMppe) {
+            sumMppe += num;
+            countMppe++;
+          }
+        }
+      } else if (student.level === 'PRIMARIA') {
+        scoreVal = ev?.scoreQualitative || 'L';
+        const qualWeight: Record<string, number> = { L: 20, P: 14, EP: 14, I: 9 };
+        const num = qualWeight[String(scoreVal)] || 16;
+        sumCba += num;
+        countCba++;
+        if (isMppe) {
+          sumMppe += num;
+          countMppe++;
+        }
+      } else {
+        scoreVal = ev?.scoreLiteral || 'A';
+        const litWeight: Record<string, number> = { A: 20, B: 17, C: 14, D: 11, E: 8 };
+        const num = litWeight[String(scoreVal)] || 18;
+        sumCba += num;
+        countCba++;
+        if (isMppe) {
+          sumMppe += num;
+          countMppe++;
+        }
+      }
+
+      cbaDetails.push({ areaId: area.id, areaName: area.name, score: scoreVal });
+      if (isMppe) {
+        mppeDetails.push({ areaId: area.id, areaName: area.name, score: scoreVal });
+      }
+    });
+
+    const averageMppe = countMppe > 0 ? Number((sumMppe / countMppe).toFixed(2)) : 0;
+    const averageCba = countCba > 0 ? Number((sumCba / countCba).toFixed(2)) : 0;
+
+    return { averageMppe, averageCba, mppeDetails, cbaDetails };
+  };
+
+  const auditMediaGeneralStrategyWeights = (grade: string, section: 'A' | 'B', lapso: 1 | 2 | 3): StrategyWeightAudit[] => {
+    const medAreas = areas.filter(a => a.level === 'MEDIA_GENERAL');
+    return medAreas.map(area => {
+      const areaInds = indicators.filter(
+        i => i.areaId === area.id && i.level === 'MEDIA_GENERAL' && i.lapso === lapso && (!i.grade || i.grade.includes(grade))
+      );
+      const totalWeightPercent = areaInds.reduce((sum, ind) => sum + (ind.weight || 20), 0);
+      const maxSingleWeightPercent = areaInds.length > 0 ? Math.max(...areaInds.map(i => i.weight || 20)) : 0;
+      const exceedsMaxLimit = maxSingleWeightPercent > 20;
+      const isCompliant = !exceedsMaxLimit && (totalWeightPercent === 70 || totalWeightPercent === 100);
+
+      let notes = 'Ponderación conforme a normativa MPPE.';
+      if (exceedsMaxLimit) {
+        notes = `Alerta: Una o más actividades superan el límite del 20% normativo (Mayor detectada: ${maxSingleWeightPercent}%).`;
+      } else if (totalWeightPercent !== 70 && totalWeightPercent !== 100) {
+        notes = `Incompleto: La suma total de ponderaciones es ${totalWeightPercent}% (debe totalizar 70% procesal o 100%).`;
+      }
+
+      return {
+        areaId: area.id,
+        areaName: area.name,
+        grade,
+        section,
+        lapso,
+        strategiesCount: areaInds.length || 4,
+        totalWeightPercent: areaInds.length > 0 ? totalWeightPercent : 70,
+        maxSingleWeightPercent: areaInds.length > 0 ? maxSingleWeightPercent : 20,
+        exceedsMaxLimit,
+        isCompliant,
+        notes
+      };
+    });
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -3315,6 +3645,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addUser,
         updateUser,
         deleteUser,
+        syncStudentUsers,
         currentTeacherAssignments,
         getTeacherAssignments,
         saveTeacherAssignments,
@@ -3336,6 +3667,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         strategies,
         addCompetency,
         addIndicator,
+        updateIndicator,
         transferCompetency,
         transferIndicator,
         addStrategy,
@@ -3441,6 +3773,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         externalAcademicRecords,
         saveExternalAcademicRecord,
         deleteExternalAcademicRecord,
+        observationTemplates,
+        saveObservationTemplate,
+        deleteObservationTemplate,
+        specializedSkills,
+        saveSpecializedSkill,
+        deleteSpecializedSkill,
+        calculateStudentPensumAverages,
+        auditMediaGeneralStrategyWeights,
         resetToSeedData,
         isSupabaseActive,
         supabaseStatusText,

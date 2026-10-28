@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { LapsoConfig } from '../../types';
@@ -116,75 +117,6 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
           <p className="text-xs text-slate-500">
             ADM: Administración de años escolares, apertura y bloqueo de ventanas evaluativas de lapso y catálogo escolar.
           </p>
-        </div>
-
-        {/* Tab Switcher - Flex-wrap responsivo y badges limpios sin desbordamiento */}
-        <div className="w-full sm:w-auto flex flex-wrap items-center gap-1.5 bg-slate-100 dark:bg-slate-800/90 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-700/80 shadow-inner">
-          {allowedTabs.includes('LAPSOS') && (
-            <button
-              onClick={() => setActiveTab('LAPSOS')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                activeTab === 'LAPSOS'
-                  ? 'bg-[#1B1C33] text-[#D4AF37] shadow-sm border border-[#D4AF37]/40 ring-1 ring-[#D4AF37]/30'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/50'
-              }`}
-            >
-              <Calendar className={`w-3.5 h-3.5 shrink-0 ${activeTab === 'LAPSOS' ? 'text-[#D4AF37]' : 'text-slate-400'}`} />
-              <span>Años Escolares y Lapsos</span>
-            </button>
-          )}
-          {allowedTabs.includes('ESTRUCTURA') && (
-            <button
-              onClick={() => setActiveTab('ESTRUCTURA')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                activeTab === 'ESTRUCTURA'
-                  ? 'bg-[#1B1C33] text-[#D4AF37] shadow-sm border border-[#D4AF37]/40 ring-1 ring-[#D4AF37]/30'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/50'
-              }`}
-            >
-              <Layers className={`w-3.5 h-3.5 shrink-0 ${activeTab === 'ESTRUCTURA' ? 'text-[#D4AF37]' : 'text-slate-400'}`} />
-              <span>Grados y Secciones</span>
-            </button>
-          )}
-          {allowedTabs.includes('TEMAS') && (
-            <button
-              onClick={() => setActiveTab('TEMAS')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                activeTab === 'TEMAS'
-                  ? 'bg-[#1B1C33] text-[#D4AF37] shadow-sm border border-[#D4AF37]/40 ring-1 ring-[#D4AF37]/30'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/50'
-              }`}
-            >
-              <Palette className={`w-3.5 h-3.5 shrink-0 ${activeTab === 'TEMAS' ? 'text-[#D4AF37]' : 'text-slate-400'}`} />
-              <span>Apariencia y Temas</span>
-            </button>
-          )}
-          {allowedTabs.includes('CONFIG_CEO') && (
-            <button
-              onClick={() => setActiveTab('CONFIG_CEO')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                activeTab === 'CONFIG_CEO'
-                  ? 'bg-amber-600 text-white shadow-sm border border-amber-400 ring-1 ring-amber-400/40'
-                  : 'text-amber-800 dark:text-amber-300 hover:text-amber-950 dark:hover:text-white bg-amber-50/80 dark:bg-amber-950/40'
-              }`}
-            >
-              <Settings className={`w-3.5 h-3.5 shrink-0 ${activeTab === 'CONFIG_CEO' ? 'text-white' : 'text-amber-600'}`} />
-              <span>Configuración CEO</span>
-            </button>
-          )}
-          {allowedTabs.includes('AVANZADA') && (
-            <button
-              onClick={() => setActiveTab('AVANZADA')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                activeTab === 'AVANZADA'
-                  ? 'bg-violet-700 text-white shadow-sm border border-violet-400 ring-1 ring-violet-400/40'
-                  : 'text-violet-700 dark:text-violet-300 hover:text-violet-900 dark:hover:text-white bg-violet-50/80 dark:bg-violet-950/40'
-              }`}
-            >
-              <SlidersHorizontal className={`w-3.5 h-3.5 shrink-0 ${activeTab === 'AVANZADA' ? 'text-white' : 'text-violet-500'}`} />
-              <span>Conf. Avanzada</span>
-            </button>
-          )}
         </div>
       </div>
 
@@ -361,7 +293,7 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
           </div>
 
           {/* Modal de Configuración de Cierre Programado */}
-          {editingLapso && (
+          {editingLapso && typeof document !== 'undefined' && createPortal(
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
               <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-2xl p-6 space-y-5">
                 <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
@@ -439,7 +371,8 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
                   </button>
                 </div>
               </div>
-            </div>
+            </div>,
+            document.body
           )}
         </div>
       )}

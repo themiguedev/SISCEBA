@@ -33,4 +33,6 @@ backup_v1/
 supabase/.temp/
 tools/bin/
 *.exe
+.chrome-capture/
+
 

@@ -74,8 +74,12 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
 }) => {
   const { currentLevel, currentRole, passes, documentRequests, currentUser } = useApp();
 
-  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
-    [activeTab]: true
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>(() => {
+    const isConsultas = isConsultasOnlyRole(currentRole);
+    return {
+      [activeTab]: true,
+      ...(isConsultas ? { CONSULTAS: true, COMUNIDAD: true, AYUDA: true } : {})
+    };
   });
 
   // Keep active section expanded when activeTab changes externally
@@ -86,17 +90,42 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
     }));
   }, [activeTab]);
 
-  const toggleSection = (sectionId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
+  // Ensure accessible sections are opened by default when role switches
+  useEffect(() => {
+    const isConsultas = isConsultasOnlyRole(currentRole);
     setExpandedSections((prev) => ({
       ...prev,
-      [sectionId]: !prev[sectionId]
+      [activeTab]: true,
+      ...(isConsultas ? { CONSULTAS: true, COMUNIDAD: true, AYUDA: true } : {})
     }));
+  }, [currentRole]);
+
+  const toggleSection = (sectionId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setExpandedSections((prev) => {
+      const isCurrentlyExpanded = prev[sectionId] !== undefined
+        ? !!prev[sectionId]
+        : (sectionId === activeTab || isConsultasOnlyRole(currentRole));
+      return {
+        ...prev,
+        [sectionId]: !isCurrentlyExpanded
+      };
+    });
   };
 
   const handleSectionClick = (section: SidebarSection) => {
-    setActiveTab(section.id);
-    if (!expandedSections[section.id]) {
+    if (activeTab === section.id) {
+      setExpandedSections((prev) => {
+        const isCurrentlyExpanded = prev[section.id] !== undefined
+          ? !!prev[section.id]
+          : (section.id === activeTab || isConsultasOnlyRole(currentRole));
+        return {
+          ...prev,
+          [section.id]: !isCurrentlyExpanded
+        };
+      });
+    } else {
+      setActiveTab(section.id);
       setExpandedSections((prev) => ({
         ...prev,
         [section.id]: true
@@ -117,18 +146,26 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
     {
       id: 'ESCRITORIO',
       categoryGroup: 'PRINCIPAL',
-      label: 'Escritorio de Control',
+      label: 'Escritorio',
       shortLabel: 'Escritorio',
       icon: Monitor,
       color: 'text-sky-400',
-      badge: 'Dashboard',
+      badge: '',
       activeBadgeBg: 'bg-sky-500/20 text-sky-300 border border-sky-500/30',
       activeSubTabStyle: 'bg-sky-500/15 text-sky-200 border-l-2 border-sky-400 font-bold shadow-sm',
       subTabActiveIcon: 'text-sky-300',
       subTabs: [
         { id: 'DASHBOARD', label: 'Tablero Principal', icon: Monitor },
         { id: 'PERFIL', label: 'Mi Perfil de Usuario', icon: UserCheck },
-        { id: 'HORARIO', label: 'Horario Institucional', icon: Clock },
+        {
+          id: 'HORARIO',
+          label: currentRole === 'REPRESENTANTE'
+            ? 'Horario de Clases'
+            : currentRole === 'ESTUDIANTE'
+            ? 'Mi Horario de Clases'
+            : 'Horario Institucional',
+          icon: Clock
+        },
         { id: 'SUGERENCIAS', label: 'Ideas y Sugerencias', icon: Sparkles }
       ]
     },
@@ -139,14 +176,14 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
       shortLabel: 'Gestión',
       icon: ClipboardList,
       color: 'text-emerald-400',
-      badge: `${passes.length} Pases`,
+      badge: '',
       activeBadgeBg: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30',
       activeSubTabStyle: 'bg-emerald-500/15 text-emerald-200 border-l-2 border-emerald-400 font-bold shadow-sm',
       subTabActiveIcon: 'text-emerald-300',
       subTabs: [
         { id: 'INSCRIPCIONES', label: 'Inscripciones', icon: UserCheck },
         { id: 'PASES', label: 'Pases por Retraso', icon: Clock },
-        { id: 'INASISTENCIAS', label: 'Inasistencias (Diarias / Lapso)', icon: Users },
+        { id: 'INASISTENCIAS', label: 'Inasistencias', icon: Users },
         { id: 'CONDUCTAS', label: 'Conductas y Faltas', icon: ShieldAlert },
         { id: 'DOCUMENTOS', label: `Documentos Solicitados (${pendingDocsCount})`, icon: FileText },
         { id: 'BLOQUEO', label: 'Bloqueo Administrativo', icon: Lock },
@@ -165,7 +202,7 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
       shortLabel: 'Inicial',
       icon: BookOpen,
       color: 'text-amber-300',
-      badge: 'Cualitativa',
+      badge: '',
       activeBadgeBg: 'bg-amber-500/20 text-amber-200 border border-amber-500/30',
       activeSubTabStyle: 'bg-amber-500/15 text-amber-100 border-l-2 border-amber-400 font-bold shadow-sm',
       subTabActiveIcon: 'text-amber-300',
@@ -174,7 +211,7 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
         { id: 'BANCO_COMPETENCIAS', label: 'Banco de Dimensiones', icon: Award },
         { id: 'PLAN_QUINCENAL', label: 'Planes Quincenales', icon: ClipboardList },
         { id: 'PLAN_LAPSO', label: 'Planes de Lapso', icon: FileText },
-        { id: 'DIAGNOSTICA', label: 'Evaluación Diagnóstica (Robótica)', icon: UserCheck },
+        { id: 'DIAGNOSTICA', label: 'Evaluación Diagnóstica', icon: UserCheck },
         { id: 'PROCESAL', label: 'Valoración Cualitativa', icon: FileSpreadsheet },
         { id: 'BOLETIN', label: 'Observaciones al Boletín', icon: GraduationCap }
       ]
@@ -186,7 +223,7 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
       shortLabel: 'Primaria',
       icon: Layers,
       color: 'text-teal-400',
-      badge: 'Cualitativa (L, EP, I)',
+      badge: '',
       activeBadgeBg: 'bg-teal-500/20 text-teal-300 border border-teal-500/30',
       activeSubTabStyle: 'bg-teal-500/15 text-teal-200 border-l-2 border-teal-400 font-bold shadow-sm',
       subTabActiveIcon: 'text-teal-300',
@@ -208,12 +245,12 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
       shortLabel: 'Media General',
       icon: GraduationCap,
       color: 'text-indigo-400',
-      badge: '01 - 20',
+      badge: '',
       activeBadgeBg: 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30',
       activeSubTabStyle: 'bg-indigo-500/15 text-indigo-200 border-l-2 border-indigo-400 font-bold shadow-sm',
       subTabActiveIcon: 'text-indigo-300',
       subTabs: [
-        { id: 'AREAS_PERFILES', label: 'Asignaturas (24 Materias)', icon: Layers },
+        { id: 'AREAS_PERFILES', label: 'Asignaturas', icon: Layers },
         { id: 'DISENADOR_OFICIAL', label: 'Diseñador Didáctico Oficial', icon: Sparkles },
         { id: 'BANCO_ESTRATEGIAS', label: 'Estrategias y Ponderaciones', icon: FileSpreadsheet },
         { id: 'PLAN_QUINCENAL', label: 'Planes Quincenales', icon: ClipboardList },
@@ -234,14 +271,14 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
       shortLabel: 'Consultas',
       icon: BarChart3,
       color: 'text-cyan-400',
-      badge: currentRole === 'REPRESENTANTE' ? 'Representante' : currentRole === 'ESTUDIANTE' ? 'Alumno' : 'Sábana & UCE',
+      badge: '',
       activeBadgeBg: 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30',
       activeSubTabStyle: 'bg-cyan-500/15 text-cyan-200 border-l-2 border-cyan-400 font-bold shadow-sm',
       subTabActiveIcon: 'text-cyan-300',
       subTabs: [
-        { id: 'RENDIMIENTO', label: 'Sábana & Rendimiento (UCE)', icon: FileSpreadsheet },
-        { id: 'BOLETIN', label: 'Centro de Reportes & Boletines', icon: GraduationCap },
-        { id: 'ASISTENCIA', label: 'Asistencia & Inasistencias LOE', icon: Clock },
+        { id: 'RENDIMIENTO', label: 'Sábana y Rendimiento', icon: FileSpreadsheet },
+        { id: 'BOLETIN', label: 'Reportes', icon: GraduationCap },
+        { id: 'ASISTENCIA', label: 'Asistencia & Inasistencias', icon: Clock },
         { id: 'ESTADISTICAS', label: 'Analítica & Semáforo UCE', icon: BarChart3 },
         { id: 'NOMINAS', label: 'Nóminas, Docentes & Horarios', icon: Users }
       ]
@@ -253,12 +290,12 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
       shortLabel: 'Comunidad',
       icon: MessageSquare,
       color: 'text-pink-400',
-      badge: 'Noticias',
+      badge: '',
       activeBadgeBg: 'bg-pink-500/20 text-pink-300 border border-pink-500/30',
       activeSubTabStyle: 'bg-pink-500/15 text-pink-200 border-l-2 border-pink-400 font-bold shadow-sm',
       subTabActiveIcon: 'text-pink-300',
       subTabs: [
-        { id: 'NOTICIAS', label: 'Noticias y Cartelera', icon: Megaphone },
+        { id: 'NOTICIAS', label: 'Cartelera Institucional', icon: Megaphone },
         { id: 'CUMPLEANOS', label: 'Cumpleañeros de la Semana', icon: Cake },
         { id: 'COMUNICADOS', label: 'Mensajería y Comunicados', icon: MessageSquare }
       ]
@@ -270,7 +307,7 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
       shortLabel: 'Configuración',
       icon: Settings,
       color: 'text-violet-400',
-      badge: 'Control',
+      badge: '',
       activeBadgeBg: 'bg-violet-500/20 text-violet-300 border border-violet-500/30',
       activeSubTabStyle: 'bg-violet-500/15 text-violet-200 border-l-2 border-violet-400 font-bold shadow-sm',
       subTabActiveIcon: 'text-violet-300',
@@ -278,8 +315,8 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
         { id: 'LAPSOS', label: 'Años Escolares y Apertura Lapsos', icon: Clock },
         { id: 'ESTRUCTURA', label: 'Estructura de Cursos y Aulas', icon: Layers },
         { id: 'TEMAS', label: 'Apariencia y Temas', icon: Palette },
-        { id: 'CONFIG_CEO', label: 'Configuración CEO (Académica)', icon: Settings },
-        { id: 'AVANZADA', label: 'Conf. Avanzada (CEO / Sistema)', icon: Sliders }
+        { id: 'CONFIG_CEO', label: 'Configuración', icon: Settings },
+        { id: 'AVANZADA', label: 'Conf. Avanzada', icon: Sliders }
       ]
     },
     {
@@ -289,7 +326,7 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
       shortLabel: 'Ayuda & Manual',
       icon: HelpCircle,
       color: 'text-amber-300',
-      badge: 'Guía',
+      badge: '',
       activeBadgeBg: 'bg-amber-500/20 text-amber-200 border border-amber-500/30',
       activeSubTabStyle: 'bg-amber-500/15 text-amber-100 border-l-2 border-amber-400 font-bold shadow-sm',
       subTabActiveIcon: 'text-amber-300',
@@ -385,7 +422,9 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
 
             return visibleSections.map((section, index) => {
               const isSectionActive = activeTab === section.id;
-              const isSectionExpanded = isConsultasOnly ? true : !!expandedSections[section.id];
+              const isSectionExpanded = expandedSections[section.id] !== undefined
+                ? !!expandedSections[section.id]
+                : (isSectionActive || isConsultasOnly);
               const SectionIcon = section.icon;
 
               const isFirstOfGroup =
@@ -449,9 +488,6 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
                         <span className="text-xs font-black block tracking-tight truncate">
                           {section.shortLabel}
                         </span>
-                        <span className="text-[10px] text-slate-400 font-semibold block truncate">
-                          {section.badge}
-                        </span>
                       </div>
                     )}
                   </div>
@@ -459,12 +495,18 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
                     <button
                       type="button"
                       onClick={(e) => toggleSection(section.id, e)}
-                      className="p-1 rounded-lg hover:bg-white/10 transition-colors focus:outline-none"
+                      className="p-1.5 rounded-lg hover:bg-white/10 active:scale-95 transition-all focus:outline-none cursor-pointer"
                       title={
                         isSectionExpanded
                           ? `Colapsar ${section.shortLabel}`
                           : `Expandir ${section.shortLabel}`
                       }
+                      aria-label={
+                        isSectionExpanded
+                          ? `Colapsar sección ${section.shortLabel}`
+                          : `Expandir sección ${section.shortLabel}`
+                      }
+                      aria-expanded={isSectionExpanded}
                     >
                       <ChevronRight
                         className={`w-4 h-4 transition-transform duration-200 ${

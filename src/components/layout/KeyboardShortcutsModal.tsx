@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useApp } from '../../context/AppContext';
 import {
   X,
   Keyboard,
@@ -158,11 +159,15 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({
   isOpen,
   onClose
 }) => {
+  const { currentRole } = useApp();
   const [searchQuery, setSearchQuery] = useState('');
 
   if (!isOpen) return null;
 
   const filteredShortcuts = SHORTCUTS_DATA.filter((s) => {
+    if (currentRole === 'REPRESENTANTE' && s.keys.includes('P') && s.keys.includes('Ctrl')) {
+      return false;
+    }
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase();
     return (

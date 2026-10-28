@@ -503,7 +503,7 @@ erDiagram
 | `read` | `BOOLEAN` | NO | Estado de lectura | `false` |
 | `category` | `ENUM` | NO | Categoría temática | `'CALIFICACIONES'`, `'ASISTENCIA'`, `'DOCUMENTOS'`, `'INSTITUCIONAL'`, `'SISTEMA'` |
 | `priority` | `ENUM` | NO | Nivel de urgencia | `'BAJA'`, `'MEDIA'`, `'ALTA'` |
-| `recipientRole` | `ENUM` | NO | Rol destinatario | `'REPRESENTANTE'`, `'ESTUDIANTE'`, `'DOCENTE'`, `'TODOS'` |
+| `recipientRole` | `VARCHAR(30)` | NO | Rol destinatario | `'ADMIN_DIRECCION'`, `'ADMINISTRADOR'`, `'DIRECTOR'`, `'COORDINACION'`, `'SECRETARIA'`, `'DOCENTE'`, `'REPRESENTANTE'`, `'ESTUDIANTE'`, `'TODOS'` |
 | `deliveryChannels` | `ENUM[]` | NO | Canales despachados | `['PORTAL', 'EMAIL', 'SMS_WHATSAPP']` |
 
 ---

@@ -1200,7 +1200,9 @@ export const supabaseFetchUsers = async (): Promise<AppUser[] | null> => {
         bio: meta.bio,
         receiveEmails: meta.receiveEmails ?? true,
         receiveMessages: meta.receiveMessages ?? true,
-        academicAssignments: Array.isArray(row.academic_assignments) ? row.academic_assignments : []
+        academicAssignments: Array.isArray(row.academic_assignments) ? row.academic_assignments : [],
+        grade: meta.grade,
+        section: meta.section
       };
     });
   } catch (e) {
@@ -1222,7 +1224,9 @@ export const supabaseSaveUser = async (user: AppUser): Promise<boolean> => {
       receiveMessages: user.receiveMessages,
       role: user.role,
       roles: user.roles,
-      allowedLevels: user.allowedLevels
+      allowedLevels: user.allowedLevels,
+      grade: user.grade,
+      section: user.section
     });
 
     const dbRole = user.role;

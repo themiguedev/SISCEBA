@@ -45,7 +45,18 @@ const SiscebaMainApp: React.FC = () => {
   const [toastMessage, setToastMessage] = useState<ShortcutToastMessage | null>(null);
 
   // Top-Level Active Module Tab
-  const [activeTab, setActiveTab] = useState<MainNavigationTab>('ESCRITORIO');
+  const [activeTab, setActiveTab] = useState<MainNavigationTab>(() => {
+    if (typeof window !== 'undefined') {
+      const p = new URLSearchParams(window.location.search).get('tab');
+      if (p) {
+        const upper = p.toUpperCase() as MainNavigationTab;
+        if (['ESCRITORIO', 'GESTION', 'PLANIFICACION', 'EVALUACION', 'CONSULTAS', 'COMUNIDAD', 'CONFIGURACION', 'AYUDA'].includes(upper)) {
+          return upper;
+        }
+      }
+    }
+    return 'ESCRITORIO';
+  });
 
   // Subtab States for each domain
   const [escritorioSubTab, setEscritorioSubTab] = useState<'DASHBOARD' | 'PERFIL' | 'HORARIO' | 'SUGERENCIAS'>('DASHBOARD');
@@ -114,7 +125,7 @@ const SiscebaMainApp: React.FC = () => {
 
     // Harmonize subtabs if not accessible under currentRole
     if (activeTab === 'GESTION' && !hasSubTabAccess(currentRole, 'GESTION', gestionSubTab)) {
-      const allowed = (['INSCRIPCIONES', 'PASES', 'INASISTENCIAS', 'CONDUCTAS', 'DOCUMENTOS', 'BLOQUEO', 'TITULOS', 'MATRICULA', 'TALLERES_CRP', 'USUARIOS'] as const)
+      const allowed = (['TAREAS_RECURRENTES', 'INSCRIPCIONES', 'PASES', 'INASISTENCIAS', 'CONDUCTAS', 'DOCUMENTOS', 'BLOQUEO', 'TITULOS', 'MATRICULA', 'TALLERES_CRP', 'USUARIOS'] as const)
         .filter(st => hasSubTabAccess(currentRole, 'GESTION', st));
       if (allowed.length > 0) setGestionSubTab(allowed[0]);
     }
@@ -175,7 +186,7 @@ const SiscebaMainApp: React.FC = () => {
     }
     if (sub === 'DASHBOARD' || sub === 'PERFIL' || sub === 'HORARIO' || sub === 'SUGERENCIAS') {
       setEscritorioSubTab(sub as 'DASHBOARD' | 'PERFIL' | 'HORARIO' | 'SUGERENCIAS');
-    } else if (['INSCRIPCIONES', 'PASES', 'INASISTENCIAS', 'CONDUCTAS', 'DOCUMENTOS', 'BLOQUEO', 'TITULOS', 'MATRICULA', 'TALLERES_CRP', 'USUARIOS'].includes(sub)) {
+    } else if (['TAREAS_RECURRENTES', 'INSCRIPCIONES', 'PASES', 'INASISTENCIAS', 'CONDUCTAS', 'DOCUMENTOS', 'BLOQUEO', 'TITULOS', 'MATRICULA', 'TALLERES_CRP', 'USUARIOS'].includes(sub)) {
       setGestionSubTab(sub);
     } else if (effectiveTab === 'CONSULTAS' && ['RENDIMIENTO', 'BOLETIN', 'ASISTENCIA', 'ESTADISTICAS', 'NOMINAS'].includes(sub)) {
       setConsultasSubTab(sub as ConsultasSubTab);
@@ -495,6 +506,11 @@ const SiscebaMainApp: React.FC = () => {
       }
     },
     onPrint: () => {
+      if (currentRole === 'REPRESENTANTE') {
+        showToast('Impresión Restringida', 'La opción de impresión no está disponible para el rol de Representante.');
+        return;
+      }
+
       const isViewingBulletin =
         (activeTab === 'CONSULTAS' && consultasSubTab === 'BOLETIN') ||
         (['INICIAL', 'PRIMARIA', 'MEDIA_GENERAL'].includes(activeTab) &&
@@ -684,6 +700,15 @@ const SiscebaMainApp: React.FC = () => {
                 <GestionModule
                   activeSubTab={gestionSubTab}
                   setActiveSubTab={setGestionSubTab}
+                  onNavigateToLevel={(level, pillar, subTab) => {
+                    handleTabChange(level);
+                    setLevelPillarTab(pillar);
+                    if (subTab) {
+                      if (pillar === 'PLANIFICACION') setPlanningSubTab(subTab);
+                      else if (pillar === 'EVALUACION') setEvaluationSubTab(subTab);
+                      else if (pillar === 'COMUNICACION') setCommunicationSubTab(subTab);
+                    }
+                  }}
                 />
               )}
 

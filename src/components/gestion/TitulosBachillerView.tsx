@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useApp } from '../../context/AppContext';
 import { TitleRecord, TitleBlockLayout, TitlePrintSettings, ExternalAcademicRecord } from '../../types';
 import {
@@ -1458,7 +1459,7 @@ export const TitulosBachillerView: React.FC = () => {
       </div>
 
       {/* Modal to Register New Graduate Title */}
-      {showNewModal && (
+      {showNewModal && typeof document !== 'undefined' && createPortal(
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl p-6 max-w-md w-full space-y-4 animate-in zoom-in-95">
             <div className="flex items-center gap-3">
@@ -1507,7 +1508,8 @@ export const TitulosBachillerView: React.FC = () => {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* ISOLATED PRINT CANVAS (Strictly 279.4mm x 215.9mm Landscape - Only visible on window.print()) */}
@@ -1546,7 +1548,7 @@ export const TitulosBachillerView: React.FC = () => {
       </div>
 
       {/* MODAL: CONVALIDACIONES Y CALIFICACIONES EXTERNAS */}
-      {showExternalGradesModal && (
+      {showExternalGradesModal && typeof document !== 'undefined' && createPortal(
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 no-print">
           <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-3xl w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto space-y-5">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
@@ -1777,7 +1779,8 @@ export const TitulosBachillerView: React.FC = () => {
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

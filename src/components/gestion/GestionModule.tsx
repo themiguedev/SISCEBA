@@ -10,6 +10,7 @@ import { TitulosBachillerView } from './TitulosBachillerView';
 import { MatriculaProsecucionView } from './MatriculaProsecucionView';
 import { TalleresCRPView } from './TalleresCRPView';
 import { UsuariosGestionView } from './UsuariosGestionView';
+import { TareasRecurrentesAdminView } from './TareasRecurrentesAdminView';
 import {
   UserCheck,
   Clock,
@@ -21,19 +22,23 @@ import {
   Users,
   ShieldX,
   Palette,
-  ShieldCheck
+  ShieldCheck,
+  ListChecks
 } from 'lucide-react';
 import { hasSubTabAccess, ROLE_METADATA } from '../../utils/rbac';
 import { recordSectionAccess, sortSubTabsByFrequency } from '../../utils/accessTracker';
+import { EducationalLevel } from '../../types';
 
 interface GestionModuleProps {
   activeSubTab: string;
   setActiveSubTab: (subTab: string) => void;
+  onNavigateToLevel?: (level: EducationalLevel, pillar: 'PLANIFICACION' | 'EVALUACION' | 'COMUNICACION', subTab?: string) => void;
 }
 
 export const GestionModule: React.FC<GestionModuleProps> = ({
   activeSubTab,
-  setActiveSubTab
+  setActiveSubTab,
+  onNavigateToLevel
 }) => {
   const { passes, documentRequests, adminBlocks, conducts, currentRole, users, currentUser } = useApp();
   const userId = currentUser?.id || currentUser?.username || currentRole;
@@ -42,6 +47,14 @@ export const GestionModule: React.FC<GestionModuleProps> = ({
   const blockedStudentsCount = adminBlocks.filter((b) => b.active).length;
 
   const subTabs = [
+    {
+      id: 'TAREAS_RECURRENTES',
+      label: 'Tareas Recurrentes',
+      sublabel: 'Supervisión UCE',
+      icon: ListChecks,
+      badge: 'Admin',
+      badgeColor: 'bg-[#D4AF37]/20 text-[#D4AF37] font-black border border-[#D4AF37]/30'
+    },
     {
       id: 'INSCRIPCIONES',
       label: 'Inscripciones',
@@ -123,36 +136,6 @@ export const GestionModule: React.FC<GestionModuleProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* Ergonomic Subtabs Bar - Adaptativa, completa y sin cortes */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl p-1.5 border border-slate-200/90 dark:border-slate-800 shadow-sm flex flex-wrap items-center gap-1 sm:gap-1.5">
-        {allowedSubTabs.map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeSubTab === tab.id;
-
-          return (
-            <button
-              key={tab.id}
-              onClick={() => {
-                setActiveSubTab(tab.id);
-                recordSectionAccess(userId, 'GESTION', tab.id);
-              }}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl text-xs font-bold transition-all select-none cursor-pointer ${
-                isActive
-                  ? 'bg-[#162721] text-emerald-300 shadow-md border border-emerald-500/40 ring-1 ring-emerald-500/20'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800'
-              }`}
-            >
-              <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 ${isActive ? 'text-emerald-400' : 'text-slate-400'}`} />
-              <span className={`whitespace-nowrap ${isActive ? 'text-white' : ''}`}>{tab.label}</span>
-              {tab.badge && (
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-md font-extrabold ${tab.badgeColor}`}>
-                  {tab.badge}
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </div>
 
       {/* Subtab Content Area with RBAC Guard */}
       <div className="animate-in fade-in duration-200">
@@ -180,6 +163,12 @@ export const GestionModule: React.FC<GestionModuleProps> = ({
           </div>
         ) : (
           <>
+            {activeSubTab === 'TAREAS_RECURRENTES' && (
+              <TareasRecurrentesAdminView
+                onNavigateToGestionSubtab={(sub) => setActiveSubTab(sub)}
+                onNavigateToLevel={onNavigateToLevel}
+              />
+            )}
             {activeSubTab === 'INSCRIPCIONES' && <InscripcionesWizardView />}
             {activeSubTab === 'PASES' && <PasesRetrasoView />}
             {activeSubTab === 'INASISTENCIAS' && <InasistenciasGestionView />}

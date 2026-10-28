@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SICE-CBA: Evolución del Control de Estudios (CBA vs CEO)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --cba-navy-dark: #0D0E1A;
+      --cba-navy: #151628;
+      --cba-navy-light: #242646;
+      --cba-gold: #D4AF37;
+      --cba-gold-light: #F3E5AB;
+      --cba-gold-dark: #A37F08;
+      --cba-burgundy: #800020;
+      --cba-slate-bg: #090A12;
+      --cba-border: rgba(212, 175, 55, 0.22);
+      --text-main: #F8FAFC;
+      --text-muted: #94A3B8;
+      --success: #10B981;
+      --danger: #EF4444;
+      --info: #3B82F6;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background-color: var(--cba-slate-bg);
+      color: var(--text-main);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      user-select: none;
+    }
+
+    /* Top Control Bar */
+    .top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: rgba(13, 14, 26, 0.94);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--cba-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 1000;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 34px;
+      height: 34px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.4));
+    }
+
+    .brand-title {
+      font-weight: 800;
+      font-size: 15px;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-badge {
+      background: linear-gradient(135deg, var(--cba-gold), var(--cba-gold-dark));
+      color: #0D0E1A;
+      font-size: 9.5px;
+      font-weight: 900;
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .action-icon-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+
+    .action-icon-btn:hover {
+      background: rgba(212, 175, 55, 0.15);
+      border-color: var(--cba-gold);
+      color: var(--cba-gold);
+    }
+
+    /* Main Slide Container */
+    .slide-viewport {
+      position: absolute;
+      top: 60px;
+      left: 0;
+      right: 0;
+      bottom: 54px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 28px;
+    }
+
+    .slide {
+      position: absolute;
+      width: 95%;
+      max-width: 1320px;
+      height: 94%;
+      max-height: 780px;
+      background: radial-gradient(circle at 85% 15%, rgba(36, 38, 70, 0.5) 0%, rgba(21, 22, 40, 0.95) 60%), #111222;
+      border: 1px solid var(--cba-border);
+      border-radius: 16px;
+      box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.8), 0 0 35px rgba(212, 175, 55, 0.06);
+      padding: 34px 42px;
+      opacity: 0;
+      transform: scale(0.97) translateY(16px);
+      pointer-events: none;
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .slide.active {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+      pointer-events: auto;
+    }
+
+    /* Bottom Control Bar */
+    .bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 54px;
+      background: rgba(13, 14, 26, 0.96);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 1000;
+    }
+
+    .progress-track {
+      flex: 1;
+      max-width: 420px;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 3px;
+      overflow: hidden;
+      margin: 0 20px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--cba-burgundy), var(--cba-gold));
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .slide-counter {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--cba-gold);
+      letter-spacing: 1px;
+    }
+
+    .nav-buttons {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #FFFFFF;
+      padding: 6px 16px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .nav-btn:hover:not(:disabled) {
+      background: var(--cba-gold);
+      color: #0D0E1A;
+      border-color: var(--cba-gold);
+      box-shadow: 0 0 12px rgba(212, 175, 55, 0.4);
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.25;
+      cursor: not-allowed;
+    }
+
+    /* Common Typography */
+    .slide-tag {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--cba-gold);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .slide-tag::before {
+      content: '';
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      background: var(--cba-gold);
+      border-radius: 50%;
+      box-shadow: 0 0 6px var(--cba-gold);
+    }
+
+    .slide-title {
+      font-size: 27px;
+      font-weight: 800;
+      color: #FFFFFF;
+      line-height: 1.25;
+      margin-bottom: 6px;
+      letter-spacing: -0.4px;
+    }
+
+    .slide-subtitle {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.45;
+      margin-bottom: 20px;
+    }
+
+    .audience-pill-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 20px;
+      background: rgba(212, 175, 55, 0.12);
+      color: var(--cba-gold);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      margin-left: 10px;
+      vertical-align: middle;
+    }
+
+    /* Hero / Cover Slide */
+    .hero-layout {
+      display: grid;
+      grid-template-columns: 1.25fr 0.75fr;
+      gap: 36px;
+      height: 100%;
+      align-items: center;
+    }
+
+    .hero-h1 {
+      font-size: 42px;
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.8px;
+      margin-bottom: 14px;
+      background: linear-gradient(135deg, #FFFFFF 30%, #E2E8F0 70%, var(--cba-gold-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-desc {
+      font-size: 15.5px;
+      color: #CBD5E1;
+      line-height: 1.55;
+      margin-bottom: 24px;
+    }
+
+    .hero-card-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .hero-stat-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(212, 175, 55, 0.18);
+      border-radius: 10px;
+      padding: 14px;
+      transition: all 0.2s ease;
+    }
+
+    .hero-stat-card:hover {
+      background: rgba(212, 175, 55, 0.06);
+      border-color: var(--cba-gold);
+      transform: translateY(-2px);
+    }
+
+    .hero-stat-num {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--cba-gold);
+      margin-bottom: 2px;
+    }
+
+    .hero-stat-label {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      font-weight: 600;
+      line-height: 1.35;
+    }
+
+    .hero-visual {
+      background: radial-gradient(circle at center, rgba(212, 175, 55, 0.12), transparent 70%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .hero-crest-lg {
+      width: 125px;
+      height: 125px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.5));
+      margin-bottom: 16px;
+    }
+
+    /* Comparison Split Views (Minimalist) */
+    .comparison-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .comp-col {
+      background: rgba(13, 14, 26, 0.65);
+      border-radius: 12px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      position: relative;
+    }
+
+    .comp-col.legacy {
+      border-color: rgba(239, 68, 68, 0.35);
+      background: rgba(239, 68, 68, 0.02);
+    }
+
+    .comp-col.modern {
+      border-color: rgba(16, 185, 129, 0.4);
+      background: rgba(16, 185, 129, 0.02);
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.06);
+    }
+
+    .comp-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .comp-pill {
+      font-size: 10.5px;
+      font-weight: 800;
+      padding: 3px 9px;
+      border-radius: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .comp-pill.legacy {
+      background: rgba(239, 68, 68, 0.18);
+      color: #F87171;
+      border: 1px solid rgba(239, 68, 68, 0.35);
+    }
+
+    .comp-pill.modern {
+      background: rgba(16, 185, 129, 0.18);
+      color: #34D399;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+
+    .comp-media-wrapper {
+      position: relative;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: #000000;
+      height: 250px;
+      margin-bottom: 14px;
+      cursor: zoom-in;
+    }
+
+    .comp-media-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+      transition: transform 0.25s ease;
+    }
+
+    .comp-media-wrapper:hover img {
+      transform: scale(1.02);
+    }
+
+    .comp-zoom-hint {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      background: rgba(0, 0, 0, 0.75);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 9.5px;
+      color: #CBD5E1;
+      pointer-events: none;
+    }
+
+    .comp-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .comp-list-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      font-size: 12.5px;
+      line-height: 1.45;
+      color: #E2E8F0;
+    }
+
+    .comp-icon {
+      font-size: 14px;
+      line-height: 1;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    /* 3-Column Minimalist Cards */
+    .card-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      flex: 1;
+    }
+
+    .feature-card {
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .feature-card:hover {
+      background: rgba(212, 175, 55, 0.04);
+      border-color: var(--cba-gold);
+      transform: translateY(-3px);
+    }
+
+    .feature-icon-circle {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: rgba(212, 175, 55, 0.12);
+      color: var(--cba-gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      margin-bottom: 14px;
+      border: 1px solid rgba(212, 175, 55, 0.25);
+    }
+
+    .feature-card-title {
+      font-size: 16.5px;
+      font-weight: 700;
+      color: #FFFFFF;
+      margin-bottom: 8px;
+    }
+
+    .feature-card-desc {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      flex: 1;
+    }
+
+    /* Zoom Modal */
+    .zoom-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.9);
+      backdrop-filter: blur(8px);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .zoom-modal.open {
+      display: flex;
+    }
+
+    .zoom-modal-content {
+      position: relative;
+      max-width: 92vw;
+      max-height: 90vh;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--cba-border);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95);
+      background: #0D0E1A;
+    }
+
+    .zoom-modal-img {
+      max-width: 92vw;
+      max-height: 84vh;
+      object-fit: contain;
+      display: block;
+    }
+
+    .zoom-modal-caption {
+      padding: 10px 16px;
+      background: #111222;
+      color: #FFFFFF;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .zoom-close-btn {
+      background: rgba(255, 255, 255, 0.12);
+      border: none;
+      color: #FFFFFF;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      cursor: pointer;
+    }
+
+    /* Drawer */
+    .drawer {
+      position: fixed;
+      top: 60px;
+      right: -340px;
+      bottom: 54px;
+      width: 320px;
+      background: #0D0E1A;
+      border-left: 1px solid var(--cba-border);
+      box-shadow: -10px 0 30px rgba(0, 0, 0, 0.7);
+      transition: right 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      padding: 18px;
+      overflow-y: auto;
+    }
+
+    .drawer.open {
+      right: 0;
+    }
+
+    .drawer-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #FFFFFF;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .drawer-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .drawer-item {
+      padding: 9px 12px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      color: #CBD5E1;
+      transition: all 0.2s;
+    }
+
+    .drawer-item:hover, .drawer-item.active {
+      background: rgba(212, 175, 55, 0.15);
+      border-color: var(--cba-gold);
+      color: var(--cba-gold);
+    }
+
+    .scale-box {
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-top: 8px;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+    .scale-box.inicial { background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); color: #93C5FD; }
+    .scale-box.primaria { background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); color: #6EE7B7; }
+    .scale-box.media { background: rgba(212, 175, 55, 0.08); border: 1px solid rgba(212, 175, 55, 0.25); color: #FDE68A; }
+
+    .kbd-hint {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-family: monospace;
+      color: var(--cba-gold);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <header class="top-bar">
+    <div class="brand-group">
+      <img src="public/presentacion/assets/logo-cba-gold.png" alt="CBA Logo" class="brand-logo" onerror="this.src='public/logo-cba-gold.png'">
+      <div class="brand-title">
+        SICE-CBA
+        <span class="brand-badge">2026</span>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <button class="action-icon-btn" onclick="toggleDrawer()" title="Índice de Diapositivas (T)">☰</button>
+      <button class="action-icon-btn" onclick="toggleFullScreen()" title="Pantalla Completa (F)">⛶</button>
+    </div>
+  </header>
+
+  <!-- Slide Viewport -->
+  <main class="slide-viewport">
+
+    <!-- DIAPOSITIVA 1: Portada & Estado del Proyecto -->
+    <section class="slide active" data-index="0" data-category="ALL">
+      <div class="hero-layout">
+        <div>
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+            <span class="slide-tag">Colegio Bellas Artes · Maracaibo</span>
+            <span class="audience-pill-tag">Fase Piloto Local</span>
+          </div>
+          <h1 class="hero-h1">SICE-CBA: Evolución del Control de Estudios</h1>
+          <p class="hero-desc">
+            Presentación ejecutiva: Comparativa frente al antiguo sistema <strong>CEO</strong>. Actualmente en <strong>fase activa de pruebas y homologación local</strong>, preparándose para su instalación definitiva en los <strong>servidores propios del colegio</strong>.
+          </p>
+          <div class="hero-card-grid">
+            <div class="hero-stat-card">
+              <div class="hero-stat-num">Fase 1</div>
+              <div class="hero-stat-label">Validación y pruebas locales en curso</div>
+            </div>
+            <div class="hero-stat-card">
+              <div class="hero-stat-num">Fase 2</div>
+              <div class="hero-stat-label">Despliegue a servidores del colegio</div>
+            </div>
+            <div class="hero-stat-card">
+              <div class="hero-stat-num">100%</div>
+              <div class="hero-stat-label">Apego estricto a escalas oficiales MPPE</div>
+            </div>
+            <div class="hero-stat-card">
+              <div class="hero-stat-num">A y B</div>
+              <div class="hero-stat-label">Secciones únicas institucionales</div>
+            </div>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <img src="public/presentacion/assets/logo-cba-gold.png" alt="Escudo CBA" class="hero-crest-lg" onerror="this.src='public/logo-cba-gold.png'">
+          <h3 style="font-size: 17px; font-weight: 800; color: #FFF; margin-bottom: 4px;">U.E.P. Colegio Bellas Artes</h3>
+          <p style="font-size: 11.5px; color: var(--cba-gold); margin-bottom: 12px;">Código DEA: S0432D2305</p>
+          <div style="background: rgba(212, 175, 55, 0.12); border: 1px solid var(--cba-border); padding: 5px 12px; border-radius: 6px; font-size: 11px; color: var(--cba-gold); margin-bottom: 12px; font-weight: 700;">
+            🛠️ Entorno de Validación Local en Progreso
+          </div>
+          <p style="font-size: 11.5px; color: var(--text-muted);">
+            Navega con <span class="kbd-hint">◀</span> <span class="kbd-hint">▶</span> o <span class="kbd-hint">Espacio</span>.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- DIAPOSITIVA 2: De CEO a SICE-CBA en 3 Puntos Críticos -->
+    <section class="slide" data-index="1" data-category="ALL">
+      <div class="slide-tag">El Salto Tecnológico <span class="audience-pill-tag">Diagnóstico Resumido</span></div>
+      <h2 class="slide-title">De CEO a SICE-CBA en 3 Puntos Críticos</h2>
+      <p class="slide-subtitle">Principales cuellos de botella del sistema histórico frente a las soluciones directas del nuevo sistema:</p>
+
+      <div class="card-grid-3">
+        <div class="feature-card">
+          <div class="feature-icon-circle" style="background: rgba(239, 68, 68, 0.12); color: #F87171; border-color: rgba(239, 68, 68, 0.25);">
+            📡
+          </div>
+          <h3 class="feature-card-title">1. Infraestructura</h3>
+          <p class="feature-card-desc">
+            <strong style="color: #F87171;">CEO (Anterior):</strong> Hosting web externo. Cualquier caída de internet en el plantel paralizaba las inscripciones y la carga de notas.<br><br>
+            <strong style="color: #34D399;">SICE-CBA (Nuevo):</strong> 100% On-Premise. La base de datos opera dentro de la red del colegio. Inmune a fallas de internet externo.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-circle" style="background: rgba(59, 130, 246, 0.12); color: #60A5FA; border-color: rgba(59, 130, 246, 0.25);">
+            ⚡
+          </div>
+          <h3 class="feature-card-title">2. Velocidad y Fluidez</h3>
+          <p class="feature-card-desc">
+            <strong style="color: #F87171;">CEO (Anterior):</strong> PHP clásico de 2012 con más de 136 URLs dispersas. Recargas completas de pantalla (F5) en cada acción.<br><br>
+            <strong style="color: #34D399;">SICE-CBA (Nuevo):</strong> Aplicación reactiva de página única (SPA). Guardado continuo celda por celda sin pérdida de datos.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-circle" style="background: rgba(212, 175, 55, 0.12); color: #FBBF24; border-color: rgba(212, 175, 55, 0.25);">
+            ⚖️
+          </div>
+          <h3 class="feature-card-title">3. Legalidad y Control</h3>
+          <p class="feature-card-desc">
+            <strong style="color: #F87171;">CEO (Anterior):</strong> Promedios numéricos indebidos en Inicial/Primaria y proliferación de secciones desordenadas (C, D, U).<br><br>
+            <strong style="color: #34D399;">SICE-CBA (Nuevo):</strong> Apego total a las normas del MPPE, roles blindados y únicamente Secciones A y B oficiales.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- DIAPOSITIVA 3: Cara a Cara Visual 1 - Escritorio y Operatividad Diaria -->
+    <section class="slide" data-index="2" data-category="ALL">
+      <div class="slide-tag">Comparativa Visual 1 <span class="audience-pill-tag">Experiencia de Usuario</span></div>
+      <h2 class="slide-title">Escritorio Principal & Centro de Comando</h2>
+      <p class="slide-subtitle">De un panel estático y desordenado a un centro de control con métricas e indicadores en vivo.</p>
+
+      <div class="comparison-container">
+        <div class="comp-col legacy">
+          <div class="comp-header">
+            <span class="comp-pill legacy">CEO (Sistema Anterior)</span>
+            <span style="font-size: 11px; color: #94A3B8;">Captura Real de la Sesión</span>
+          </div>
+          <div class="comp-media-wrapper" onclick="openZoom('public/presentacion/assets/ceo_dashboard_legacy.png', 'CEO Anterior: Escritorio real con menús fragmentados y tablas de 2012')">
+            <img src="public/presentacion/assets/ceo_dashboard_legacy.png" alt="CEO Dashboard Real">
+            <span class="comp-zoom-hint">🔍 Clic para ampliar</span>
+          </div>
+          <ul class="comp-list">
+            <li class="comp-list-item">
+              <span class="comp-icon" style="color: #EF4444;">✕</span>
+              <span>Menú lateral rígido con opciones redundantes que sobrecargaban al usuario.</span>
+            </li>
+            <li class="comp-list-item">
+              <span class="comp-icon" style="color: #EF4444;">✕</span>
+              <span>Consultas lentas para actualizar contadores y sin soporte de búsqueda rápida.</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="comp-col modern">
+          <div class="comp-header">
+            <span class="comp-pill modern">SICE-CBA (Nuevo Sistema)</span>
+            <span style="font-size: 11px; color: #34D399;">Academic Pulse Hero</span>
+          </div>
+          <div class="comp-media-wrapper" onclick="openZoom('public/presentacion/assets/sisceba_dashboard_real.png', 'SICE-CBA: Dashboard en tiempo real con estadísticas y accesos directos')">
+            <img src="public/presentacion/assets/sisceba_dashboard_real.png" alt="SICE-CBA Dashboard">
+            <span class="comp-zoom-hint">🔍 Clic para ampliar</span>
+          </div>
+          <ul class="comp-list">
+            <li class="comp-list-item">
+              <span class="comp-icon" style="color: #10B981;">✓</span>
+              <span><strong>Métricas en Vivo:</strong> Matrícula activa, estado del lapso y resumen de asistencia al instante.</span>
+            </li>
+            <li class="comp-list-item">
+              <span class="comp-icon" style="color: #10B981;">✓</span>
+              <span>Buscador global <span class="kbd-hint">Ctrl+K</span> y atajos de teclado para navegación inmediata.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- DIAPOSITIVA 4: Cara a Cara Visual 2 - Gestión, Matrícula y Secciones A/B -->
+    <section class="slide" data-index="3" data-category="DIRECTIVA">
+      <div class="slide-tag">Comparativa Visual 2 <span class="audience-pill-tag">Control Institucional</span></div>
+      <h2 class="slide-title">Gestión de Matrícula: Secciones Estrictas "A" y "B"</h2>
+      <p class="slide-subtitle">Erradicación de secciones residuales que alteraban las nóminas de Zona Educativa.</p>
+
+      <div class="comparison-container">
+        <div class="comp-col legacy">
+          <div class="comp-header">
+            <span class="comp-pill legacy">CEO (Sistema Anterior)</span>
+            <span style="font-size: 11px; color: #F87171;">Secciones No Normadas</span>
+          </div>
+          <div class="comp-media-wrapper" onclick="openZoom('public/presentacion/assets/ceo_alumnos.png', 'CEO Anterior: Lista de alumnos con filtros y secciones residuales')">
+            <img src="public/presentacion/assets/ceo_alumnos.png" alt="CEO Alumnos">
+            <span class="comp-zoom-hint">🔍 Clic para ampliar</span>
+          </div>
+          <ul class="comp-list">
+            <li class="comp-list-item">
+              <span class="comp-icon" style="color: #EF4444;">✕</span>
+              <span>Aparición de secciones ficticias (`C`, `D`, `U`) que descuadraban los listados oficiales.</span>
+            </li>
+            <li class="comp-list-item">
+              <span class="comp-icon" style="color: #EF4444;">✕</span>
+              <span>Formatos de tabla rígidos y lentos para filtrar por grado o nivel.</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="comp-col modern">
+          <div class="comp-header">
+            <span class="comp-pill modern">SICE-CBA (Nuevo Sistema)</span>
+            <span style="font-size: 11px; color: #34D399;">Regla Institucional Inviolable</span>
+          </div>
+          <div class="comp-media-wrapper" onclick="openZoom('public/presentacion/assets/sisceba_gestion_real.png', 'SICE-CBA: Módulo de Gestión con matrícula exclusiva y Secciones estrictas A y B')">
+            <img src="public/presentacion/assets/sisceba_gestion_real.png" alt="SICE-CBA Gestión">
+            <span class="comp-zoom-hint">🔍 Clic para ampliar</span>
+          </div>
+          <ul class="comp-list">
+            <li class="comp-list-item">
+              <span class="comp-icon" style="color: #10B981;">✓</span>
+              <span><strong>Exclusivamente Secciones A y B:</strong> Todos los formularios y reportes bloquean secciones espurias.</span>
+            </li>
+            <li class="comp-list-item">
+              <span class="comp-icon" style="color: #10B981;">✓</span>
+              <span><strong>Matrícula Blindada:</strong> Acceso y prosecución exclusiva para el rol <code>ADMINISTRADOR</code>.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- DIAPOSITIVA 5: Normativa Legal MPPE y Roles Blindados -->
+    <section class="slide" data-index="4" data-category="DOCENTES DIRECTIVA">
+      <div class="slide-tag">Reglas de Negocio Oficiales MPPE <span class="audience-pill-tag">Pedagógico & Roles</span></div>
+      <h2 class="slide-title">Escalas Evaluativas Oficiales y Roles de Personal</h2>
+      <p class="slide-subtitle">Alineación exacta con las normativas del Ministerio y segregación de responsabilidades:</p>
+
+      <div class="card-grid-3">
+        <div class="feature-card">
+          <div class="feature-icon-circle" style="background: rgba(59, 130, 246, 0.15); color: #60A5FA;">
+            🧸
+          </div>
+          <h3 class="feature-card-title">Educación Inicial</h3>
+          <p class="feature-card-desc">
+            Escala <strong>Literal Oficial Exclusiva</strong>. Prohibidos promedios o escalas numéricas sobre 20.
+          </p>
+          <div class="scale-box inicial">
+            <strong>Escala Literal:</strong> <code>A</code>, <code>B</code>, <code>C</code>, <code>D</code>, <code>E</code>.<br>
+            Evaluación descriptiva formativa.
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-circle" style="background: rgba(16, 185, 129, 0.15); color: #34D399;">
+            🌱
+          </div>
+          <h3 class="feature-card-title">Educación Primaria</h3>
+          <p class="feature-card-desc">
+            Evaluación <strong>Cualitativa / Formativa</strong> por competencias e indicadores de aprendizaje.
+          </p>
+          <div class="scale-box primaria">
+            <strong>Indicadores:</strong><br>
+            <code>L</code> (Logrado) · <code>P/EP</code> (En Proceso) · <code>I</code> (Iniciado).
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-circle" style="background: rgba(212, 175, 55, 0.15); color: #FBBF24;">
+            🎓
+          </div>
+          <h3 class="feature-card-title">Media General & Roles</h3>
+          <p class="feature-card-desc">
+            Escala <strong>Cuantitativa Vigesimal (01 a 20)</strong> con actas y ponderaciones por lapso.
+          </p>
+          <div class="scale-box media">
+            <strong>Seguridad de Roles:</strong><br>
+            • <em>Secretaría:</em> Asistencia y Conducta (sin notas).<br>
+            • <em>Docente:</em> Evaluación y Planificación.<br>
+            • <em>Admin:</em> Matrícula y Usuarios.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DIAPOSITIVA 6: Infraestructura y Ruta hacia los Servidores del Plantel -->
+    <section class="slide" data-index="5" data-category="ALL">
+      <div class="hero-layout">
+        <div>
+          <div class="slide-tag">Plan de Despliegue · CBA 2026 <span class="audience-pill-tag">Ruta Metódica</span></div>
+          <h2 class="hero-h1" style="font-size: 34px;">De Pruebas Locales a Producción Institucional</h2>
+          <p class="hero-desc">
+            El sistema se consolida en un plan de 4 fases para asegurar una transición sin interrupciones en la <strong>Unidad Educativa Bellas Artes</strong>.
+          </p>
+          <div class="feature-card" style="margin-bottom: 16px;">
+            <div style="display: flex; flex-direction: column; gap: 8px; font-size: 12.5px; color: #CBD5E1; line-height: 1.45;">
+              <div><strong style="color: #34D399;">1. Fase Actual (En Curso): Pruebas Locales</strong> — Simulación de notas, escalas oficiales y validación con directivos.</div>
+              <div><strong style="color: var(--cba-gold);">2. Próximo Hito: Servidores del Colegio</strong> — Instalación de PostgreSQL 16 y Node.js en el hardware institucional del CBA.</div>
+              <div><strong style="color: #60A5FA;">3. Inducción al Personal</strong> — Entrega de Códigos de Autorización para registro de docentes y secretaría.</div>
+              <div><strong style="color: #F87171;">4. Apagado de CEO</strong> — Migración oficial de nóminas y desincorporación del hosting PHP antiguo.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-visual">
+          <div style="font-size: 42px; margin-bottom: 10px;">💬</div>
+          <h3 style="font-size: 19px; font-weight: 800; color: #FFF; margin-bottom: 6px;">Preguntas y Respuestas</h3>
+          <p style="font-size: 12px; color: var(--text-muted); line-height: 1.45; margin-bottom: 16px;">
+            Espacio abierto para atender inquietudes de Directiva, Docentes y Personal Técnico.
+          </p>
+          <div style="padding: 8px 14px; background: rgba(212, 175, 55, 0.12); border: 1px solid var(--cba-border); border-radius: 6px; font-size: 11px; color: var(--cba-gold); font-weight: 700;">
+            SICE-CBA · Excelencia Educativa Bellas Artes
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Bottom Bar -->
+  <footer class="bottom-bar">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <span class="slide-counter" id="slideCounter">1 / 6</span>
+    </div>
+
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="nav-btn" id="prevBtn" onclick="prevSlide()" title="Anterior (Flecha Izquierda)">
+        ◀ Anterior
+      </button>
+      <button class="nav-btn" id="nextBtn" onclick="nextSlide()" title="Siguiente (Flecha Derecha / Espacio)">
+        Siguiente ▶
+      </button>
+    </div>
+  </footer>
+
+  <!-- Drawer (Índice de Diapositivas) -->
+  <aside class="drawer" id="slideDrawer">
+    <div class="drawer-title">
+      <span>Índice de Presentación</span>
+      <button onclick="toggleDrawer()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;">✕</button>
+    </div>
+    <div class="drawer-list" id="drawerList"></div>
+  </aside>
+
+  <!-- Modal Zoom Image -->
+  <div class="zoom-modal" id="zoomModal" onclick="closeZoom(event)">
+    <div class="zoom-modal-content" onclick="event.stopPropagation()">
+      <img src="" alt="Zoom" class="zoom-modal-img" id="zoomImg">
+      <div class="zoom-modal-caption">
+        <span id="zoomCaption"></span>
+        <button class="zoom-close-btn" onclick="closeZoom()">Cerrar ✕</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    let currentIndex = 0;
+
+    function updatePresentation() {
+      slides.forEach(s => s.classList.remove('active'));
+      const activeSlide = slides[currentIndex];
+      if (activeSlide) {
+        activeSlide.classList.add('active');
+      }
+
+      // Update counter and progress
+      const counter = document.getElementById('slideCounter');
+      const progress = document.getElementById('progressFill');
+      const total = slides.length;
+      counter.textContent = `${currentIndex + 1} / ${total}`;
+      const pct = total > 1 ? (currentIndex / (total - 1)) * 100 : 100;
+      progress.style.width = `${pct}%`;
+
+      // Update Nav Buttons
+      document.getElementById('prevBtn').disabled = currentIndex === 0;
+      document.getElementById('nextBtn').disabled = currentIndex === total - 1;
+
+      renderDrawer();
+    }
+
+    function nextSlide() {
+      if (currentIndex < slides.length - 1) {
+        currentIndex++;
+        updatePresentation();
+      }
+    }
+
+    function prevSlide() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        updatePresentation();
+      }
+    }
+
+    function goToSlide(targetSlide) {
+      const idx = slides.indexOf(targetSlide);
+      if (idx !== -1) {
+        currentIndex = idx;
+        updatePresentation();
+        closeDrawer();
+      }
+    }
+
+    // Keyboard Navigation
+    window.addEventListener('keydown', (e) => {
+      if (document.getElementById('zoomModal').classList.contains('open')) {
+        if (e.key === 'Escape') closeZoom();
+        return;
+      }
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        prevSlide();
+      } else if (e.key === 'Home') {
+        currentIndex = 0;
+        updatePresentation();
+      } else if (e.key === 'End') {
+        currentIndex = slides.length - 1;
+        updatePresentation();
+      } else if (e.key === 'f' || e.key === 'F') {
+        toggleFullScreen();
+      } else if (e.key === 't' || e.key === 'T') {
+        toggleDrawer();
+      }
+    });
+
+    // Zoom Image Modal
+    function openZoom(src, caption) {
+      const modal = document.getElementById('zoomModal');
+      const img = document.getElementById('zoomImg');
+      const cap = document.getElementById('zoomCaption');
+      img.src = src;
+      cap.textContent = caption;
+      modal.classList.add('open');
+    }
+
+    function closeZoom() {
+      document.getElementById('zoomModal').classList.remove('open');
+    }
+
+    // Fullscreen Toggle
+    function toggleFullScreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => console.log(err));
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+      }
+    }
+
+    // Drawer Thumbnails / TOC
+    function toggleDrawer() {
+      const drawer = document.getElementById('slideDrawer');
+      drawer.classList.toggle('open');
+      if (drawer.classList.contains('open')) renderDrawer();
+    }
+
+    function closeDrawer() {
+      document.getElementById('slideDrawer').classList.remove('open');
+    }
+
+    function renderDrawer() {
+      const drawerList = document.getElementById('drawerList');
+      drawerList.innerHTML = '';
+      slides.forEach((slide, idx) => {
+        const titleEl = slide.querySelector('.slide-title') || slide.querySelector('.hero-h1');
+        const title = titleEl ? titleEl.textContent : `Diapositiva ${idx + 1}`;
+        const item = document.createElement('div');
+        item.className = `drawer-item ${idx === currentIndex ? 'active' : ''}`;
+        item.innerHTML = `<span>${idx + 1}. ${title}</span>`;
+        item.onclick = () => goToSlide(slide);
+        drawerList.appendChild(item);
+      });
+    }
+
+    // Touch Swipe Support
+    let touchStartX = 0;
+    window.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX, false);
+    window.addEventListener('touchend', e => {
+      const touchEndX = e.changedTouches[0].screenX;
+      if (touchStartX - touchEndX > 50) nextSlide();
+      else if (touchEndX - touchStartX > 50) prevSlide();
+    }, false);
+
+    // Initial render
+    updatePresentation();
+  </script>
+</body>
+</html>
+

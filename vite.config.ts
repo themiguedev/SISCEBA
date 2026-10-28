@@ -15,6 +15,11 @@ export default defineConfig({
             res.end();
             return;
           }
+          if (url === '/presentacion' || url === '/presentacion/' || url === '/SISCEBA/presentacion' || url === '/SISCEBA/presentacion/') {
+            res.writeHead(302, { Location: '/SISCEBA/presentacion/index.html' });
+            res.end();
+            return;
+          }
           next();
         });
       }

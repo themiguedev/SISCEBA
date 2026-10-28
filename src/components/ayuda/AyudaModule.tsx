@@ -57,33 +57,6 @@ export const AyudaModule: React.FC<AyudaModuleProps> = ({
           </div>
         </div>
 
-        {/* Subtabs Pill Switcher */}
-        <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 shadow-inner shrink-0">
-          <button
-            onClick={() => setTab('MANUAL')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-              currentTab === 'MANUAL'
-                ? 'bg-[#1F1E29] text-amber-300 shadow-sm border border-amber-400/40'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/60'
-            }`}
-          >
-            <BookOpen className={`w-3.5 h-3.5 ${currentTab === 'MANUAL' ? 'text-amber-400' : 'text-slate-400'}`} />
-            Manual de Uso Interactivo
-          </button>
-          {canAccessMapaSitio && (
-            <button
-              onClick={() => setTab('MAPA_SITIO')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                currentTab === 'MAPA_SITIO'
-                  ? 'bg-[#1F1E29] text-amber-300 shadow-sm border border-amber-400/40'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/60'
-              }`}
-            >
-              <Compass className={`w-3.5 h-3.5 ${currentTab === 'MAPA_SITIO' ? 'text-amber-400' : 'text-slate-400'}`} />
-              Directorio & Mapa del Sitio
-            </button>
-          )}
-        </div>
       </div>
 
       {/* Render Subview */}

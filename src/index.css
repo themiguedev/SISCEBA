@@ -1138,7 +1138,7 @@ html.dark img[src*="logo-cba.png"]:not(.force-light *):not(.no-dark-invert) {
 .animate-in {
   animation-duration: 220ms;
   animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: transform, opacity;
+  will-change: opacity;
 }
 
 @keyframes cbaFadeIn {

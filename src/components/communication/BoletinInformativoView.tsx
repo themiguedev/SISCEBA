@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
+import { Student } from '../../types';
 import {
   Printer,
   User,
@@ -14,23 +15,36 @@ import {
   AlertTriangle
 } from 'lucide-react';
 
-export const BoletinInformativoView: React.FC = () => {
+interface BoletinInformativoViewProps {
+  studentsList?: Student[];
+}
+
+export const BoletinInformativoView: React.FC<BoletinInformativoViewProps> = ({
+  studentsList
+}) => {
   const {
     levelStudents,
+    students,
     levelAreas,
     indicators,
     currentLevel,
+    setCurrentLevel,
     activeLapso,
     currentSection,
     evaluations,
     currentRole,
     currentUser,
     adminBlocks,
-    toggleAdminBlock
+    toggleAdminBlock,
+    accumulatedAttendance,
+    conducts
   } = useApp();
 
   const isFamilyOrStudent = currentRole === 'REPRESENTANTE' || currentRole === 'ESTUDIANTE';
   const isAdmin = currentRole === 'ADMINISTRADOR';
+
+  const baseStudents = studentsList || (isFamilyOrStudent ? (students.length > 0 ? students : levelStudents) : levelStudents);
+
   const displayStudents = isFamilyOrStudent
     ? (() => {
         if (currentRole === 'ESTUDIANTE') {
@@ -39,7 +53,7 @@ export const BoletinInformativoView: React.FC = () => {
           const userEmail = currentUser?.email?.toLowerCase().trim() || '';
           const userFullName = currentUser?.fullName?.toLowerCase().trim() || '';
 
-          const matched = levelStudents.filter((s) => {
+          const matched = baseStudents.filter((s) => {
             const studentCedula = s.cedula?.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || '';
             const studentEmail = s.representativeEmail?.toLowerCase().trim() || '';
             const studentName = s.fullName?.toLowerCase().trim() || '';
@@ -59,7 +73,7 @@ export const BoletinInformativoView: React.FC = () => {
 
           // Si es el Administrador simulando el rol de Estudiante
           if (currentUser?.role === 'ADMINISTRADOR') {
-            return levelStudents.length > 0 ? [levelStudents[0]] : [];
+            return baseStudents.length > 0 ? [baseStudents[0]] : [];
           }
 
           return [];
@@ -71,7 +85,7 @@ export const BoletinInformativoView: React.FC = () => {
         const repCedula = currentUser?.cedula?.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || '';
         const repUsername = currentUser?.username?.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || '';
 
-        const matched = levelStudents.filter((s) => {
+        const matched = baseStudents.filter((s) => {
           const sRepName = s.representativeName?.toLowerCase().trim() || '';
           const sRepEmail = s.representativeEmail?.toLowerCase().trim() || '';
           const sRepCedula = s.motherInfo?.cedula?.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || s.fatherInfo?.cedula?.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || '';
@@ -89,7 +103,7 @@ export const BoletinInformativoView: React.FC = () => {
         }
 
         if (currentUser?.role === 'ADMINISTRADOR') {
-          return levelStudents.slice(0, 2);
+          return baseStudents.slice(0, 2);
         }
 
         return [];
@@ -97,9 +111,16 @@ export const BoletinInformativoView: React.FC = () => {
     : levelStudents;
 
   const [selectedStudentId, setSelectedStudentId] = useState<string>(
-    displayStudents[0]?.id || levelStudents[0]?.id || ''
+    displayStudents[0]?.id || baseStudents[0]?.id || ''
   );
-  const activeStudent = displayStudents.find(s => s.id === selectedStudentId) || displayStudents[0] || levelStudents[0];
+  const activeStudent = displayStudents.find(s => s.id === selectedStudentId) || displayStudents[0] || baseStudents[0];
+
+  // Sincronizar automáticamente el nivel educativo con el representado activo
+  useEffect(() => {
+    if (isFamilyOrStudent && activeStudent?.level && activeStudent.level !== currentLevel && setCurrentLevel) {
+      setCurrentLevel(activeStudent.level);
+    }
+  }, [activeStudent?.level, currentLevel, isFamilyOrStudent, setCurrentLevel]);
 
   // Verificar si el estudiante actual posee un bloqueo administrativo activo
   const activeBlock = adminBlocks.find(b =>
@@ -110,24 +131,24 @@ export const BoletinInformativoView: React.FC = () => {
   );
   const isBlocked = !!activeBlock;
 
-  // Helper to fetch student score per area
-  const getAreaEvaluation = (areaId: string) => {
+  // Helper to fetch student score per area and optional lapso
+  const getAreaEvaluation = (areaId: string, lapsoNum: 1 | 2 | 3 = activeLapso) => {
     if (!activeStudent) {
       return { scoreNumeric: undefined, scoreLiteral: undefined, scoreQualitative: undefined, obs: '' };
     }
     const finalRec = evaluations.find(
-      e => e.studentId === activeStudent.id && e.areaId === areaId && e.moment === 'FINAL_LAPSO' && e.lapso === activeLapso
+      e => e.studentId === activeStudent.id && e.areaId === areaId && e.moment === 'FINAL_LAPSO' && e.lapso === lapsoNum
     );
     if (finalRec) {
       return {
         scoreNumeric: finalRec.scoreNumeric,
         scoreLiteral: finalRec.scoreLiteral,
         scoreQualitative: finalRec.scoreQualitative,
-        obs: finalRec.observations || 'Demuestra avance regular en los objetivos pedagógicos.'
+        obs: finalRec.observations || ''
       };
     }
     const procRecs = evaluations.filter(
-      e => e.studentId === activeStudent.id && e.areaId === areaId && e.moment === 'PROCESAL' && e.lapso === activeLapso
+      e => e.studentId === activeStudent.id && e.areaId === areaId && e.moment === 'PROCESAL' && e.lapso === lapsoNum
     );
     if (procRecs.length > 0) {
       const numScores = procRecs.filter(e => e.scoreNumeric !== undefined).map(e => e.scoreNumeric as number);
@@ -139,25 +160,60 @@ export const BoletinInformativoView: React.FC = () => {
         scoreNumeric: avgScore ?? procRecs[0].scoreNumeric,
         scoreLiteral: procRecs[0].scoreLiteral,
         scoreQualitative: procRecs[0].scoreQualitative,
-        obs: procRecs[0].observations || 'Participación activa y cumplimiento de actividades.'
+        obs: procRecs[0].observations || ''
       };
     }
     return {
       scoreNumeric: undefined,
       scoreLiteral: undefined,
       scoreQualitative: undefined,
-      obs: 'Sin evaluaciones procesales asentadas en este lapso.'
+      obs: ''
     };
   };
 
+  // Student scores for active lapso in Media General
+  const activeStudentScores = (currentLevel === 'MEDIA_GENERAL' && activeStudent)
+    ? levelAreas
+        .map(a => getAreaEvaluation(a.id, activeLapso).scoreNumeric)
+        .filter((s): s is number => s !== undefined)
+    : [];
+  const hasActiveLapsoGrades = activeStudentScores.length > 0;
+
+  // Student scores across all lapsos in Media General
+  const allLapsosScores = (currentLevel === 'MEDIA_GENERAL' && activeStudent)
+    ? levelAreas.flatMap(a => [
+        getAreaEvaluation(a.id, 1).scoreNumeric,
+        getAreaEvaluation(a.id, 2).scoreNumeric,
+        getAreaEvaluation(a.id, 3).scoreNumeric
+      ]).filter((s): s is number => s !== undefined)
+    : [];
+  const hasAnyGrades = allLapsosScores.length > 0;
+
   // Compute general average for Media General ONLY
-  const generalAverage = currentLevel === 'MEDIA_GENERAL' && activeStudent
-    ? (() => {
-        const studentScores = levelAreas.map(a => getAreaEvaluation(a.id).scoreNumeric).filter((s): s is number => s !== undefined);
-        if (studentScores.length === 0) return 0;
-        return Math.round((studentScores.reduce((a, b) => a + b, 0) / studentScores.length) * 10) / 10;
-      })()
-    : 0;
+  const generalAverage = hasActiveLapsoGrades
+    ? Math.round((activeStudentScores.reduce((a, b) => a + b, 0) / activeStudentScores.length) * 10) / 10
+    : (hasAnyGrades
+        ? Math.round((allLapsosScores.reduce((a, b) => a + b, 0) / allLapsosScores.length) * 10) / 10
+        : 0);
+
+  // Student list position within their section
+  const sectionStudents = levelStudents
+    .filter(s => s.grade === activeStudent?.grade && s.section === activeStudent?.section)
+    .sort((a, b) => a.fullName.localeCompare(b.fullName));
+  const studentIndex = sectionStudents.findIndex(s => s.id === activeStudent?.id);
+  const studentListNumber = studentIndex >= 0 ? (studentIndex + 1).toString().padStart(2, '0') : '--';
+
+  // Conducts summary for active student
+  const studentConducts = (conducts || []).filter(
+    c => c.studentId === activeStudent?.id ||
+         (activeStudent?.fullName && c.studentName?.toLowerCase().trim() === activeStudent.fullName?.toLowerCase().trim())
+  );
+  const levesCount = studentConducts.filter(c => c.type === 'LEVE').length;
+  const gravesCount = studentConducts.filter(c => c.type === 'GRAVE' || c.type === 'MUY_GRAVE').length;
+
+  // Approved / Reproved count in active lapso
+  const aproCount = activeStudentScores.filter(s => s >= 10).length;
+  const repCount = activeStudentScores.filter(s => s < 10).length;
 
   return (
     <div className="space-y-6">
@@ -250,12 +306,12 @@ export const BoletinInformativoView: React.FC = () => {
             </div>
           ) : null}
 
-          {isFamilyOrStudent && isBlocked ? (
+          {isFamilyOrStudent ? null : isBlocked ? (
             <div className="flex items-center gap-2 px-4 py-2.5 bg-red-100 dark:bg-red-950/60 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 font-black rounded-xl text-xs whitespace-nowrap">
               <Lock className="w-4 h-4 text-red-600 dark:text-red-400" />
               Impresión Bloqueada por Mora
             </div>
-          ) : isFamilyOrStudent ? null : !isAdmin ? (
+          ) : !isAdmin ? (
             <div
               className="flex items-center gap-2 px-4 py-2.5 bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 font-bold rounded-xl text-xs whitespace-nowrap shadow-sm select-none"
               title="La emisión e impresión oficial de boletines está reservada exclusivamente para el rol Administrador"
@@ -412,11 +468,11 @@ export const BoletinInformativoView: React.FC = () => {
                 <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-[11px] leading-tight space-y-0.5 min-w-[240px]">
                   <div><span className="text-slate-500">Identificación:</span> <strong>{activeStudent.cedula}</strong></div>
                   <div><span className="text-slate-500">Estudiante:</span> <strong className="text-[#2C2E53]">{activeStudent.fullName}</strong></div>
-                  <div><span className="text-slate-500">Representante:</span> <strong>{activeStudent.representativeName}</strong></div>
+                  <div><span className="text-slate-500">Representante:</span> <strong>{activeStudent.representativeName || '--'}</strong></div>
                   <div className="flex justify-between pt-1">
                     <span><strong>CURSO:</strong> {activeStudent.grade}</span>
                     <span><strong>SECC:</strong> "{activeStudent.section}"</span>
-                    <span><strong>LISTA:</strong> 23</span>
+                    <span><strong>LISTA:</strong> {studentListNumber}</span>
                   </div>
                 </div>
               </div>
@@ -447,11 +503,53 @@ export const BoletinInformativoView: React.FC = () => {
                   </thead>
                   <tbody className="divide-y divide-slate-200">
                     {levelAreas.map((area, idx) => {
-                      const evalData = getAreaEvaluation(area.id);
                       const isLiteralSubject = area.name.toLowerCase().includes('orientación') ||
                                               area.name.toLowerCase().includes('lectoescritura') ||
                                               area.name.toLowerCase().includes('taller');
-                      const scoreNum = evalData.scoreNumeric || 19;
+
+                      const evalActive = getAreaEvaluation(area.id, activeLapso);
+                      const evalL1 = getAreaEvaluation(area.id, 1);
+                      const evalL2 = getAreaEvaluation(area.id, 2);
+                      const evalL3 = getAreaEvaluation(area.id, 3);
+
+                      // Inasistencias for active lapso
+                      const studentAreaInas = (accumulatedAttendance || []).find(
+                        a => a.studentId === activeStudent?.id && a.areaId === area.id && a.lapso === activeLapso
+                      );
+                      const inasActive = studentAreaInas
+                        ? (studentAreaInas.unjustifiedAbsences + studentAreaInas.justifiedAbsences)
+                        : undefined;
+
+                      // Inasistencias accumulated across all lapsos
+                      const allAreaInas = (accumulatedAttendance || []).filter(
+                        a => a.studentId === activeStudent?.id && a.areaId === area.id
+                      );
+                      const inasTotal = allAreaInas.length > 0
+                        ? allAreaInas.reduce((acc, curr) => acc + curr.unjustifiedAbsences + curr.justifiedAbsences, 0)
+                        : undefined;
+
+                      // Area numeric scores across completed lapsos
+                      const areaScores = [
+                        evalL1.scoreNumeric,
+                        activeLapso >= 2 ? evalL2.scoreNumeric : undefined,
+                        activeLapso >= 3 ? evalL3.scoreNumeric : undefined
+                      ].filter((s): s is number => s !== undefined);
+
+                      const defAvg = areaScores.length > 0
+                        ? Math.round(areaScores.reduce((a, b) => a + b, 0) / areaScores.length)
+                        : undefined;
+                      const displayDef = defAvg !== undefined
+                        ? (defAvg < 10 ? `0${defAvg}` : `${defAvg}`)
+                        : '';
+
+                      const scoreNum = evalActive.scoreNumeric;
+                      const displayScoreNum = scoreNum !== undefined
+                        ? (scoreNum < 10 ? `0${Math.round(scoreNum)}` : `${Math.round(scoreNum)}`)
+                        : '';
+                      const displayAcum = scoreNum !== undefined
+                        ? (scoreNum < 10 ? `0${scoreNum.toFixed(2)}` : scoreNum.toFixed(2))
+                        : '';
+
                       return (
                         <tr key={area.id} className="hover:bg-slate-50">
                           <td className="py-1 px-2 text-center text-slate-400 font-mono text-[10px]">
@@ -461,31 +559,47 @@ export const BoletinInformativoView: React.FC = () => {
                             {area.name}
                           </td>
                           <td className="py-1 px-2 text-center font-mono text-slate-600">
-                            {isLiteralSubject ? '--' : `${scoreNum}.00`}
+                            {isLiteralSubject ? '--' : displayAcum}
                           </td>
                           <td className="py-1 px-2 text-center font-bold">
-                            {isLiteralSubject ? (evalData.scoreLiteral || 'A') : scoreNum}
+                            {isLiteralSubject ? (evalActive.scoreLiteral || '') : displayScoreNum}
                           </td>
                           <td className="py-1 px-2 text-center text-slate-500">
-                            {isLiteralSubject ? '--' : 2}
+                            {isLiteralSubject ? '--' : (inasActive !== undefined ? inasActive : (scoreNum !== undefined ? 0 : ''))}
                           </td>
-                          <td className="py-1 px-1 text-center">
-                            {isLiteralSubject ? '--' : (activeLapso >= 1 ? scoreNum : '--')}
+                          <td className="py-1 px-1 text-center font-mono">
+                            {isLiteralSubject
+                              ? (evalL1.scoreLiteral || (activeLapso >= 1 ? '' : '--'))
+                              : (evalL1.scoreNumeric !== undefined
+                                  ? (evalL1.scoreNumeric < 10 ? `0${Math.round(evalL1.scoreNumeric)}` : `${Math.round(evalL1.scoreNumeric)}`)
+                                  : (activeLapso >= 1 ? '' : '--'))}
                           </td>
-                          <td className="py-1 px-1 text-center">
-                            {isLiteralSubject ? (evalData.scoreLiteral || 'A') : (activeLapso >= 2 ? scoreNum : '--')}
+                          <td className="py-1 px-1 text-center font-mono">
+                            {isLiteralSubject
+                              ? (activeLapso >= 2 ? (evalL2.scoreLiteral || '') : '--')
+                              : (activeLapso >= 2
+                                  ? (evalL2.scoreNumeric !== undefined
+                                      ? (evalL2.scoreNumeric < 10 ? `0${Math.round(evalL2.scoreNumeric)}` : `${Math.round(evalL2.scoreNumeric)}`)
+                                      : '')
+                                  : '--')}
                           </td>
-                          <td className="py-1 px-1 text-center">
-                            {isLiteralSubject ? (evalData.scoreLiteral || 'A') : (activeLapso >= 3 ? scoreNum : '--')}
+                          <td className="py-1 px-1 text-center font-mono">
+                            {isLiteralSubject
+                              ? (activeLapso >= 3 ? (evalL3.scoreLiteral || '') : '--')
+                              : (activeLapso >= 3
+                                  ? (evalL3.scoreNumeric !== undefined
+                                      ? (evalL3.scoreNumeric < 10 ? `0${Math.round(evalL3.scoreNumeric)}` : `${Math.round(evalL3.scoreNumeric)}`)
+                                      : '')
+                                  : '--')}
                           </td>
                           <td className="py-1 px-2 text-center font-black bg-slate-50 text-[#2C2E53]">
-                            {isLiteralSubject ? (evalData.scoreLiteral || 'A') : scoreNum}
+                            {isLiteralSubject ? (evalActive.scoreLiteral || evalL1.scoreLiteral || '') : displayDef}
                           </td>
                           <td className="py-1 px-2 text-center text-slate-500">
-                            {isLiteralSubject ? '--' : 2}
+                            {isLiteralSubject ? '--' : (inasTotal !== undefined ? inasTotal : (areaScores.length > 0 ? 0 : ''))}
                           </td>
                           <td className="py-1 px-3 text-[10px] text-slate-600 truncate max-w-[150px]">
-                            {evalData.obs}
+                            {evalActive.obs || ''}
                           </td>
                         </tr>
                       );
@@ -499,11 +613,21 @@ export const BoletinInformativoView: React.FC = () => {
                 <div className="border border-slate-200 rounded-lg p-2.5 bg-slate-50 flex justify-between items-center">
                   <div>
                     <div className="font-bold text-[#2C2E53]">Faltas Acumuladas</div>
-                    <div className="text-[10px] text-slate-500">Leves: 0 &nbsp;|&nbsp; Graves: 0</div>
+                    <div className="text-[10px] text-slate-500">Leves: {levesCount} &nbsp;|&nbsp; Graves: {gravesCount}</div>
                   </div>
                   <div>
                     <div className="font-bold text-[#2C2E53]">Áreas</div>
-                    <div className="text-[10px] text-emerald-600 font-bold">Apro: {levelAreas.length} &nbsp;|&nbsp; Rep: 0</div>
+                    <div className="text-[10px] font-bold">
+                      {hasActiveLapsoGrades ? (
+                        <>
+                          <span className="text-emerald-600">Apro: {aproCount}</span>
+                          &nbsp;|&nbsp;
+                          <span className="text-rose-600">Rep: {repCount}</span>
+                        </>
+                      ) : (
+                        <span className="text-slate-400">Apro: &nbsp;&nbsp; | Rep: &nbsp;&nbsp;</span>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -513,13 +637,17 @@ export const BoletinInformativoView: React.FC = () => {
                     <div>
                       <span className="text-[10px] text-slate-500 block">Interno:</span>
                       <strong className="text-sm font-black text-[#2C2E53]">
-                        {generalAverage > 0 ? generalAverage : 19.7}
+                        {hasActiveLapsoGrades && generalAverage > 0
+                          ? (generalAverage < 10 ? `0${generalAverage.toFixed(2)}` : generalAverage.toFixed(2))
+                          : ''}
                       </strong>
                     </div>
                     <div className="border-l border-slate-200 pl-3">
                       <span className="text-[10px] text-slate-500 block">MPPE:</span>
                       <strong className="text-sm font-black text-sky-700">
-                        {generalAverage > 0 ? (generalAverage - 0.15).toFixed(2) : 19.57}
+                        {hasActiveLapsoGrades && generalAverage > 0
+                          ? (Math.round(generalAverage) < 10 ? `0${Math.round(generalAverage)}` : `${Math.round(generalAverage)}`)
+                          : ''}
                       </strong>
                     </div>
                   </div>
@@ -527,8 +655,14 @@ export const BoletinInformativoView: React.FC = () => {
 
                 <div className="border border-slate-200 rounded-lg p-2.5 bg-slate-50 text-[10px] leading-tight">
                   <strong className="text-[#2C2E53] block mb-0.5">Apreciación Formativa:</strong>
-                  • Desarrollas habilidades sociales y compartes con tus compañeros.<br />
-                  • Tu comportamiento y actitud cívica son excelentes.
+                  {hasActiveLapsoGrades ? (
+                    <>
+                      • Demuestra compromiso activo y desarrollo regular en las competencias pedagógicas.<br />
+                      • Mantiene conducta y actitud cívica acorde al reglamento institucional.
+                    </>
+                  ) : (
+                    <div className="h-6"></div>
+                  )}
                 </div>
               </div>
 
@@ -538,10 +672,16 @@ export const BoletinInformativoView: React.FC = () => {
                   <div className="bg-[#2C2E53] text-white font-bold px-3 py-1 text-center uppercase tracking-wider text-[10px]">
                     Lectoescritura
                   </div>
-                  <div className="p-2.5 space-y-1.5 leading-tight text-slate-700 bg-white">
-                    <p><strong>• MEMORIA COMPRENSIVA Y CONTRASTE HISTÓRICO:</strong> Redacta justificaciones coherentes y argumentadas para refutar premisas falsas, demostrando precisión conceptual.</p>
-                    <p><strong>• COMPRENSIÓN ANALÍTICA Y SÍNTESIS:</strong> Explica con sus propias palabras los pilares estilísticos de un autor. Sintetiza ideas complejas de forma breve y directa.</p>
-                    <p><strong>• LECTURA ESTÉTICA Y LENGUAJE FIGURADO:</strong> Reconoce de forma textual recursos literarios (metáfora, símil, hipérbole) en obras clásicas analizadas.</p>
+                  <div className="p-2.5 space-y-1.5 leading-tight text-slate-700 bg-white min-h-[85px]">
+                    {hasActiveLapsoGrades ? (
+                      <>
+                        <p><strong>• MEMORIA COMPRENSIVA Y CONTRASTE HISTÓRICO:</strong> Redacta justificaciones coherentes y argumentadas para refutar premisas falsas, demostrando precisión conceptual.</p>
+                        <p><strong>• COMPRENSIÓN ANALÍTICA Y SÍNTESIS:</strong> Explica con sus propias palabras los pilares estilísticos de un autor. Sintetiza ideas complejas de forma breve y directa.</p>
+                        <p><strong>• LECTURA ESTÉTICA Y LENGUAJE FIGURADO:</strong> Reconoce de forma textual recursos literarios (metáfora, símil, hipérbole) en obras clásicas analizadas.</p>
+                      </>
+                    ) : (
+                      <div className="min-h-[70px]"></div>
+                    )}
                   </div>
                 </div>
 
@@ -549,10 +689,16 @@ export const BoletinInformativoView: React.FC = () => {
                   <div className="bg-[#2C2E53] text-white font-bold px-3 py-1 text-center uppercase tracking-wider text-[10px]">
                     Orientación y Convivencia
                   </div>
-                  <div className="p-2.5 space-y-1.5 leading-tight text-slate-700 bg-white">
-                    <p><strong>• EN CUANTO AL CONOCIMIENTO:</strong> Se observan progresos ante los planteamientos presentados y actitud propositiva frente al estudio.</p>
-                    <p><strong>• EN CUANTO A LA INFORMACIÓN:</strong> Atiende y ejecuta con diligencia las indicaciones o sugerencias de las y los docentes.</p>
-                    <p><strong>• EN CUANTO AL TRABAJO EN EQUIPO:</strong> Presenta contribuciones valiosas al equipo promoviendo la empatía, el respeto y la sana convivencia.</p>
+                  <div className="p-2.5 space-y-1.5 leading-tight text-slate-700 bg-white min-h-[85px]">
+                    {hasActiveLapsoGrades ? (
+                      <>
+                        <p><strong>• EN CUANTO AL CONOCIMIENTO:</strong> Se observan progresos ante los planteamientos presentados y actitud propositiva frente al estudio.</p>
+                        <p><strong>• EN CUANTO A LA INFORMACIÓN:</strong> Atiende y ejecuta con diligencia las indicaciones o sugerencias de las y los docentes.</p>
+                        <p><strong>• EN CUANTO AL TRABAJO EN EQUIPO:</strong> Presenta contribuciones valiosas al equipo promoviendo la empatía, el respeto y la sana convivencia.</p>
+                      </>
+                    ) : (
+                      <div className="min-h-[70px]"></div>
+                    )}
                   </div>
                 </div>
               </div>

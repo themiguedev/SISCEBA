@@ -3571,31 +3571,69 @@ export const INITIAL_SCHOOL_YEAR_CONFIG: SchoolYearConfig = {
 export const INITIAL_COMMUNITY_NOTICES: CommunityNotice[] = [
   {
     id: 'not-01',
+    title: '☀️ Conmemoración del Natalicio del General Rafael Urdaneta y Orgullo Marabino',
+    content: 'La Comunidad Educativa Bellas Artes rinde tributo de admiración al General en Jefe Rafael Urdaneta ("El Brillante"), prócer insigne de Maracaibo, ejemplo perenne de lealtad, honradez y patriotismo. Invitamos a las muestras cívicas y declamaciones en el auditorio.',
+    date: '24-10-2026',
+    type: 'EVENTO',
+    targetAudience: 'TODOS',
+    theme: 'ZULIANIDAD',
+    author: 'Comisión de Cultura y Zulianidad CBA',
+    pinned: true
+  },
+  {
+    id: 'not-02',
     title: 'Apertura Formal del Año Escolar 2026-2027 y Nuevos Laboratorios STEAM',
     content: 'La Junta Directiva y la Dirección General del Colegio Bellas Artes dan la más cordial bienvenida a toda la comunidad estudiantil. Anunciamos la inauguración de las nuevas estaciones de robótica educativa y diseño creativo.',
     date: '16-09-2026',
     type: 'NOTICIA',
     targetAudience: 'TODOS',
+    theme: 'ANIVERSARIO_CBA',
     author: 'Dirección General CBA',
-    pinned: true
+    pinned: false
   },
   {
-    id: 'not-02',
+    id: 'not-03',
+    title: '🇻🇪 Jornada Cívica Escolar: Conmemoración de las Efemérides Patrias de Venezuela',
+    content: 'Con motivo de las fechas magnas de nuestra historia republicana, los estudiantes de Primaria y Media General presentarán periódicos murales y biografías sobre el Ideario de Simón Bolívar y Simón Rodríguez.',
+    date: '18-09-2026',
+    type: 'EVENTO',
+    targetAudience: 'TODOS',
+    theme: 'PATRIO_VENEZUELA',
+    author: 'Coordinación de Ciencias Sociales CBA',
+    pinned: false
+  },
+  {
+    id: 'not-04',
+    title: '🌍 Jornada Mundial de la Educación y la Ciencia para el Desarrollo Sostenible (UNESCO)',
+    content: 'Nos sumamos al llamado global de la UNESCO para promover una educación de calidad, inclusiva y con enfoque científico transformador en nuestras aulas, laboratorios y proyectos robóticos.',
+    date: '20-09-2026',
+    type: 'NOTICIA',
+    targetAudience: 'TODOS',
+    theme: 'GLOBAL_MUNDIAL',
+    author: 'Unidad de Control y Evaluación (UCE)',
+    pinned: false
+  },
+  {
+    id: 'not-05',
     title: 'Cronograma Oficial de Entrega de Planificaciones Quincenales a Coordinación',
     content: 'Se recuerda al personal docente de Inicial, Primaria y Media General que la fecha límite para consignar el modelo de planificación a revisión del primer corte es este viernes 25 de septiembre.',
     date: '17-09-2026',
     type: 'ANUNCIO_URGENTE',
     targetAudience: 'DOCENTES',
-    author: 'Unidad de Control y Evaluación (UCE)'
+    theme: 'ESTANDAR',
+    author: 'Unidad de Control y Evaluación (UCE)',
+    pinned: false
   },
   {
-    id: 'not-03',
+    id: 'not-06',
     title: 'Reunión General de Padres y Representantes: Inducción a la Plataforma CBA',
     content: 'Invitamos a todas las familias este jueves 24 a las 5:00 PM en el Auditorio del plantel para la presentación de los módulos interactivos de consulta y seguimiento.',
     date: '15-09-2026',
     type: 'EVENTO',
     targetAudience: 'REPRESENTANTES',
-    author: 'Comité de Padres y Familias'
+    theme: 'ESTANDAR',
+    author: 'Comité de Padres y Familias',
+    pinned: false
   }
 ];
 

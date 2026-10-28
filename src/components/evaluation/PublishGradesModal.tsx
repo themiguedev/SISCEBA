@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { NotificationDeliveryChannel } from '../../types';
 import {
   Send,
@@ -80,7 +81,7 @@ export const PublishGradesModal: React.FC<PublishGradesModalProps> = ({
     }, 1800);
   };
 
-  return (
+  const modalContent = (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white dark:bg-[#1B1C33] rounded-3xl max-w-lg w-full border border-slate-200 dark:border-[#414474] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
         {/* Header */}
@@ -276,4 +277,8 @@ export const PublishGradesModal: React.FC<PublishGradesModalProps> = ({
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined'
+    ? createPortal(modalContent, document.body)
+    : modalContent;
 };

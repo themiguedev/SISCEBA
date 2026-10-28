@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useApp } from '../../context/AppContext';
 import { normalizeCedulaUsername } from '../../utils/rbac';
 import { ParentLegalInfo } from '../../types';
@@ -375,7 +376,8 @@ export const InscripcionesWizardView: React.FC = () => {
       )}). Cuentas generadas para la Madre, Padre y Estudiante con su cédula de identidad.`,
       category: 'INSTITUCIONAL',
       priority: 'ALTA',
-      recipientRole: 'TODOS',
+      recipientRole: 'ADMIN_DIRECCION',
+      recipientRoles: ['ADMINISTRADOR', 'DIRECTOR'],
       studentName: fullName,
       actionTab: 'GESTION',
       actionSubTab: 'INSCRIPCIONES',
@@ -1492,7 +1494,7 @@ export const InscripcionesWizardView: React.FC = () => {
       </div>
 
       {/* MODAL OFICIAL: TRASLADO DE SECCIÓN (A <-> B) */}
-      {isTransferModalOpen && (
+      {isTransferModalOpen && typeof document !== 'undefined' && createPortal(
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto space-y-5 animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -1704,7 +1706,8 @@ export const InscripcionesWizardView: React.FC = () => {
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* MODAL DE IMPRESIÓN OFICIAL CBA */}

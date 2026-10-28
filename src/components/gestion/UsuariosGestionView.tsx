@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useApp } from '../../context/AppContext';
-import { UserRole, EducationalLevel, AppUser, AcademicAssignment, LEVEL_GRADES_CATALOG } from '../../types';
+import { UserRole, EducationalLevel, AppUser, AcademicAssignment, LEVEL_GRADES_CATALOG, Student } from '../../types';
 import { ROLE_METADATA, normalizeCedulaUsername } from '../../utils/rbac';
 import { getDefaultAvatarForUser } from '../../utils/avatarCatalog';
 import { PasswordStrengthBar } from '../common/PasswordStrengthBar';
@@ -37,9 +38,11 @@ import {
 export const UsuariosGestionView: React.FC = () => {
   const {
     users,
+    students,
     addUser,
     updateUser,
     deleteUser,
+    syncStudentUsers,
     registrationCodes,
     createRegistrationCode,
     deleteRegistrationCode,
@@ -64,6 +67,13 @@ export const UsuariosGestionView: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'DIRECTORIO' | 'CODIGOS' | 'NUEVO'>('DIRECTORIO');
 
+  // Filtros secundarios para Estudiantes
+  const [studentLevelFilter, setStudentLevelFilter] = useState<'TODOS' | EducationalLevel>('TODOS');
+  const [studentGradeFilter, setStudentGradeFilter] = useState<string>('TODOS');
+  const [studentSectionFilter, setStudentSectionFilter] = useState<'TODAS' | 'A' | 'B'>('TODAS');
+  const [isSyncingStudents, setIsSyncingStudents] = useState(false);
+  const [syncFeedbackMsg, setSyncFeedbackMsg] = useState<string | null>(null);
+
   // Estado para creación de nuevo usuario
   const [newFullName, setNewFullName] = useState('');
   const [newUsername, setNewUsername] = useState('');
@@ -74,6 +84,8 @@ export const UsuariosGestionView: React.FC = () => {
   const [newGender, setNewGender] = useState<'MASCULINO' | 'FEMENINO'>('FEMENINO');
   const [newSelectedLevels, setNewSelectedLevels] = useState<EducationalLevel[]>(['MEDIA_GENERAL']);
   const [newDefaultLevel, setNewDefaultLevel] = useState<EducationalLevel>('MEDIA_GENERAL');
+  const [newStudentGrade, setNewStudentGrade] = useState<string>('1er Año');
+  const [newStudentSection, setNewStudentSection] = useState<'A' | 'B'>('A');
   const [formSuccessMessage, setFormSuccessMessage] = useState('');
   const [formErrorMessage, setFormErrorMessage] = useState('');
 
@@ -82,6 +94,8 @@ export const UsuariosGestionView: React.FC = () => {
   const [editPrimaryRole, setEditPrimaryRole] = useState<UserRole>('DOCENTE');
   const [editAdditionalRoles, setEditAdditionalRoles] = useState<UserRole[]>([]);
   const [editAllowedLevels, setEditAllowedLevels] = useState<EducationalLevel[]>(['MEDIA_GENERAL']);
+  const [editStudentGrade, setEditStudentGrade] = useState<string>('1er Año');
+  const [editStudentSection, setEditStudentSection] = useState<'A' | 'B'>('A');
   const [editModalTab, setEditModalTab] = useState<'ROLES' | 'SEGURIDAD' | 'SUBSISTEMAS'>('ROLES');
   const [editPassword, setEditPassword] = useState('');
   const [showEditPassword, setShowEditPassword] = useState(false);
@@ -227,6 +241,67 @@ export const UsuariosGestionView: React.FC = () => {
     });
   };
 
+  // Mapa de estudiantes por cédula o username normalizado
+  const studentsMap = useMemo(() => {
+    const map = new Map<string, Student>();
+    students.forEach(s => {
+      if (s.cedula) {
+        map.set(normalizeCedulaUsername(s.cedula), s);
+      }
+    });
+    return map;
+  }, [students]);
+
+  // Estudiantes inscritos en matrícula sin cuenta de usuario
+  const missingStudents = useMemo(() => {
+    return students.filter(s => {
+      if (!s.cedula) return false;
+      const normCed = normalizeCedulaUsername(s.cedula);
+      return normCed && !users.some(u => normalizeCedulaUsername(u.username) === normCed || (u.cedula && normalizeCedulaUsername(u.cedula) === normCed));
+    });
+  }, [students, users]);
+
+  // Grados disponibles para filtro de estudiantes
+  const availableStudentGrades = useMemo(() => {
+    const gradesSet = new Set<string>();
+    students.forEach(s => {
+      if (s.grade && (studentLevelFilter === 'TODOS' || s.level === studentLevelFilter)) {
+        gradesSet.add(s.grade);
+      }
+    });
+    users.forEach(u => {
+      if (u.role === 'ESTUDIANTE' && u.grade && (studentLevelFilter === 'TODOS' || u.defaultLevel === studentLevelFilter)) {
+        gradesSet.add(u.grade);
+      }
+    });
+    if (gradesSet.size === 0) {
+      if (studentLevelFilter === 'MEDIA_GENERAL') return ['1er Año', '2do Año', '3er Año', '4to Año', '5to Año'];
+      if (studentLevelFilter === 'PRIMARIA') return ['1er Grado', '2do Grado', '3er Grado', '4to Grado', '5to Grado', '6to Grado'];
+      if (studentLevelFilter === 'INICIAL') return ['Sala de 3 Años', 'Sala de 4 Años', 'Sala de 5 Años'];
+      return ['1er Año', '2do Año', '3er Año', '4to Año', '5to Año'];
+    }
+    return Array.from(gradesSet);
+  }, [students, users, studentLevelFilter]);
+
+  const handleSyncStudentAccounts = async () => {
+    setIsSyncingStudents(true);
+    setSyncFeedbackMsg(null);
+    try {
+      const res = await syncStudentUsers();
+      if (res.created > 0 || res.updated > 0) {
+        setSyncFeedbackMsg(`¡Sincronización completada! Se crearon ${res.created} cuenta(s) y se actualizaron ${res.updated}.`);
+      } else {
+        setSyncFeedbackMsg('Todas las cuentas de estudiantes están al día con la matrícula escolar.');
+      }
+    } catch (err) {
+      console.error(err);
+      setSyncFeedbackMsg('Ocurrió un inconveniente al sincronizar las cuentas de estudiantes.');
+    } finally {
+      setIsSyncingStudents(false);
+      setTimeout(() => setSyncFeedbackMsg(null), 4000);
+    }
+  };
+
   // Conteo de usuarios por rol
   const roleCounts = useMemo(() => {
     const counts: Record<string, number> = {
@@ -254,23 +329,48 @@ export const UsuariosGestionView: React.FC = () => {
   // Lista de usuarios filtrada
   const filteredUsers = useMemo(() => {
     return users.filter(u => {
+      const isStudent = u.role === 'ESTUDIANTE';
+
       const matchesRole =
         selectedRoleFilter === 'TODOS' ||
         u.role === selectedRoleFilter ||
         (u.roles && u.roles.includes(selectedRoleFilter));
 
+      if (!matchesRole) return false;
+
+      // Filtros específicos cuando se visualizan Estudiantes
+      if (selectedRoleFilter === 'ESTUDIANTE' || isStudent) {
+        if (selectedRoleFilter === 'ESTUDIANTE') {
+          if (studentLevelFilter !== 'TODOS' && u.defaultLevel !== studentLevelFilter) {
+            return false;
+          }
+          if (studentGradeFilter !== 'TODOS' && u.grade !== studentGradeFilter) {
+            return false;
+          }
+          if (studentSectionFilter !== 'TODAS' && u.section !== studentSectionFilter) {
+            return false;
+          }
+        }
+      }
+
       const q = searchQuery.trim().toLowerCase();
+      if (!q) return true;
+
       const normCedula = normalizeCedulaUsername(searchQuery);
-      const matchesSearch =
-        !q ||
+      const qDigits = searchQuery.replace(/[^0-9]/g, '');
+
+      return (
         u.fullName.toLowerCase().includes(q) ||
         u.username.toLowerCase().includes(q) ||
         u.email.toLowerCase().includes(q) ||
-        (normCedula && normalizeCedulaUsername(u.username) === normCedula);
-
-      return matchesRole && matchesSearch;
+        (u.cedula && u.cedula.toLowerCase().includes(q)) ||
+        (normCedula && normalizeCedulaUsername(u.username) === normCedula) ||
+        (qDigits && u.username.replace(/[^0-9]/g, '').includes(qDigits)) ||
+        (u.grade && u.grade.toLowerCase().includes(q)) ||
+        (u.section && u.section.toLowerCase() === q)
+      );
     });
-  }, [users, selectedRoleFilter, searchQuery]);
+  }, [users, selectedRoleFilter, searchQuery, studentLevelFilter, studentGradeFilter, studentSectionFilter]);
 
   // Manejar creación de nuevo usuario
   const handleCreateUser = async (e: React.FormEvent) => {
@@ -317,6 +417,8 @@ export const UsuariosGestionView: React.FC = () => {
         gender: newGender,
         defaultLevel: newDefaultLevel,
         allowedLevels: newSelectedLevels,
+        grade: newRole === 'ESTUDIANTE' ? newStudentGrade : undefined,
+        section: newRole === 'ESTUDIANTE' ? newStudentSection : undefined,
         active: true,
         avatarUrl: avatar
       });
@@ -340,6 +442,8 @@ export const UsuariosGestionView: React.FC = () => {
     setEditPrimaryRole(user.role);
     setEditAdditionalRoles(user.roles ? [...user.roles] : []);
     setEditAllowedLevels(user.allowedLevels ? [...user.allowedLevels] : [user.defaultLevel || 'MEDIA_GENERAL']);
+    setEditStudentGrade(user.grade || '1er Año');
+    setEditStudentSection(user.section || 'A');
     setEditPassword('');
     setShowEditPassword(false);
     setEditSuccessMsg('');
@@ -378,6 +482,11 @@ export const UsuariosGestionView: React.FC = () => {
       allowedLevels: editAllowedLevels,
       defaultLevel: editAllowedLevels[0] || editingUser.defaultLevel
     };
+
+    if (editPrimaryRole === 'ESTUDIANTE') {
+      updates.grade = editStudentGrade;
+      updates.section = editStudentSection;
+    }
 
     if (editPassword.trim()) {
       updates.password = editPassword.trim();
@@ -502,7 +611,7 @@ export const UsuariosGestionView: React.FC = () => {
             >
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-black uppercase tracking-wider truncate" title={cat.title}>
-                  {cat.id.slice(0, 5)}
+                  {cat.id === 'ESTUDIANTE' ? 'ALUMNOS' : cat.id.slice(0, 5)}
                 </span>
                 <Icon className="w-3.5 h-3.5 opacity-70 shrink-0" />
               </div>
@@ -518,6 +627,114 @@ export const UsuariosGestionView: React.FC = () => {
       {/* VISTA 1: DIRECTORIO DE USUARIOS CLASIFICADO POR ROLES */}
       {activeTab === 'DIRECTORIO' && (
         <div className="space-y-4">
+          {/* Mensaje de retroalimentación de sincronización */}
+          {syncFeedbackMsg && (
+            <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-bold flex items-center justify-between gap-2 animate-in fade-in">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>{syncFeedbackMsg}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Banner de Sincronización si hay estudiantes de matrícula sin cuenta */}
+          {missingStudents.length > 0 && (
+            <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-xs animate-in fade-in">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-700 dark:text-amber-300 flex items-center justify-center shrink-0">
+                  <GraduationCap className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="font-extrabold text-amber-950 dark:text-amber-200">
+                    Estudiantes de Matrícula Pendientes por Cuenta ({missingStudents.length})
+                  </h4>
+                  <p className="text-[11px] text-amber-800 dark:text-amber-400">
+                    Existen {missingStudents.length} estudiantes inscritos en el plantel que aún no cuentan con usuario institucional generado.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleSyncStudentAccounts}
+                disabled={isSyncingStudents}
+                className="px-3.5 py-2 bg-gradient-to-r from-[#1E2038] to-[#2C2E53] hover:from-[#151627] hover:to-[#222442] text-[#D4AF37] border border-[#D4AF37]/40 font-black rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer shrink-0 disabled:opacity-60"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-[#D4AF37] animate-pulse" />
+                <span>{isSyncingStudents ? 'Sincronizando...' : 'Generar Cuentas de Estudiantes'}</span>
+              </button>
+            </div>
+          )}
+
+          {/* Barra de Filtros Específicos para Estudiantes */}
+          {selectedRoleFilter === 'ESTUDIANTE' && (
+            <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Selector de Nivel */}
+                <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+                  {(['TODOS', 'MEDIA_GENERAL', 'PRIMARIA', 'INICIAL'] as ('TODOS' | EducationalLevel)[]).map(lvl => (
+                    <button
+                      key={lvl}
+                      type="button"
+                      onClick={() => {
+                        setStudentLevelFilter(lvl);
+                        setStudentGradeFilter('TODOS');
+                      }}
+                      className={`px-2.5 py-1 rounded-lg font-bold text-[11px] transition cursor-pointer ${
+                        studentLevelFilter === lvl
+                          ? 'bg-[#1B1C33] text-white shadow-xs'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+                      }`}
+                    >
+                      {lvl === 'TODOS' ? 'Todos' : lvl === 'MEDIA_GENERAL' ? 'Media General' : lvl === 'PRIMARIA' ? 'Primaria' : 'Inicial'}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Selector de Grado / Año */}
+                <select
+                  value={studentGradeFilter}
+                  onChange={e => setStudentGradeFilter(e.target.value)}
+                  className="px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-[11px] text-slate-800 dark:text-slate-100 outline-none cursor-pointer"
+                >
+                  <option value="TODOS">Todos los Años / Grados</option>
+                  {availableStudentGrades.map(g => (
+                    <option key={g} value={g}>{g}</option>
+                  ))}
+                </select>
+
+                {/* Selector de Sección - Exclusivamente A y B (Regla 4) */}
+                <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+                  {(['TODAS', 'A', 'B'] as ('TODAS' | 'A' | 'B')[]).map(sec => (
+                    <button
+                      key={sec}
+                      type="button"
+                      onClick={() => setStudentSectionFilter(sec)}
+                      className={`px-2.5 py-1 rounded-lg font-bold text-[11px] transition cursor-pointer ${
+                        studentSectionFilter === sec
+                          ? 'bg-[#1B1C33] text-[#D4AF37] border border-[#D4AF37]/50 shadow-xs'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+                      }`}
+                    >
+                      {sec === 'TODAS' ? 'Sec. A y B' : `Sec. ${sec}`}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Botón de Sincronización Manual */}
+              <button
+                type="button"
+                onClick={handleSyncStudentAccounts}
+                disabled={isSyncingStudents}
+                className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-[#D4AF37] text-slate-700 dark:text-slate-200 font-bold text-[11px] flex items-center gap-1.5 transition cursor-pointer self-start md:self-auto disabled:opacity-60"
+                title="Verificar y sincronizar cuentas de estudiantes inscritos en matrícula"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 text-[#D4AF37] ${isSyncingStudents ? 'animate-spin' : ''}`} />
+                <span>{isSyncingStudents ? 'Sincronizando...' : 'Sincronizar Matrícula'}</span>
+              </button>
+            </div>
+          )}
+
           {/* Barra de Búsqueda y Filtros */}
           <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="relative w-full sm:max-w-md">
@@ -566,26 +783,31 @@ export const UsuariosGestionView: React.FC = () => {
           ) : selectedRoleFilter !== 'TODOS' ? (
             /* Vista de Rol Específico */
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
-              {filteredUsers.map(user => (
-                <UserCard
-                  key={user.id}
-                  user={user}
-                  currentUser={currentUser}
-                  onEdit={() => handleOpenEditUser(user)}
-                  onManageAssignments={() => handleOpenAssignments(user)}
-                  onToggleStatus={() => {
-                    if (user.username === 'admin' || user.id === currentUser?.id) {
-                      alert('No es posible desactivar la cuenta principal de administrador.');
-                      return;
-                    }
-                    const newStatus = !user.active;
-                    if (confirm(`¿Confirma ${newStatus ? 'activar' : 'desactivar'} el acceso institucional para @${user.username}?`)) {
-                      updateUser(user.id, { active: newStatus });
-                    }
-                  }}
-                  onDelete={() => handleDeleteUser(user)}
-                />
-              ))}
+              {filteredUsers.map(user => {
+                const normCed = normalizeCedulaUsername(user.username);
+                const stu = studentsMap.get(normCed) || (user.cedula ? studentsMap.get(normalizeCedulaUsername(user.cedula)) : undefined);
+                return (
+                  <UserCard
+                    key={user.id}
+                    user={user}
+                    student={stu}
+                    currentUser={currentUser}
+                    onEdit={() => handleOpenEditUser(user)}
+                    onManageAssignments={() => handleOpenAssignments(user)}
+                    onToggleStatus={() => {
+                      if (user.username === 'admin' || user.id === currentUser?.id) {
+                        alert('No es posible desactivar la cuenta principal de administrador.');
+                        return;
+                      }
+                      const newStatus = !user.active;
+                      if (confirm(`¿Confirma ${newStatus ? 'activar' : 'desactivar'} el acceso institucional para @${user.username}?`)) {
+                        updateUser(user.id, { active: newStatus });
+                      }
+                    }}
+                    onDelete={() => handleDeleteUser(user)}
+                  />
+                );
+              })}
             </div>
           ) : (
             /* Vista Clasificada por Grupos de Roles */
@@ -613,26 +835,31 @@ export const UsuariosGestionView: React.FC = () => {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
-                      {groupUsers.map(user => (
-                        <UserCard
-                          key={user.id}
-                          user={user}
-                          currentUser={currentUser}
-                          onEdit={() => handleOpenEditUser(user)}
-                          onManageAssignments={() => handleOpenAssignments(user)}
-                          onToggleStatus={() => {
-                            if (user.username === 'admin' || user.id === currentUser?.id) {
-                              alert('No es posible desactivar la cuenta principal de administrador.');
-                              return;
-                            }
-                            const newStatus = !user.active;
-                            if (confirm(`¿Confirma ${newStatus ? 'activar' : 'desactivar'} el acceso institucional para @${user.username}?`)) {
-                              updateUser(user.id, { active: newStatus });
-                            }
-                          }}
-                          onDelete={() => handleDeleteUser(user)}
-                        />
-                      ))}
+                      {groupUsers.map(user => {
+                        const normCed = normalizeCedulaUsername(user.username);
+                        const stu = studentsMap.get(normCed) || (user.cedula ? studentsMap.get(normalizeCedulaUsername(user.cedula)) : undefined);
+                        return (
+                          <UserCard
+                            key={user.id}
+                            user={user}
+                            student={stu}
+                            currentUser={currentUser}
+                            onEdit={() => handleOpenEditUser(user)}
+                            onManageAssignments={() => handleOpenAssignments(user)}
+                            onToggleStatus={() => {
+                              if (user.username === 'admin' || user.id === currentUser?.id) {
+                                alert('No es posible desactivar la cuenta principal de administrador.');
+                                return;
+                              }
+                              const newStatus = !user.active;
+                              if (confirm(`¿Confirma ${newStatus ? 'activar' : 'desactivar'} el acceso institucional para @${user.username}?`)) {
+                                updateUser(user.id, { active: newStatus });
+                              }
+                            }}
+                            onDelete={() => handleDeleteUser(user)}
+                          />
+                        );
+                      })}
                     </div>
                   </div>
                 );
@@ -747,6 +974,39 @@ export const UsuariosGestionView: React.FC = () => {
                   <option value="ESTUDIANTE">ESTUDIANTE (Alumno Regular)</option>
                 </select>
               </div>
+
+              {/* Si el rol es ESTUDIANTE: Selección de Grado y Sección Oficial */}
+              {newRole === 'ESTUDIANTE' && (
+                <div className="sm:col-span-2 md:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-3 bg-teal-500/10 dark:bg-teal-950/20 p-3.5 rounded-xl border border-teal-400/30 animate-in fade-in">
+                  <div>
+                    <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1">
+                      Grado / Año Escolar *
+                    </label>
+                    <select
+                      value={newStudentGrade}
+                      onChange={e => setNewStudentGrade(e.target.value)}
+                      className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl font-bold text-slate-800 dark:text-slate-100 outline-none"
+                    >
+                      {LEVEL_GRADES_CATALOG[newDefaultLevel].map(g => (
+                        <option key={g} value={g}>{g}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1">
+                      Sección Oficial * (Exclusivamente A y B)
+                    </label>
+                    <select
+                      value={newStudentSection}
+                      onChange={e => setNewStudentSection(e.target.value as 'A' | 'B')}
+                      className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl font-bold text-slate-800 dark:text-slate-100 outline-none"
+                    >
+                      <option value="A">Sección A</option>
+                      <option value="B">Sección B</option>
+                    </select>
+                  </div>
+                </div>
+              )}
 
               {/* Roles Adicionales */}
               <div className="sm:col-span-2 md:col-span-3 space-y-2 bg-amber-500/10 dark:bg-amber-950/20 p-3.5 rounded-xl border border-amber-400/30">
@@ -1095,7 +1355,7 @@ export const UsuariosGestionView: React.FC = () => {
       )}
 
       {/* MODAL DE EDICIÓN INTEGRAL DE USUARIO (ROLES, SUBSISTEMAS Y CONTRASEÑA) */}
-      {editingUser && (
+      {editingUser && typeof document !== 'undefined' && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in">
           <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-xl p-6 space-y-4 animate-in zoom-in-95 max-h-[90vh] flex flex-col">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 shrink-0">
@@ -1192,6 +1452,39 @@ export const UsuariosGestionView: React.FC = () => {
                       <option value="ESTUDIANTE">ESTUDIANTE (Alumno Regular)</option>
                     </select>
                   </div>
+
+                  {/* Campos específicos si el rol editado es ESTUDIANTE */}
+                  {editPrimaryRole === 'ESTUDIANTE' && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-teal-500/10 dark:bg-teal-950/20 p-3.5 rounded-xl border border-teal-400/30 animate-in fade-in">
+                      <div>
+                        <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1">
+                          Grado / Año Escolar *
+                        </label>
+                        <select
+                          value={editStudentGrade}
+                          onChange={e => setEditStudentGrade(e.target.value)}
+                          className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl font-bold text-slate-800 dark:text-slate-100 outline-none"
+                        >
+                          {(LEVEL_GRADES_CATALOG[editingUser?.defaultLevel || 'MEDIA_GENERAL'] || ['1er Año', '2do Año', '3er Año', '4to Año', '5to Año']).map(g => (
+                            <option key={g} value={g}>{g}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1">
+                          Sección Oficial * (Exclusivamente A y B)
+                        </label>
+                        <select
+                          value={editStudentSection}
+                          onChange={e => setEditStudentSection(e.target.value as 'A' | 'B')}
+                          className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl font-bold text-slate-800 dark:text-slate-100 outline-none"
+                        >
+                          <option value="A">Sección A</option>
+                          <option value="B">Sección B</option>
+                        </select>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Roles Adicionales Simultáneos */}
                   <div className="space-y-2 bg-amber-500/10 dark:bg-amber-950/20 p-3.5 rounded-2xl border border-amber-400/30">
@@ -1344,11 +1637,12 @@ export const UsuariosGestionView: React.FC = () => {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* MODAL DE ASIGNACIÓN ACADÉMICA / DISTRIBUTIVO DE CÁTEDRA */}
-      {assigningTeacher && (
+      {assigningTeacher && typeof document !== 'undefined' && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in">
           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-2xl p-6 space-y-4 max-h-[90vh] flex flex-col animate-in zoom-in-95">
             {/* Modal Header */}
@@ -1557,7 +1851,8 @@ export const UsuariosGestionView: React.FC = () => {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
@@ -1566,14 +1861,29 @@ export const UsuariosGestionView: React.FC = () => {
 // Subcomponente: Tarjeta de Usuario Institucional
 const UserCard: React.FC<{
   user: AppUser;
+  student?: Student;
   currentUser: AppUser | null;
   onEdit: () => void;
   onToggleStatus: () => void;
   onDelete?: () => void;
   onManageAssignments?: () => void;
-}> = ({ user, currentUser, onEdit, onToggleStatus, onDelete, onManageAssignments }) => {
+}> = ({ user, student, currentUser, onEdit, onToggleStatus, onDelete, onManageAssignments }) => {
   const roleMeta = ROLE_METADATA[user.role];
   const isTeacher = user.role === 'DOCENTE' || (user.roles && user.roles.includes('DOCENTE'));
+  const isStudent = user.role === 'ESTUDIANTE';
+  const [copiedCredentials, setCopiedCredentials] = useState(false);
+
+  const displayGrade = user.grade || student?.grade || (user.defaultLevel === 'MEDIA_GENERAL' ? '1er Año' : user.defaultLevel === 'PRIMARIA' ? '1er Grado' : 'Inicial');
+  const displaySection = user.section || student?.section || 'A';
+  const displayCedula = user.cedula || student?.cedula || user.username.toUpperCase();
+  const rawDigits = displayCedula.replace(/[^0-9]/g, '') || 'cba2026';
+
+  const handleCopyCredentials = () => {
+    const text = `Credenciales de Acceso SICE-CBA\nEstudiante: ${user.fullName}\nUsuario: ${user.username}\nCédula: ${displayCedula}\nClave Inicial: ${rawDigits}\nGrado: ${displayGrade} Sección ${displaySection}`;
+    navigator.clipboard.writeText(text).catch(() => {});
+    setCopiedCredentials(true);
+    setTimeout(() => setCopiedCredentials(false), 2500);
+  };
 
   return (
     <div className="p-4 rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs hover:shadow-md hover:border-[#D4AF37]/50 dark:hover:border-[#D4AF37]/40 transition-all flex flex-col justify-between gap-3 group">
@@ -1606,13 +1916,63 @@ const UserCard: React.FC<{
 
       {/* Correo y Niveles */}
       <div className="space-y-1.5 pt-1 border-t border-slate-100 dark:border-slate-800/80 text-[11px]">
-        <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 truncate">
-          <Mail className="w-3 h-3 text-slate-400 shrink-0" />
-          <span className="truncate">{user.email || 'Sin correo asignado'}</span>
-        </div>
+        {/* Datos específicos de Estudiante */}
+        {isStudent ? (
+          <div className="p-2.5 rounded-xl bg-teal-50/80 dark:bg-teal-950/30 border border-teal-200/80 dark:border-teal-800/60 space-y-2">
+            <div className="flex items-center justify-between gap-1 flex-wrap">
+              <span className="px-2 py-0.5 rounded-lg font-black text-[10px] bg-teal-100 dark:bg-teal-900/60 text-teal-800 dark:text-teal-200 border border-teal-300 dark:border-teal-700/60 flex items-center gap-1">
+                <GraduationCap className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400 shrink-0" />
+                <span>{displayGrade} • Sección {displaySection}</span>
+              </span>
+              <span className="font-mono text-[10px] text-teal-800 dark:text-teal-300 font-bold px-1.5 py-0.5 rounded bg-white dark:bg-slate-800 border border-teal-200 dark:border-teal-800/50">
+                {displayCedula}
+              </span>
+            </div>
+
+            {student?.representativeName && (
+              <p className="text-[10px] text-slate-600 dark:text-slate-300 flex items-center gap-1 truncate" title={`Representante: ${student.representativeName}`}>
+                <Users className="w-3 h-3 text-slate-400 shrink-0" />
+                <span className="truncate">Rep: <strong className="text-slate-800 dark:text-slate-200 font-semibold">{student.representativeName}</strong></span>
+              </p>
+            )}
+
+            <div className="flex items-center justify-between gap-1 pt-1.5 border-t border-teal-200/60 dark:border-teal-900/60 text-[10px]">
+              <span className="font-mono text-slate-600 dark:text-slate-400">
+                Clave inicial: <strong className="text-slate-900 dark:text-slate-100 font-mono font-black">{rawDigits}</strong>
+              </span>
+              <button
+                type="button"
+                onClick={handleCopyCredentials}
+                className={`px-2 py-0.5 rounded-md text-[10px] font-bold border transition flex items-center gap-1 cursor-pointer shrink-0 ${
+                  copiedCredentials
+                    ? 'bg-emerald-600 text-white border-emerald-600'
+                    : 'bg-white dark:bg-slate-800 text-teal-800 dark:text-teal-200 border-teal-300 dark:border-teal-700 hover:bg-teal-50 dark:hover:bg-teal-900/40'
+                }`}
+                title="Copiar credenciales de acceso institucional"
+              >
+                {copiedCredentials ? (
+                  <>
+                    <Check className="w-3 h-3 stroke-[3]" />
+                    <span>¡Copiado!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3 h-3" />
+                    <span>Copiar</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 truncate">
+            <Mail className="w-3 h-3 text-slate-400 shrink-0" />
+            <span className="truncate">{user.email || 'Sin correo asignado'}</span>
+          </div>
+        )}
 
         {/* Roles adicionales */}
-        {user.roles && user.roles.length > 0 && (
+        {!isStudent && user.roles && user.roles.length > 0 && (
           <div className="flex items-center gap-1 flex-wrap pt-0.5">
             <span className="text-[9px] font-bold text-slate-400">Funciones:</span>
             {user.roles.map(r => (
@@ -1627,7 +1987,7 @@ const UserCard: React.FC<{
         )}
 
         {/* Subsistemas asignados */}
-        {user.allowedLevels && user.allowedLevels.length > 0 && (
+        {!isStudent && user.allowedLevels && user.allowedLevels.length > 0 && (
           <div className="flex items-center gap-1 flex-wrap pt-0.5">
             {user.allowedLevels.map(lvl => (
               <span

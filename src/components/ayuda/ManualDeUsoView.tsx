@@ -551,10 +551,11 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
   const filteredFaqs = useMemo(() => {
     return faqItems.filter((faq) => {
       const matchRole =
-        selectedRole === 'ADMINISTRADOR' ||
+        (selectedRole === 'ADMINISTRADOR' ||
         selectedRole === 'DIRECTOR' ||
         faq.role === 'TODOS' ||
-        faq.role === selectedRole;
+        faq.role === selectedRole) &&
+        !(selectedRole === 'REPRESENTANTE' && faq.id === 'faq-role-7');
 
       const matchSearch =
         searchQuery === '' ||
@@ -627,14 +628,16 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
 
           {/* Botones de acción rápida del encabezado */}
           <div className="flex items-center gap-3 shrink-0 no-print">
-            <button
-              onClick={handlePrint}
-              className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 shadow-md transition flex items-center gap-2 focus:outline-none"
-              title="Imprimir Guía de Inducción"
-            >
-              <Printer className="w-4 h-4 text-[#D4AF37]" />
-              <span>Imprimir Manual</span>
-            </button>
+            {currentRole !== 'REPRESENTANTE' && (
+              <button
+                onClick={handlePrint}
+                className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 shadow-md transition flex items-center gap-2 focus:outline-none"
+                title="Imprimir Guía de Inducción"
+              >
+                <Printer className="w-4 h-4 text-[#D4AF37]" />
+                <span>Imprimir Manual</span>
+              </button>
+            )}
             <button
               onClick={() => {
                 setActiveSection('GUIAS_PASO_A_PASO');
@@ -1382,21 +1385,23 @@ export const ManualDeUsoView: React.FC<ManualDeUsoViewProps> = ({ onNavigate }) 
                       </td>
                     </tr>
 
-                    <tr className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition">
-                      <td className="py-3 px-4 whitespace-nowrap">
-                        <div className="flex items-center gap-1 font-mono font-bold">
-                          <kbd className="px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 shadow-sm">Ctrl</kbd>
-                          <span className="text-slate-400">+</span>
-                          <kbd className="px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-amber-300 shadow-sm">P</kbd>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 font-bold text-[#2C2E53] dark:text-[#F8FAFC]">
-                        Imprimir / Generar PDF
-                      </td>
-                      <td className="py-3 px-4 text-slate-600 dark:text-slate-300">
-                        Prepara actas, boletines o la vista actual para impresión.
-                      </td>
-                    </tr>
+                    {currentRole !== 'REPRESENTANTE' && (
+                      <tr className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition">
+                        <td className="py-3 px-4 whitespace-nowrap">
+                          <div className="flex items-center gap-1 font-mono font-bold">
+                            <kbd className="px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 shadow-sm">Ctrl</kbd>
+                            <span className="text-slate-400">+</span>
+                            <kbd className="px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-amber-300 shadow-sm">P</kbd>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 font-bold text-[#2C2E53] dark:text-[#F8FAFC]">
+                          Imprimir / Generar PDF
+                        </td>
+                        <td className="py-3 px-4 text-slate-600 dark:text-slate-300">
+                          Prepara actas, boletines o la vista actual para impresión.
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>

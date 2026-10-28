@@ -24,6 +24,8 @@ export interface AppUser {
   twoFactorSecret?: string;
   passwordLastChanged?: string;
   academicAssignments?: AcademicAssignment[];
+  grade?: string;
+  section?: 'A' | 'B';
 }
 
 export interface AcademicAssignment {
@@ -570,7 +572,8 @@ export type NoticeTheme =
   | 'CARNAVAL'
   | 'DIA_DEL_MAESTRO'
   | 'ANIVERSARIO_CBA'
-  | 'PATRIO_VENEZUELA';
+  | 'PATRIO_VENEZUELA'
+  | 'GLOBAL_MUNDIAL';
 
 export type TargetAudienceRole = 
   | 'TODOS'
@@ -638,7 +641,8 @@ export interface SystemNotification {
   read: boolean;
   category: NotificationCategory;
   priority: 'BAJA' | 'MEDIA' | 'ALTA';
-  recipientRole: 'TODOS' | 'REPRESENTANTE' | 'ESTUDIANTE' | 'DOCENTE' | 'COORDINACION' | 'DIRECTOR';
+  recipientRole: 'TODOS' | 'REPRESENTANTE' | 'ESTUDIANTE' | 'DOCENTE' | 'COORDINACION' | 'DIRECTOR' | 'ADMINISTRADOR' | 'ADMIN_DIRECCION';
+  recipientRoles?: UserRole[];
   recipientName?: string;
   studentName?: string;
   actionTab?: MainNavigationTab;
@@ -866,5 +870,83 @@ export interface ExternalAcademicRecord {
   certifiedDocumentRef?: string;
   createdAt?: string;
 }
+
+// ==========================================
+// TAREAS RECURRENTES - ADMINISTRACIÓN Y SUPERVISIÓN
+// ==========================================
+
+export type ObservationCategory = 'RENDIMIENTO' | 'ACTITUD' | 'CONVIVENCIA' | 'RECOMENDACION';
+
+export interface BulletinObservationTemplate {
+  id: string;
+  level: EducationalLevel;
+  category: ObservationCategory;
+  code: string;
+  title: string;
+  text: string;
+  grade?: string;
+  active: boolean;
+}
+
+export type SpecializedSkillType = 'LECTOESCRITURA' | 'PROYECTO_VIDA' | 'ORIENTACION_CONVIVENCIA' | 'ACTITUDINAL';
+
+export interface SpecializedSkillRecord {
+  id: string;
+  studentId: string;
+  studentName?: string;
+  level: EducationalLevel;
+  grade: string;
+  section: 'A' | 'B';
+  lapso: 1 | 2 | 3;
+  type: SpecializedSkillType;
+  fluidezLectora?: string;
+  comprensionLectora?: string;
+  velocidadPpm?: number;
+  caligrafiaOrtografia?: string;
+  habitosTrabajo?: string;
+  convivenciaSocial?: string;
+  autonomiaPersonal?: string;
+  proyectoVidaMetas?: string;
+  orientacionConvivenciaObs?: string;
+  scoreLiteral?: LiteralScore;       // Para Inicial (A, B, C, D, E)
+  scoreQualitative?: QualitativeScore; // Para Primaria (L, P/EP, I)
+  scoreNumeric?: number;             // Para Media General (01..20)
+  observacionesGenerales?: string;
+  evaluatedBy?: string;
+  evaluatedAt: string;
+}
+
+export interface StrategyWeightAudit {
+  areaId: string;
+  areaName: string;
+  grade: string;
+  section: 'A' | 'B';
+  lapso: 1 | 2 | 3;
+  teacherName?: string;
+  strategiesCount: number;
+  totalWeightPercent: number; // Suma declarada de porcentajes (ej. 70% procesal o 100%)
+  maxSingleWeightPercent: number; // Mayor ponderación individual asignada
+  exceedsMaxLimit: boolean; // True si alguna estrategia supera el 20% normativo
+  isCompliant: boolean;
+  notes?: string;
+}
+
+export interface PensumComparativeReport {
+  studentId: string;
+  studentName: string;
+  studentCedula?: string;
+  grade: string;
+  section: 'A' | 'B';
+  lapso: 1 | 2 | 3;
+  averageMppe: number; // Promedio solo asignaturas oficiales MPPE
+  averageCba: number;  // Promedio pensum completo institucional CBA
+  rankMppe: number;
+  rankCba: number;
+  passedMppeCount: number;
+  failedMppeCount: number;
+  passedCbaCount: number;
+  failedCbaCount: number;
+}
+
 
 

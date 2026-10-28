@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useApp } from '../../context/AppContext';
 import {
   RevisionEvaluationRecord,
@@ -192,7 +193,7 @@ export const RemedialInterventionView: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Printable Sheet for Acta de Revisión */}
-      {printActaRevision && (
+      {printActaRevision && typeof document !== 'undefined' && createPortal(
         <div className="fixed inset-0 bg-white z-[9999] p-12 overflow-y-auto print:block flex flex-col justify-between">
           <div className="space-y-6 max-w-4xl mx-auto border-2 border-slate-900 p-8 rounded-xl">
             <div className="flex items-center justify-between border-b-2 border-slate-900 pb-4">
@@ -297,7 +298,8 @@ export const RemedialInterventionView: React.FC = () => {
               Cerrar Vista Previa
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Main Header */}
@@ -676,7 +678,7 @@ export const RemedialInterventionView: React.FC = () => {
       )}
 
       {/* MODAL: REGISTRAR NOTA DE REVISIÓN (JULIO) */}
-      {isCreateRevisionModalOpen && (
+      {isCreateRevisionModalOpen && typeof document !== 'undefined' && createPortal(
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -806,11 +808,12 @@ export const RemedialInterventionView: React.FC = () => {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* MODAL: INSCRIBIR MATERIA PENDIENTE */}
-      {isCreatePendingModalOpen && (
+      {isCreatePendingModalOpen && typeof document !== 'undefined' && createPortal(
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -908,11 +911,12 @@ export const RemedialInterventionView: React.FC = () => {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* MODAL: PLAN REMEDIAL */}
-      {isCreateRemedialModalOpen && (
+      {isCreateRemedialModalOpen && typeof document !== 'undefined' && createPortal(
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
@@ -972,7 +976,8 @@ export const RemedialInterventionView: React.FC = () => {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

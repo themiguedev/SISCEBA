@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useApp } from '../../context/AppContext';
 import { PlanQuincenal, DidacticPlanRow, EducationalLevel, PlanStatus, LEVEL_GRADES_CATALOG, AcademicAssignment, Competency } from '../../types';
 import { INITIAL_DIAGNOSTIC_CRITERIA } from '../../data/seedData';
@@ -689,13 +690,14 @@ export const DisenadorPlanificacionView: React.FC<DisenadorPlanificacionViewProp
             <span>ENVIAR A REVISIÓN</span>
           </button>
 
-          {/* 3. COMPARTIR */}
+          {/* 3. COMPARTIR & GOOGLE CLASSROOM */}
           <button
             onClick={handleShare}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-indigo-600/60 hover:bg-indigo-600 text-white font-bold rounded-xl text-xs transition-colors border border-indigo-400/30"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-[#1E8E3E] hover:bg-[#167030] text-white font-extrabold rounded-xl text-xs transition-colors border border-emerald-400/40 shadow-sm"
+            title="Conectar y compartir con Google Classroom o WhatsApp"
           >
-            <Share2 className="w-4 h-4 text-indigo-200" />
-            <span>COMPARTIR</span>
+            <Share2 className="w-4 h-4 text-white" />
+            <span>CLASSROOM / COMPARTIR</span>
           </button>
 
           {/* 4. IMPRIMIR */}
@@ -1406,7 +1408,7 @@ export const DisenadorPlanificacionView: React.FC<DisenadorPlanificacionViewProp
       />
 
       {/* Modal Interactivo: Banco Curricular & Recursos Didácticos */}
-      {isBankModalOpen && (
+      {isBankModalOpen && typeof document !== 'undefined' && createPortal(
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white dark:bg-slate-900 rounded-3xl border-2 border-slate-300 dark:border-slate-700 shadow-2xl max-w-4xl w-full overflow-hidden flex flex-col max-h-[88vh] animate-in fade-in zoom-in-95 duration-200">
             {/* Cabecera del Modal */}
@@ -1671,7 +1673,8 @@ export const DisenadorPlanificacionView: React.FC<DisenadorPlanificacionViewProp
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { BoletinInformativoView } from '../communication/BoletinInformativoView';
 import { OfficialFormatPrintModal, OfficialFormatType } from '../common/OfficialFormatPrintModal';
@@ -36,7 +36,16 @@ export const ReportesCentroView: React.FC<ReportesCentroViewProps> = ({
   const students = overrideStudents || ctxStudents;
   const isAdmin = currentRole === 'ADMINISTRADOR';
 
-  const [activeSubOption, setActiveSubOption] = useState<'CATALOGO' | 'BOLETIN' | 'FORMATOS'>('CATALOGO');
+  const [activeSubOption, setActiveSubOption] = useState<'CATALOGO' | 'BOLETIN' | 'FORMATOS'>(() => {
+    return isAdmin ? 'CATALOGO' : 'BOLETIN';
+  });
+
+  // Asegurar que si el rol activo no es Administrador, no permanezca en la vista del Catálogo C.E.O. ni en FORMATOS
+  useEffect(() => {
+    if (!isAdmin && (activeSubOption === 'CATALOGO' || activeSubOption === 'FORMATOS')) {
+      setActiveSubOption('BOLETIN');
+    }
+  }, [isAdmin, activeSubOption]);
   const [selectedStudentId, setSelectedStudentId] = useState<string>(() => {
     return (isFamilyOrStudent ? scopedStudents[0]?.id : students[0]?.id) || '';
   });
@@ -84,17 +93,19 @@ export const ReportesCentroView: React.FC<ReportesCentroViewProps> = ({
       {/* Selector de Herramientas de Reporte */}
       <div className="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-slate-900 p-2 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm no-print">
         <div className="flex items-center gap-1.5 flex-wrap">
-          <button
-            onClick={() => setActiveSubOption('CATALOGO')}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition ${
-              activeSubOption === 'CATALOGO'
-                ? 'bg-[#2C2E53] text-[#D4AF37] shadow-sm'
-                : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-            }`}
-          >
-            <Printer className="w-4 h-4" />
-            <span>Catálogo Oficial de Reportes (C.E.O.)</span>
-          </button>
+          {isAdmin && (
+            <button
+              onClick={() => setActiveSubOption('CATALOGO')}
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition ${
+                activeSubOption === 'CATALOGO'
+                  ? 'bg-[#2C2E53] text-[#D4AF37] shadow-sm'
+                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+              }`}
+            >
+              <Printer className="w-4 h-4" />
+              <span>Catálogo Oficial de Reportes (C.E.O.)</span>
+            </button>
+          )}
 
           <button
             onClick={() => setActiveSubOption('BOLETIN')}
@@ -108,7 +119,7 @@ export const ReportesCentroView: React.FC<ReportesCentroViewProps> = ({
             <span>Boletín Informativo en Vivo</span>
           </button>
 
-          {!isFamilyOrStudent && (
+          {isAdmin && (
             <button
               onClick={() => setActiveSubOption('FORMATOS')}
               className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition ${
@@ -124,7 +135,7 @@ export const ReportesCentroView: React.FC<ReportesCentroViewProps> = ({
         </div>
 
         {/* Student Selector for Document issuance */}
-        {!isFamilyOrStudent && activeSubOption !== 'CATALOGO' && (
+        {isAdmin && activeSubOption === 'FORMATOS' && (
           <div className="flex items-center gap-2">
             <span className="text-[11px] font-bold text-slate-500">Estudiante:</span>
             <select
@@ -149,7 +160,7 @@ export const ReportesCentroView: React.FC<ReportesCentroViewProps> = ({
       </div>
 
       {/* VIEW: CATÁLOGO OFICIAL DE REPORTES C.E.O. (reg_opciones_reportes.php) */}
-      {activeSubOption === 'CATALOGO' && (
+      {isAdmin && activeSubOption === 'CATALOGO' && (
         <CatalogoReportesView
           students={students}
           onNavigateToBoletin={(subsystem) => {
@@ -164,12 +175,12 @@ export const ReportesCentroView: React.FC<ReportesCentroViewProps> = ({
       {/* VIEW: BOLETÍN INFORMATIVO OFICIAL */}
       {activeSubOption === 'BOLETIN' && (
         <div className="space-y-4">
-          <BoletinInformativoView />
+          <BoletinInformativoView studentsList={isFamilyOrStudent ? scopedStudents : overrideStudents} />
         </div>
       )}
 
       {/* VIEW: CONSTANCIAS E INSTRUMENTOS OFICIALES (reg_opciones_reportes.php) */}
-      {activeSubOption === 'FORMATOS' && (
+      {isAdmin && activeSubOption === 'FORMATOS' && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {/* Constancia de Estudio */}
