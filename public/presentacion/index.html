@@ -9,20 +9,109 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --cba-navy-dark: #0D0E1A;
-      --cba-navy: #151628;
-      --cba-navy-light: #242646;
-      --cba-gold: #D4AF37;
-      --cba-gold-light: #F3E5AB;
-      --cba-gold-dark: #A37F08;
-      --cba-burgundy: #800020;
-      --cba-slate-bg: #090A12;
-      --cba-border: rgba(212, 175, 55, 0.22);
+      /* Tema Claro Institucional (Default) */
+      --bg-page: #F1F5F9;
+      --bg-gradient: radial-gradient(circle at 10% 15%, rgba(217, 119, 6, 0.07) 0%, transparent 45%),
+                     radial-gradient(circle at 90% 85%, rgba(30, 58, 138, 0.08) 0%, transparent 50%),
+                     #F1F5F9;
+      --slide-bg: #FFFFFF;
+      --slide-border: rgba(226, 232, 240, 0.95);
+      --slide-shadow: 0 20px 45px -12px rgba(15, 23, 42, 0.08), 0 2px 6px rgba(15, 23, 42, 0.04);
+      
+      --topbar-bg: rgba(255, 255, 255, 0.92);
+      --bottombar-bg: rgba(255, 255, 255, 0.95);
+      --bar-border: rgba(226, 232, 240, 0.9);
+      
+      --text-main: #0F172A;
+      --text-secondary: #334155;
+      --text-muted: #64748B;
+      
+      --cba-navy: #1E3A8A;
+      --cba-navy-deep: #0F172A;
+      --cba-gold: #B45309;
+      --cba-gold-light: #FEF3C7;
+      --cba-gold-accent: #D97706;
+      --cba-burgundy: #881337;
+      
+      --card-bg: #FFFFFF;
+      --card-subtle-bg: #F8FAFC;
+      --card-border: #E2E8F0;
+      --card-hover-border: #D97706;
+      
+      --comp-legacy-bg: #FFF5F5;
+      --comp-legacy-border: #FECACA;
+      --comp-legacy-pill-bg: #FEE2E2;
+      --comp-legacy-pill-text: #B91C1C;
+      --comp-legacy-pill-border: #FCA5A5;
+      
+      --comp-modern-bg: #F0FDF4;
+      --comp-modern-border: #A7F3D0;
+      --comp-modern-pill-bg: #DCFCE7;
+      --comp-modern-pill-text: #15803D;
+      --comp-modern-pill-border: #86EFAC;
+      
+      --nav-btn-bg: #F8FAFC;
+      --nav-btn-border: #CBD5E1;
+      --nav-btn-text: #0F172A;
+      
+      --drawer-bg: #FFFFFF;
+      --drawer-border: #E2E8F0;
+      --drawer-item-bg: #F8FAFC;
+      --drawer-item-border: #E2E8F0;
+      --drawer-item-text: #334155;
+    }
+
+    body.dark-mode {
+      /* Tema Oscuro Alternativo (Toggle con D o botón) */
+      --bg-page: #090A12;
+      --bg-gradient: radial-gradient(circle at 10% 15%, rgba(212, 175, 55, 0.08) 0%, transparent 45%),
+                     radial-gradient(circle at 90% 85%, rgba(36, 38, 70, 0.35) 0%, transparent 50%),
+                     #090A12;
+      --slide-bg: radial-gradient(circle at 85% 15%, rgba(36, 38, 70, 0.45) 0%, rgba(21, 22, 40, 0.95) 60%), #111222;
+      --slide-border: rgba(212, 175, 55, 0.22);
+      --slide-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.8), 0 0 35px rgba(212, 175, 55, 0.06);
+      
+      --topbar-bg: rgba(13, 14, 26, 0.94);
+      --bottombar-bg: rgba(13, 14, 26, 0.96);
+      --bar-border: rgba(212, 175, 55, 0.22);
+      
       --text-main: #F8FAFC;
+      --text-secondary: #CBD5E1;
       --text-muted: #94A3B8;
-      --success: #10B981;
-      --danger: #EF4444;
-      --info: #3B82F6;
+      
+      --cba-navy: #60A5FA;
+      --cba-navy-deep: #FFFFFF;
+      --cba-gold: #FBBF24;
+      --cba-gold-light: rgba(212, 175, 55, 0.15);
+      --cba-gold-accent: #D4AF37;
+      --cba-burgundy: #BE123C;
+      
+      --card-bg: rgba(255, 255, 255, 0.025);
+      --card-subtle-bg: rgba(255, 255, 255, 0.025);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-hover-border: #D4AF37;
+      
+      --comp-legacy-bg: rgba(239, 68, 68, 0.02);
+      --comp-legacy-border: rgba(239, 68, 68, 0.35);
+      --comp-legacy-pill-bg: rgba(239, 68, 68, 0.18);
+      --comp-legacy-pill-text: #F87171;
+      --comp-legacy-pill-border: rgba(239, 68, 68, 0.35);
+      
+      --comp-modern-bg: rgba(16, 185, 129, 0.02);
+      --comp-modern-border: rgba(16, 185, 129, 0.4);
+      --comp-modern-pill-bg: rgba(16, 185, 129, 0.18);
+      --comp-modern-pill-text: #34D399;
+      --comp-modern-pill-border: rgba(16, 185, 129, 0.35);
+      
+      --nav-btn-bg: rgba(255, 255, 255, 0.06);
+      --nav-btn-border: rgba(255, 255, 255, 0.12);
+      --nav-btn-text: #FFFFFF;
+      
+      --drawer-bg: #0D0E1A;
+      --drawer-border: rgba(212, 175, 55, 0.22);
+      --drawer-item-bg: rgba(255, 255, 255, 0.03);
+      --drawer-item-border: rgba(255, 255, 255, 0.06);
+      --drawer-item-text: #CBD5E1;
     }
 
     * {
@@ -34,12 +123,13 @@
 
     body {
       font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-      background-color: var(--cba-slate-bg);
+      background: var(--bg-gradient);
       color: var(--text-main);
       overflow: hidden;
       height: 100vh;
       width: 100vw;
       user-select: none;
+      transition: background 0.3s ease, color 0.3s ease;
     }
 
     /* Top Control Bar */
@@ -49,14 +139,16 @@
       left: 0;
       right: 0;
       height: 60px;
-      background: rgba(13, 14, 26, 0.94);
+      background: var(--topbar-bg);
       backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--cba-border);
+      border-bottom: 1px solid var(--bar-border);
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0 24px;
       z-index: 1000;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+      transition: all 0.3s ease;
     }
 
     .brand-group {
@@ -66,44 +158,34 @@
     }
 
     .brand-logo {
-      width: 34px;
-      height: 34px;
+      width: 36px;
+      height: 36px;
       object-fit: contain;
-      filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.4));
+      filter: drop-shadow(0 2px 5px rgba(180, 83, 9, 0.25));
     }
 
     .brand-title {
       font-weight: 800;
-      font-size: 15px;
-      color: #FFFFFF;
+      font-size: 15.5px;
+      color: var(--text-main);
+      letter-spacing: -0.2px;
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
-    .brand-badge {
-      background: linear-gradient(135deg, var(--cba-gold), var(--cba-gold-dark));
-      color: #0D0E1A;
-      font-size: 9.5px;
-      font-weight: 900;
-      padding: 2px 6px;
-      border-radius: 4px;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-    }
-
     .top-actions {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
 
     .action-icon-btn {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: var(--text-main);
-      width: 34px;
-      height: 34px;
+      background: var(--nav-btn-bg);
+      border: 1px solid var(--nav-btn-border);
+      color: var(--text-secondary);
+      width: 36px;
+      height: 36px;
       border-radius: 8px;
       display: flex;
       align-items: center;
@@ -114,9 +196,10 @@
     }
 
     .action-icon-btn:hover {
-      background: rgba(212, 175, 55, 0.15);
-      border-color: var(--cba-gold);
+      background: var(--cba-gold-light);
+      border-color: var(--cba-gold-accent);
       color: var(--cba-gold);
+      transform: translateY(-1px);
     }
 
     /* Main Slide Container */
@@ -139,10 +222,10 @@
       max-width: 1320px;
       height: 94%;
       max-height: 780px;
-      background: radial-gradient(circle at 85% 15%, rgba(36, 38, 70, 0.5) 0%, rgba(21, 22, 40, 0.95) 60%), #111222;
-      border: 1px solid var(--cba-border);
+      background: var(--slide-bg);
+      border: 1px solid var(--slide-border);
       border-radius: 16px;
-      box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.8), 0 0 35px rgba(212, 175, 55, 0.06);
+      box-shadow: var(--slide-shadow);
       padding: 34px 42px;
       opacity: 0;
       transform: scale(0.97) translateY(16px);
@@ -166,20 +249,22 @@
       left: 0;
       right: 0;
       height: 54px;
-      background: rgba(13, 14, 26, 0.96);
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      background: var(--bottombar-bg);
+      border-top: 1px solid var(--bar-border);
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0 24px;
       z-index: 1000;
+      box-shadow: 0 -1px 3px rgba(15, 23, 42, 0.02);
+      transition: all 0.3s ease;
     }
 
     .progress-track {
       flex: 1;
       max-width: 420px;
-      height: 5px;
-      background: rgba(255, 255, 255, 0.08);
+      height: 6px;
+      background: #E2E8F0;
       border-radius: 3px;
       overflow: hidden;
       margin: 0 20px;
@@ -187,7 +272,7 @@
 
     .progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, var(--cba-burgundy), var(--cba-gold));
+      background: linear-gradient(90deg, #1E3A8A, #D97706);
       width: 0%;
       transition: width 0.3s ease;
     }
@@ -206,9 +291,9 @@
     }
 
     .nav-btn {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      color: #FFFFFF;
+      background: var(--nav-btn-bg);
+      border: 1px solid var(--nav-btn-border);
+      color: var(--nav-btn-text);
       padding: 6px 16px;
       border-radius: 8px;
       font-size: 12.5px;
@@ -221,14 +306,14 @@
     }
 
     .nav-btn:hover:not(:disabled) {
-      background: var(--cba-gold);
-      color: #0D0E1A;
-      border-color: var(--cba-gold);
-      box-shadow: 0 0 12px rgba(212, 175, 55, 0.4);
+      background: #1E3A8A;
+      color: #FFFFFF;
+      border-color: #1E3A8A;
+      box-shadow: 0 4px 12px rgba(30, 58, 138, 0.25);
     }
 
     .nav-btn:disabled {
-      opacity: 0.25;
+      opacity: 0.3;
       cursor: not-allowed;
     }
 
@@ -238,7 +323,7 @@
       font-weight: 800;
       color: var(--cba-gold);
       text-transform: uppercase;
-      letter-spacing: 2px;
+      letter-spacing: 1.6px;
       margin-bottom: 4px;
       display: flex;
       align-items: center;
@@ -250,15 +335,15 @@
       display: inline-block;
       width: 7px;
       height: 7px;
-      background: var(--cba-gold);
+      background: var(--cba-gold-accent);
       border-radius: 50%;
-      box-shadow: 0 0 6px var(--cba-gold);
+      box-shadow: 0 0 6px rgba(217, 119, 6, 0.45);
     }
 
     .slide-title {
       font-size: 27px;
       font-weight: 800;
-      color: #FFFFFF;
+      color: var(--text-main);
       line-height: 1.25;
       margin-bottom: 6px;
       letter-spacing: -0.4px;
@@ -277,11 +362,11 @@
       gap: 5px;
       font-size: 10.5px;
       font-weight: 700;
-      padding: 3px 9px;
+      padding: 3px 10px;
       border-radius: 20px;
-      background: rgba(212, 175, 55, 0.12);
-      color: var(--cba-gold);
-      border: 1px solid rgba(212, 175, 55, 0.3);
+      background: #FEF3C7;
+      color: #92400E;
+      border: 1px solid #FCD34D;
       margin-left: 10px;
       vertical-align: middle;
     }
@@ -301,14 +386,20 @@
       line-height: 1.15;
       letter-spacing: -0.8px;
       margin-bottom: 14px;
-      background: linear-gradient(135deg, #FFFFFF 30%, #E2E8F0 70%, var(--cba-gold-light) 100%);
+      background: linear-gradient(135deg, #0F172A 25%, #1E3A8A 70%, #B45309 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode .hero-h1 {
+      background: linear-gradient(135deg, #FFFFFF 30%, #E2E8F0 70%, #FBBF24 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
     .hero-desc {
       font-size: 15.5px;
-      color: #CBD5E1;
+      color: var(--text-secondary);
       line-height: 1.55;
       margin-bottom: 24px;
     }
@@ -320,23 +411,30 @@
     }
 
     .hero-stat-card {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(212, 175, 55, 0.18);
+      background: var(--card-subtle-bg);
+      border: 1px solid var(--card-border);
       border-radius: 10px;
       padding: 14px;
       transition: all 0.2s ease;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
     }
 
     .hero-stat-card:hover {
-      background: rgba(212, 175, 55, 0.06);
-      border-color: var(--cba-gold);
+      background: #FEF3C7;
+      border-color: #F59E0B;
       transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(245, 158, 11, 0.12);
+    }
+
+    body.dark-mode .hero-stat-card:hover {
+      background: rgba(212, 175, 55, 0.08);
+      border-color: var(--cba-gold);
     }
 
     .hero-stat-num {
       font-size: 22px;
       font-weight: 800;
-      color: var(--cba-gold);
+      color: var(--cba-navy);
       margin-bottom: 2px;
     }
 
@@ -348,7 +446,7 @@
     }
 
     .hero-visual {
-      background: radial-gradient(circle at center, rgba(212, 175, 55, 0.12), transparent 70%);
+      background: radial-gradient(circle at center, rgba(212, 175, 55, 0.15), rgba(241, 245, 249, 0.6) 70%);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -356,6 +454,12 @@
       text-align: center;
       padding: 24px;
       border-radius: 14px;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+    }
+
+    body.dark-mode .hero-visual {
+      background: radial-gradient(circle at center, rgba(212, 175, 55, 0.12), transparent 70%);
       border: 1px solid rgba(255, 255, 255, 0.06);
     }
 
@@ -363,7 +467,7 @@
       width: 125px;
       height: 125px;
       object-fit: contain;
-      filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.5));
+      filter: drop-shadow(0 4px 14px rgba(212, 175, 55, 0.35));
       margin-bottom: 16px;
     }
 
@@ -377,24 +481,25 @@
     }
 
     .comp-col {
-      background: rgba(13, 14, 26, 0.65);
       border-radius: 12px;
       padding: 18px;
       display: flex;
       flex-direction: column;
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--card-border);
       position: relative;
+      transition: all 0.2s ease;
     }
 
     .comp-col.legacy {
-      border-color: rgba(239, 68, 68, 0.35);
-      background: rgba(239, 68, 68, 0.02);
+      border-color: var(--comp-legacy-border);
+      background: var(--comp-legacy-bg);
+      box-shadow: 0 4px 14px rgba(239, 68, 68, 0.04);
     }
 
     .comp-col.modern {
-      border-color: rgba(16, 185, 129, 0.4);
-      background: rgba(16, 185, 129, 0.02);
-      box-shadow: 0 0 20px rgba(16, 185, 129, 0.06);
+      border-color: var(--comp-modern-border);
+      background: var(--comp-modern-bg);
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.06);
     }
 
     .comp-header {
@@ -403,39 +508,44 @@
       justify-content: space-between;
       margin-bottom: 12px;
       padding-bottom: 8px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    body.dark-mode .comp-header {
       border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .comp-pill {
       font-size: 10.5px;
       font-weight: 800;
-      padding: 3px 9px;
+      padding: 3px 10px;
       border-radius: 12px;
       text-transform: uppercase;
       letter-spacing: 0.8px;
     }
 
     .comp-pill.legacy {
-      background: rgba(239, 68, 68, 0.18);
-      color: #F87171;
-      border: 1px solid rgba(239, 68, 68, 0.35);
+      background: var(--comp-legacy-pill-bg);
+      color: var(--comp-legacy-pill-text);
+      border: 1px solid var(--comp-legacy-pill-border);
     }
 
     .comp-pill.modern {
-      background: rgba(16, 185, 129, 0.18);
-      color: #34D399;
-      border: 1px solid rgba(16, 185, 129, 0.35);
+      background: var(--comp-modern-pill-bg);
+      color: var(--comp-modern-pill-text);
+      border: 1px solid var(--comp-modern-pill-border);
     }
 
     .comp-media-wrapper {
       position: relative;
       border-radius: 8px;
       overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      background: #000000;
+      border: 1px solid #CBD5E1;
+      background: #0F172A;
       height: 250px;
       margin-bottom: 14px;
       cursor: zoom-in;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
     }
 
     .comp-media-wrapper img {
@@ -454,11 +564,11 @@
       position: absolute;
       bottom: 8px;
       right: 8px;
-      background: rgba(0, 0, 0, 0.75);
+      background: rgba(15, 23, 42, 0.85);
       padding: 3px 8px;
       border-radius: 4px;
       font-size: 9.5px;
-      color: #CBD5E1;
+      color: #F8FAFC;
       pointer-events: none;
     }
 
@@ -477,7 +587,7 @@
       gap: 9px;
       font-size: 12.5px;
       line-height: 1.45;
-      color: #E2E8F0;
+      color: var(--text-secondary);
     }
 
     .comp-icon {
@@ -505,19 +615,20 @@
     }
 
     .task-card {
-      background: rgba(255, 255, 255, 0.025);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
       border-radius: 12px;
       padding: 14px;
       display: flex;
       flex-direction: column;
       transition: all 0.2s ease;
       position: relative;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
     }
 
     .task-card:hover {
-      background: rgba(212, 175, 55, 0.04);
-      border-color: var(--cba-gold);
+      border-color: var(--card-hover-border);
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.07);
       transform: translateY(-2px);
     }
 
@@ -527,6 +638,10 @@
       justify-content: space-between;
       margin-bottom: 10px;
       padding-bottom: 8px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    body.dark-mode .task-card-header {
       border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     }
 
@@ -550,7 +665,7 @@
     .task-card-title {
       font-size: 13px;
       font-weight: 800;
-      color: #FFFFFF;
+      color: var(--text-main);
       line-height: 1.2;
     }
 
@@ -565,11 +680,8 @@
     .task-count-badge {
       font-size: 9px;
       font-weight: 800;
-      padding: 2px 6px;
+      padding: 2px 7px;
       border-radius: 10px;
-      background: rgba(212, 175, 55, 0.15);
-      color: var(--cba-gold);
-      border: 1px solid rgba(212, 175, 55, 0.3);
       white-space: nowrap;
     }
 
@@ -588,7 +700,7 @@
     }
 
     .task-list::-webkit-scrollbar-thumb {
-      background: rgba(212, 175, 55, 0.4);
+      background: rgba(217, 119, 6, 0.35);
       border-radius: 4px;
     }
 
@@ -598,11 +710,15 @@
       gap: 6px;
       font-size: 10.5px;
       line-height: 1.35;
-      color: #CBD5E1;
+      color: var(--text-secondary);
+    }
+
+    .task-item strong {
+      color: var(--text-main);
     }
 
     .task-item-bullet {
-      color: var(--cba-gold);
+      color: var(--cba-gold-accent);
       font-size: 9px;
       line-height: 1.35;
       flex-shrink: 0;
@@ -610,19 +726,20 @@
     }
 
     .feature-card {
-      background: rgba(255, 255, 255, 0.025);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
       border-radius: 12px;
       padding: 20px;
       display: flex;
       flex-direction: column;
-      transition: all 0.2s ease;
+      transition: all 0.25s ease;
       position: relative;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
     }
 
     .feature-card:hover {
-      background: rgba(212, 175, 55, 0.04);
-      border-color: var(--cba-gold);
+      border-color: var(--card-hover-border);
+      box-shadow: 0 10px 24px rgba(217, 119, 6, 0.12);
       transform: translateY(-3px);
     }
 
@@ -630,20 +747,17 @@
       width: 42px;
       height: 42px;
       border-radius: 10px;
-      background: rgba(212, 175, 55, 0.12);
-      color: var(--cba-gold);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 20px;
       margin-bottom: 14px;
-      border: 1px solid rgba(212, 175, 55, 0.25);
     }
 
     .feature-card-title {
       font-size: 16.5px;
-      font-weight: 700;
-      color: #FFFFFF;
+      font-weight: 800;
+      color: var(--text-main);
       margin-bottom: 8px;
     }
 
@@ -659,7 +773,7 @@
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.9);
+      background: rgba(15, 23, 42, 0.85);
       backdrop-filter: blur(8px);
       z-index: 2000;
       align-items: center;
@@ -677,9 +791,9 @@
       max-height: 90vh;
       border-radius: 10px;
       overflow: hidden;
-      border: 1px solid var(--cba-border);
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95);
-      background: #0D0E1A;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      background: #0F172A;
     }
 
     .zoom-modal-img {
@@ -691,7 +805,7 @@
 
     .zoom-modal-caption {
       padding: 10px 16px;
-      background: #111222;
+      background: #1E293B;
       color: #FFFFFF;
       font-size: 13px;
       font-weight: 600;
@@ -702,7 +816,7 @@
     }
 
     .zoom-close-btn {
-      background: rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.15);
       border: none;
       color: #FFFFFF;
       padding: 4px 10px;
@@ -718,9 +832,9 @@
       right: -340px;
       bottom: 54px;
       width: 320px;
-      background: #0D0E1A;
-      border-left: 1px solid var(--cba-border);
-      box-shadow: -10px 0 30px rgba(0, 0, 0, 0.7);
+      background: var(--drawer-bg);
+      border-left: 1px solid var(--drawer-border);
+      box-shadow: -10px 0 30px rgba(15, 23, 42, 0.08);
       transition: right 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       z-index: 999;
       display: flex;
@@ -736,7 +850,7 @@
     .drawer-title {
       font-size: 15px;
       font-weight: 800;
-      color: #FFFFFF;
+      color: var(--text-main);
       margin-bottom: 12px;
       display: flex;
       align-items: center;
@@ -752,16 +866,22 @@
     .drawer-item {
       padding: 9px 12px;
       border-radius: 8px;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: var(--drawer-item-bg);
+      border: 1px solid var(--drawer-item-border);
       cursor: pointer;
       font-size: 12px;
       font-weight: 600;
-      color: #CBD5E1;
+      color: var(--drawer-item-text);
       transition: all 0.2s;
     }
 
     .drawer-item:hover, .drawer-item.active {
+      background: #FEF3C7;
+      border-color: #F59E0B;
+      color: #92400E;
+    }
+
+    body.dark-mode .drawer-item:hover, body.dark-mode .drawer-item.active {
       background: rgba(212, 175, 55, 0.15);
       border-color: var(--cba-gold);
       color: var(--cba-gold);
@@ -774,16 +894,27 @@
       font-size: 12px;
       line-height: 1.45;
     }
-    .scale-box.inicial { background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); color: #93C5FD; }
-    .scale-box.primaria { background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); color: #6EE7B7; }
-    .scale-box.media { background: rgba(212, 175, 55, 0.08); border: 1px solid rgba(212, 175, 55, 0.25); color: #FDE68A; }
+    .scale-box.inicial { background: #EFF6FF; border: 1px solid #BFDBFE; color: #1E40AF; }
+    .scale-box.primaria { background: #ECFDF5; border: 1px solid #A7F3D0; color: #065F46; }
+    .scale-box.media { background: #FEF3C7; border: 1px solid #FDE68A; color: #92400E; }
+
+    body.dark-mode .scale-box.inicial { background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); color: #93C5FD; }
+    body.dark-mode .scale-box.primaria { background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); color: #6EE7B7; }
+    body.dark-mode .scale-box.media { background: rgba(212, 175, 55, 0.08); border: 1px solid rgba(212, 175, 55, 0.25); color: #FDE68A; }
 
     .kbd-hint {
-      background: rgba(255, 255, 255, 0.08);
-      padding: 2px 5px;
+      background: #F1F5F9;
+      padding: 2px 6px;
       border-radius: 4px;
       font-size: 10px;
       font-family: monospace;
+      color: #1E3A8A;
+      font-weight: 700;
+      border: 1px solid #CBD5E1;
+    }
+
+    body.dark-mode .kbd-hint {
+      background: rgba(255, 255, 255, 0.08);
       color: var(--cba-gold);
       border: 1px solid rgba(255, 255, 255, 0.12);
     }
@@ -801,6 +932,7 @@
     </div>
 
     <div class="top-actions">
+      <button class="action-icon-btn" onclick="toggleTheme()" id="themeBtn" title="Cambiar Tema (D)">🌙</button>
       <button class="action-icon-btn" onclick="toggleDrawer()" title="Índice de Diapositivas (T)">☰</button>
       <button class="action-icon-btn" onclick="toggleFullScreen()" title="Pantalla Completa (F)">⛶</button>
     </div>
@@ -842,7 +974,7 @@
         </div>
         <div class="hero-visual">
           <img src="./assets/logo-cba-gold.png" alt="Escudo CBA" class="hero-crest-lg" onerror="this.src='../logo-cba-gold.png'">
-          <h3 style="font-size: 17px; font-weight: 800; color: #FFF; margin-bottom: 14px;">U.E.P. Colegio Bellas Artes</h3>
+          <h3 style="font-size: 17px; font-weight: 800; color: var(--text-main); margin-bottom: 14px;">U.E.P. Colegio Bellas Artes</h3>
           <p style="font-size: 11.5px; color: var(--text-muted);">
             Navega con <span class="kbd-hint">◀</span> <span class="kbd-hint">▶</span> o <span class="kbd-hint">Espacio</span>.
           </p>
@@ -858,35 +990,35 @@
 
       <div class="card-grid-3">
         <div class="feature-card">
-          <div class="feature-icon-circle" style="background: rgba(239, 68, 68, 0.12); color: #F87171; border-color: rgba(239, 68, 68, 0.25);">
+          <div class="feature-icon-circle" style="background: #FEE2E2; color: #DC2626; border: 1px solid #FCA5A5;">
             📡
           </div>
           <h3 class="feature-card-title">1. Infraestructura</h3>
           <p class="feature-card-desc">
-            <strong style="color: #F87171;">CEO (Anterior):</strong> Hosting web externo. Cualquier caída de internet en el plantel paralizaba las inscripciones y la carga de notas.<br><br>
-            <strong style="color: #34D399;">SICE-CBA (Nuevo):</strong> 100% On-Premise. La base de datos opera dentro de la red del colegio. Inmune a fallas de internet externo.
+            <strong style="color: #DC2626;">CEO (Anterior):</strong> Hosting web externo. Cualquier caída de internet en el plantel paralizaba las inscripciones y la carga de notas.<br><br>
+            <strong style="color: #059669;">SICE-CBA (Nuevo):</strong> 100% On-Premise. La base de datos opera dentro de la red del colegio. Inmune a fallas de internet externo.
           </p>
         </div>
 
         <div class="feature-card">
-          <div class="feature-icon-circle" style="background: rgba(59, 130, 246, 0.12); color: #60A5FA; border-color: rgba(59, 130, 246, 0.25);">
+          <div class="feature-icon-circle" style="background: #EFF6FF; color: #2563EB; border: 1px solid #BFDBFE;">
             ⚡
           </div>
           <h3 class="feature-card-title">2. Velocidad y Fluidez</h3>
           <p class="feature-card-desc">
-            <strong style="color: #F87171;">CEO (Anterior):</strong> PHP clásico de 2012 con más de 136 URLs dispersas. Recargas completas de pantalla (F5) en cada acción.<br><br>
-            <strong style="color: #34D399;">SICE-CBA (Nuevo):</strong> Aplicación reactiva de página única (SPA). Guardado continuo celda por celda sin pérdida de datos.
+            <strong style="color: #DC2626;">CEO (Anterior):</strong> PHP clásico de 2012 con más de 136 URLs dispersas. Recargas completas de pantalla (F5) en cada acción.<br><br>
+            <strong style="color: #059669;">SICE-CBA (Nuevo):</strong> Aplicación reactiva de página única (SPA). Guardado continuo celda por celda sin pérdida de datos.
           </p>
         </div>
 
         <div class="feature-card">
-          <div class="feature-icon-circle" style="background: rgba(212, 175, 55, 0.12); color: #FBBF24; border-color: rgba(212, 175, 55, 0.25);">
+          <div class="feature-icon-circle" style="background: #FEF3C7; color: #D97706; border: 1px solid #FCD34D;">
             ⚖️
           </div>
           <h3 class="feature-card-title">3. Legalidad y Control</h3>
           <p class="feature-card-desc">
-            <strong style="color: #F87171;">CEO (Anterior):</strong> Promedios numéricos indebidos en Inicial/Primaria y proliferación de secciones desordenadas (C, D, U).<br><br>
-            <strong style="color: #34D399;">SICE-CBA (Nuevo):</strong> Apego total a las normas del MPPE, roles blindados y únicamente Secciones A y B oficiales.
+            <strong style="color: #DC2626;">CEO (Anterior):</strong> Promedios numéricos indebidos en Inicial/Primaria y proliferación de secciones desordenadas (C, D, U).<br><br>
+            <strong style="color: #059669;">SICE-CBA (Nuevo):</strong> Apego total a las normas del MPPE, roles blindados y únicamente Secciones A y B oficiales.
           </p>
         </div>
       </div>
@@ -910,11 +1042,11 @@
           </div>
           <ul class="comp-list">
             <li class="comp-list-item">
-              <span class="comp-icon" style="color: #EF4444;">✕</span>
+              <span class="comp-icon" style="color: #DC2626;">✕</span>
               <span>Menú lateral rígido con opciones redundantes que sobrecargaban al usuario.</span>
             </li>
             <li class="comp-list-item">
-              <span class="comp-icon" style="color: #EF4444;">✕</span>
+              <span class="comp-icon" style="color: #DC2626;">✕</span>
               <span>Consultas lentas para actualizar contadores y sin soporte de búsqueda rápida.</span>
             </li>
           </ul>
@@ -923,7 +1055,7 @@
         <div class="comp-col modern">
           <div class="comp-header">
             <span class="comp-pill modern">SICE-CBA (Nuevo Sistema)</span>
-            <span style="font-size: 11px; color: #34D399;">Academic Pulse Hero</span>
+            <span style="font-size: 11px; color: #059669;">Academic Pulse Hero</span>
           </div>
           <div class="comp-media-wrapper" onclick="openZoom('./assets/sisceba_dashboard_real.png', 'SICE-CBA: Dashboard en tiempo real con estadísticas y accesos directos')">
             <img src="./assets/sisceba_dashboard_real.png" alt="SICE-CBA Dashboard">
@@ -931,11 +1063,11 @@
           </div>
           <ul class="comp-list">
             <li class="comp-list-item">
-              <span class="comp-icon" style="color: #10B981;">✓</span>
+              <span class="comp-icon" style="color: #059669;">✓</span>
               <span><strong>Métricas en Vivo:</strong> Matrícula activa, estado del lapso y resumen de asistencia al instante.</span>
             </li>
             <li class="comp-list-item">
-              <span class="comp-icon" style="color: #10B981;">✓</span>
+              <span class="comp-icon" style="color: #059669;">✓</span>
               <span>Buscador global <span class="kbd-hint">Ctrl+K</span> y atajos de teclado para navegación inmediata.</span>
             </li>
           </ul>
@@ -953,7 +1085,7 @@
         <div class="comp-col legacy">
           <div class="comp-header">
             <span class="comp-pill legacy">CEO (Sistema Anterior)</span>
-            <span style="font-size: 11px; color: #F87171;">Secciones No Normadas</span>
+            <span style="font-size: 11px; color: #DC2626;">Secciones No Normadas</span>
           </div>
           <div class="comp-media-wrapper" onclick="openZoom('./assets/ceo_alumnos.png', 'CEO Anterior: Lista de alumnos con filtros y secciones residuales')">
             <img src="./assets/ceo_alumnos.png" alt="CEO Alumnos">
@@ -961,11 +1093,11 @@
           </div>
           <ul class="comp-list">
             <li class="comp-list-item">
-              <span class="comp-icon" style="color: #EF4444;">✕</span>
+              <span class="comp-icon" style="color: #DC2626;">✕</span>
               <span>Aparición de secciones ficticias (`C`, `D`, `U`) que descuadraban los listados oficiales.</span>
             </li>
             <li class="comp-list-item">
-              <span class="comp-icon" style="color: #EF4444;">✕</span>
+              <span class="comp-icon" style="color: #DC2626;">✕</span>
               <span>Formatos de tabla rígidos y lentos para filtrar por grado o nivel.</span>
             </li>
           </ul>
@@ -974,7 +1106,7 @@
         <div class="comp-col modern">
           <div class="comp-header">
             <span class="comp-pill modern">SICE-CBA (Nuevo Sistema)</span>
-            <span style="font-size: 11px; color: #34D399;">Regla Institucional Inviolable</span>
+            <span style="font-size: 11px; color: #059669;">Regla Institucional Inviolable</span>
           </div>
           <div class="comp-media-wrapper" onclick="openZoom('./assets/sisceba_gestion_real.png', 'SICE-CBA: Módulo de Gestión con matrícula exclusiva y Secciones estrictas A y B')">
             <img src="./assets/sisceba_gestion_real.png" alt="SICE-CBA Gestión">
@@ -982,11 +1114,11 @@
           </div>
           <ul class="comp-list">
             <li class="comp-list-item">
-              <span class="comp-icon" style="color: #10B981;">✓</span>
+              <span class="comp-icon" style="color: #059669;">✓</span>
               <span><strong>Exclusivamente Secciones A y B:</strong> Todos los formularios y reportes bloquean secciones espurias.</span>
             </li>
             <li class="comp-list-item">
-              <span class="comp-icon" style="color: #10B981;">✓</span>
+              <span class="comp-icon" style="color: #059669;">✓</span>
               <span><strong>Matrícula Blindada:</strong> Acceso y prosecución exclusiva para el rol <code>ADMINISTRADOR</code>.</span>
             </li>
           </ul>
@@ -1005,7 +1137,7 @@
         <div class="task-card">
           <div class="task-card-header">
             <div class="task-card-header-left">
-              <div class="task-card-icon" style="background: rgba(212, 175, 55, 0.15); color: #FBBF24; border: 1px solid rgba(212, 175, 55, 0.3);">
+              <div class="task-card-icon" style="background: #FEF3C7; color: #B45309; border: 1px solid #FCD34D;">
                 🏛️
               </div>
               <div>
@@ -1013,7 +1145,7 @@
                 <div class="task-card-subtitle">Supervisión General</div>
               </div>
             </div>
-            <span class="task-count-badge">10 Tareas</span>
+            <span class="task-count-badge" style="background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D;">10 Tareas</span>
           </div>
           <ul class="task-list">
             <li class="task-item">
@@ -1063,7 +1195,7 @@
         <div class="task-card">
           <div class="task-card-header">
             <div class="task-card-header-left">
-              <div class="task-card-icon" style="background: rgba(59, 130, 246, 0.15); color: #60A5FA; border: 1px solid rgba(59, 130, 246, 0.3);">
+              <div class="task-card-icon" style="background: #EFF6FF; color: #2563EB; border: 1px solid #BFDBFE;">
                 🧸
               </div>
               <div>
@@ -1071,7 +1203,7 @@
                 <div class="task-card-subtitle">Maternal & Preescolar</div>
               </div>
             </div>
-            <span class="task-count-badge" style="background: rgba(59, 130, 246, 0.15); color: #93C5FD; border-color: rgba(59, 130, 246, 0.3);">5 Tareas</span>
+            <span class="task-count-badge" style="background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE;">5 Tareas</span>
           </div>
           <ul class="task-list">
             <li class="task-item">
@@ -1101,7 +1233,7 @@
         <div class="task-card">
           <div class="task-card-header">
             <div class="task-card-header-left">
-              <div class="task-card-icon" style="background: rgba(16, 185, 129, 0.15); color: #34D399; border: 1px solid rgba(16, 185, 129, 0.3);">
+              <div class="task-card-icon" style="background: #ECFDF5; color: #059669; border: 1px solid #A7F3D0;">
                 🌱
               </div>
               <div>
@@ -1109,7 +1241,7 @@
                 <div class="task-card-subtitle">1.° a 6.° Grado</div>
               </div>
             </div>
-            <span class="task-count-badge" style="background: rgba(16, 185, 129, 0.15); color: #6EE7B7; border-color: rgba(16, 185, 129, 0.3);">8 Tareas</span>
+            <span class="task-count-badge" style="background: #ECFDF5; color: #047857; border: 1px solid #A7F3D0;">8 Tareas</span>
           </div>
           <ul class="task-list">
             <li class="task-item">
@@ -1151,7 +1283,7 @@
         <div class="task-card">
           <div class="task-card-header">
             <div class="task-card-header-left">
-              <div class="task-card-icon" style="background: rgba(168, 85, 247, 0.15); color: #C084FC; border: 1px solid rgba(168, 85, 247, 0.3);">
+              <div class="task-card-icon" style="background: #F3E8FF; color: #7E22CE; border: 1px solid #DDD6FE;">
                 🎓
               </div>
               <div>
@@ -1159,7 +1291,7 @@
                 <div class="task-card-subtitle">1.° a 5.° Año</div>
               </div>
             </div>
-            <span class="task-count-badge" style="background: rgba(168, 85, 247, 0.15); color: #E9D5FF; border-color: rgba(168, 85, 247, 0.3);">10 Tareas</span>
+            <span class="task-count-badge" style="background: #F3E8FF; color: #6B21A8; border: 1px solid #DDD6FE;">10 Tareas</span>
           </div>
           <ul class="task-list">
             <li class="task-item">
@@ -1215,7 +1347,7 @@
 
       <div class="card-grid-3">
         <div class="feature-card">
-          <div class="feature-icon-circle" style="background: rgba(59, 130, 246, 0.15); color: #60A5FA;">
+          <div class="feature-icon-circle" style="background: #EFF6FF; color: #2563EB; border: 1px solid #BFDBFE;">
             🧸
           </div>
           <h3 class="feature-card-title">Educación Inicial</h3>
@@ -1229,7 +1361,7 @@
         </div>
 
         <div class="feature-card">
-          <div class="feature-icon-circle" style="background: rgba(16, 185, 129, 0.15); color: #34D399;">
+          <div class="feature-icon-circle" style="background: #ECFDF5; color: #059669; border: 1px solid #A7F3D0;">
             🌱
           </div>
           <h3 class="feature-card-title">Educación Primaria</h3>
@@ -1243,7 +1375,7 @@
         </div>
 
         <div class="feature-card">
-          <div class="feature-icon-circle" style="background: rgba(212, 175, 55, 0.15); color: #FBBF24;">
+          <div class="feature-icon-circle" style="background: #FEF3C7; color: #B45309; border: 1px solid #FCD34D;">
             🎓
           </div>
           <h3 class="feature-card-title">Media General & Roles</h3>
@@ -1270,22 +1402,22 @@
             El sistema se consolida en un plan de 4 fases para asegurar una transición sin interrupciones en la <strong>Unidad Educativa Bellas Artes</strong>.
           </p>
           <div class="feature-card" style="margin-bottom: 16px;">
-            <div style="display: flex; flex-direction: column; gap: 8px; font-size: 12.5px; color: #CBD5E1; line-height: 1.45;">
-              <div><strong style="color: #34D399;">1. Fase Actual (En Curso): Pruebas Locales</strong> — Simulación de notas, escalas oficiales y validación con directivos.</div>
+            <div style="display: flex; flex-direction: column; gap: 8px; font-size: 12.5px; color: var(--text-secondary); line-height: 1.45;">
+              <div><strong style="color: #059669;">1. Fase Actual (En Curso): Pruebas Locales</strong> — Simulación de notas, escalas oficiales y validación con directivos.</div>
               <div><strong style="color: var(--cba-gold);">2. Próximo Hito: Servidores del Colegio</strong> — Instalación de PostgreSQL 16 y Node.js en el hardware institucional del CBA.</div>
-              <div><strong style="color: #60A5FA;">3. Inducción al Personal</strong> — Entrega de Códigos de Autorización para registro de docentes y secretaría.</div>
-              <div><strong style="color: #F87171;">4. Apagado de CEO</strong> — Migración oficial de nóminas y desincorporación del hosting PHP antiguo.</div>
+              <div><strong style="color: #2563EB;">3. Inducción al Personal</strong> — Entrega de Códigos de Autorización para registro de docentes y secretaría.</div>
+              <div><strong style="color: #DC2626;">4. Apagado de CEO</strong> — Migración oficial de nóminas y desincorporación del hosting PHP antiguo.</div>
             </div>
           </div>
         </div>
 
         <div class="hero-visual">
           <div style="font-size: 42px; margin-bottom: 10px;">💬</div>
-          <h3 style="font-size: 19px; font-weight: 800; color: #FFF; margin-bottom: 6px;">Preguntas y Respuestas</h3>
+          <h3 style="font-size: 19px; font-weight: 800; color: var(--text-main); margin-bottom: 6px;">Preguntas y Respuestas</h3>
           <p style="font-size: 12px; color: var(--text-muted); line-height: 1.45; margin-bottom: 16px;">
             Espacio abierto para atender inquietudes de Directiva, Docentes y Personal Técnico.
           </p>
-          <div style="padding: 8px 14px; background: rgba(212, 175, 55, 0.12); border: 1px solid var(--cba-border); border-radius: 6px; font-size: 11px; color: var(--cba-gold); font-weight: 700;">
+          <div style="padding: 8px 14px; background: #FEF3C7; border: 1px solid #FCD34D; border-radius: 6px; font-size: 11px; color: #92400E; font-weight: 700;">
             SICE-CBA · Excelencia Educativa Bellas Artes
           </div>
         </div>
@@ -1383,6 +1515,29 @@
       }
     }
 
+    // Theme Toggle (Default Light Institutional with Dark Mode switch)
+    function toggleTheme() {
+      document.body.classList.toggle('dark-mode');
+      const isDark = document.body.classList.contains('dark-mode');
+      localStorage.setItem('siceba_theme', isDark ? 'dark' : 'light');
+      const btn = document.getElementById('themeBtn');
+      if (btn) {
+        btn.textContent = isDark ? '☀️' : '🌙';
+        btn.title = isDark ? 'Cambiar a Tema Claro (D)' : 'Cambiar a Tema Oscuro (D)';
+      }
+    }
+
+    // Init saved theme (Default is light if unset)
+    const savedTheme = localStorage.getItem('siceba_theme');
+    if (savedTheme === 'dark') {
+      document.body.classList.add('dark-mode');
+      const btn = document.getElementById('themeBtn');
+      if (btn) {
+        btn.textContent = '☀️';
+        btn.title = 'Cambiar a Tema Claro (D)';
+      }
+    }
+
     // Keyboard Navigation
     window.addEventListener('keydown', (e) => {
       if (document.getElementById('zoomModal').classList.contains('open')) {
@@ -1405,6 +1560,8 @@
         toggleFullScreen();
       } else if (e.key === 't' || e.key === 'T') {
         toggleDrawer();
+      } else if (e.key === 'd' || e.key === 'D') {
+        toggleTheme();
       }
     });
 
