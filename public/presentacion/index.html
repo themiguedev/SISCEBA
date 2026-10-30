@@ -9,7 +9,62 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      /* Tema Claro Institucional (Default) */
+      /* Tema Principal: Azul Marino Noche CBA de Alto Contraste & Oro */
+      --bg-page: #0B0D18;
+      --bg-gradient: radial-gradient(circle at 15% 15%, rgba(212, 175, 55, 0.12) 0%, transparent 45%),
+                     radial-gradient(circle at 85% 85%, rgba(30, 58, 138, 0.25) 0%, transparent 50%),
+                     #0B0D18;
+      --slide-bg: radial-gradient(circle at 85% 15%, rgba(36, 45, 88, 0.45) 0%, rgba(18, 22, 46, 0.98) 70%), #12152A;
+      --slide-border: rgba(212, 175, 55, 0.35);
+      --slide-shadow: 0 20px 55px -10px rgba(0, 0, 0, 0.8), 0 0 30px rgba(212, 175, 55, 0.08);
+      
+      --topbar-bg: rgba(13, 16, 32, 0.95);
+      --bottombar-bg: rgba(13, 16, 32, 0.97);
+      --bar-border: rgba(212, 175, 55, 0.25);
+      
+      --text-main: #FFFFFF;
+      --text-secondary: #F1F5F9;
+      --text-muted: #94A3B8;
+      
+      --cba-navy: #38BDF8;
+      --cba-navy-deep: #1E2548;
+      --cba-gold: #FBBF24;
+      --cba-gold-light: rgba(251, 191, 36, 0.15);
+      --cba-gold-accent: #D4AF37;
+      --cba-burgundy: #991B1B;
+      
+      /* Tarjetas sólidas y con alto contraste */
+      --card-bg: #181D38;
+      --card-subtle-bg: #141830;
+      --card-border: rgba(212, 175, 55, 0.22);
+      --card-hover-border: #FBBF24;
+      --card-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.45);
+      
+      --comp-legacy-bg: rgba(239, 68, 68, 0.08);
+      --comp-legacy-border: rgba(239, 68, 68, 0.45);
+      --comp-legacy-pill-bg: rgba(239, 68, 68, 0.22);
+      --comp-legacy-pill-text: #FCA5A5;
+      --comp-legacy-pill-border: rgba(239, 68, 68, 0.45);
+      
+      --comp-modern-bg: rgba(16, 185, 129, 0.08);
+      --comp-modern-border: rgba(16, 185, 129, 0.45);
+      --comp-modern-pill-bg: rgba(16, 185, 129, 0.22);
+      --comp-modern-pill-text: #6EE7B7;
+      --comp-modern-pill-border: rgba(16, 185, 129, 0.45);
+      
+      --nav-btn-bg: rgba(255, 255, 255, 0.08);
+      --nav-btn-border: rgba(212, 175, 55, 0.25);
+      --nav-btn-text: #FFFFFF;
+      
+      --drawer-bg: #0D1022;
+      --drawer-border: rgba(212, 175, 55, 0.28);
+      --drawer-item-bg: #161A34;
+      --drawer-item-border: rgba(255, 255, 255, 0.08);
+      --drawer-item-text: #E2E8F0;
+    }
+
+    body.light-mode {
+      /* Tema Claro Alternativo (Toggle con D o botón) */
       --bg-page: #F1F5F9;
       --bg-gradient: radial-gradient(circle at 10% 15%, rgba(217, 119, 6, 0.07) 0%, transparent 45%),
                      radial-gradient(circle at 90% 85%, rgba(30, 58, 138, 0.08) 0%, transparent 50%),
@@ -37,6 +92,7 @@
       --card-subtle-bg: #F8FAFC;
       --card-border: #E2E8F0;
       --card-hover-border: #D97706;
+      --card-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
       
       --comp-legacy-bg: #FFF5F5;
       --comp-legacy-border: #FECACA;
@@ -59,59 +115,6 @@
       --drawer-item-bg: #F8FAFC;
       --drawer-item-border: #E2E8F0;
       --drawer-item-text: #334155;
-    }
-
-    body.dark-mode {
-      /* Tema Oscuro Alternativo (Toggle con D o botón) */
-      --bg-page: #090A12;
-      --bg-gradient: radial-gradient(circle at 10% 15%, rgba(212, 175, 55, 0.08) 0%, transparent 45%),
-                     radial-gradient(circle at 90% 85%, rgba(36, 38, 70, 0.35) 0%, transparent 50%),
-                     #090A12;
-      --slide-bg: radial-gradient(circle at 85% 15%, rgba(36, 38, 70, 0.45) 0%, rgba(21, 22, 40, 0.95) 60%), #111222;
-      --slide-border: rgba(212, 175, 55, 0.22);
-      --slide-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.8), 0 0 35px rgba(212, 175, 55, 0.06);
-      
-      --topbar-bg: rgba(13, 14, 26, 0.94);
-      --bottombar-bg: rgba(13, 14, 26, 0.96);
-      --bar-border: rgba(212, 175, 55, 0.22);
-      
-      --text-main: #F8FAFC;
-      --text-secondary: #CBD5E1;
-      --text-muted: #94A3B8;
-      
-      --cba-navy: #60A5FA;
-      --cba-navy-deep: #FFFFFF;
-      --cba-gold: #FBBF24;
-      --cba-gold-light: rgba(212, 175, 55, 0.15);
-      --cba-gold-accent: #D4AF37;
-      --cba-burgundy: #BE123C;
-      
-      --card-bg: rgba(255, 255, 255, 0.025);
-      --card-subtle-bg: rgba(255, 255, 255, 0.025);
-      --card-border: rgba(255, 255, 255, 0.08);
-      --card-hover-border: #D4AF37;
-      
-      --comp-legacy-bg: rgba(239, 68, 68, 0.02);
-      --comp-legacy-border: rgba(239, 68, 68, 0.35);
-      --comp-legacy-pill-bg: rgba(239, 68, 68, 0.18);
-      --comp-legacy-pill-text: #F87171;
-      --comp-legacy-pill-border: rgba(239, 68, 68, 0.35);
-      
-      --comp-modern-bg: rgba(16, 185, 129, 0.02);
-      --comp-modern-border: rgba(16, 185, 129, 0.4);
-      --comp-modern-pill-bg: rgba(16, 185, 129, 0.18);
-      --comp-modern-pill-text: #34D399;
-      --comp-modern-pill-border: rgba(16, 185, 129, 0.35);
-      
-      --nav-btn-bg: rgba(255, 255, 255, 0.06);
-      --nav-btn-border: rgba(255, 255, 255, 0.12);
-      --nav-btn-text: #FFFFFF;
-      
-      --drawer-bg: #0D0E1A;
-      --drawer-border: rgba(212, 175, 55, 0.22);
-      --drawer-item-bg: rgba(255, 255, 255, 0.03);
-      --drawer-item-border: rgba(255, 255, 255, 0.06);
-      --drawer-item-text: #CBD5E1;
     }
 
     * {
@@ -147,7 +150,7 @@
       justify-content: space-between;
       padding: 0 24px;
       z-index: 1000;
-      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
       transition: all 0.3s ease;
     }
 
@@ -161,12 +164,12 @@
       width: 36px;
       height: 36px;
       object-fit: contain;
-      filter: drop-shadow(0 2px 5px rgba(180, 83, 9, 0.25));
+      filter: drop-shadow(0 2px 8px rgba(212, 175, 55, 0.4));
     }
 
     .brand-title {
       font-weight: 800;
-      font-size: 15.5px;
+      font-size: 16px;
       color: var(--text-main);
       letter-spacing: -0.2px;
       display: flex;
@@ -183,7 +186,7 @@
     .action-icon-btn {
       background: var(--nav-btn-bg);
       border: 1px solid var(--nav-btn-border);
-      color: var(--text-secondary);
+      color: var(--text-main);
       width: 36px;
       height: 36px;
       border-radius: 8px;
@@ -197,7 +200,7 @@
 
     .action-icon-btn:hover {
       background: var(--cba-gold-light);
-      border-color: var(--cba-gold-accent);
+      border-color: var(--cba-gold);
       color: var(--cba-gold);
       transform: translateY(-1px);
     }
@@ -256,7 +259,7 @@
       justify-content: space-between;
       padding: 0 24px;
       z-index: 1000;
-      box-shadow: 0 -1px 3px rgba(15, 23, 42, 0.02);
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.35);
       transition: all 0.3s ease;
     }
 
@@ -264,7 +267,7 @@
       flex: 1;
       max-width: 420px;
       height: 6px;
-      background: #E2E8F0;
+      background: rgba(255, 255, 255, 0.12);
       border-radius: 3px;
       overflow: hidden;
       margin: 0 20px;
@@ -272,13 +275,13 @@
 
     .progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, #1E3A8A, #D97706);
+      background: linear-gradient(90deg, #991B1B, #D4AF37, #FBBF24);
       width: 0%;
       transition: width 0.3s ease;
     }
 
     .slide-counter {
-      font-size: 13px;
+      font-size: 13.5px;
       font-weight: 800;
       color: var(--cba-gold);
       letter-spacing: 1px;
@@ -294,7 +297,7 @@
       background: var(--nav-btn-bg);
       border: 1px solid var(--nav-btn-border);
       color: var(--nav-btn-text);
-      padding: 6px 16px;
+      padding: 7px 18px;
       border-radius: 8px;
       font-size: 12.5px;
       font-weight: 700;
@@ -306,14 +309,14 @@
     }
 
     .nav-btn:hover:not(:disabled) {
-      background: #1E3A8A;
-      color: #FFFFFF;
-      border-color: #1E3A8A;
-      box-shadow: 0 4px 12px rgba(30, 58, 138, 0.25);
+      background: #FBBF24;
+      color: #0B0D18;
+      border-color: #FBBF24;
+      box-shadow: 0 0 14px rgba(251, 191, 36, 0.4);
     }
 
     .nav-btn:disabled {
-      opacity: 0.3;
+      opacity: 0.25;
       cursor: not-allowed;
     }
 
@@ -323,7 +326,7 @@
       font-weight: 800;
       color: var(--cba-gold);
       text-transform: uppercase;
-      letter-spacing: 1.6px;
+      letter-spacing: 1.8px;
       margin-bottom: 4px;
       display: flex;
       align-items: center;
@@ -335,13 +338,13 @@
       display: inline-block;
       width: 7px;
       height: 7px;
-      background: var(--cba-gold-accent);
+      background: var(--cba-gold);
       border-radius: 50%;
-      box-shadow: 0 0 6px rgba(217, 119, 6, 0.45);
+      box-shadow: 0 0 8px var(--cba-gold);
     }
 
     .slide-title {
-      font-size: 27px;
+      font-size: 28px;
       font-weight: 800;
       color: var(--text-main);
       line-height: 1.25;
@@ -364,9 +367,9 @@
       font-weight: 700;
       padding: 3px 10px;
       border-radius: 20px;
-      background: #FEF3C7;
-      color: #92400E;
-      border: 1px solid #FCD34D;
+      background: var(--cba-gold-light);
+      color: var(--cba-gold);
+      border: 1px solid var(--cba-gold);
       margin-left: 10px;
       vertical-align: middle;
     }
@@ -386,13 +389,13 @@
       line-height: 1.15;
       letter-spacing: -0.8px;
       margin-bottom: 14px;
-      background: linear-gradient(135deg, #0F172A 25%, #1E3A8A 70%, #B45309 100%);
+      background: linear-gradient(135deg, #FFFFFF 35%, #E2E8F0 70%, #FBBF24 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
-    body.dark-mode .hero-h1 {
-      background: linear-gradient(135deg, #FFFFFF 30%, #E2E8F0 70%, #FBBF24 100%);
+    body.light-mode .hero-h1 {
+      background: linear-gradient(135deg, #0F172A 25%, #1E3A8A 70%, #B45309 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
@@ -411,42 +414,37 @@
     }
 
     .hero-stat-card {
-      background: var(--card-subtle-bg);
+      background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 10px;
       padding: 14px;
       transition: all 0.2s ease;
-      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
+      box-shadow: var(--card-shadow);
     }
 
     .hero-stat-card:hover {
-      background: #FEF3C7;
-      border-color: #F59E0B;
-      transform: translateY(-2px);
-      box-shadow: 0 8px 16px rgba(245, 158, 11, 0.12);
-    }
-
-    body.dark-mode .hero-stat-card:hover {
-      background: rgba(212, 175, 55, 0.08);
+      background: rgba(251, 191, 36, 0.08);
       border-color: var(--cba-gold);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
     }
 
     .hero-stat-num {
-      font-size: 22px;
+      font-size: 24px;
       font-weight: 800;
-      color: var(--cba-navy);
+      color: var(--cba-gold);
       margin-bottom: 2px;
     }
 
     .hero-stat-label {
-      font-size: 11.5px;
-      color: var(--text-muted);
+      font-size: 12px;
+      color: var(--text-secondary);
       font-weight: 600;
       line-height: 1.35;
     }
 
     .hero-visual {
-      background: radial-gradient(circle at center, rgba(212, 175, 55, 0.15), rgba(241, 245, 249, 0.6) 70%);
+      background: radial-gradient(circle at center, rgba(212, 175, 55, 0.15), rgba(24, 29, 56, 0.7) 70%);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -455,19 +453,14 @@
       padding: 24px;
       border-radius: 14px;
       border: 1px solid var(--card-border);
-      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
-    }
-
-    body.dark-mode .hero-visual {
-      background: radial-gradient(circle at center, rgba(212, 175, 55, 0.12), transparent 70%);
-      border: 1px solid rgba(255, 255, 255, 0.06);
+      box-shadow: var(--card-shadow);
     }
 
     .hero-crest-lg {
       width: 125px;
       height: 125px;
       object-fit: contain;
-      filter: drop-shadow(0 4px 14px rgba(212, 175, 55, 0.35));
+      filter: drop-shadow(0 4px 16px rgba(212, 175, 55, 0.5));
       margin-bottom: 16px;
     }
 
@@ -493,13 +486,13 @@
     .comp-col.legacy {
       border-color: var(--comp-legacy-border);
       background: var(--comp-legacy-bg);
-      box-shadow: 0 4px 14px rgba(239, 68, 68, 0.04);
+      box-shadow: 0 4px 14px rgba(239, 68, 68, 0.06);
     }
 
     .comp-col.modern {
       border-color: var(--comp-modern-border);
       background: var(--comp-modern-bg);
-      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.06);
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.08);
     }
 
     .comp-header {
@@ -508,11 +501,11 @@
       justify-content: space-between;
       margin-bottom: 12px;
       padding-bottom: 8px;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    body.dark-mode .comp-header {
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    body.light-mode .comp-header {
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
     }
 
     .comp-pill {
@@ -540,12 +533,12 @@
       position: relative;
       border-radius: 8px;
       overflow: hidden;
-      border: 1px solid #CBD5E1;
-      background: #0F172A;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: #000000;
       height: 250px;
       margin-bottom: 14px;
       cursor: zoom-in;
-      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
     }
 
     .comp-media-wrapper img {
@@ -564,7 +557,7 @@
       position: absolute;
       bottom: 8px;
       right: 8px;
-      background: rgba(15, 23, 42, 0.85);
+      background: rgba(0, 0, 0, 0.85);
       padding: 3px 8px;
       border-radius: 4px;
       font-size: 9.5px;
@@ -623,12 +616,12 @@
       flex-direction: column;
       transition: all 0.2s ease;
       position: relative;
-      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+      box-shadow: var(--card-shadow);
     }
 
     .task-card:hover {
       border-color: var(--card-hover-border);
-      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.07);
+      box-shadow: 0 10px 26px -2px rgba(0, 0, 0, 0.55);
       transform: translateY(-2px);
     }
 
@@ -638,11 +631,11 @@
       justify-content: space-between;
       margin-bottom: 10px;
       padding-bottom: 8px;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    body.dark-mode .task-card-header {
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    body.light-mode .task-card-header {
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     }
 
     .task-card-header-left {
@@ -652,18 +645,18 @@
     }
 
     .task-card-icon {
-      width: 32px;
-      height: 32px;
+      width: 34px;
+      height: 34px;
       border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 15px;
+      font-size: 16px;
       flex-shrink: 0;
     }
 
     .task-card-title {
-      font-size: 13px;
+      font-size: 13.5px;
       font-weight: 800;
       color: var(--text-main);
       line-height: 1.2;
@@ -678,7 +671,7 @@
     }
 
     .task-count-badge {
-      font-size: 9px;
+      font-size: 9.5px;
       font-weight: 800;
       padding: 2px 7px;
       border-radius: 10px;
@@ -689,7 +682,7 @@
       list-style: none;
       display: flex;
       flex-direction: column;
-      gap: 5px;
+      gap: 6px;
       overflow-y: auto;
       flex: 1;
       padding-right: 4px;
@@ -700,7 +693,7 @@
     }
 
     .task-list::-webkit-scrollbar-thumb {
-      background: rgba(217, 119, 6, 0.35);
+      background: var(--cba-gold);
       border-radius: 4px;
     }
 
@@ -708,18 +701,23 @@
       display: flex;
       align-items: flex-start;
       gap: 6px;
-      font-size: 10.5px;
-      line-height: 1.35;
+      font-size: 11px;
+      line-height: 1.38;
       color: var(--text-secondary);
     }
 
     .task-item strong {
-      color: var(--text-main);
+      color: #FFFFFF;
+      font-weight: 700;
+    }
+
+    body.light-mode .task-item strong {
+      color: #0F172A;
     }
 
     .task-item-bullet {
-      color: var(--cba-gold-accent);
-      font-size: 9px;
+      color: var(--cba-gold);
+      font-size: 10px;
       line-height: 1.35;
       flex-shrink: 0;
       margin-top: 2px;
@@ -734,18 +732,18 @@
       flex-direction: column;
       transition: all 0.25s ease;
       position: relative;
-      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+      box-shadow: var(--card-shadow);
     }
 
     .feature-card:hover {
       border-color: var(--card-hover-border);
-      box-shadow: 0 10px 24px rgba(217, 119, 6, 0.12);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6);
       transform: translateY(-3px);
     }
 
     .feature-icon-circle {
-      width: 42px;
-      height: 42px;
+      width: 44px;
+      height: 44px;
       border-radius: 10px;
       display: flex;
       align-items: center;
@@ -755,15 +753,15 @@
     }
 
     .feature-card-title {
-      font-size: 16.5px;
+      font-size: 17px;
       font-weight: 800;
       color: var(--text-main);
       margin-bottom: 8px;
     }
 
     .feature-card-desc {
-      font-size: 12.5px;
-      color: var(--text-muted);
+      font-size: 13px;
+      color: var(--text-secondary);
       line-height: 1.5;
       flex: 1;
     }
@@ -773,7 +771,7 @@
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(15, 23, 42, 0.85);
+      background: rgba(0, 0, 0, 0.92);
       backdrop-filter: blur(8px);
       z-index: 2000;
       align-items: center;
@@ -791,9 +789,9 @@
       max-height: 90vh;
       border-radius: 10px;
       overflow: hidden;
-      border: 1px solid var(--card-border);
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-      background: #0F172A;
+      border: 1px solid var(--cba-gold);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
+      background: #0D0E1A;
     }
 
     .zoom-modal-img {
@@ -805,7 +803,7 @@
 
     .zoom-modal-caption {
       padding: 10px 16px;
-      background: #1E293B;
+      background: #141730;
       color: #FFFFFF;
       font-size: 13px;
       font-weight: 600;
@@ -834,7 +832,7 @@
       width: 320px;
       background: var(--drawer-bg);
       border-left: 1px solid var(--drawer-border);
-      box-shadow: -10px 0 30px rgba(15, 23, 42, 0.08);
+      box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
       transition: right 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       z-index: 999;
       display: flex;
@@ -864,7 +862,7 @@
     }
 
     .drawer-item {
-      padding: 9px 12px;
+      padding: 10px 14px;
       border-radius: 8px;
       background: var(--drawer-item-bg);
       border: 1px solid var(--drawer-item-border);
@@ -876,13 +874,7 @@
     }
 
     .drawer-item:hover, .drawer-item.active {
-      background: #FEF3C7;
-      border-color: #F59E0B;
-      color: #92400E;
-    }
-
-    body.dark-mode .drawer-item:hover, body.dark-mode .drawer-item.active {
-      background: rgba(212, 175, 55, 0.15);
+      background: rgba(251, 191, 36, 0.16);
       border-color: var(--cba-gold);
       color: var(--cba-gold);
     }
@@ -894,29 +886,19 @@
       font-size: 12px;
       line-height: 1.45;
     }
-    .scale-box.inicial { background: #EFF6FF; border: 1px solid #BFDBFE; color: #1E40AF; }
-    .scale-box.primaria { background: #ECFDF5; border: 1px solid #A7F3D0; color: #065F46; }
-    .scale-box.media { background: #FEF3C7; border: 1px solid #FDE68A; color: #92400E; }
-
-    body.dark-mode .scale-box.inicial { background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); color: #93C5FD; }
-    body.dark-mode .scale-box.primaria { background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); color: #6EE7B7; }
-    body.dark-mode .scale-box.media { background: rgba(212, 175, 55, 0.08); border: 1px solid rgba(212, 175, 55, 0.25); color: #FDE68A; }
+    .scale-box.inicial { background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.4); color: #93C5FD; }
+    .scale-box.primaria { background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #6EE7B7; }
+    .scale-box.media { background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.4); color: #FDE68A; }
 
     .kbd-hint {
-      background: #F1F5F9;
+      background: rgba(255, 255, 255, 0.1);
       padding: 2px 6px;
       border-radius: 4px;
       font-size: 10px;
       font-family: monospace;
-      color: #1E3A8A;
-      font-weight: 700;
-      border: 1px solid #CBD5E1;
-    }
-
-    body.dark-mode .kbd-hint {
-      background: rgba(255, 255, 255, 0.08);
       color: var(--cba-gold);
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      font-weight: 700;
+      border: 1px solid rgba(255, 255, 255, 0.18);
     }
   </style>
 </head>
@@ -932,7 +914,7 @@
     </div>
 
     <div class="top-actions">
-      <button class="action-icon-btn" onclick="toggleTheme()" id="themeBtn" title="Cambiar Tema (D)">🌙</button>
+      <button class="action-icon-btn" onclick="toggleTheme()" id="themeBtn" title="Alternar Modo de Pantalla (D)">🌓</button>
       <button class="action-icon-btn" onclick="toggleDrawer()" title="Índice de Diapositivas (T)">☰</button>
       <button class="action-icon-btn" onclick="toggleFullScreen()" title="Pantalla Completa (F)">⛶</button>
     </div>
@@ -974,7 +956,7 @@
         </div>
         <div class="hero-visual">
           <img src="./assets/logo-cba-gold.png" alt="Escudo CBA" class="hero-crest-lg" onerror="this.src='../logo-cba-gold.png'">
-          <h3 style="font-size: 17px; font-weight: 800; color: var(--text-main); margin-bottom: 14px;">U.E.P. Colegio Bellas Artes</h3>
+          <h3 style="font-size: 17px; font-weight: 800; color: #FFFFFF; margin-bottom: 14px;">U.E.P. Colegio Bellas Artes</h3>
           <p style="font-size: 11.5px; color: var(--text-muted);">
             Navega con <span class="kbd-hint">◀</span> <span class="kbd-hint">▶</span> o <span class="kbd-hint">Espacio</span>.
           </p>
@@ -990,35 +972,35 @@
 
       <div class="card-grid-3">
         <div class="feature-card">
-          <div class="feature-icon-circle" style="background: #FEE2E2; color: #DC2626; border: 1px solid #FCA5A5;">
+          <div class="feature-icon-circle" style="background: rgba(239, 68, 68, 0.18); color: #FCA5A5; border: 1px solid rgba(239, 68, 68, 0.35);">
             📡
           </div>
           <h3 class="feature-card-title">1. Infraestructura</h3>
           <p class="feature-card-desc">
-            <strong style="color: #DC2626;">CEO (Anterior):</strong> Hosting web externo. Cualquier caída de internet en el plantel paralizaba las inscripciones y la carga de notas.<br><br>
-            <strong style="color: #059669;">SICE-CBA (Nuevo):</strong> 100% On-Premise. La base de datos opera dentro de la red del colegio. Inmune a fallas de internet externo.
+            <strong style="color: #F87171;">CEO (Anterior):</strong> Hosting web externo. Cualquier caída de internet en el plantel paralizaba las inscripciones y la carga de notas.<br><br>
+            <strong style="color: #34D399;">SICE-CBA (Nuevo):</strong> 100% On-Premise. La base de datos opera dentro de la red del colegio. Inmune a fallas de internet externo.
           </p>
         </div>
 
         <div class="feature-card">
-          <div class="feature-icon-circle" style="background: #EFF6FF; color: #2563EB; border: 1px solid #BFDBFE;">
+          <div class="feature-icon-circle" style="background: rgba(59, 130, 246, 0.18); color: #93C5FD; border: 1px solid rgba(59, 130, 246, 0.35);">
             ⚡
           </div>
           <h3 class="feature-card-title">2. Velocidad y Fluidez</h3>
           <p class="feature-card-desc">
-            <strong style="color: #DC2626;">CEO (Anterior):</strong> PHP clásico de 2012 con más de 136 URLs dispersas. Recargas completas de pantalla (F5) en cada acción.<br><br>
-            <strong style="color: #059669;">SICE-CBA (Nuevo):</strong> Aplicación reactiva de página única (SPA). Guardado continuo celda por celda sin pérdida de datos.
+            <strong style="color: #F87171;">CEO (Anterior):</strong> PHP clásico de 2012 con más de 136 URLs dispersas. Recargas completas de pantalla (F5) en cada acción.<br><br>
+            <strong style="color: #34D399;">SICE-CBA (Nuevo):</strong> Aplicación reactiva de página única (SPA). Guardado continuo celda por celda sin pérdida de datos.
           </p>
         </div>
 
         <div class="feature-card">
-          <div class="feature-icon-circle" style="background: #FEF3C7; color: #D97706; border: 1px solid #FCD34D;">
+          <div class="feature-icon-circle" style="background: rgba(251, 191, 36, 0.18); color: #FDE68A; border: 1px solid rgba(251, 191, 36, 0.35);">
             ⚖️
           </div>
           <h3 class="feature-card-title">3. Legalidad y Control</h3>
           <p class="feature-card-desc">
-            <strong style="color: #DC2626;">CEO (Anterior):</strong> Promedios numéricos indebidos en Inicial/Primaria y proliferación de secciones desordenadas (C, D, U).<br><br>
-            <strong style="color: #059669;">SICE-CBA (Nuevo):</strong> Apego total a las normas del MPPE, roles blindados y únicamente Secciones A y B oficiales.
+            <strong style="color: #F87171;">CEO (Anterior):</strong> Promedios numéricos indebidos en Inicial/Primaria y proliferación de secciones desordenadas (C, D, U).<br><br>
+            <strong style="color: #34D399;">SICE-CBA (Nuevo):</strong> Apego total a las normas del MPPE, roles blindados y únicamente Secciones A y B oficiales.
           </p>
         </div>
       </div>
@@ -1042,11 +1024,11 @@
           </div>
           <ul class="comp-list">
             <li class="comp-list-item">
-              <span class="comp-icon" style="color: #DC2626;">✕</span>
+              <span class="comp-icon" style="color: #EF4444;">✕</span>
               <span>Menú lateral rígido con opciones redundantes que sobrecargaban al usuario.</span>
             </li>
             <li class="comp-list-item">
-              <span class="comp-icon" style="color: #DC2626;">✕</span>
+              <span class="comp-icon" style="color: #EF4444;">✕</span>
               <span>Consultas lentas para actualizar contadores y sin soporte de búsqueda rápida.</span>
             </li>
           </ul>
@@ -1055,7 +1037,7 @@
         <div class="comp-col modern">
           <div class="comp-header">
             <span class="comp-pill modern">SICE-CBA (Nuevo Sistema)</span>
-            <span style="font-size: 11px; color: #059669;">Academic Pulse Hero</span>
+            <span style="font-size: 11px; color: #34D399;">Academic Pulse Hero</span>
           </div>
           <div class="comp-media-wrapper" onclick="openZoom('./assets/sisceba_dashboard_real.png', 'SICE-CBA: Dashboard en tiempo real con estadísticas y accesos directos')">
             <img src="./assets/sisceba_dashboard_real.png" alt="SICE-CBA Dashboard">
@@ -1063,11 +1045,11 @@
           </div>
           <ul class="comp-list">
             <li class="comp-list-item">
-              <span class="comp-icon" style="color: #059669;">✓</span>
+              <span class="comp-icon" style="color: #10B981;">✓</span>
               <span><strong>Métricas en Vivo:</strong> Matrícula activa, estado del lapso y resumen de asistencia al instante.</span>
             </li>
             <li class="comp-list-item">
-              <span class="comp-icon" style="color: #059669;">✓</span>
+              <span class="comp-icon" style="color: #10B981;">✓</span>
               <span>Buscador global <span class="kbd-hint">Ctrl+K</span> y atajos de teclado para navegación inmediata.</span>
             </li>
           </ul>
@@ -1085,7 +1067,7 @@
         <div class="comp-col legacy">
           <div class="comp-header">
             <span class="comp-pill legacy">CEO (Sistema Anterior)</span>
-            <span style="font-size: 11px; color: #DC2626;">Secciones No Normadas</span>
+            <span style="font-size: 11px; color: #F87171;">Secciones No Normadas</span>
           </div>
           <div class="comp-media-wrapper" onclick="openZoom('./assets/ceo_alumnos.png', 'CEO Anterior: Lista de alumnos con filtros y secciones residuales')">
             <img src="./assets/ceo_alumnos.png" alt="CEO Alumnos">
@@ -1093,11 +1075,11 @@
           </div>
           <ul class="comp-list">
             <li class="comp-list-item">
-              <span class="comp-icon" style="color: #DC2626;">✕</span>
+              <span class="comp-icon" style="color: #EF4444;">✕</span>
               <span>Aparición de secciones ficticias (`C`, `D`, `U`) que descuadraban los listados oficiales.</span>
             </li>
             <li class="comp-list-item">
-              <span class="comp-icon" style="color: #DC2626;">✕</span>
+              <span class="comp-icon" style="color: #EF4444;">✕</span>
               <span>Formatos de tabla rígidos y lentos para filtrar por grado o nivel.</span>
             </li>
           </ul>
@@ -1106,7 +1088,7 @@
         <div class="comp-col modern">
           <div class="comp-header">
             <span class="comp-pill modern">SICE-CBA (Nuevo Sistema)</span>
-            <span style="font-size: 11px; color: #059669;">Regla Institucional Inviolable</span>
+            <span style="font-size: 11px; color: #34D399;">Regla Institucional Inviolable</span>
           </div>
           <div class="comp-media-wrapper" onclick="openZoom('./assets/sisceba_gestion_real.png', 'SICE-CBA: Módulo de Gestión con matrícula exclusiva y Secciones estrictas A y B')">
             <img src="./assets/sisceba_gestion_real.png" alt="SICE-CBA Gestión">
@@ -1114,11 +1096,11 @@
           </div>
           <ul class="comp-list">
             <li class="comp-list-item">
-              <span class="comp-icon" style="color: #059669;">✓</span>
+              <span class="comp-icon" style="color: #10B981;">✓</span>
               <span><strong>Exclusivamente Secciones A y B:</strong> Todos los formularios y reportes bloquean secciones espurias.</span>
             </li>
             <li class="comp-list-item">
-              <span class="comp-icon" style="color: #059669;">✓</span>
+              <span class="comp-icon" style="color: #10B981;">✓</span>
               <span><strong>Matrícula Blindada:</strong> Acceso y prosecución exclusiva para el rol <code>ADMINISTRADOR</code>.</span>
             </li>
           </ul>
@@ -1137,7 +1119,7 @@
         <div class="task-card">
           <div class="task-card-header">
             <div class="task-card-header-left">
-              <div class="task-card-icon" style="background: #FEF3C7; color: #B45309; border: 1px solid #FCD34D;">
+              <div class="task-card-icon" style="background: rgba(251, 191, 36, 0.18); color: #FDE68A; border: 1px solid rgba(251, 191, 36, 0.45);">
                 🏛️
               </div>
               <div>
@@ -1145,7 +1127,7 @@
                 <div class="task-card-subtitle">Supervisión General</div>
               </div>
             </div>
-            <span class="task-count-badge" style="background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D;">10 Tareas</span>
+            <span class="task-count-badge" style="background: rgba(251, 191, 36, 0.18); color: #FDE68A; border: 1px solid rgba(251, 191, 36, 0.45);">10 Tareas</span>
           </div>
           <ul class="task-list">
             <li class="task-item">
@@ -1195,7 +1177,7 @@
         <div class="task-card">
           <div class="task-card-header">
             <div class="task-card-header-left">
-              <div class="task-card-icon" style="background: #EFF6FF; color: #2563EB; border: 1px solid #BFDBFE;">
+              <div class="task-card-icon" style="background: rgba(59, 130, 246, 0.18); color: #93C5FD; border: 1px solid rgba(59, 130, 246, 0.45);">
                 🧸
               </div>
               <div>
@@ -1203,7 +1185,7 @@
                 <div class="task-card-subtitle">Maternal & Preescolar</div>
               </div>
             </div>
-            <span class="task-count-badge" style="background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE;">5 Tareas</span>
+            <span class="task-count-badge" style="background: rgba(59, 130, 246, 0.18); color: #93C5FD; border: 1px solid rgba(59, 130, 246, 0.45);">5 Tareas</span>
           </div>
           <ul class="task-list">
             <li class="task-item">
@@ -1233,7 +1215,7 @@
         <div class="task-card">
           <div class="task-card-header">
             <div class="task-card-header-left">
-              <div class="task-card-icon" style="background: #ECFDF5; color: #059669; border: 1px solid #A7F3D0;">
+              <div class="task-card-icon" style="background: rgba(16, 185, 129, 0.18); color: #6EE7B7; border: 1px solid rgba(16, 185, 129, 0.45);">
                 🌱
               </div>
               <div>
@@ -1241,7 +1223,7 @@
                 <div class="task-card-subtitle">1.° a 6.° Grado</div>
               </div>
             </div>
-            <span class="task-count-badge" style="background: #ECFDF5; color: #047857; border: 1px solid #A7F3D0;">8 Tareas</span>
+            <span class="task-count-badge" style="background: rgba(16, 185, 129, 0.18); color: #6EE7B7; border: 1px solid rgba(16, 185, 129, 0.45);">8 Tareas</span>
           </div>
           <ul class="task-list">
             <li class="task-item">
@@ -1283,7 +1265,7 @@
         <div class="task-card">
           <div class="task-card-header">
             <div class="task-card-header-left">
-              <div class="task-card-icon" style="background: #F3E8FF; color: #7E22CE; border: 1px solid #DDD6FE;">
+              <div class="task-card-icon" style="background: rgba(168, 85, 247, 0.18); color: #E9D5FF; border: 1px solid rgba(168, 85, 247, 0.45);">
                 🎓
               </div>
               <div>
@@ -1291,7 +1273,7 @@
                 <div class="task-card-subtitle">1.° a 5.° Año</div>
               </div>
             </div>
-            <span class="task-count-badge" style="background: #F3E8FF; color: #6B21A8; border: 1px solid #DDD6FE;">10 Tareas</span>
+            <span class="task-count-badge" style="background: rgba(168, 85, 247, 0.18); color: #E9D5FF; border: 1px solid rgba(168, 85, 247, 0.45);">10 Tareas</span>
           </div>
           <ul class="task-list">
             <li class="task-item">
@@ -1347,7 +1329,7 @@
 
       <div class="card-grid-3">
         <div class="feature-card">
-          <div class="feature-icon-circle" style="background: #EFF6FF; color: #2563EB; border: 1px solid #BFDBFE;">
+          <div class="feature-icon-circle" style="background: rgba(59, 130, 246, 0.18); color: #93C5FD; border: 1px solid rgba(59, 130, 246, 0.35);">
             🧸
           </div>
           <h3 class="feature-card-title">Educación Inicial</h3>
@@ -1361,7 +1343,7 @@
         </div>
 
         <div class="feature-card">
-          <div class="feature-icon-circle" style="background: #ECFDF5; color: #059669; border: 1px solid #A7F3D0;">
+          <div class="feature-icon-circle" style="background: rgba(16, 185, 129, 0.18); color: #6EE7B7; border: 1px solid rgba(16, 185, 129, 0.35);">
             🌱
           </div>
           <h3 class="feature-card-title">Educación Primaria</h3>
@@ -1375,7 +1357,7 @@
         </div>
 
         <div class="feature-card">
-          <div class="feature-icon-circle" style="background: #FEF3C7; color: #B45309; border: 1px solid #FCD34D;">
+          <div class="feature-icon-circle" style="background: rgba(251, 191, 36, 0.18); color: #FDE68A; border: 1px solid rgba(251, 191, 36, 0.35);">
             🎓
           </div>
           <h3 class="feature-card-title">Media General & Roles</h3>
@@ -1403,21 +1385,21 @@
           </p>
           <div class="feature-card" style="margin-bottom: 16px;">
             <div style="display: flex; flex-direction: column; gap: 8px; font-size: 12.5px; color: var(--text-secondary); line-height: 1.45;">
-              <div><strong style="color: #059669;">1. Fase Actual (En Curso): Pruebas Locales</strong> — Simulación de notas, escalas oficiales y validación con directivos.</div>
+              <div><strong style="color: #34D399;">1. Fase Actual (En Curso): Pruebas Locales</strong> — Simulación de notas, escalas oficiales y validación con directivos.</div>
               <div><strong style="color: var(--cba-gold);">2. Próximo Hito: Servidores del Colegio</strong> — Instalación de PostgreSQL 16 y Node.js en el hardware institucional del CBA.</div>
-              <div><strong style="color: #2563EB;">3. Inducción al Personal</strong> — Entrega de Códigos de Autorización para registro de docentes y secretaría.</div>
-              <div><strong style="color: #DC2626;">4. Apagado de CEO</strong> — Migración oficial de nóminas y desincorporación del hosting PHP antiguo.</div>
+              <div><strong style="color: #60A5FA;">3. Inducción al Personal</strong> — Entrega de Códigos de Autorización para registro de docentes y secretaría.</div>
+              <div><strong style="color: #F87171;">4. Apagado de CEO</strong> — Migración oficial de nóminas y desincorporación del hosting PHP antiguo.</div>
             </div>
           </div>
         </div>
 
         <div class="hero-visual">
           <div style="font-size: 42px; margin-bottom: 10px;">💬</div>
-          <h3 style="font-size: 19px; font-weight: 800; color: var(--text-main); margin-bottom: 6px;">Preguntas y Respuestas</h3>
+          <h3 style="font-size: 19px; font-weight: 800; color: #FFFFFF; margin-bottom: 6px;">Preguntas y Respuestas</h3>
           <p style="font-size: 12px; color: var(--text-muted); line-height: 1.45; margin-bottom: 16px;">
             Espacio abierto para atender inquietudes de Directiva, Docentes y Personal Técnico.
           </p>
-          <div style="padding: 8px 14px; background: #FEF3C7; border: 1px solid #FCD34D; border-radius: 6px; font-size: 11px; color: #92400E; font-weight: 700;">
+          <div style="padding: 8px 14px; background: rgba(212, 175, 55, 0.15); border: 1px solid var(--cba-gold); border-radius: 6px; font-size: 11px; color: var(--cba-gold); font-weight: 700;">
             SICE-CBA · Excelencia Educativa Bellas Artes
           </div>
         </div>
@@ -1515,26 +1497,26 @@
       }
     }
 
-    // Theme Toggle (Default Light Institutional with Dark Mode switch)
+    // Theme Toggle (Default High-Contrast CBA Navy & Gold, with Light Mode switch)
     function toggleTheme() {
-      document.body.classList.toggle('dark-mode');
-      const isDark = document.body.classList.contains('dark-mode');
-      localStorage.setItem('siceba_theme', isDark ? 'dark' : 'light');
+      document.body.classList.toggle('light-mode');
+      const isLight = document.body.classList.contains('light-mode');
+      localStorage.setItem('siceba_theme', isLight ? 'light' : 'navy');
       const btn = document.getElementById('themeBtn');
       if (btn) {
-        btn.textContent = isDark ? '☀️' : '🌙';
-        btn.title = isDark ? 'Cambiar a Tema Claro (D)' : 'Cambiar a Tema Oscuro (D)';
+        btn.textContent = isLight ? '🌙' : '☀️';
+        btn.title = isLight ? 'Cambiar a Azul Marino CBA (D)' : 'Cambiar a Modo Claro (D)';
       }
     }
 
-    // Init saved theme (Default is light if unset)
+    // Init saved theme (Default is high-contrast navy if unset)
     const savedTheme = localStorage.getItem('siceba_theme');
-    if (savedTheme === 'dark') {
-      document.body.classList.add('dark-mode');
+    if (savedTheme === 'light') {
+      document.body.classList.add('light-mode');
       const btn = document.getElementById('themeBtn');
       if (btn) {
-        btn.textContent = '☀️';
-        btn.title = 'Cambiar a Tema Claro (D)';
+        btn.textContent = '🌙';
+        btn.title = 'Cambiar a Azul Marino CBA (D)';
       }
     }
 
