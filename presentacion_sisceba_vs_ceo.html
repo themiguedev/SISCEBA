@@ -64,342 +64,634 @@
     }
 
     body.light-mode {
-      /* Tema Claro Institucional CBA de Alto Contraste */
-      --bg-page: #E2E8F0;
-      --bg-gradient: radial-gradient(circle at 10% 15%, rgba(180, 83, 9, 0.10) 0%, transparent 45%),
-                     radial-gradient(circle at 90% 85%, rgba(30, 58, 138, 0.12) 0%, transparent 50%),
-                     #E2E8F0;
+      /* Tema Claro Institucional CBA Ultra-Visible & Alto Contraste */
+      --bg-page: #CBD5E1;
+      --bg-gradient: radial-gradient(circle at 10% 15%, rgba(180, 83, 9, 0.15) 0%, transparent 45%),
+                     radial-gradient(circle at 90% 85%, rgba(30, 58, 138, 0.18) 0%, transparent 50%),
+                     #CBD5E1;
       --slide-bg: #FFFFFF;
-      --slide-border: #CBD5E1;
-      --slide-shadow: 0 24px 50px -10px rgba(15, 23, 42, 0.18), 0 4px 16px rgba(15, 23, 42, 0.08);
+      --slide-border: #64748B;
+      --slide-shadow: 0 25px 65px -10px rgba(15, 23, 42, 0.28), 0 0 0 2px rgba(15, 23, 42, 0.1);
       
       --topbar-bg: #FFFFFF;
       --bottombar-bg: #FFFFFF;
-      --bar-border: #CBD5E1;
+      --bar-border: #94A3B8;
       
-      --text-main: #0B132B;
-      --text-secondary: #1E293B;
-      --text-muted: #475569;
+      --text-main: #000000;
+      --text-secondary: #0F172A;
+      --text-muted: #334155;
       
       --cba-navy: #1E3A8A;
       --cba-navy-deep: #0F172A;
-      --cba-gold: #B45309;
+      --cba-gold: #92400E;
       --cba-gold-light: #FEF3C7;
-      --cba-gold-accent: #92400E;
+      --cba-gold-accent: #78350F;
       --cba-burgundy: #881337;
       
-      /* Tarjetas sólidas sobre lienzo blanco con marcos definidos */
-      --card-bg: #F8FAFC;
-      --card-subtle-bg: #F1F5F9;
-      --card-border: #CBD5E1;
+      /* Tarjetas de Alto Contraste con Marcos Sólidos */
+      --card-bg: #FFFFFF;
+      --card-subtle-bg: #F8FAFC;
+      --card-border: #94A3B8;
       --card-hover-border: #B45309;
-      --card-shadow: 0 4px 14px -2px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.05);
+      --card-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.12), 0 1px 3px rgba(15, 23, 42, 0.08);
       
-      --comp-legacy-bg: #FEF2F2;
-      --comp-legacy-border: #F87171;
-      --comp-legacy-pill-bg: #FEE2E2;
-      --comp-legacy-pill-text: #991B1B;
-      --comp-legacy-pill-border: #F87171;
+      --comp-legacy-bg: #FFF5F5;
+      --comp-legacy-border: #DC2626;
+      --comp-legacy-pill-bg: #DC2626;
+      --comp-legacy-pill-text: #FFFFFF;
+      --comp-legacy-pill-border: #B91C1C;
       
       --comp-modern-bg: #F0FDF4;
-      --comp-modern-border: #34D399;
-      --comp-modern-pill-bg: #DCFCE7;
-      --comp-modern-pill-text: #065F46;
-      --comp-modern-pill-border: #34D399;
+      --comp-modern-border: #059669;
+      --comp-modern-pill-bg: #059669;
+      --comp-modern-pill-text: #FFFFFF;
+      --comp-modern-pill-border: #047857;
       
-      --nav-btn-bg: #FFFFFF;
-      --nav-btn-border: #CBD5E1;
-      --nav-btn-text: #0B132B;
+      --nav-btn-bg: #0F172A;
+      --nav-btn-border: #0F172A;
+      --nav-btn-text: #FFFFFF;
       
       --drawer-bg: #FFFFFF;
-      --drawer-border: #CBD5E1;
+      --drawer-border: #94A3B8;
       --drawer-item-bg: #F8FAFC;
       --drawer-item-border: #CBD5E1;
-      --drawer-item-text: #1E293B;
+      --drawer-item-text: #0F172A;
     }
 
-    /* Refuerzos de Contraste en Modo Claro */
+    /* Refuerzos de Visibilidad y Alto Contraste en Modo Claro */
+    body.light-mode .slide {
+      border: 2px solid #64748B !important;
+      background: #FFFFFF !important;
+    }
+
+    body.light-mode .top-bar {
+      border-bottom: 2px solid #94A3B8 !important;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.08) !important;
+    }
+
+    body.light-mode .bottom-bar {
+      border-top: 2px solid #94A3B8 !important;
+      box-shadow: 0 -2px 10px rgba(15, 23, 42, 0.08) !important;
+    }
+
     body.light-mode .hero-h1 {
-      background: linear-gradient(135deg, #0B132B 30%, #1E3A8A 70%, #B45309 100%) !important;
+      background: linear-gradient(135deg, #000000 30%, #1E3A8A 70%, #92400E 100%) !important;
       -webkit-background-clip: text !important;
       -webkit-text-fill-color: transparent !important;
+      font-weight: 900 !important;
+    }
+
+    body.light-mode .hero-desc {
+      color: #0F172A !important;
+      font-size: 16px !important;
+      font-weight: 500 !important;
+    }
+
+    body.light-mode .hero-desc strong {
+      color: #000000 !important;
+      font-weight: 800 !important;
     }
 
     body.light-mode .slide-title {
-      color: #0B132B !important;
+      color: #000000 !important;
+      font-size: 29px !important;
+      font-weight: 900 !important;
     }
 
     body.light-mode .slide-subtitle {
-      color: #475569 !important;
-      font-weight: 500;
+      color: #1E293B !important;
+      font-size: 14.5px !important;
+      font-weight: 600 !important;
     }
 
     body.light-mode .slide-tag {
-      color: #B45309 !important;
-      font-weight: 800;
+      color: #92400E !important;
+      font-weight: 900 !important;
+      font-size: 11.5px !important;
+      letter-spacing: 1.8px !important;
     }
 
     body.light-mode .slide-tag::before {
-      background: #B45309 !important;
-      box-shadow: 0 0 6px rgba(180, 83, 9, 0.6) !important;
+      background: #92400E !important;
+      box-shadow: 0 0 6px rgba(146, 64, 14, 0.8) !important;
     }
 
     body.light-mode .audience-pill-tag {
-      background: #FEF3C7 !important;
-      color: #92400E !important;
-      border: 1px solid #D97706 !important;
-      font-weight: 800;
+      background: #92400E !important;
+      color: #FFFFFF !important;
+      border: 1.5px solid #78350F !important;
+      font-weight: 900 !important;
+      padding: 3px 12px !important;
     }
 
+    /* Portada: Tarjetas de estadísticas de alto contraste */
+    body.light-mode .hero-stat-card {
+      background: #FFFDF5 !important;
+      border: 2px solid #D97706 !important;
+      box-shadow: 0 4px 14px rgba(217, 119, 6, 0.12) !important;
+    }
+    body.light-mode .hero-stat-num {
+      color: #B45309 !important;
+      font-weight: 900 !important;
+      font-size: 28px !important;
+    }
+    body.light-mode .hero-stat-label {
+      color: #0F172A !important;
+      font-weight: 700 !important;
+      font-size: 12.5px !important;
+    }
+
+    /* Slide 2: 3 Puntos Críticos con Marcos y Fondos Distintivos */
+    body.light-mode .slide[data-index="1"] .card-grid-3 .feature-card:nth-child(1) {
+      border: 2.5px solid #DC2626 !important;
+      background: #FFF5F5 !important;
+      box-shadow: 0 6px 18px rgba(220, 38, 38, 0.12) !important;
+    }
+    body.light-mode .slide[data-index="1"] .card-grid-3 .feature-card:nth-child(1) .feature-icon-circle {
+      background: #DC2626 !important;
+      color: #FFFFFF !important;
+      border: 2px solid #B91C1C !important;
+      font-size: 20px !important;
+    }
+
+    body.light-mode .slide[data-index="1"] .card-grid-3 .feature-card:nth-child(2) {
+      border: 2.5px solid #2563EB !important;
+      background: #F8FAFF !important;
+      box-shadow: 0 6px 18px rgba(37, 99, 235, 0.12) !important;
+    }
+    body.light-mode .slide[data-index="1"] .card-grid-3 .feature-card:nth-child(2) .feature-icon-circle {
+      background: #2563EB !important;
+      color: #FFFFFF !important;
+      border: 2px solid #1D4ED8 !important;
+      font-size: 20px !important;
+    }
+
+    body.light-mode .slide[data-index="1"] .card-grid-3 .feature-card:nth-child(3) {
+      border: 2.5px solid #D97706 !important;
+      background: #FFFDF5 !important;
+      box-shadow: 0 6px 18px rgba(217, 119, 6, 0.12) !important;
+    }
+    body.light-mode .slide[data-index="1"] .card-grid-3 .feature-card:nth-child(3) .feature-icon-circle {
+      background: #D97706 !important;
+      color: #FFFFFF !important;
+      border: 2px solid #B45309 !important;
+      font-size: 20px !important;
+    }
+
+    body.light-mode .feature-card-title {
+      color: #000000 !important;
+      font-weight: 900 !important;
+      font-size: 17.5px !important;
+    }
+
+    body.light-mode .feature-card-desc {
+      color: #0F172A !important;
+      font-size: 13.5px !important;
+      line-height: 1.55 !important;
+      font-weight: 500 !important;
+    }
+
+    /* Diapositivas 3 y 4: Comparativas Visuales CEO vs SICE-CBA */
     body.light-mode .comp-col.legacy {
-      border: 1.5px solid #F87171 !important;
-      background: #FEF2F2 !important;
-      box-shadow: 0 4px 14px rgba(239, 68, 68, 0.1) !important;
+      border: 2.5px solid #DC2626 !important;
+      background: #FFF5F5 !important;
+      box-shadow: 0 6px 20px rgba(220, 38, 38, 0.12) !important;
     }
 
     body.light-mode .comp-col.modern {
-      border: 1.5px solid #34D399 !important;
+      border: 2.5px solid #059669 !important;
       background: #F0FDF4 !important;
-      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.1) !important;
+      box-shadow: 0 6px 20px rgba(5, 150, 105, 0.15) !important;
     }
 
     body.light-mode .comp-header {
-      border-bottom: 1px solid #E2E8F0 !important;
+      border-bottom: 2px solid #E2E8F0 !important;
+      padding-bottom: 10px !important;
+    }
+
+    body.light-mode .comp-pill.legacy {
+      background: #DC2626 !important;
+      color: #FFFFFF !important;
+      border: 2px solid #B91C1C !important;
+      font-weight: 900 !important;
+      font-size: 11px !important;
+      letter-spacing: 0.5px !important;
+    }
+
+    body.light-mode .comp-pill.modern {
+      background: #059669 !important;
+      color: #FFFFFF !important;
+      border: 2px solid #047857 !important;
+      font-weight: 900 !important;
+      font-size: 11px !important;
+      letter-spacing: 0.5px !important;
+    }
+
+    body.light-mode .comp-header span:not(.comp-pill) {
+      font-weight: 800 !important;
+      font-size: 11.5px !important;
     }
 
     body.light-mode .comp-media-wrapper {
-      border: 1px solid #CBD5E1 !important;
+      border: 2px solid #94A3B8 !important;
       background: #FFFFFF !important;
-      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.1) !important;
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.15) !important;
+    }
+
+    body.light-mode .comp-col.legacy .comp-media-wrapper {
+      border: 2px solid #DC2626 !important;
+    }
+
+    body.light-mode .comp-col.modern .comp-media-wrapper {
+      border: 2px solid #059669 !important;
     }
 
     body.light-mode .comp-zoom-hint {
-      background: rgba(15, 23, 42, 0.9) !important;
+      background: #0F172A !important;
       color: #FFFFFF !important;
+      font-weight: 800 !important;
     }
 
     body.light-mode .comp-list-item {
-      color: #1E293B !important;
-      font-weight: 500;
+      color: #000000 !important;
+      font-weight: 600 !important;
+      font-size: 13px !important;
     }
 
     body.light-mode .comp-list-item strong {
-      color: #0B132B !important;
-      font-weight: 700;
+      color: #064E3B !important;
+      font-weight: 900 !important;
     }
 
+    body.light-mode .comp-col.legacy .comp-icon {
+      color: #DC2626 !important;
+      font-weight: 900 !important;
+      font-size: 16px !important;
+    }
+
+    body.light-mode .comp-col.modern .comp-icon {
+      color: #059669 !important;
+      font-weight: 900 !important;
+      font-size: 16px !important;
+    }
+
+    /* Diapositiva 5: Tareas Recurrentes (Coordinaciones de Alto Impacto) */
     body.light-mode .task-card {
-      background: #F8FAFC !important;
-      border: 1px solid #CBD5E1 !important;
-      box-shadow: 0 3px 10px rgba(15, 23, 42, 0.06) !important;
+      border-radius: 12px !important;
+      padding: 16px !important;
     }
 
-    body.light-mode .task-card:hover {
-      border-color: #B45309 !important;
-      box-shadow: 0 8px 22px rgba(15, 23, 42, 0.12) !important;
-      transform: translateY(-2px);
+    /* 1. Directora (Oro Ámbar CBA) */
+    body.light-mode .task-card:nth-child(1) {
+      border: 2.5px solid #D97706 !important;
+      background: #FFFDF5 !important;
+      box-shadow: 0 6px 18px rgba(217, 119, 6, 0.15) !important;
+    }
+    body.light-mode .task-card:nth-child(1) .task-card-icon {
+      background: #D97706 !important;
+      color: #FFFFFF !important;
+      border: 2px solid #B45309 !important;
+      font-size: 18px !important;
+    }
+    body.light-mode .task-card:nth-child(1) .task-count-badge {
+      background: #FEF3C7 !important;
+      color: #78350F !important;
+      border: 2px solid #D97706 !important;
+      font-weight: 900 !important;
+      font-size: 10.5px !important;
+    }
+    body.light-mode .task-card:nth-child(1) .task-card-title {
+      color: #78350F !important;
+      font-weight: 900 !important;
+      font-size: 14.5px !important;
+    }
+    body.light-mode .task-card:nth-child(1) .task-card-subtitle {
+      color: #B45309 !important;
+      font-weight: 800 !important;
+    }
+    body.light-mode .task-card:nth-child(1) .task-item-bullet {
+      color: #D97706 !important;
+      font-weight: 900 !important;
+    }
+
+    /* 2. Coord. Inicial (Azul Institucional) */
+    body.light-mode .task-card:nth-child(2) {
+      border: 2.5px solid #2563EB !important;
+      background: #F8FAFF !important;
+      box-shadow: 0 6px 18px rgba(37, 99, 235, 0.15) !important;
+    }
+    body.light-mode .task-card:nth-child(2) .task-card-icon {
+      background: #2563EB !important;
+      color: #FFFFFF !important;
+      border: 2px solid #1D4ED8 !important;
+      font-size: 18px !important;
+    }
+    body.light-mode .task-card:nth-child(2) .task-count-badge {
+      background: #DBEAFE !important;
+      color: #1E3A8A !important;
+      border: 2px solid #2563EB !important;
+      font-weight: 900 !important;
+      font-size: 10.5px !important;
+    }
+    body.light-mode .task-card:nth-child(2) .task-card-title {
+      color: #1E3A8A !important;
+      font-weight: 900 !important;
+      font-size: 14.5px !important;
+    }
+    body.light-mode .task-card:nth-child(2) .task-card-subtitle {
+      color: #2563EB !important;
+      font-weight: 800 !important;
+    }
+    body.light-mode .task-card:nth-child(2) .task-item-bullet {
+      color: #2563EB !important;
+      font-weight: 900 !important;
+    }
+
+    /* 3. Coord. Primaria (Verde Esmeralda) */
+    body.light-mode .task-card:nth-child(3) {
+      border: 2.5px solid #059669 !important;
+      background: #F6FEFA !important;
+      box-shadow: 0 6px 18px rgba(5, 150, 105, 0.15) !important;
+    }
+    body.light-mode .task-card:nth-child(3) .task-card-icon {
+      background: #059669 !important;
+      color: #FFFFFF !important;
+      border: 2px solid #047857 !important;
+      font-size: 18px !important;
+    }
+    body.light-mode .task-card:nth-child(3) .task-count-badge {
+      background: #D1FAE5 !important;
+      color: #064E3B !important;
+      border: 2px solid #059669 !important;
+      font-weight: 900 !important;
+      font-size: 10.5px !important;
+    }
+    body.light-mode .task-card:nth-child(3) .task-card-title {
+      color: #064E3B !important;
+      font-weight: 900 !important;
+      font-size: 14.5px !important;
+    }
+    body.light-mode .task-card:nth-child(3) .task-card-subtitle {
+      color: #059669 !important;
+      font-weight: 800 !important;
+    }
+    body.light-mode .task-card:nth-child(3) .task-item-bullet {
+      color: #059669 !important;
+      font-weight: 900 !important;
+    }
+
+    /* 4. Coord. Media General (Púrpura Imperial) */
+    body.light-mode .task-card:nth-child(4) {
+      border: 2.5px solid #7C3AED !important;
+      background: #FAF7FF !important;
+      box-shadow: 0 6px 18px rgba(124, 58, 237, 0.15) !important;
+    }
+    body.light-mode .task-card:nth-child(4) .task-card-icon {
+      background: #7C3AED !important;
+      color: #FFFFFF !important;
+      border: 2px solid #6D28D9 !important;
+      font-size: 18px !important;
+    }
+    body.light-mode .task-card:nth-child(4) .task-count-badge {
+      background: #EDE9FE !important;
+      color: #4C1D95 !important;
+      border: 2px solid #7C3AED !important;
+      font-weight: 900 !important;
+      font-size: 10.5px !important;
+    }
+    body.light-mode .task-card:nth-child(4) .task-card-title {
+      color: #4C1D95 !important;
+      font-weight: 900 !important;
+      font-size: 14.5px !important;
+    }
+    body.light-mode .task-card:nth-child(4) .task-card-subtitle {
+      color: #7C3AED !important;
+      font-weight: 800 !important;
+    }
+    body.light-mode .task-card:nth-child(4) .task-item-bullet {
+      color: #7C3AED !important;
+      font-weight: 900 !important;
     }
 
     body.light-mode .task-card-header {
-      border-bottom: 1px solid #CBD5E1 !important;
-    }
-
-    body.light-mode .task-card-title {
-      color: #0B132B !important;
-      font-weight: 800;
-    }
-
-    body.light-mode .task-card-subtitle {
-      color: #B45309 !important;
-      font-weight: 800;
+      border-bottom: 2px solid rgba(0, 0, 0, 0.08) !important;
+      padding-bottom: 8px !important;
+      margin-bottom: 10px !important;
     }
 
     body.light-mode .task-item {
-      color: #1E293B !important;
-      font-weight: 500;
+      color: #0F172A !important;
+      font-weight: 600 !important;
+      font-size: 11.5px !important;
+      line-height: 1.42 !important;
     }
 
     body.light-mode .task-item strong {
-      color: #0B132B !important;
-      font-weight: 700;
+      color: #000000 !important;
+      font-weight: 900 !important;
     }
 
-    body.light-mode .task-item-bullet {
-      color: #B45309 !important;
-      font-weight: 800;
+    /* Diapositiva 6: Normativa Legal MPPE */
+    body.light-mode .slide[data-index="5"] .card-grid-3 .feature-card:nth-child(1) {
+      border: 2.5px solid #2563EB !important;
+      background: #F8FAFF !important;
     }
-
-    /* Coordinaciones en Slide 5 en Modo Claro */
-    body.light-mode .task-card:nth-child(1) .task-card-icon,
-    body.light-mode .task-card:nth-child(1) .task-count-badge {
-      background: #FEF3C7 !important;
-      color: #92400E !important;
-      border: 1px solid #F59E0B !important;
-      font-weight: 800 !important;
-    }
-    body.light-mode .task-card:nth-child(2) .task-card-icon,
-    body.light-mode .task-card:nth-child(2) .task-count-badge {
-      background: #EFF6FF !important;
-      color: #1E40AF !important;
-      border: 1px solid #60A5FA !important;
-      font-weight: 800 !important;
-    }
-    body.light-mode .task-card:nth-child(3) .task-card-icon,
-    body.light-mode .task-card:nth-child(3) .task-count-badge {
-      background: #ECFDF5 !important;
-      color: #065F46 !important;
-      border: 1px solid #34D399 !important;
-      font-weight: 800 !important;
-    }
-    body.light-mode .task-card:nth-child(4) .task-card-icon,
-    body.light-mode .task-card:nth-child(4) .task-count-badge {
-      background: #FAF5FF !important;
-      color: #6B21A8 !important;
-      border: 1px solid #C084FC !important;
-      font-weight: 800 !important;
-    }
-
-    /* Iconos de Feature Cards en Slide 2 & Slide 6 en Modo Claro */
-    body.light-mode .slide[data-index="1"] .card-grid-3 .feature-card:nth-child(1) .feature-icon-circle {
-      background: #FEE2E2 !important;
-      color: #DC2626 !important;
-      border: 1px solid #F87171 !important;
-    }
-    body.light-mode .slide[data-index="1"] .card-grid-3 .feature-card:nth-child(2) .feature-icon-circle {
-      background: #EFF6FF !important;
-      color: #2563EB !important;
-      border: 1px solid #60A5FA !important;
-    }
-    body.light-mode .slide[data-index="1"] .card-grid-3 .feature-card:nth-child(3) .feature-icon-circle {
-      background: #FEF3C7 !important;
-      color: #B45309 !important;
-      border: 1px solid #FBBF24 !important;
-    }
-
     body.light-mode .slide[data-index="5"] .card-grid-3 .feature-card:nth-child(1) .feature-icon-circle {
-      background: #EFF6FF !important;
-      color: #2563EB !important;
-      border: 1px solid #60A5FA !important;
+      background: #2563EB !important;
+      color: #FFFFFF !important;
+      border: 2px solid #1D4ED8 !important;
+    }
+
+    body.light-mode .slide[data-index="5"] .card-grid-3 .feature-card:nth-child(2) {
+      border: 2.5px solid #059669 !important;
+      background: #F6FEFA !important;
     }
     body.light-mode .slide[data-index="5"] .card-grid-3 .feature-card:nth-child(2) .feature-icon-circle {
-      background: #ECFDF5 !important;
-      color: #059669 !important;
-      border: 1px solid #34D399 !important;
+      background: #059669 !important;
+      color: #FFFFFF !important;
+      border: 2px solid #047857 !important;
+    }
+
+    body.light-mode .slide[data-index="5"] .card-grid-3 .feature-card:nth-child(3) {
+      border: 2.5px solid #D97706 !important;
+      background: #FFFDF5 !important;
     }
     body.light-mode .slide[data-index="5"] .card-grid-3 .feature-card:nth-child(3) .feature-icon-circle {
-      background: #FEF3C7 !important;
-      color: #B45309 !important;
-      border: 1px solid #FBBF24 !important;
+      background: #D97706 !important;
+      color: #FFFFFF !important;
+      border: 2px solid #B45309 !important;
     }
 
-    /* Textos Destacados en Modo Claro */
-    body.light-mode strong[style*="#F87171"] {
-      color: #DC2626 !important;
-      font-weight: 800;
-    }
-    body.light-mode strong[style*="#34D399"] {
-      color: #059669 !important;
-      font-weight: 800;
-    }
-    body.light-mode strong[style*="#60A5FA"] {
-      color: #2563EB !important;
-      font-weight: 800;
-    }
-    body.light-mode span[style*="#34D399"] {
-      color: #059669 !important;
-      font-weight: 700;
-    }
-    body.light-mode span[style*="#F87171"] {
-      color: #DC2626 !important;
-      font-weight: 700;
-    }
-    body.light-mode span[style*="#94A3B8"] {
-      color: #64748B !important;
-      font-weight: 600;
-    }
-
-    /* Cajas Normativas en Slide 6 en Modo Claro */
     body.light-mode .scale-box.inicial {
-      background: #EFF6FF !important;
-      border: 1px solid #60A5FA !important;
-      color: #1E40AF !important;
-      font-weight: 600;
+      background: #DBEAFE !important;
+      border: 2px solid #2563EB !important;
+      color: #1E3A8A !important;
+      font-weight: 700 !important;
     }
     body.light-mode .scale-box.inicial code {
-      background: #DBEAFE !important;
+      background: #FFFFFF !important;
       color: #1E3A8A !important;
-      padding: 1px 6px;
-      border-radius: 4px;
-      font-weight: 800;
+      border: 1.5px solid #2563EB !important;
+      padding: 2px 7px !important;
+      border-radius: 4px !important;
+      font-weight: 900 !important;
     }
 
     body.light-mode .scale-box.primaria {
-      background: #ECFDF5 !important;
-      border: 1px solid #34D399 !important;
-      color: #065F46 !important;
-      font-weight: 600;
+      background: #D1FAE5 !important;
+      border: 2px solid #059669 !important;
+      color: #064E3B !important;
+      font-weight: 700 !important;
     }
     body.light-mode .scale-box.primaria code {
-      background: #D1FAE5 !important;
+      background: #FFFFFF !important;
       color: #064E3B !important;
-      padding: 1px 6px;
-      border-radius: 4px;
-      font-weight: 800;
+      border: 1.5px solid #059669 !important;
+      padding: 2px 7px !important;
+      border-radius: 4px !important;
+      font-weight: 900 !important;
     }
 
     body.light-mode .scale-box.media {
-      background: #FFFBEB !important;
-      border: 1px solid #FCD34D !important;
-      color: #92400E !important;
-      font-weight: 600;
+      background: #FEF3C7 !important;
+      border: 2px solid #D97706 !important;
+      color: #78350F !important;
+      font-weight: 700 !important;
     }
     body.light-mode .scale-box.media code {
+      background: #FFFFFF !important;
+      color: #78350F !important;
+      border: 1.5px solid #D97706 !important;
+      padding: 2px 7px !important;
+      border-radius: 4px !important;
+      font-weight: 900 !important;
+    }
+
+    /* Diapositiva 7: Fases y Tarjetas */
+    body.light-mode .slide[data-index="6"] .feature-card {
+      background: #FFFFFF !important;
+      border: 2px solid #64748B !important;
+      box-shadow: 0 6px 20px rgba(15, 23, 42, 0.1) !important;
+      padding: 16px !important;
+    }
+    body.light-mode .slide[data-index="6"] .feature-card > div > div {
+      padding: 8px 12px !important;
+      border-radius: 6px !important;
+      margin-bottom: 4px !important;
+    }
+    body.light-mode .slide[data-index="6"] .feature-card > div > div:nth-child(1) {
+      background: #ECFDF5 !important;
+      border-left: 5px solid #059669 !important;
+      color: #064E3B !important;
+    }
+    body.light-mode .slide[data-index="6"] .feature-card > div > div:nth-child(2) {
+      background: #FFFBEB !important;
+      border-left: 5px solid #D97706 !important;
+      color: #78350F !important;
+    }
+    body.light-mode .slide[data-index="6"] .feature-card > div > div:nth-child(3) {
+      background: #EFF6FF !important;
+      border-left: 5px solid #2563EB !important;
+      color: #1E40AF !important;
+    }
+    body.light-mode .slide[data-index="6"] .feature-card > div > div:nth-child(4) {
+      background: #FEF2F2 !important;
+      border-left: 5px solid #DC2626 !important;
+      color: #991B1B !important;
+    }
+
+    /* Tarjeta Visual Institucional (Escudo CBA y Q&A) en Modo Claro */
+    body.light-mode .hero-visual {
+      background: #0B1026 !important;
+      border: 2.5px solid #D97706 !important;
+      box-shadow: 0 12px 30px rgba(11, 16, 38, 0.35) !important;
+    }
+    body.light-mode .hero-visual h3 {
+      color: #FFFFFF !important;
+      font-weight: 900 !important;
+    }
+    body.light-mode .hero-visual p {
+      color: #E2E8F0 !important;
+      font-weight: 500 !important;
+    }
+    body.light-mode .hero-visual div[style*="padding: 8px 14px"] {
       background: #FEF3C7 !important;
       color: #78350F !important;
-      padding: 1px 6px;
-      border-radius: 4px;
-      font-weight: 800;
+      border: 2px solid #D97706 !important;
+      font-weight: 900 !important;
     }
 
     /* Teclas de Atajo en Modo Claro */
     body.light-mode .kbd-hint {
-      background: #E2E8F0 !important;
-      color: #0B132B !important;
-      border: 1px solid #CBD5E1 !important;
-      font-weight: 800;
+      background: #0F172A !important;
+      color: #FFFFFF !important;
+      border: 1.5px solid #000000 !important;
+      font-weight: 900 !important;
+      padding: 2px 7px !important;
     }
 
-    /* Tarjeta Visual Institucional (Escudo y Preguntas) en Modo Claro */
-    body.light-mode .hero-visual {
-      background: linear-gradient(145deg, #0F172A 0%, #1E293B 100%) !important;
-      border: 1.5px solid #D97706 !important;
-      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.2) !important;
+    /* Controles de Navegación y Barra de Progreso en Modo Claro */
+    body.light-mode .nav-btn {
+      background: #0F172A !important;
+      border: 2px solid #0F172A !important;
+      color: #FFFFFF !important;
+      font-weight: 800 !important;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.25) !important;
     }
-    body.light-mode .hero-visual h3 {
+    body.light-mode .nav-btn:hover:not(:disabled) {
+      background: #B45309 !important;
+      border-color: #B45309 !important;
+      color: #FFFFFF !important;
+      box-shadow: 0 4px 14px rgba(180, 83, 9, 0.35) !important;
+    }
+    body.light-mode .action-icon-btn {
+      background: #FFFFFF !important;
+      border: 2px solid #94A3B8 !important;
+      color: #0F172A !important;
+      font-weight: 800 !important;
+    }
+    body.light-mode .action-icon-btn:hover {
+      background: #0F172A !important;
+      border-color: #0F172A !important;
       color: #FFFFFF !important;
     }
-    body.light-mode .hero-visual p {
-      color: #E2E8F0 !important;
+    body.light-mode .slide-counter {
+      color: #78350F !important;
+      font-weight: 900 !important;
+      font-size: 15px !important;
+      letter-spacing: 1.2px !important;
     }
-
-    /* Barra de Progreso y Controles en Modo Claro */
     body.light-mode .progress-track {
-      background: #E2E8F0 !important;
+      background: #CBD5E1 !important;
+      height: 8px !important;
+      border-radius: 4px !important;
     }
     body.light-mode .progress-fill {
       background: linear-gradient(90deg, #881337, #B45309, #D97706) !important;
     }
-    body.light-mode .nav-btn {
+
+    /* Menú Desplegable (Drawer) en Modo Claro */
+    body.light-mode .drawer {
       background: #FFFFFF !important;
-      border: 1px solid #CBD5E1 !important;
-      color: #0B132B !important;
-      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+      border-left: 2px solid #94A3B8 !important;
+      box-shadow: -10px 0 35px rgba(15, 23, 42, 0.15) !important;
     }
-    body.light-mode .nav-btn:hover:not(:disabled) {
-      background: #0B132B !important;
-      color: #FFFFFF !important;
-      border-color: #0B132B !important;
-      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+    body.light-mode .drawer-title {
+      color: #000000 !important;
+      font-weight: 900 !important;
+    }
+    body.light-mode .drawer-item {
+      background: #F8FAFC !important;
+      border: 1.5px solid #CBD5E1 !important;
+      color: #0F172A !important;
+      font-weight: 700 !important;
+    }
+    body.light-mode .drawer-item:hover,
+    body.light-mode .drawer-item.active {
+      background: #FEF3C7 !important;
+      border-color: #D97706 !important;
+      color: #78350F !important;
+      font-weight: 900 !important;
     }
 
     * {
