@@ -779,9 +779,10 @@ export const BoletinInformativoView: React.FC<BoletinInformativoViewProps> = ({
                         <th className="py-2 px-2 text-center w-8">N°</th>
                         <th className="py-2 px-3">ÁREAS O ASIGNATURAS</th>
                         <th className="py-2 px-2 text-center w-24">Indicadores<br />Evaluados</th>
-                        <th className="py-2 px-2 text-center w-20 bg-emerald-800">LOGRADO<br />(L)</th>
-                        <th className="py-2 px-2 text-center w-20 bg-amber-800">EN PROCESO<br />(P / EP)</th>
-                        <th className="py-2 px-2 text-center w-20 bg-rose-800">INICIADO<br />(I)</th>
+                        <th className="py-2 px-2 text-center w-16 bg-emerald-800">LOGRADO<br />(L)</th>
+                        <th className="py-2 px-2 text-center w-16 bg-blue-800">AVANZANDO<br />(A)</th>
+                        <th className="py-2 px-2 text-center w-16 bg-amber-800">PROCESO<br />(P)</th>
+                        <th className="py-2 px-2 text-center w-16 bg-rose-800">INICIADO<br />(I)</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200">
@@ -803,10 +804,12 @@ export const BoletinInformativoView: React.FC<BoletinInformativoViewProps> = ({
                         );
 
                         const countL = studentEvals.filter(e => e.scoreQualitative === 'L').length;
-                        const countP = studentEvals.filter(e => e.scoreQualitative === 'P' || e.scoreQualitative === 'EP').length;
+                        const countA = studentEvals.filter(e => e.scoreQualitative === 'A').length;
+                        const countP = studentEvals.filter(e => e.scoreQualitative === 'P' || (e.scoreQualitative as any) === 'EP').length;
                         const countI = studentEvals.filter(e => e.scoreQualitative === 'I').length;
                         const totalEvaluated = studentEvals.length || (areaInds.length > 0 ? areaInds.length : 0);
                         const displayedL = studentEvals.length > 0 ? countL : Math.max(0, areaInds.length - 1);
+                        const displayedA = studentEvals.length > 0 ? countA : 0;
                         const displayedP = studentEvals.length > 0 ? countP : (areaInds.length > 0 ? 1 : 0);
                         const displayedI = studentEvals.length > 0 ? countI : 0;
 
@@ -816,6 +819,7 @@ export const BoletinInformativoView: React.FC<BoletinInformativoViewProps> = ({
                             <td className="py-1 px-3 font-bold text-[#2C2E53]">{area.name}</td>
                             <td className="py-1 px-2 text-center font-bold">{totalEvaluated}</td>
                             <td className="py-1 px-2 text-center font-black text-emerald-700 bg-emerald-50/50">{displayedL}</td>
+                            <td className="py-1 px-2 text-center font-bold text-blue-700 bg-blue-50/50">{displayedA}</td>
                             <td className="py-1 px-2 text-center font-bold text-amber-700 bg-amber-50/50">{displayedP}</td>
                             <td className="py-1 px-2 text-center text-rose-700 bg-rose-50/50">{displayedI}</td>
                           </tr>
@@ -895,7 +899,14 @@ export const BoletinInformativoView: React.FC<BoletinInformativoViewProps> = ({
                               e => e.studentId === activeStudent.id && e.indicatorId === ind.id && e.lapso === activeLapso && e.moment === 'PROCESAL'
                             );
                             const score = evalRec?.scoreQualitative || 'L';
-                            const badgeColor = score === 'L' ? 'bg-emerald-100 text-emerald-800' : (score === 'I' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800');
+                            const badgeColor =
+                              score === 'L'
+                                ? 'bg-emerald-100 text-emerald-800'
+                                : score === 'A'
+                                ? 'bg-blue-100 text-blue-800'
+                                : score === 'I'
+                                ? 'bg-rose-100 text-rose-800'
+                                : 'bg-amber-100 text-amber-800';
 
                             return (
                               <div key={ind.id} className="pt-1.5 first:pt-0 flex justify-between items-start gap-2">

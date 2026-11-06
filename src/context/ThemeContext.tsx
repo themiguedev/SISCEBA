@@ -19,8 +19,14 @@ export interface ThemeDefinition {
   category: string;
   description: string;
   primaryColor: string;
+  primaryHover: string;
+  primaryDark: string;
   secondaryColor: string;
+  surfaceDark: string;
+  borderDark: string;
+  cardDark: string;
   accentColor: string;
+  accentHover: string;
   bgLight: string;
   bgDark: string;
   badge: string;
@@ -36,8 +42,14 @@ export const THEMES_CATALOG: ThemeDefinition[] = [
     category: 'Oficial',
     description: 'Paleta oficial del Colegio Bellas Artes con Azul Marino Imperial y Oro Ateniense calibrado.',
     primaryColor: '#2C2E53',
+    primaryHover: '#353866',
+    primaryDark: '#242646',
     secondaryColor: '#1B1C33',
+    surfaceDark: '#141628',
+    borderDark: '#3F436E',
+    cardDark: '#151828',
     accentColor: '#D4AF37',
+    accentHover: '#C29E2E',
     bgLight: '#F8FAFC',
     bgDark: '#0D0F18',
     badge: 'Institucional',
@@ -51,8 +63,14 @@ export const THEMES_CATALOG: ThemeDefinition[] = [
     category: 'Naturaleza & Crecimiento',
     description: 'Tonos bosque y menta energizante, orientados a la serenidad y la concentración docente.',
     primaryColor: '#064E3B',
+    primaryHover: '#08634C',
+    primaryDark: '#04382A',
     secondaryColor: '#022C22',
+    surfaceDark: '#011A14',
+    borderDark: '#0F5C47',
+    cardDark: '#0A211B',
     accentColor: '#10B981',
+    accentHover: '#059669',
     bgLight: '#F0FDF4',
     bgDark: '#051A14',
     badge: 'Naturaleza',
@@ -66,8 +84,14 @@ export const THEMES_CATALOG: ThemeDefinition[] = [
     category: 'Académico & Tradición',
     description: 'Vino tinto clásico y acentos de ámbar dorado para una estética solemne y humanista.',
     primaryColor: '#581C28',
+    primaryHover: '#6D2232',
+    primaryDark: '#42141E',
     secondaryColor: '#370F18',
+    surfaceDark: '#24080F',
+    borderDark: '#702636',
+    cardDark: '#240E14',
     accentColor: '#F59E0B',
+    accentHover: '#D97706',
     bgLight: '#FFF1F2',
     bgDark: '#1C080D',
     badge: 'Solemne',
@@ -81,8 +105,14 @@ export const THEMES_CATALOG: ThemeDefinition[] = [
     category: 'Regional & Fresco',
     description: 'Inspirado en el Lago de Maracaibo, el sol zuliano y la frescura del Caribe.',
     primaryColor: '#0C4A6E',
+    primaryHover: '#075985',
+    primaryDark: '#073854',
     secondaryColor: '#082F49',
+    surfaceDark: '#041E30',
+    borderDark: '#0E5C8A',
+    cardDark: '#0B202F',
     accentColor: '#38BDF8',
+    accentHover: '#0EA5E9',
     bgLight: '#F0F9FF',
     bgDark: '#071622',
     badge: 'Regional',
@@ -96,8 +126,14 @@ export const THEMES_CATALOG: ThemeDefinition[] = [
     category: 'Lectura & Ergonomía',
     description: 'Tonos papiro suave y marrón ateneo, diseñado para reducir la fatiga visual prolongada.',
     primaryColor: '#4A3B32',
+    primaryHover: '#5C4A3F',
+    primaryDark: '#3A2E27',
     secondaryColor: '#332720',
+    surfaceDark: '#221A15',
+    borderDark: '#614E43',
+    cardDark: '#221A16',
     accentColor: '#C28B56',
+    accentHover: '#A67341',
     bgLight: '#FAF7F2',
     bgDark: '#181411',
     badge: 'Lectura',
@@ -111,8 +147,14 @@ export const THEMES_CATALOG: ThemeDefinition[] = [
     category: 'Alta Tecnología',
     description: 'Grafito profundo, índigo galáctico y detalles en lavanda neón de alto contraste.',
     primaryColor: '#1E1B4B',
+    primaryHover: '#2E286E',
+    primaryDark: '#16133B',
     secondaryColor: '#0F0E2A',
+    surfaceDark: '#0A091E',
+    borderDark: '#2E2A6B',
+    cardDark: '#12102E',
     accentColor: '#818CF8',
+    accentHover: '#6366F1',
     bgLight: '#EEF2FF',
     bgDark: '#090818',
     badge: 'Cyber',
@@ -330,8 +372,14 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     const themeDef = THEMES_CATALOG.find((t) => t.id === palette) || THEMES_CATALOG[0];
     root.style.setProperty('--theme-primary', themeDef.primaryColor);
+    root.style.setProperty('--theme-primary-hover', themeDef.primaryHover);
+    root.style.setProperty('--theme-primary-dark', themeDef.primaryDark);
     root.style.setProperty('--theme-secondary', themeDef.secondaryColor);
+    root.style.setProperty('--theme-surface-dark', themeDef.surfaceDark);
+    root.style.setProperty('--theme-border-dark', themeDef.borderDark);
+    root.style.setProperty('--theme-card-dark', themeDef.cardDark);
     root.style.setProperty('--theme-accent', themeDef.accentColor);
+    root.style.setProperty('--theme-accent-hover', themeDef.accentHover);
     root.style.setProperty('--theme-accent-text-light', themeDef.accentTextLight);
     root.style.setProperty('--theme-accent-text-dark', themeDef.accentTextDark);
     root.style.setProperty('--theme-bg-light', themeDef.bgLight);

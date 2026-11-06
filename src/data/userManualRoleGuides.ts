@@ -63,7 +63,7 @@ export const ROLE_SPECIFIC_MANUALS: Record<UserRole, DetailedRoleGuide> = {
           'Selecciona en la barra superior el nivel educativo correspondiente.',
           'Entra en Evaluación → Registro Procesal.',
           'Elige el grado, sección y materia para desplegar la lista de tus estudiantes.',
-          'Ingresa la nota (Cualitativa en Inicial, Literal A-E en Primaria, o Numérica 01-20 en Media General) y pulsa "Guardar Calificaciones".'
+          'Ingresa la nota (Literal A-E en Inicial, Cualitativa L/A/P/I en Primaria, o Numérica 01-20 en Media General) y pulsa "Guardar Calificaciones".'
         ]
       },
       {

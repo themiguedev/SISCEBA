@@ -17,6 +17,7 @@ import {
   CheckSquare,
   FileSpreadsheet
 } from 'lucide-react';
+import { exportReportToExcel } from '../../utils/excelExport';
 
 interface NominasExpedientesViewProps {
   isFamilyOrStudent: boolean;
@@ -110,39 +111,52 @@ export const NominasExpedientesView: React.FC<NominasExpedientesViewProps> = ({
 
   const teacherUsers = registeredTeachers.length > 0 ? registeredTeachers : [fallbackTeacher];
 
-  // Exportar a CSV
-  const handleExportCSV = () => {
-    const headers = [
-      'Nivel',
-      'Grado/Año',
-      'Sección',
-      'Cédula',
-      'Apellidos y Nombres',
-      'Sexo',
-      'Representante',
-      'Teléfono',
-      'Correo'
+  // Exportar e Imprimir en Formato Oficial Excel
+  const handleExportExcel = () => {
+    const columns = [
+      { header: 'N°', width: 40, align: 'center' as const },
+      { header: 'Nivel', width: 130, align: 'center' as const },
+      { header: 'Grado / Año', width: 100, align: 'center' as const },
+      { header: 'Sección', width: 60, align: 'center' as const },
+      { header: 'Cédula', width: 110, align: 'center' as const },
+      { header: 'Apellidos y Nombres', width: 260, align: 'left' as const },
+      { header: 'Sexo', width: 50, align: 'center' as const },
+      { header: 'Representante Legal', width: 220, align: 'left' as const },
+      { header: 'Teléfono', width: 120, align: 'center' as const },
+      { header: 'Correo Electrónico', width: 220, align: 'left' as const }
     ];
-    const rows = filteredStudents.map((s) => [
-      `"${s.level}"`,
-      `"${s.grade}"`,
-      `"${s.section}"`,
-      `"${s.cedula}"`,
-      `"${s.fullName}"`,
-      `"${s.gender}"`,
-      `"${s.representativeName}"`,
-      `"${s.representativePhone || ''}"`,
-      `"${s.representativeEmail || ''}"`
+
+    const data = filteredStudents.map((s, idx) => [
+      idx + 1,
+      s.level,
+      s.grade,
+      s.section,
+      s.cedula || 'S/C',
+      s.fullName.toUpperCase(),
+      s.gender,
+      s.representativeName || '',
+      s.representativePhone || '',
+      s.representativeEmail || ''
     ]);
 
-    const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `Nomina_Estudiantes_CBA_${new Date().toISOString().slice(0, 10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    exportReportToExcel({
+      title: 'NÓMINA INSTITUCIONAL DE ESTUDIANTES MATRICULADOS',
+      subtitle: 'SISTEMA INTEGRAL DE CONTROL DE ESTUDIOS CBA',
+      schoolYear: '2025 - 2026',
+      orientation: 'landscape',
+      columns,
+      data,
+      extraNotes: [
+        `Total de estudiantes registrados en nómina: ${filteredStudents.length}`,
+        'Documento oficial generado con especificación de impresión en Microsoft Excel.'
+      ],
+      signatures: [
+        { title: 'Control de Estudios y Evaluación', subtitle: 'Verificación Oficial' },
+        { title: 'Dirección General CBA', subtitle: 'Sello y Firma Autorizada' }
+      ],
+      filename: `Nomina_Estudiantes_CBA_${new Date().toISOString().slice(0, 10)}`,
+      sheetName: 'Nómina CBA'
+    });
   };
 
   const fallbackSchedule = {
@@ -230,12 +244,12 @@ export const NominasExpedientesView: React.FC<NominasExpedientesViewProps> = ({
             </button>
 
             <button
-              onClick={handleExportCSV}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition"
-              title="Exportar nómina filtrada a CSV"
+              onClick={handleExportExcel}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition cursor-pointer"
+              title="Descargar e imprimir nómina oficial en Microsoft Excel"
             >
-              <Download className="w-3.5 h-3.5" />
-              <span>Exportar Excel</span>
+              <FileSpreadsheet className="w-3.5 h-3.5" />
+              <span>Imprimir en Excel</span>
             </button>
           </div>
         )}

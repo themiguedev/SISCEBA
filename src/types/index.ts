@@ -40,7 +40,7 @@ export interface AcademicAssignment {
 }
 
 export const LEVEL_GRADES_CATALOG: Record<EducationalLevel, string[]> = {
-  INICIAL: ['Sala de 3 Años', 'Sala de 4 Años', 'Sala de 5 Años'],
+  INICIAL: ['Sala de 4 Años', 'Sala de 5 Años'],
   PRIMARIA: ['1er Grado', '2do Grado', '3er Grado', '4to Grado', '5to Grado', '6to Grado'],
   MEDIA_GENERAL: ['1er Año', '2do Año', '3er Año', '4to Año', '5to Año']
 };
@@ -150,7 +150,7 @@ export interface ChecklistScoreItem {
   criterionId: string;
   criterionName?: string;
   criterionText?: string;
-  status: 'L' | 'EP' | 'I' | 'C' | 'ED' | 'RN' | 'LOGRADO' | 'EN_PROCESO' | 'INICIADO';
+  status: 'L' | 'A' | 'P' | 'EP' | 'I' | 'C' | 'ED' | 'RN' | 'LOGRADO' | 'EN_PROCESO' | 'INICIADO';
   score?: number;
   notes?: string;
 }
@@ -257,6 +257,7 @@ export interface ParentLegalInfo {
 export interface Student {
   id: string;
   cedula: string;
+  studentIdNumber?: string;
   fullName: string;
   primerNombre?: string;
   segundoNombre?: string;
@@ -286,7 +287,7 @@ export interface Student {
   alergiasSalud?: string;
 }
 
-export type QualitativeScore = 'L' | 'P' | 'EP' | 'I'; // Primaria: Logrado (L), Proceso (P / EP), Inicio (I)
+export type QualitativeScore = 'L' | 'A' | 'P' | 'I'; // Primaria: Logrado (L), Avanzando (A), Proceso (P), Iniciado (I)
 export type LiteralScore = 'A' | 'B' | 'C' | 'D' | 'E'; // Inicial: Literales (A, B, C, D, E)
 
 export const LITERAL_DESCRIPTIONS: Record<LiteralScore, { title: string; desc: string }> = {
@@ -299,8 +300,8 @@ export const LITERAL_DESCRIPTIONS: Record<LiteralScore, { title: string; desc: s
 
 export const QUALITATIVE_DESCRIPTIONS: Record<QualitativeScore, { title: string; desc: string }> = {
   L: { title: 'Logrado', desc: 'El estudiante evidencia la adquisición y dominio autónomo de la competencia.' },
-  P: { title: 'En Proceso', desc: 'El estudiante muestra avances significativos pero aún requiere consolidar la competencia.' },
-  EP: { title: 'En Proceso', desc: 'El estudiante muestra avances significativos pero aún requiere consolidar la competencia.' },
+  A: { title: 'Avanzando', desc: 'El estudiante avanza satisfactoriamente en el desarrollo de la competencia hacia su consolidación.' },
+  P: { title: 'Proceso', desc: 'El estudiante se encuentra en proceso de desarrollo y requiere mediación pedagógica regular.' },
   I: { title: 'Iniciado', desc: 'El estudiante se encuentra en fase inicial de exploración o requiere acompañamiento continuo.' }
 };
 
@@ -319,7 +320,7 @@ export interface EvaluationRecord {
   lapso: 1 | 2 | 3;
   scoreNumeric?: number; // Exclusively for MEDIA_GENERAL (1..20)
   scoreLiteral?: LiteralScore; // Exclusively for INICIAL (A, B, C, D, E)
-  scoreQualitative?: QualitativeScore; // Exclusively for PRIMARIA (L, P/EP, I)
+  scoreQualitative?: QualitativeScore; // Exclusively for PRIMARIA (L, A, P, I)
   roboticsScore?: RoboticsSpecialEvaluation;
   checklistScores?: ChecklistScoreItem[];
   rasgosScore?: number; // Media General (0..20, 10% rasgos del docente)
@@ -909,7 +910,7 @@ export interface SpecializedSkillRecord {
   proyectoVidaMetas?: string;
   orientacionConvivenciaObs?: string;
   scoreLiteral?: LiteralScore;       // Para Inicial (A, B, C, D, E)
-  scoreQualitative?: QualitativeScore; // Para Primaria (L, P/EP, I)
+  scoreQualitative?: QualitativeScore; // Para Primaria (L, A, P, I)
   scoreNumeric?: number;             // Para Media General (01..20)
   observacionesGenerales?: string;
   evaluatedBy?: string;

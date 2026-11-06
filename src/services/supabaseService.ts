@@ -479,8 +479,10 @@ export const supabaseFetchEvaluations = async (): Promise<EvaluationRecord[] | n
       lapso: row.lapso,
       scoreNumeric: row.score_numeric !== null ? Number(row.score_numeric) : undefined,
       scoreQualitative: (() => {
-        const raw = typeof row.score_qualitative === 'string' ? row.score_qualitative.trim() : undefined;
-        return raw === 'C' ? 'L' : (raw as QualitativeScore | undefined);
+        const raw = typeof row.score_qualitative === 'string' ? row.score_qualitative.trim().toUpperCase() : undefined;
+        if (raw === 'C') return 'L';
+        if (raw === 'EP') return 'P';
+        return raw as QualitativeScore | undefined;
       })(),
       scoreLiteral: typeof row.score_literal === 'string' ? (row.score_literal.trim() as LiteralScore) : undefined,
       roboticsScore: row.robotics_score,

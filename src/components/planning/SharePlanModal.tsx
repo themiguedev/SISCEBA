@@ -262,7 +262,7 @@ export const SharePlanModal: React.FC<SharePlanModalProps> = ({
                       Plantilla Estructurada para Tarea de Classroom
                     </h5>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                      Actividades (Inicio/Desarrollo/Cierre), criterios y escala adaptada ({plan.level === 'MEDIA_GENERAL' ? '01-20 Vigesimal' : plan.level === 'PRIMARIA' ? 'Cualitativa L-P-I' : 'Literal'})
+                      Actividades (Inicio/Desarrollo/Cierre), criterios y escala adaptada ({plan.level === 'MEDIA_GENERAL' ? '01-20 Vigesimal' : plan.level === 'PRIMARIA' ? 'Cualitativa L-A-P-I' : 'Literal'})
                     </p>
                   </div>
 

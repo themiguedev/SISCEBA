@@ -199,13 +199,25 @@ export const FinalLapsoView: React.FC = () => {
                             </span>
                           ) : (
                             <span className={`px-2 py-0.5 rounded font-bold text-xs ${
-                              sc === 'L' || sc === 'A'
+                              sc === 'L'
                                 ? 'bg-emerald-50 text-emerald-800'
-                                : sc === 'P' || sc === 'EP' || sc === 'B'
-                                ? 'bg-blue-50 text-blue-800'
-                                : 'bg-amber-50 text-amber-800'
+                                : sc === 'A'
+                                ? 'bg-teal-50 text-teal-800'
+                                : sc === 'P' || sc === 'EP'
+                                ? 'bg-amber-50 text-amber-800'
+                                : sc === 'I'
+                                ? 'bg-rose-50 text-rose-800'
+                                : 'bg-blue-50 text-blue-800'
                             }`}>
-                              {sc === 'L' ? 'Logrado (L)' : sc === 'P' || sc === 'EP' ? 'En Proceso' : sc === 'I' ? 'Iniciado' : sc}
+                              {sc === 'L'
+                                ? 'Logrado (L)'
+                                : sc === 'A'
+                                ? (currentLevel === 'PRIMARIA' ? 'Avanzando (A)' : 'A (Excelente)')
+                                : sc === 'P' || sc === 'EP'
+                                ? 'Proceso (P)'
+                                : sc === 'I'
+                                ? 'Iniciado (I)'
+                                : sc}
                             </span>
                           )}
                         </td>

@@ -125,7 +125,7 @@ export const generateClassroomBodyParam = (
           const pts = Math.round((row.ponderacionPercent / 100) * 20);
           itemParts.push(`   • 💯 Ponderación: ${row.ponderacionPercent}% (${pts} / 20 pts vigesimal)`);
         } else if (isPrimaria) {
-          itemParts.push(`   • 💯 Ponderación: ${row.ponderacionPercent}% (Formativa L - EP - I)`);
+          itemParts.push(`   • 💯 Ponderación: ${row.ponderacionPercent}% (Formativa L - A - P - I)`);
         } else {
           itemParts.push(`   • 💯 Ponderación: ${row.ponderacionPercent}% (Escala Literal A-E)`);
         }
@@ -277,7 +277,7 @@ export const generateClassroomTaskDescription = (
           const pts = Math.round((row.ponderacionPercent / 100) * 20);
           itemParts.push(`   • 💯 Ponderación: ${row.ponderacionPercent}% (${pts} / 20 pts vigesimal)`);
         } else if (isPrimaria) {
-          itemParts.push(`   • 💯 Ponderación: ${row.ponderacionPercent}% (Formativa L - EP - I)`);
+          itemParts.push(`   • 💯 Ponderación: ${row.ponderacionPercent}% (Formativa L - A - P - I)`);
         } else {
           itemParts.push(`   • 💯 Ponderación: ${row.ponderacionPercent}% (Escala Literal A-E)`);
         }
@@ -375,7 +375,7 @@ export const generateClassroomTaskHtml = (
           const puntosVigesimal = Math.round((row.ponderacionPercent / 100) * 20);
           html += `<li><strong>💯 Ponderación:</strong> ${row.ponderacionPercent}% (Equivale a ${puntosVigesimal} / 20 pts en Escala Vigesimal)</li>`;
         } else if (isPrimaria) {
-          html += `<li><strong>💯 Ponderación:</strong> ${row.ponderacionPercent}% (Evaluación Formativa / Cualitativa: L - EP - I)</li>`;
+          html += `<li><strong>💯 Ponderación:</strong> ${row.ponderacionPercent}% (Evaluación Formativa / Cualitativa: L - A - P - I)</li>`;
         } else {
           html += `<li><strong>💯 Ponderación:</strong> ${row.ponderacionPercent}% (Escala Literal: A, B, C, D, E)</li>`;
         }

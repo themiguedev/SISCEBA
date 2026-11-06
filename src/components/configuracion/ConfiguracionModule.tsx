@@ -392,7 +392,6 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
             <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
               <span className="text-xs font-black uppercase text-amber-700">Educación Inicial</span>
               <ul className="text-xs text-slate-600 space-y-1">
-                <li>• Sala de 3 Años (Secciones A y B)</li>
                 <li>• Sala de 4 Años (Secciones A y B)</li>
                 <li>• Sala de 5 Años (Secciones A y B)</li>
               </ul>
@@ -442,7 +441,7 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
                   setMode('light');
                   setPalette('cba-classic');
                 }}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition self-start sm:self-center"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 dark:text-slate-300 dark:hover:text-white dark:bg-white/10 dark:hover:bg-white/15 rounded-xl transition self-start sm:self-center cursor-pointer"
                 title="Restablecer tema original"
               >
                 <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
@@ -816,7 +815,7 @@ export const ConfiguracionModule: React.FC<ConfiguracionModuleProps> = ({
                 <input
                   type="text"
                   readOnly
-                  value="Colegio Belén San Juan - SISCEBA"
+                  value="U.E.P. Colegio Bellas Artes - SICE-CBA"
                   className="w-full px-3 py-1.5 rounded-xl border border-slate-300 text-xs font-medium text-slate-800 bg-white"
                 />
               </div>

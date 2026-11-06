@@ -409,10 +409,8 @@ export const ConfiguracionGeneralCEOView: React.FC = () => {
                 <div className="p-3.5 rounded-xl border border-pink-200 bg-pink-50/30 space-y-2">
                   <h4 className="text-xs font-black text-pink-900">EDUCACIÓN INICIAL</h4>
                   <ul className="text-xs text-slate-700 space-y-1">
-                    <li>• Maternal (1 a 2 años)</li>
-                    <li>• Sala de 3 Años (Nivel 1)</li>
-                    <li>• Sala de 4 Años (Nivel 2)</li>
-                    <li>• Sala de 5 Años (Nivel 3 / Preescolar)</li>
+                    <li>• Sala de 4 Años (Secciones A y B)</li>
+                    <li>• Sala de 5 Años (Secciones A y B)</li>
                   </ul>
                 </div>
                 <div className="p-3.5 rounded-xl border border-sky-200 bg-sky-50/30 space-y-2">

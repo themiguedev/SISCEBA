@@ -55,7 +55,7 @@ export const RecurrentesPrimariaView: React.FC<RecurrentesPrimariaViewProps> = (
     return (indicators || []).filter(i => i.level === 'PRIMARIA');
   }, [indicators]);
 
-  // Semáforo de carga cualitativa (L, EP, I) por grado y sección
+  // Semáforo de carga cualitativa (L, A, P, I) por grado y sección
   const gradosReport = useMemo(() => {
     const grados = LEVEL_GRADES_CATALOG.PRIMARIA;
     const sections: ('A' | 'B')[] = ['A', 'B'];
@@ -126,7 +126,7 @@ export const RecurrentesPrimariaView: React.FC<RecurrentesPrimariaViewProps> = (
                   Educación Primaria CBA
                 </span>
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/15 text-slate-200 font-mono">
-                  Escala Cualitativa (L - EP - I)
+                  Escala Cualitativa (L - A - P - I)
                 </span>
               </div>
               <h2 className="text-2xl font-black text-white mt-1">
@@ -360,7 +360,7 @@ export const RecurrentesPrimariaView: React.FC<RecurrentesPrimariaViewProps> = (
           <div>
             <h3 className="text-base font-black text-[#2C2E53] dark:text-slate-100 flex items-center gap-2">
               <Clock className="w-5 h-5 text-indigo-500" />
-              Revisión de la Carga de Indicadores Evaluados (Escala Cualitativa L, EP, I)
+              Revisión de la Carga de Indicadores Evaluados (Escala Cualitativa L, A, P, I)
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               Cumplimiento de carga docente en las secciones oficiales A y B de 1er a 6to Grado.

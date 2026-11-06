@@ -38,6 +38,12 @@ export const RendimientoAuditView: React.FC<RendimientoAuditViewProps> = ({
 
   // Filtros de Auditoría UCE
   const [selectedLevel, setSelectedLevel] = useState<'ALL' | EducationalLevel>(() => {
+    if (typeof window !== 'undefined') {
+      const q = new URLSearchParams(window.location.search).get('level');
+      if (q && ['INICIAL', 'PRIMARIA', 'MEDIA_GENERAL', 'ALL'].includes(q.toUpperCase())) {
+        return q.toUpperCase() as any;
+      }
+    }
     if (isFamilyOrStudent && scopedStudents[0]?.level) {
       return scopedStudents[0].level;
     }
@@ -90,7 +96,7 @@ export const RendimientoAuditView: React.FC<RendimientoAuditViewProps> = ({
     return recs[0].scoreLiteral || '-';
   };
 
-  // Helper para Primaria (Escala Cualitativa: L = Logrado, EP/P = En Proceso, I = Iniciado según GEMINI.md)
+  // Helper para Primaria (Escala Cualitativa: L = Logrado, A = Avanzando, P = Proceso, I = Iniciado)
   const getPrimariaQualitativeScore = (studentId: string, areaId: string): { code: string; label: string } => {
     const recs = evaluations.filter(
       (e) => e.studentId === studentId && e.areaId === areaId && e.lapso === selectedLapso
@@ -98,7 +104,8 @@ export const RendimientoAuditView: React.FC<RendimientoAuditViewProps> = ({
     if (recs.length === 0) return { code: '-', label: 'Sin evaluar' };
     const qual = recs[0].scoreQualitative;
     if (qual === 'L') return { code: 'L', label: 'Logrado' };
-    if (qual === 'EP' || qual === 'P') return { code: 'EP', label: 'En Proceso' };
+    if (qual === 'A') return { code: 'A', label: 'Avanzando' };
+    if (qual === 'P' || (qual as any) === 'EP') return { code: 'P', label: 'Proceso' };
     if (qual === 'I') return { code: 'I', label: 'Iniciado' };
     return { code: '-', label: 'Sin evaluar' };
   };
@@ -210,7 +217,7 @@ export const RendimientoAuditView: React.FC<RendimientoAuditViewProps> = ({
               <span className="text-[10px] font-black uppercase text-slate-400 px-2">Nivel:</span>
               {[
                 { id: 'MEDIA_GENERAL', label: 'Media G. (01-20)' },
-                { id: 'PRIMARIA', label: 'Primaria (L, EP, I)' },
+                { id: 'PRIMARIA', label: 'Primaria (L, A, P, I)' },
                 { id: 'INICIAL', label: 'Inicial (A-E)' },
                 { id: 'ALL', label: 'Todos' }
               ].map((lvl) => (
@@ -310,7 +317,7 @@ export const RendimientoAuditView: React.FC<RendimientoAuditViewProps> = ({
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
                 <span className="text-xs font-black text-[#2C2E53] dark:text-amber-300 uppercase tracking-wider">
-                  Educación Inicial (Salas de 3, 4 y 5 Años) • Evaluación Literal Oficial MPPE
+                  Educación Inicial (Salas de 4 y 5 Años) • Evaluación Literal Oficial MPPE
                 </span>
               </div>
               <span className="text-[10px] font-extrabold text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/60 px-2.5 py-0.5 rounded-full border border-amber-300 dark:border-amber-700">
@@ -402,7 +409,7 @@ export const RendimientoAuditView: React.FC<RendimientoAuditViewProps> = ({
         )}
 
         {/* ============================================================== */}
-        {/* 2. EDUCACIÓN PRIMARIA: ESCALA CUALITATIVA (L, P/EP, I)           */}
+        {/* 2. EDUCACIÓN PRIMARIA: ESCALA CUALITATIVA (L, A, P, I)           */}
         {/* ============================================================== */}
         {(selectedLevel === 'PRIMARIA' || selectedLevel === 'ALL') && (
           <div>
@@ -414,7 +421,7 @@ export const RendimientoAuditView: React.FC<RendimientoAuditViewProps> = ({
                 </span>
               </div>
               <span className="text-[10px] font-extrabold text-emerald-800 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-700">
-                Escala Normativa: Logrado (L) • En Proceso (EP) • Iniciado (I)
+                Escala Normativa: Logrado (L) • Avanzando (A) • Proceso (P) • Iniciado (I)
               </span>
             </div>
             <div className="overflow-x-auto max-h-[460px] overflow-y-auto">
@@ -449,7 +456,8 @@ export const RendimientoAuditView: React.FC<RendimientoAuditViewProps> = ({
                       .map((stu) => {
                         const primariaAreas = relevantAreas.filter((a) => a.level === 'PRIMARIA').slice(0, 5);
                         const qualScores = primariaAreas.map((a) => getPrimariaQualitativeScore(stu.id, a.id));
-                        const hasEP = qualScores.some((q) => q.code === 'EP');
+                        const hasP = qualScores.some((q) => q.code === 'P' || q.code === 'I');
+                        const hasA = qualScores.some((q) => q.code === 'A');
 
                         return (
                           <tr key={stu.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
@@ -473,9 +481,11 @@ export const RendimientoAuditView: React.FC<RendimientoAuditViewProps> = ({
                                       className={`px-2 py-0.5 rounded text-xs font-black border ${
                                         qual.code === 'L'
                                           ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
-                                          : qual.code === 'EP'
+                                          : qual.code === 'A'
+                                          ? 'bg-blue-50 text-blue-700 border-blue-300'
+                                          : qual.code === 'P'
                                           ? 'bg-amber-50 text-amber-800 border-amber-300'
-                                          : 'bg-blue-50 text-blue-800 border-blue-300'
+                                          : 'bg-rose-50 text-rose-800 border-rose-300'
                                       }`}
                                     >
                                       {qual.code}
@@ -487,12 +497,14 @@ export const RendimientoAuditView: React.FC<RendimientoAuditViewProps> = ({
                             <td className="py-3 px-4 text-center">
                               <span
                                 className={`px-2.5 py-0.5 rounded-full text-[10px] font-black border ${
-                                  hasEP
+                                  hasP
                                     ? 'bg-amber-50 text-amber-800 border-amber-300'
+                                    : hasA
+                                    ? 'bg-blue-50 text-blue-800 border-blue-300'
                                     : 'bg-emerald-50 text-emerald-700 border-emerald-300'
                                 }`}
                               >
-                                {hasEP ? 'En Proceso (EP)' : 'Logrado (L)'}
+                                {hasP ? 'Proceso (P)' : hasA ? 'Avanzando (A)' : 'Logrado (L)'}
                               </span>
                             </td>
                             <td className="py-3 px-4 text-center">

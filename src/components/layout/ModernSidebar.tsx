@@ -27,7 +27,20 @@ import {
   Sliders,
   Sparkles,
   Palette,
-  ShieldCheck
+  ShieldCheck,
+  Tag,
+  CheckSquare,
+  Heart,
+  BrainCircuit,
+  Scale,
+  FileCheck,
+  Lightbulb,
+  Boxes,
+  SpellCheck,
+  TrendingUp,
+  HeartHandshake,
+  Percent,
+  Calendar
 } from 'lucide-react';
 import { SeasonalAccessoryIcon } from '../auth/LogoSeasonalAccessory';
 import { hasTabAccess, hasSubTabAccess, getUserAllowedLevels, isConsultasOnlyRole, ROLE_METADATA } from '../../utils/rbac';
@@ -47,6 +60,7 @@ interface SidebarSubTab {
   id: string;
   label: string;
   icon: React.ComponentType<{ className?: string }>;
+  group?: string;
 }
 
 interface SidebarSection {
@@ -207,13 +221,12 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
       activeSubTabStyle: 'bg-amber-500/15 text-amber-100 border-l-2 border-amber-400 font-bold shadow-sm',
       subTabActiveIcon: 'text-amber-300',
       subTabs: [
-        { id: 'AREAS_PERFILES', label: 'Áreas de Desarrollo', icon: Layers },
-        { id: 'BANCO_COMPETENCIAS', label: 'Banco de Dimensiones', icon: Award },
-        { id: 'PLAN_QUINCENAL', label: 'Planes Quincenales', icon: ClipboardList },
-        { id: 'PLAN_LAPSO', label: 'Planes de Lapso', icon: FileText },
-        { id: 'DIAGNOSTICA', label: 'Evaluación Diagnóstica', icon: UserCheck },
-        { id: 'PROCESAL', label: 'Valoración Cualitativa', icon: FileSpreadsheet },
-        { id: 'BOLETIN', label: 'Observaciones al Boletín', icon: GraduationCap }
+        { id: 'DIMENSIONES', label: 'Dimensiones', icon: Compass },
+        { id: 'INDICADORES', label: 'Indicadores', icon: Tag },
+        { id: 'PLANES', label: 'Planes', icon: ClipboardList },
+        { id: 'OBSERVACIONES', label: 'Observaciones', icon: GraduationCap },
+        { id: 'DIAGNOSTICO_CIERRE', label: 'Diagnóstico y Cierre', icon: BrainCircuit },
+        { id: 'MALLA_RECURSOS', label: 'Malla y Recursos', icon: Layers }
       ]
     },
     {
@@ -228,14 +241,26 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
       activeSubTabStyle: 'bg-teal-500/15 text-teal-200 border-l-2 border-teal-400 font-bold shadow-sm',
       subTabActiveIcon: 'text-teal-300',
       subTabs: [
-        { id: 'AREAS_PERFILES', label: 'Áreas de Formación', icon: Layers },
-        { id: 'DISENADOR_OFICIAL', label: 'Diseñador Didáctico Oficial', icon: Sparkles },
-        { id: 'BANCO_COMPETENCIAS', label: 'Competencias e Indicadores', icon: Award },
-        { id: 'BANCO_ESTRATEGIAS', label: 'Banco de Estrategias', icon: FileSpreadsheet },
-        { id: 'PLAN_QUINCENAL', label: 'Plan Quincenal', icon: ClipboardList },
-        { id: 'PROCESAL', label: 'Seguimiento de Indicadores', icon: FileSpreadsheet },
-        { id: 'FINAL_LAPSO', label: 'Literales Finales Lapso', icon: Award },
-        { id: 'BOLETIN', label: 'Boletín Informativo', icon: GraduationCap }
+        // Indicadores (6 Opciones Oficiales CBA)
+        { id: 'CURADURIA_INDICADORES', label: 'Revisión y Ortografía', icon: SpellCheck, group: 'Indicadores' },
+        { id: 'PROCESAL', label: 'Seguimiento de Indicadores', icon: ClipboardList, group: 'Indicadores' },
+        { id: 'REVISION_CARGA', label: 'Revisión de la Carga', icon: Clock, group: 'Indicadores' },
+        { id: 'INDICADORES_ACTITUDINALES', label: 'Indicadores Actitudinales', icon: Heart, group: 'Indicadores' },
+        { id: 'INDICADORES_LECTOESCRITURA', label: 'Indicadores de Lectoescritura', icon: BookOpen, group: 'Indicadores' },
+        { id: 'PROGRESO_INDICADORES', label: 'Progreso de Indicadores', icon: TrendingUp, group: 'Indicadores' },
+        { id: 'BANCO_INDICADORES', label: 'Banco de Indicadores', icon: Tag, group: 'Indicadores' },
+        // Calificaciones
+        { id: 'CALIFICACIONES_ESTUDIANTE', label: 'Calificaciones por Estudiante', icon: UserCheck, group: 'Calificaciones' },
+        { id: 'CALIFICACIONES_CURSO', label: 'Calificaciones por Curso', icon: FileSpreadsheet, group: 'Calificaciones' },
+        // Boletín
+        { id: 'BOLETIN_INFORMATIVO', label: 'Boletín Informativo', icon: GraduationCap, group: 'Boletín' },
+        { id: 'OBSERVACIONES_BOLETIN', label: 'Lista de Observaciones', icon: MessageSquare, group: 'Boletín' },
+        // Áreas de Formación
+        { id: 'AREAS_FORMACION', label: 'Áreas de Formación', icon: BookOpen, group: 'Áreas de Formación' },
+        // Diseñador Didáctico
+        { id: 'DISENADOR_DIDACTICO', label: 'Diseñador Didáctico', icon: Sparkles, group: 'Diseñador Didáctico' },
+        // Competencias Didáctico
+        { id: 'COMPETENCIAS', label: 'Competencias', icon: Layers, group: 'Competencias Didáctico' }
       ]
     },
     {
@@ -250,16 +275,35 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
       activeSubTabStyle: 'bg-indigo-500/15 text-indigo-200 border-l-2 border-indigo-400 font-bold shadow-sm',
       subTabActiveIcon: 'text-indigo-300',
       subTabs: [
-        { id: 'AREAS_PERFILES', label: 'Asignaturas', icon: Layers },
-        { id: 'DISENADOR_OFICIAL', label: 'Diseñador Didáctico Oficial', icon: Sparkles },
-        { id: 'BANCO_ESTRATEGIAS', label: 'Estrategias y Ponderaciones', icon: FileSpreadsheet },
-        { id: 'PLAN_QUINCENAL', label: 'Planes Quincenales', icon: ClipboardList },
-        { id: 'PLAN_LAPSO', label: 'Planes de Lapso', icon: FileText },
-        { id: 'PROCESAL', label: 'Calificaciones Numéricas', icon: FileSpreadsheet },
-        { id: 'ACTAS_CONSEJO', label: 'Consejo de Curso y Actas', icon: Award },
-        { id: 'IA_ACTION_PLANS', label: 'Planes de Acción Personalizados', icon: ClipboardList },
-        { id: 'REMEDIALES', label: 'Intervención & Remediales', icon: BookOpen },
-        { id: 'BOLETIN', label: 'Boletín Informativo', icon: GraduationCap }
+        // Calificaciones
+        { id: 'CALIFICACIONES', label: 'Calificaciones', icon: Award, group: 'Calificaciones' },
+        { id: 'CALIFICACIONES_ESTUDIANTE', label: 'Calificaciones por estudiantes', icon: UserCheck, group: 'Calificaciones' },
+        { id: 'CALIFICACIONES_CRP', label: 'Calificaciones Grupos CRP', icon: Palette, group: 'Calificaciones' },
+        { id: 'CALIFICACIONES_ORIENTACION_CONVIVENCIA', label: 'Calificaciones de Orientación y Convivencia', icon: HeartHandshake, group: 'Calificaciones' },
+        { id: 'CALIFICACIONES_MATERIAS_PENDIENTES', label: 'Calificaciones Materias Pendientes', icon: Clock, group: 'Calificaciones' },
+        { id: 'CALIFICACIONES_POR_LAPSO', label: 'Calificaciones por Lapso', icon: Layers, group: 'Calificaciones' },
+        { id: 'CALIFICACIONES_GENERALES', label: 'Calificaciones Generales', icon: FileSpreadsheet, group: 'Calificaciones' },
+        { id: 'CALIFICACIONES_NUMERICAS', label: 'Calificaciones Numéricas', icon: FileSpreadsheet, group: 'Calificaciones' },
+        // Evaluación
+        { id: 'ESTRATEGIAS_EVALUACION', label: 'Estrategias de Evaluación', icon: ClipboardList, group: 'Evaluación' },
+        { id: 'PROGRESO_EVALUACIONES', label: 'Progreso de Evaluaciones', icon: TrendingUp, group: 'Evaluación' },
+        { id: 'RESULTADO_AUTOEVALUACION', label: 'Resultado de Autoevaluación cronograma', icon: Calendar, group: 'Evaluación' },
+        // Rasgos
+        { id: 'RASGOS_PERSONALIDAD', label: 'Rasgos de Personalidad', icon: Sliders, group: 'Rasgos' },
+        { id: 'RESULTADO_RASGOS', label: 'Resultado de Rasgos', icon: Heart, group: 'Rasgos' },
+        // Planes
+        { id: 'PLANES_ACCION_PERSONALIZADOS', label: 'Planes de accion personalizado', icon: Sparkles, group: 'Planes' },
+        { id: 'PLANES_LAPSO', label: 'Planes de Lapso', icon: Calendar, group: 'Planes' },
+        { id: 'PLANES_QUINCENALES', label: 'Planes Quincenales', icon: BookOpen, group: 'Planes' },
+        // Extra
+        { id: 'BANCO_ESTRATEGIAS', label: 'Banco de estrategias', icon: Layers, group: 'Extra' },
+        { id: 'OBSERVACIONES_BOLETIN', label: 'Observaciones al boletín', icon: MessageSquare, group: 'Extra' },
+        { id: 'REVISION', label: 'Revisión', icon: Scale, group: 'Extra' },
+        { id: 'CONSEJO_CURSO', label: 'Consejo de Curso', icon: Scale, group: 'Extra' },
+        { id: 'DISENADOR_DIDACTICO', label: 'Diseñador didáctico', icon: Sparkles, group: 'Extra' },
+        { id: 'BOLETIN_INFORMATIVO', label: 'Boletín informativo', icon: GraduationCap, group: 'Extra' },
+        { id: 'ESTRATEGIAS_PONDERACIONES', label: 'Estrategias y ponderaciones', icon: Percent, group: 'Extra' },
+        { id: 'ACTAS', label: 'Actas', icon: FileText, group: 'Extra' }
       ]
     },
 
@@ -413,11 +457,13 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
               })
               .map((section) => ({
                 ...section,
-                subTabs: sortSubTabsByFrequency(
-                  userId,
-                  section.id,
-                  section.subTabs.filter((sub) => hasSubTabAccess(effectiveUserOrRole, section.id, sub.id))
-                )
+                subTabs: (section.id === 'INICIAL' || section.id === 'PRIMARIA')
+                  ? section.subTabs.filter((sub) => hasSubTabAccess(effectiveUserOrRole, section.id, sub.id))
+                  : sortSubTabsByFrequency(
+                      userId,
+                      section.id,
+                      section.subTabs.filter((sub) => hasSubTabAccess(effectiveUserOrRole, section.id, sub.id))
+                    )
               }));
 
             return visibleSections.map((section, index) => {
@@ -524,40 +570,59 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
                 {/* Sub-items (expanded view) */}
                 {isOpen && isSectionExpanded && (
                   <div className="pl-3 pr-1 pt-1 space-y-1 animate-in fade-in slide-in-from-top-2 duration-200">
-                    {section.subTabs.map((sub) => {
+                    {section.subTabs.map((sub, sIdx) => {
                       const isSubActive =
-                        activeTab === section.id && activeSubTab === sub.id;
+                        activeTab === section.id &&
+                        (activeSubTab === sub.id ||
+                          (section.id === 'INICIAL' && (
+                            (sub.id === 'DIMENSIONES' && ['DIMENSIONES', 'BANCO_DIMENSIONES'].includes(activeSubTab)) ||
+                            (sub.id === 'INDICADORES' && ['INDICADORES', 'BANCO_INDICADORES', 'CURADURIA_INDICADORES', 'REVISION_CARGA', 'INDICADORES_ACTITUDINALES'].includes(activeSubTab)) ||
+                            (sub.id === 'PLANES' && ['PLANES', 'PLAN_LAPSO', 'PLAN_QUINCENAL', 'DISENADOR_OFICIAL'].includes(activeSubTab)) ||
+                            (sub.id === 'OBSERVACIONES' && ['OBSERVACIONES', 'BOLETIN', 'OBS_PREESCOLAR'].includes(activeSubTab)) ||
+                            (sub.id === 'DIAGNOSTICO_CIERRE' && ['DIAGNOSTICO_CIERRE', 'DIAGNOSTICA', 'FINAL_LAPSO', 'ESTADISTICAS', 'ACTAS_CONSEJO', 'REPORTES_INSTITUCIONALES'].includes(activeSubTab)) ||
+                            (sub.id === 'MALLA_RECURSOS' && ['MALLA_RECURSOS', 'AREAS_PERFILES', 'BANCO_COMPETENCIAS', 'BANCO_ESTRATEGIAS', 'BANCO_RECURSOS'].includes(activeSubTab))
+                          )));
                       const SubIcon = sub.icon;
+                      const showGroupHeader = sub.group && (sIdx === 0 || section.subTabs[sIdx - 1]?.group !== sub.group);
                       return (
-                        <button
-                          key={sub.id}
-                          onClick={() => {
-                            if (activeTab !== section.id) {
-                              setActiveTab(section.id);
-                            }
-                            setActiveSubTab(sub.id, section.id);
-                            recordSectionAccess(userId, section.id, sub.id);
-                            if (typeof window !== 'undefined' && window.innerWidth < 1024) {
-                              onCloseMobile();
-                            }
-                          }}
-                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all group ${
-                            isSubActive
-                              ? (section.activeSubTabStyle || 'bg-white/10 text-white font-bold shadow-sm')
-                              : 'text-slate-300 hover:text-white hover:bg-white/[0.08]'
-                          }`}
-                        >
-                          <div className="flex items-center gap-2 truncate">
-                            <SubIcon
-                              className={`w-3.5 h-3.5 shrink-0 transition-colors ${
-                                isSubActive
-                                  ? (section.subTabActiveIcon || 'text-white')
-                                  : 'text-slate-400 group-hover:text-slate-200'
-                              }`}
-                            />
-                            <span className="truncate">{sub.label}</span>
-                          </div>
-                        </button>
+                        <React.Fragment key={sub.id}>
+                          {showGroupHeader && (
+                            <div className="pt-2.5 pb-1 px-2 text-[10px] font-black uppercase tracking-wider text-amber-400/90 border-t border-white/5 mt-1.5 first:mt-0 first:border-0 flex items-center justify-between">
+                              <span className="flex items-center gap-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                                {sub.group}
+                              </span>
+                            </div>
+                          )}
+                          <button
+                            onClick={() => {
+                              if (activeTab !== section.id) {
+                                setActiveTab(section.id);
+                              }
+                              setActiveSubTab(sub.id, section.id);
+                              recordSectionAccess(userId, section.id, sub.id);
+                              if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+                                onCloseMobile();
+                              }
+                            }}
+                            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all group ${
+                              isSubActive
+                                ? (section.activeSubTabStyle || 'bg-white/10 text-white font-bold shadow-sm')
+                                : 'text-slate-300 hover:text-white hover:bg-white/[0.08]'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2 truncate">
+                              <SubIcon
+                                className={`w-3.5 h-3.5 shrink-0 transition-colors ${
+                                  isSubActive
+                                    ? (section.subTabActiveIcon || 'text-white')
+                                    : 'text-slate-400 group-hover:text-slate-200'
+                                }`}
+                              />
+                              <span className="truncate">{sub.label}</span>
+                            </div>
+                          </button>
+                        </React.Fragment>
                       );
                     })}
                   </div>

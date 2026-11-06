@@ -993,11 +993,12 @@ export const ConfiguracionAvanzadaView: React.FC = () => {
                 <div className="p-4 rounded-xl border border-sky-200 bg-sky-50/40">
                   <h4 className="text-xs font-black text-sky-900 mb-1">2. EDUCACIÓN PRIMARIA (Escala Cualitativa / Formativa)</h4>
                   <p className="text-[11px] text-sky-700 mb-2">Seguimiento de competencias pedagógicas:</p>
-                  <div className="flex flex-wrap gap-2 text-xs font-bold">
-                    <span className="px-2.5 py-1 rounded bg-white border border-sky-200 text-sky-800">L - Logrado</span>
-                    <span className="px-2.5 py-1 rounded bg-white border border-sky-200 text-sky-800">EP / P - En Proceso</span>
-                    <span className="px-2.5 py-1 rounded bg-white border border-sky-200 text-sky-800">I - Iniciado</span>
-                  </div>
+                    <div className="flex flex-wrap gap-2 text-xs font-bold">
+                      <span className="px-2.5 py-1 rounded bg-white border border-sky-200 text-sky-800">L - Logrado</span>
+                      <span className="px-2.5 py-1 rounded bg-white border border-sky-200 text-sky-800">A - Avanzando</span>
+                      <span className="px-2.5 py-1 rounded bg-white border border-sky-200 text-sky-800">P - Proceso</span>
+                      <span className="px-2.5 py-1 rounded bg-white border border-sky-200 text-sky-800">I - Iniciado</span>
+                    </div>
                 </div>
 
                 <div className="p-4 rounded-xl border border-indigo-200 bg-indigo-50/40">

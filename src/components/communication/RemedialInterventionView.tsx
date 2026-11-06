@@ -194,7 +194,7 @@ export const RemedialInterventionView: React.FC = () => {
     <div className="space-y-6">
       {/* Printable Sheet for Acta de Revisión */}
       {printActaRevision && typeof document !== 'undefined' && createPortal(
-        <div className="fixed inset-0 bg-white z-[9999] p-12 overflow-y-auto print:block flex flex-col justify-between">
+        <div className="fixed inset-0 bg-white force-light printable-sheet z-[9999] p-12 overflow-y-auto print:block flex flex-col justify-between">
           <div className="space-y-6 max-w-4xl mx-auto border-2 border-slate-900 p-8 rounded-xl">
             <div className="flex items-center justify-between border-b-2 border-slate-900 pb-4">
               <div className="text-left">

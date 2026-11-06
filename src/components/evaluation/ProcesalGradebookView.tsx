@@ -669,7 +669,7 @@ export const ProcesalGradebookView: React.FC<ProcesalGradebookViewProps> = ({ on
                             </select>
                           ) : (
                             <select
-                              value={val || 'L'}
+                              value={val === 'EP' ? 'P' : (val || 'L')}
                               disabled={isLockedForTeacher}
                               onChange={(e) => handleCellChange(stu.id, ind.id, e.target.value)}
                               aria-label={`Valoración cualitativa de ${stu.fullName} en ${ind.code}`}
@@ -680,8 +680,8 @@ export const ProcesalGradebookView: React.FC<ProcesalGradebookViewProps> = ({ on
                               }`}
                             >
                               <option value="L">L (Logrado)</option>
-                              <option value="P">P (En Proceso)</option>
-                              <option value="EP">EP (En Proceso)</option>
+                              <option value="A">A (Avanzando)</option>
+                              <option value="P">P (Proceso)</option>
                               <option value="I">I (Iniciado)</option>
                             </select>
                           )}

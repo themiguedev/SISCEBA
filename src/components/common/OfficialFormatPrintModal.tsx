@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Student, CouncilMeetingMinute } from '../../types';
-import { Printer, X, Download, ShieldCheck, FileCheck, CheckCircle2, User } from 'lucide-react';
+import { Printer, FileSpreadsheet, X, Download, ShieldCheck, FileCheck, CheckCircle2, User } from 'lucide-react';
+import { exportTableElementToExcel } from '../../utils/excelExport';
 
 export type OfficialFormatType = 
   | 'CONSTANCIA_ESTUDIO'
@@ -102,6 +103,22 @@ export const OfficialFormatPrintModal: React.FC<OfficialFormatPrintModalProps> =
     window.print();
   };
 
+  const handlePrintExcel = () => {
+    const container = document.getElementById('cba-official-format-container');
+    if (!container) {
+      handlePrint();
+      return;
+    }
+    const studentTag = currentStudent?.fullName ? `_${currentStudent.fullName.replace(/\s+/g, '_')}` : '';
+    const filename = `Formato_Oficial_${selectedFormat}${studentTag}`;
+    exportTableElementToExcel(container, {
+      title: `FORMATO INSTITUCIONAL CBA - ${selectedFormat}`,
+      filename,
+      orientation: selectedFormat === 'SABANA_SECCION' ? 'landscape' : 'portrait',
+      sheetName: selectedFormat.slice(0, 31)
+    });
+  };
+
   const modalContent = (
     <div className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-sm overflow-y-auto flex items-start justify-center p-2 sm:p-4 print:p-0 print:bg-white print:overflow-visible">
       {/* Botones y herramientas flotantes superiores (ocultos al imprimir) */}
@@ -154,8 +171,17 @@ export const OfficialFormatPrintModal: React.FC<OfficialFormatPrintModalProps> =
             )}
 
             <button
+              onClick={handlePrintExcel}
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl text-xs shadow-md transition flex items-center gap-1.5 cursor-pointer"
+              title="Descargar e imprimir formato oficial en Microsoft Excel"
+            >
+              <FileSpreadsheet className="w-4 h-4" />
+              Imprimir en Excel
+            </button>
+
+            <button
               onClick={handlePrint}
-              className="px-4 py-2 bg-[#D4AF37] hover:bg-[#e6c148] text-[#1e2038] font-black rounded-xl text-xs shadow-md transition flex items-center gap-1.5"
+              className="px-4 py-2 bg-[#D4AF37] hover:bg-[#e6c148] text-[#1e2038] font-black rounded-xl text-xs shadow-md transition flex items-center gap-1.5 cursor-pointer"
             >
               <Printer className="w-4 h-4" />
               Imprimir / Guardar PDF
@@ -200,6 +226,7 @@ export const OfficialFormatPrintModal: React.FC<OfficialFormatPrintModalProps> =
         }
       `}</style>
 
+      <div id="cba-official-format-container" className="w-full">
       {/* ============================================================== */}
       {/* 1. FORMATO: CONSTANCIA OFICIAL DE ESTUDIO                     */}
       {/* ============================================================== */}
@@ -1163,6 +1190,7 @@ export const OfficialFormatPrintModal: React.FC<OfficialFormatPrintModalProps> =
           })()}
         </div>
       )}
+      </div>
     </div>
   );
 

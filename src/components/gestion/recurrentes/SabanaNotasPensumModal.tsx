@@ -15,6 +15,7 @@ import {
   TrendingUp,
   AlertCircle
 } from 'lucide-react';
+import { exportReportToExcel } from '../../../utils/excelExport';
 
 interface SabanaNotasPensumModalProps {
   isOpen: boolean;
@@ -120,9 +121,19 @@ export const SabanaNotasPensumModal: React.FC<SabanaNotasPensumModalProps> = ({
     window.print();
   };
 
-  const handleExportCSV = () => {
-    const headers = ['Nro', 'Cédula', 'Estudiante', ...levelAreas.map(a => a.name), 'Promedio MPPE', 'Rank MPPE', 'Promedio CBA', 'Rank CBA'];
-    const rows = reportData.map((item, idx) => {
+  const handleExportExcel = () => {
+    const columns = [
+      { header: 'N°', width: 40, align: 'center' as const },
+      { header: 'Cédula', width: 110, align: 'center' as const },
+      { header: 'Apellidos y Nombres', width: 250, align: 'left' as const },
+      ...levelAreas.map(a => ({ header: a.name, width: 85, align: 'center' as const })),
+      { header: 'Prom. MPPE', width: 95, align: 'center' as const },
+      { header: 'Rank MPPE', width: 85, align: 'center' as const },
+      { header: 'Prom. CBA', width: 95, align: 'center' as const },
+      { header: 'Rank CBA', width: 85, align: 'center' as const }
+    ];
+
+    const data = reportData.map((item, idx) => {
       const scores = levelAreas.map(a => {
         const found = item.calc.cbaDetails.find(d => d.areaId === a.id);
         return found ? found.score : '--';
@@ -130,23 +141,38 @@ export const SabanaNotasPensumModal: React.FC<SabanaNotasPensumModalProps> = ({
       return [
         idx + 1,
         item.student.cedula,
-        `"${item.student.fullName}"`,
+        item.student.fullName.toUpperCase(),
         ...scores,
         item.calc.averageMppe,
         item.rankMppe,
         item.calc.averageCba,
         item.rankCba
-      ].join(',');
+      ];
     });
 
-    const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers.join(','), ...rows].join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `Sabana_Notas_${selectedGrade}_Sec_${selectedSection}_Lapso_${selectedLapso}_${pensumMode}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    exportReportToExcel({
+      title: 'SÁBANA CONSOLIDADA DE CALIFICACIONES Y PENSUM CBA',
+      subtitle: `MODALIDAD: ${pensumMode === 'MPPE' ? 'PENSUM MPPE OFICIAL' : 'PENSUM INTEGRAL CBA'}`,
+      schoolYear: '2025 - 2026',
+      lapso: selectedLapso,
+      grade: selectedGrade,
+      section: selectedSection,
+      level: selectedLevel,
+      orientation: 'landscape',
+      columns,
+      data,
+      extraNotes: [
+        'Registro curricular emitido según directrices del MPPE y el Sistema de Calificaciones CBA.',
+        'Escala vigesimal (01-20) para Media General y cualitativa/literal según corresponda al subsistema.'
+      ],
+      signatures: [
+        { title: 'Docente Titular / Guía', subtitle: 'Firma y Cédula' },
+        { title: 'Coordinación Pedagógica', subtitle: 'Revisión Académica' },
+        { title: 'Control de Estudios y Evaluación', subtitle: 'Sello Oficial CBA' }
+      ],
+      filename: `Sabana_Notas_${selectedGrade.replace(/\s+/g, '_')}_Sec_${selectedSection}_L${selectedLapso}_${pensumMode}`,
+      sheetName: `Sábana Sec ${selectedSection} L${selectedLapso}`
+    });
   };
 
   if (!isOpen) return null;
@@ -176,20 +202,20 @@ export const SabanaNotasPensumModal: React.FC<SabanaNotasPensumModalProps> = ({
 
           <div className="flex items-center gap-2">
             <button
-              onClick={handlePrint}
-              className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition flex items-center gap-1.5 text-xs font-bold"
-              title="Imprimir Sábana"
+              onClick={handleExportExcel}
+              className="p-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl transition flex items-center gap-1.5 text-xs font-bold shadow-md cursor-pointer"
+              title="Descargar e imprimir sábana en Microsoft Excel"
             >
-              <Printer className="w-4 h-4" />
-              <span className="hidden sm:inline">Imprimir</span>
+              <FileSpreadsheet className="w-4 h-4" />
+              <span className="hidden sm:inline">Imprimir en Excel</span>
             </button>
             <button
-              onClick={handleExportCSV}
-              className="p-2 bg-[#D4AF37] hover:bg-[#c49f2e] text-[#1B1C33] rounded-xl transition flex items-center gap-1.5 text-xs font-black shadow-md"
-              title="Descargar en Excel/CSV"
+              onClick={handlePrint}
+              className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition flex items-center gap-1.5 text-xs font-bold"
+              title="Imprimir Sábana o Guardar PDF"
             >
-              <Download className="w-4 h-4" />
-              <span className="hidden sm:inline">Exportar CSV</span>
+              <Printer className="w-4 h-4" />
+              <span className="hidden sm:inline">Imprimir PDF</span>
             </button>
             <button
               onClick={onClose}

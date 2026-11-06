@@ -3,7 +3,8 @@ import { createPortal } from 'react-dom';
 import { useApp } from '../../context/AppContext';
 import { ReporteItem, incrementReporteImpresiones } from '../../data/reportesCEOData';
 import { Student } from '../../types';
-import { Printer, X, ShieldCheck, FileCheck, Award, Calendar, Users, Building, Info } from 'lucide-react';
+import { Printer, FileSpreadsheet, X, ShieldCheck, FileCheck, Award, Calendar, Users, Building, Info } from 'lucide-react';
+import { exportTableElementToExcel } from '../../utils/excelExport';
 
 interface ReporteInstitucionalModalProps {
   isOpen: boolean;
@@ -34,7 +35,7 @@ export const ReporteInstitucionalModal: React.FC<ReporteInstitucionalModalProps>
   filtroNotaMax,
   filtroOrden = 'Apellidos y Nombres'
 }) => {
-  const { currentRole, activeLapso, addAuditLog, evaluations, currentUser } = useApp();
+  const { currentRole, activeLapso, addAuditLog, evaluations, currentUser, showToast } = useApp();
 
   const isLiteralesPorSeccion =
     reporte.id === 'adm-literales-por-seccion' ||
@@ -303,7 +304,7 @@ export const ReporteInstitucionalModal: React.FC<ReporteInstitucionalModalProps>
         const sc = e.scoreQualitative || e.scoreLiteral;
         if (sc === 'L') lCount++;
         else if (sc === 'A') aCount++;
-        else if (sc === 'P' || sc === 'EP') pCount++;
+        else if (sc === 'P' || (sc as unknown as string) === 'EP') pCount++;
         else if (sc === 'I') iCount++;
         else if (sc === 'B') aCount++;
         else if (sc === 'C') pCount++;
@@ -391,6 +392,34 @@ export const ReporteInstitucionalModal: React.FC<ReporteInstitucionalModalProps>
       );
     }
     window.print();
+  };
+
+  const handlePrintExcel = () => {
+    const container = document.getElementById('cba-reporte-sheet-container');
+    if (!container) {
+      handlePrint();
+      return;
+    }
+    const newCount = incrementReporteImpresiones(reporte.id);
+    if (onPrintIncrement) {
+      onPrintIncrement(reporte.id, newCount);
+    }
+    if (addAuditLog) {
+      addAuditLog(
+        `IMPRESION_EXCEL_${reporte.codigoReporte || reporte.id}`,
+        `Exportación e impresión en Excel del reporte: "${reporte.nombre}" para ${selectedGrade} Secc. "${selectedSection}"`
+      );
+    }
+    const cleanFileName = `Reporte_${reporte.codigoReporte || 'CBA'}_${selectedGrade.replace(/\s+/g, '_')}_Sec_${selectedSection}_L${selectedLapso}`;
+    exportTableElementToExcel(container, {
+      title: reporte.nombre,
+      filename: cleanFileName,
+      orientation: isSabanaPromedios ? 'landscape' : 'portrait',
+      sheetName: (reporte.codigoReporte || 'Reporte CBA').slice(0, 31)
+    });
+    if (showToast) {
+      showToast('Impresión en Excel Generada', `El reporte "${reporte.nombre}" se ha generado en formato Excel listo para imprimir.`);
+    }
   };
 
   const currentDateFormatted = new Date().toLocaleDateString('es-VE', {
@@ -481,9 +510,18 @@ export const ReporteInstitucionalModal: React.FC<ReporteInstitucionalModalProps>
             </div>
 
             <button
+              onClick={handlePrintExcel}
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl text-xs shadow-md transition flex items-center gap-1.5 cursor-pointer"
+              title="Descargar e imprimir reporte en formato Microsoft Excel"
+            >
+              <FileSpreadsheet className="w-4 h-4" />
+              <span>Imprimir en Excel</span>
+            </button>
+
+            <button
               onClick={handlePrint}
               className="px-4 py-2 bg-[#D4AF37] hover:bg-[#e6c148] text-[#1e2038] font-black rounded-xl text-xs shadow-md transition flex items-center gap-1.5"
-              title="Imprimir documento oficial en papel carta"
+              title="Imprimir documento oficial en papel carta o guardar PDF"
             >
               <Printer className="w-4 h-4" />
               <span>Imprimir / PDF</span>
@@ -528,7 +566,7 @@ export const ReporteInstitucionalModal: React.FC<ReporteInstitucionalModalProps>
         `}</style>
 
         {/* Hoja de Impresión del Documento Institucional */}
-        <div className="cba-report-sheet bg-white text-slate-900 rounded-2xl border border-slate-200 shadow-2xl p-6 sm:p-10 mb-8 font-sans">
+        <div id="cba-reporte-sheet-container" className="cba-report-sheet bg-white text-slate-900 rounded-2xl border border-slate-200 shadow-2xl p-6 sm:p-10 mb-8 font-sans">
           {isLiteralesPorSeccion ? (
             /* CABECERA OFICIAL UCE - LITERALES POR SECCIÓN (EXACTA AL FORMATO IMPRESO FÍSICO) */
             <div className="mb-4">

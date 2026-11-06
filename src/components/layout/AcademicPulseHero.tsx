@@ -28,9 +28,9 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
   const levelRecords = evaluations.filter((r: EvaluationRecord) => r.lapso === activeLapso);
 
   const levelLabels = {
-    INICIAL: { name: 'Educación Inicial', cycle: 'Salas de 3, 4 y 5 Años', scale: 'Evaluación Cualitativa Descriptiva' },
-    PRIMARIA: { name: 'Educación Primaria', cycle: '1° a 6° Grado', scale: 'Escala Literal (A - E)' },
-    MEDIA_GENERAL: { name: 'Educación Media General', cycle: '1° a 5° Año', scale: 'Escala Numérica Oficial (01 - 20)' }
+    INICIAL: { name: 'Educación Inicial', cycle: 'Salas de 4 y 5 Años', scale: 'Escala Literal Oficial (A - E)' },
+    PRIMARIA: { name: 'Educación Primaria', cycle: '1° a 6° Grado', scale: 'Escala Cualitativa Formativa (L - A - P - I)' },
+    MEDIA_GENERAL: { name: 'Educación Media General', cycle: '1° a 5° Año', scale: 'Escala Cuantitativa Vigesimal (01 - 20)' }
   };
 
   const currentInfo = levelLabels[currentLevel];
@@ -67,7 +67,7 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
 
               {/* Seasonal Pill Tag */}
               <span
-                className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold border shadow-xs ${currentMonthConfig.badgeBg} ${currentMonthConfig.badgeText} ${currentMonthConfig.badgeBorder}`}
+                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold border shadow-xs ${currentMonthConfig.badgeBg} ${currentMonthConfig.badgeText} ${currentMonthConfig.badgeBorder}`}
                 title={`${currentMonthConfig.ephemeris} - ${currentMonthConfig.greetingMessage}`}
               >
                 <span>{currentMonthConfig.emoji}</span>

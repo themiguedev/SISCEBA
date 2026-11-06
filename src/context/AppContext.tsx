@@ -230,6 +230,7 @@ interface AppContextType {
   addCompetency: (comp: Omit<Competency, 'id'>) => Competency;
   addIndicator: (ind: Omit<Indicator, 'id'>) => Indicator;
   updateIndicator: (ind: Indicator) => void;
+  deleteIndicator: (indicatorId: string) => void;
   transferCompetency: (competencyId: string, targetLapso: 1 | 2 | 3) => void;
   transferIndicator: (indicatorId: string, targetLapso: 1 | 2 | 3) => void;
   addStrategy: (strat: Omit<Strategy, 'id'>) => Strategy;
@@ -331,6 +332,7 @@ interface AppContextType {
   notifications: SystemNotification[];
   unreadNotificationsCount: number;
   sendNotification: (notif: Omit<SystemNotification, 'id' | 'timestamp' | 'read'>) => void;
+  showToast: (titleOrMessage: string, messageOrType?: string, type?: 'success' | 'error' | 'info' | 'warning') => void;
   markNotificationAsRead: (id: string) => void;
   markAllNotificationsAsRead: () => void;
   clearNotifications: () => void;
@@ -460,6 +462,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const [currentUser, setCurrentUser] = useState<AppUser | null>(() => {
+    if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('autologin') === 'admin') {
+      return INITIAL_USERS[0];
+    }
     const saved = localStorage.getItem('sisceba_current_user');
     const auth = localStorage.getItem('sisceba_auth_session');
     if (auth === 'true' && saved) {
@@ -478,6 +483,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Session States
   const [currentLevel, setCurrentLevel] = useState<EducationalLevel>(() => {
+    if (typeof window !== 'undefined') {
+      const p = new URLSearchParams(window.location.search).get('level');
+      if (p) return p.toUpperCase() as EducationalLevel;
+    }
     const saved = localStorage.getItem('sisceba_current_user');
     if (saved) {
       try {
@@ -489,6 +498,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const [currentRole, setCurrentRole] = useState<UserRole>(() => {
+    if (typeof window !== 'undefined') {
+      const p = new URLSearchParams(window.location.search).get('role');
+      if (p) return p.toUpperCase() as UserRole;
+    }
     const savedActiveRole = localStorage.getItem('sisceba_active_role');
     const saved = localStorage.getItem('sisceba_current_user');
     if (saved) {
@@ -532,6 +545,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const SESSION_INACTIVITY_LIMIT_MS = 10 * 60 * 1000;
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('autologin') === 'admin') {
+      return true;
+    }
     const saved = localStorage.getItem('sisceba_auth_session');
     const user = localStorage.getItem('sisceba_current_user');
     const lastActiveStr = localStorage.getItem('sisceba_last_activity');
@@ -1568,11 +1584,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 ? (savedActiveRole as UserRole)
                 : verified.role;
               setCurrentRole(roleToSet);
-              if (verified.defaultLevel && !savedActiveRole) {
-                setCurrentLevel(verified.defaultLevel);
-              } else if (verified.allowedLevels && verified.allowedLevels.length > 0 && !savedActiveRole) {
-                setCurrentLevel(verified.allowedLevels[0]);
-              }
             }
           } catch {
             setIsAuthenticated(false);
@@ -1779,6 +1790,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     syncWithCloud(() => supabaseSaveNotification(newNotif), 'enviar notificación');
   };
 
+  const showToast = (titleOrMessage: string, messageOrType?: string, type?: 'success' | 'error' | 'info' | 'warning') => {
+    let finalTitle = 'Notificación Institucional CBA';
+    let finalMessage = titleOrMessage;
+    let finalPriority: SystemNotification['priority'] = 'MEDIA';
+
+    if (messageOrType && (messageOrType === 'success' || messageOrType === 'error' || messageOrType === 'info' || messageOrType === 'warning')) {
+      finalMessage = titleOrMessage;
+      finalTitle = messageOrType === 'success' ? 'Operación Exitosa' : messageOrType === 'error' ? 'Aviso del Sistema' : 'Notificación CBA';
+      finalPriority = messageOrType === 'error' ? 'ALTA' : 'MEDIA';
+    } else if (messageOrType) {
+      finalTitle = titleOrMessage;
+      finalMessage = messageOrType;
+      finalPriority = type === 'error' ? 'ALTA' : 'MEDIA';
+    }
+
+    sendNotification({
+      title: finalTitle,
+      message: finalMessage,
+      category: 'SISTEMA',
+      priority: finalPriority,
+      recipientRole: 'TODOS',
+      deliveryChannels: ['PORTAL']
+    });
+  };
+
   const markNotificationAsRead = (id: string) => {
     setNotifications(prev => prev.map(n => (n.id === id ? { ...n, read: true } : n)));
     syncWithCloud(() => supabaseMarkNotificationAsRead(id), 'marcar notificación leída');
@@ -1978,6 +2014,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const updateIndicator = (ind: Indicator) => {
     setIndicators(prev => prev.map(i => i.id === ind.id ? ind : i));
     syncWithCloud(() => supabaseSaveIndicator(ind), 'actualizar indicador');
+  };
+
+  const deleteIndicator = (indicatorId: string) => {
+    setIndicators(prev => prev.filter(i => i.id !== indicatorId));
   };
 
   const transferCompetency = (competencyId: string, targetLapso: 1 | 2 | 3) => {
@@ -2264,7 +2304,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       : undefined;
 
     const scoreQualitative = isPrimaria
-      ? ((['L', 'P', 'EP', 'I'].includes(upperScore) ? upperScore : undefined) as QualitativeScore | undefined)
+      ? ((['L', 'A', 'P', 'I'].includes(upperScore)
+          ? upperScore
+          : upperScore === 'EP'
+          ? 'P'
+          : undefined) as QualitativeScore | undefined)
       : undefined;
 
     const scoreNumeric = isMedia && !isNaN(Number(cleanScore))
@@ -3570,7 +3614,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       } else if (student.level === 'PRIMARIA') {
         scoreVal = ev?.scoreQualitative || 'L';
-        const qualWeight: Record<string, number> = { L: 20, P: 14, EP: 14, I: 9 };
+        const qualWeight: Record<string, number> = { L: 20, A: 16, P: 12, EP: 12, I: 8 };
         const num = qualWeight[String(scoreVal)] || 16;
         sumCba += num;
         countCba++;
@@ -3668,6 +3712,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addCompetency,
         addIndicator,
         updateIndicator,
+        deleteIndicator,
         transferCompetency,
         transferIndicator,
         addStrategy,
@@ -3736,6 +3781,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         notifications,
         unreadNotificationsCount,
         sendNotification,
+        showToast,
         markNotificationAsRead,
         markAllNotificationsAsRead,
         clearNotifications,

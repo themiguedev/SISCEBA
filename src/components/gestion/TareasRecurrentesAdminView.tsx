@@ -41,7 +41,15 @@ export const TareasRecurrentesAdminView: React.FC<TareasRecurrentesAdminViewProp
   } = useApp();
 
   // Active level tab inside Tareas Recurrentes
-  const [selectedSubsystem, setSelectedSubsystem] = useState<EducationalLevel>(currentLevel || 'INICIAL');
+  const [selectedSubsystem, setSelectedSubsystem] = useState<EducationalLevel>(() => {
+    if (typeof window !== 'undefined') {
+      const q = new URLSearchParams(window.location.search).get('level');
+      if (q && ['INICIAL', 'PRIMARIA', 'MEDIA_GENERAL'].includes(q.toUpperCase())) {
+        return q.toUpperCase() as EducationalLevel;
+      }
+    }
+    return currentLevel || 'INICIAL';
+  });
 
   // Stats calculation
   const totalStudents = (students || []).length;

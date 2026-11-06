@@ -401,13 +401,13 @@ export const SelfRegisterModal: React.FC<SelfRegisterModalProps> = ({
                     {
                       id: 'PRIMARIA' as EducationalLevel,
                       title: 'Primaria',
-                      scale: 'Literal A-E',
+                      scale: 'Cualitativa L/A/P/I',
                       icon: Layers
                     },
                     {
                       id: 'INICIAL' as EducationalLevel,
                       title: 'Inicial',
-                      scale: 'Cualitativa L/EP/I',
+                      scale: 'Literal A-E',
                       icon: BookOpen
                     }
                   ].map((item) => {
@@ -610,7 +610,7 @@ export const SelfRegisterModal: React.FC<SelfRegisterModalProps> = ({
                 <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
                 Vinculación de Perfiles Institucionales CBA
               </span>
-              <h4 className="text-base sm:text-lg font-black text-[#1B1C33] tracking-tight">
+              <h4 className="text-base sm:text-lg font-black text-[#1B1C33] dark:text-white tracking-tight">
                 ¿Tiene un hijo o hija estudiando en la institución?
               </h4>
               <p className="text-slate-600 text-xs max-w-md mx-auto leading-relaxed">
@@ -646,10 +646,10 @@ export const SelfRegisterModal: React.FC<SelfRegisterModalProps> = ({
                       <Users className="w-5 h-5" />
                     </div>
                     <div>
-                      <span className="text-xs font-black text-[#1B1C33] block">
+                      <span className="text-xs font-black text-[#1B1C33] dark:text-white block">
                         SÍ, tengo un hijo(a)
                       </span>
-                      <span className="text-[10px] font-bold text-amber-700">
+                      <span className="text-[10px] font-bold text-amber-700 dark:text-amber-400">
                         Habilitar Rol de Representante
                       </span>
                     </div>
@@ -707,10 +707,10 @@ export const SelfRegisterModal: React.FC<SelfRegisterModalProps> = ({
                       <Briefcase className="w-5 h-5" />
                     </div>
                     <div>
-                      <span className="text-xs font-black text-[#1B1C33] block">
+                      <span className="text-xs font-black text-[#1B1C33] dark:text-white block">
                         NO, no tengo hijos aquí
                       </span>
-                      <span className="text-[10px] font-bold text-slate-500">
+                      <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
                         Únicamente Labor Institucional
                       </span>
                     </div>
@@ -797,19 +797,19 @@ export const SelfRegisterModal: React.FC<SelfRegisterModalProps> = ({
             </div>
 
             <div className="space-y-1">
-              <h4 className="text-lg font-black text-[#1B1C33]">
+              <h4 className="text-lg font-black text-[#1B1C33] dark:text-white">
                 ¡Registro Completado con Éxito!
               </h4>
-              <p className="text-xs text-slate-600 max-w-md mx-auto">
+              <p className="text-xs text-slate-600 dark:text-slate-300 max-w-md mx-auto">
                 {successMessage}
               </p>
             </div>
 
             {/* Resumen de Accesos */}
-            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-left max-w-sm mx-auto space-y-2">
+            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs text-left max-w-sm mx-auto space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-slate-500 font-semibold">Usuario de acceso:</span>
-                <span className="font-mono font-bold text-[#1B1C33]">@{username}</span>
+                <span className="text-slate-500 dark:text-slate-400 font-semibold">Usuario de acceso:</span>
+                <span className="font-mono font-bold text-[#1B1C33] dark:text-[#D4AF37]">@{username}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-slate-500 font-semibold">Rol Principal:</span>

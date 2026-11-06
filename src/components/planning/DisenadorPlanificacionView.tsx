@@ -992,7 +992,7 @@ export const DisenadorPlanificacionView: React.FC<DisenadorPlanificacionViewProp
                       {selectedLevel === 'INICIAL'
                         ? 'INDICADORES FORMATIVOS (LITERAL A-E)'
                         : selectedLevel === 'PRIMARIA'
-                        ? 'INDICADORES DE COMPETENCIA (L / EP / I)'
+                        ? 'INDICADORES DE COMPETENCIA (L / A / P / I)'
                         : 'INDICADORES DE COMPETENCIA'}
                     </th>
                     {/* Col 4 */}

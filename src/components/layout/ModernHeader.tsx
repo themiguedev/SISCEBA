@@ -101,7 +101,7 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
   > = {
     INICIAL: {
       label: 'Educación Inicial',
-      sub: 'Salas 3, 4 y 5 Años',
+      sub: 'Salas de 4 y 5 Años',
       icon: '🧸',
       badge: '',
       color: 'from-amber-500 to-orange-500'
@@ -170,7 +170,7 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
                 SICE-CBA
               </span>
               <span
-                className={`hidden xl:inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-black border uppercase tracking-wider ${currentMonthConfig.badgeBg} ${currentMonthConfig.badgeText} ${currentMonthConfig.badgeBorder}`}
+                className={`hidden xl:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-black border uppercase tracking-wider shadow-xs ${currentMonthConfig.badgeBg} ${currentMonthConfig.badgeText} ${currentMonthConfig.badgeBorder}`}
                 title={`Temática del Mes: ${currentMonthConfig.name} - ${currentMonthConfig.seasonTitle}`}
               >
                 <span>{currentMonthConfig.emoji}</span>

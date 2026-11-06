@@ -5,7 +5,6 @@ import { MainNavigationTab, EducationalLevel, UserRole } from './types';
 import { ModernHeader } from './components/layout/ModernHeader';
 import { ModernSidebar } from './components/layout/ModernSidebar';
 import { AcademicPulseHero } from './components/layout/AcademicPulseHero';
-import { CompactWorkspaceHeader } from './components/layout/CompactWorkspaceHeader';
 import { QuickActionDock } from './components/layout/QuickActionDock';
 import { ModernMobileNav } from './components/layout/ModernMobileNav';
 import { CommandSearchModal } from './components/layout/CommandSearchModal';
@@ -22,6 +21,9 @@ import { hasTabAccess, hasSubTabAccess, getDefaultTabForRole, getUserAllowedLeve
 // Modules
 import { EscritorioView } from './components/dashboard/EscritorioView';
 import { GestionModule } from './components/gestion/GestionModule';
+import { InicialModule, InicialGroup } from './components/inicial/InicialModule';
+import { PrimariaModule, PrimariaGroup } from './components/primaria/PrimariaModule';
+import { MediaGeneralModule, MediaGroup } from './components/mediageneral/MediaGeneralModule';
 import { PlanningModule } from './components/planning/PlanningModule';
 import { EvaluationModule } from './components/evaluation/EvaluationModule';
 import { CommunicationModule } from './components/communication/CommunicationModule';
@@ -60,11 +62,17 @@ const SiscebaMainApp: React.FC = () => {
 
   // Subtab States for each domain
   const [escritorioSubTab, setEscritorioSubTab] = useState<'DASHBOARD' | 'PERFIL' | 'HORARIO' | 'SUGERENCIAS'>('DASHBOARD');
-  const [gestionSubTab, setGestionSubTab] = useState<string>('INSCRIPCIONES');
-  const [consultasSubTab, setConsultasSubTab] = useState<ConsultasSubTab>('RENDIMIENTO');
+  const [gestionSubTab, setGestionSubTab] = useState<string>(() => (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('sub')) || 'INSCRIPCIONES');
+  const [consultasSubTab, setConsultasSubTab] = useState<ConsultasSubTab>(() => (typeof window !== 'undefined' && (new URLSearchParams(window.location.search).get('sub') as ConsultasSubTab)) || 'RENDIMIENTO');
   const [comunidadSubTab, setComunidadSubTab] = useState<'NOTICIAS' | 'CUMPLEANOS' | 'COMUNICADOS'>('NOTICIAS');
   const [configuracionSubTab, setConfiguracionSubTab] = useState<'LAPSOS' | 'ESTRUCTURA' | 'TEMAS' | 'CONFIG_CEO' | 'AVANZADA'>('LAPSOS');
   const [ayudaSubTab, setAyudaSubTab] = useState<'MANUAL' | 'MAPA_SITIO'>('MANUAL');
+  const [inicialGroupTab, setInicialGroupTab] = useState<InicialGroup>('DIMENSIONES');
+  const [inicialSubTab, setInicialSubTab] = useState<string>('BANCO_DIMENSIONES');
+  const [primariaGroupTab, setPrimariaGroupTab] = useState<PrimariaGroup>('INDICADORES');
+  const [primariaSubTab, setPrimariaSubTab] = useState<string>('CURADURIA_INDICADORES');
+  const [mediaGroupTab, setMediaGroupTab] = useState<MediaGroup>('CALIFICACIONES');
+  const [mediaSubTab, setMediaSubTab] = useState<string>('CALIFICACIONES');
   const [planningSubTab, setPlanningSubTab] = useState<string>('AREAS_PERFILES');
   const [evaluationSubTab, setEvaluationSubTab] = useState<string>('PROCESAL');
   const [communicationSubTab, setCommunicationSubTab] = useState<string>('BOLETIN');
@@ -105,6 +113,20 @@ const SiscebaMainApp: React.FC = () => {
     }
   }, [device.deviceType, device.orientation, device.isTouch, device.isMobile, device.isDesktop]);
 
+  // Synchronize role and level from URL parameters if provided (for role-specific captures)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const searchParams = new URLSearchParams(window.location.search);
+    const pRole = searchParams.get('role');
+    if (pRole) {
+      switchActiveRole(pRole.toUpperCase() as UserRole);
+    }
+    const pLevel = searchParams.get('level');
+    if (pLevel) {
+      setCurrentLevel(pLevel.toUpperCase() as EducationalLevel);
+    }
+  }, [switchActiveRole, setCurrentLevel]);
+
   // Keep activeTab, subTabs, and currentLevel synchronized with RBAC hierarchy and user allowed educational levels
   useEffect(() => {
     const userLevels = getUserAllowedLevels(currentRole, currentUser);
@@ -142,9 +164,11 @@ const SiscebaMainApp: React.FC = () => {
 
     if (activeTab === 'INICIAL' || activeTab === 'PRIMARIA' || activeTab === 'MEDIA_GENERAL') {
       if (userLevels.length > 0 && !userLevels.includes(activeTab)) {
-        setActiveTab(userLevels[0]);
-      } else if (activeTab !== currentLevel) {
-        setActiveTab(currentLevel);
+        const fallbackLevel = userLevels[0];
+        setActiveTab(fallbackLevel);
+        setCurrentLevel(fallbackLevel);
+      } else if (currentLevel !== activeTab) {
+        setCurrentLevel(activeTab);
       }
     }
   }, [currentLevel, currentRole, activeTab, currentUser, gestionSubTab, consultasSubTab, configuracionSubTab]);
@@ -196,6 +220,194 @@ const SiscebaMainApp: React.FC = () => {
       setConfiguracionSubTab(sub as 'LAPSOS' | 'ESTRUCTURA' | 'TEMAS' | 'CONFIG_CEO' | 'AVANZADA');
     } else if (['MANUAL', 'MAPA_SITIO'].includes(sub)) {
       setAyudaSubTab(sub as 'MANUAL' | 'MAPA_SITIO');
+    } else if (
+      effectiveTab === 'INICIAL' ||
+      (!['PRIMARIA', 'MEDIA_GENERAL'].includes(effectiveTab || activeTab) &&
+        ['OBS_PREESCOLAR', 'DIMENSIONES', 'BANCO_DIMENSIONES', 'INDICADORES', 'PLANES', 'OBSERVACIONES', 'DIAGNOSTICO_CIERRE', 'MALLA_RECURSOS'].includes(sub))
+    ) {
+      if (sub === 'DIMENSIONES' || sub === 'BANCO_DIMENSIONES') {
+        setInicialGroupTab('DIMENSIONES');
+        setInicialSubTab('BANCO_DIMENSIONES');
+      } else if (sub === 'INDICADORES' || ['BANCO_INDICADORES', 'CURADURIA_INDICADORES', 'REVISION_CARGA', 'INDICADORES_ACTITUDINALES'].includes(sub)) {
+        setInicialGroupTab('INDICADORES');
+        setInicialSubTab(sub === 'INDICADORES' ? 'BANCO_INDICADORES' : sub);
+      } else if (sub === 'PLANES' || ['PLAN_LAPSO', 'PLAN_QUINCENAL', 'DISENADOR_OFICIAL'].includes(sub)) {
+        setInicialGroupTab('PLANES');
+        setInicialSubTab(sub === 'PLANES' ? 'PLAN_LAPSO' : sub);
+      } else if (sub === 'OBSERVACIONES' || ['BOLETIN', 'OBS_PREESCOLAR'].includes(sub)) {
+        setInicialGroupTab('OBSERVACIONES');
+        setInicialSubTab(sub === 'OBSERVACIONES' ? 'BOLETIN' : sub);
+      } else if (sub === 'DIAGNOSTICO_CIERRE' || ['DIAGNOSTICA', 'FINAL_LAPSO', 'ESTADISTICAS', 'ACTAS_CONSEJO', 'REPORTES_INSTITUCIONALES'].includes(sub)) {
+        setInicialGroupTab('DIAGNOSTICO_CIERRE');
+        setInicialSubTab(sub === 'DIAGNOSTICO_CIERRE' ? 'DIAGNOSTICA' : sub);
+      } else if (sub === 'MALLA_RECURSOS' || ['AREAS_PERFILES', 'BANCO_COMPETENCIAS', 'BANCO_ESTRATEGIAS', 'BANCO_RECURSOS'].includes(sub)) {
+        setInicialGroupTab('MALLA_RECURSOS');
+        setInicialSubTab(sub === 'MALLA_RECURSOS' ? 'AREAS_PERFILES' : sub);
+      } else {
+        setInicialSubTab(sub);
+      }
+    } else if (
+      effectiveTab === 'PRIMARIA' ||
+      (activeTab === 'PRIMARIA' &&
+        [
+          'CURADURIA_INDICADORES',
+          'PROCESAL',
+          'SEGUIMIENTO_INDICADORES',
+          'REVISION_CARGA',
+          'INDICADORES_ACTITUDINALES',
+          'INDICADORES_LECTOESCRITURA',
+          'PROGRESO_INDICADORES',
+          'BANCO_INDICADORES',
+          'CALIFICACIONES_ESTUDIANTE',
+          'CALIFICACIONES_CURSO',
+          'BOLETIN_INFORMATIVO',
+          'BOLETIN',
+          'OBSERVACIONES_BOLETIN',
+          'AREAS_FORMACION',
+          'AREAS_PERFILES',
+          'DISENADOR_DIDACTICO',
+          'DISENADOR_OFICIAL',
+          'COMPETENCIAS',
+          'BANCO_COMPETENCIAS'
+        ].includes(sub))
+    ) {
+      if (
+        [
+          'CURADURIA_INDICADORES',
+          'PROCESAL',
+          'SEGUIMIENTO_INDICADORES',
+          'REVISION_CARGA',
+          'INDICADORES_ACTITUDINALES',
+          'INDICADORES_LECTOESCRITURA',
+          'PROGRESO_INDICADORES',
+          'BANCO_INDICADORES'
+        ].includes(sub)
+      ) {
+        setPrimariaGroupTab('INDICADORES');
+        setPrimariaSubTab(sub === 'SEGUIMIENTO_INDICADORES' ? 'PROCESAL' : sub);
+      } else if (['CALIFICACIONES_ESTUDIANTE', 'CALIFICACIONES_CURSO'].includes(sub)) {
+        setPrimariaGroupTab('CALIFICACIONES');
+        setPrimariaSubTab(sub);
+      } else if (['BOLETIN_INFORMATIVO', 'BOLETIN', 'OBSERVACIONES_BOLETIN'].includes(sub)) {
+        setPrimariaGroupTab('BOLETIN');
+        setPrimariaSubTab(sub === 'BOLETIN' ? 'BOLETIN_INFORMATIVO' : sub);
+      } else if (['AREAS_FORMACION', 'AREAS_PERFILES'].includes(sub)) {
+        setPrimariaGroupTab('AREAS_FORMACION');
+        setPrimariaSubTab('AREAS_FORMACION');
+      } else if (['DISENADOR_DIDACTICO', 'DISENADOR_OFICIAL'].includes(sub)) {
+        setPrimariaGroupTab('DISENADOR_DIDACTICO');
+        setPrimariaSubTab('DISENADOR_DIDACTICO');
+      } else if (['COMPETENCIAS', 'BANCO_COMPETENCIAS'].includes(sub)) {
+        setPrimariaGroupTab('COMPETENCIAS_DIDACTICO');
+        setPrimariaSubTab('COMPETENCIAS');
+      } else {
+        setPrimariaSubTab(sub);
+      }
+    } else if (
+      effectiveTab === 'MEDIA_GENERAL' ||
+      (activeTab === 'MEDIA_GENERAL' &&
+        [
+          // Calificaciones
+          'CALIFICACIONES',
+          'CALIFICACIONES_ESTUDIANTE',
+          'CALIFICACIONES_CRP',
+          'CALIFICACIONES_ORIENTACION_CONVIVENCIA',
+          'CALIFICACIONES_MATERIAS_PENDIENTES',
+          'CALIFICACIONES_POR_LAPSO',
+          'CALIFICACIONES_GENERALES',
+          'CALIFICACIONES_NUMERICAS',
+          // Evaluación
+          'ESTRATEGIAS_EVALUACION',
+          'PROGRESO_EVALUACIONES',
+          'RESULTADO_AUTOEVALUACION',
+          // Rasgos
+          'RASGOS_PERSONALIDAD',
+          'RESULTADO_RASGOS',
+          // Planes
+          'PLANES_ACCION_PERSONALIZADOS',
+          'PLANES_LAPSO',
+          'PLANES_QUINCENALES',
+          'IA_ACTION_PLANS',
+          'PLAN_LAPSO',
+          'PLAN_QUINCENAL',
+          // Extra
+          'BANCO_ESTRATEGIAS',
+          'OBSERVACIONES_BOLETIN',
+          'REVISION',
+          'CONSEJO_CURSO',
+          'ACTAS_CONSEJO',
+          'DISENADOR_DIDACTICO',
+          'DISENADOR_OFICIAL',
+          'BOLETIN_INFORMATIVO',
+          'BOLETIN',
+          'ESTRATEGIAS_PONDERACIONES',
+          'ACTAS'
+        ].includes(sub))
+    ) {
+      if (
+        [
+          'CALIFICACIONES',
+          'CALIFICACIONES_ESTUDIANTE',
+          'CALIFICACIONES_CRP',
+          'CALIFICACIONES_ORIENTACION_CONVIVENCIA',
+          'CALIFICACIONES_MATERIAS_PENDIENTES',
+          'CALIFICACIONES_POR_LAPSO',
+          'CALIFICACIONES_GENERALES',
+          'CALIFICACIONES_NUMERICAS'
+        ].includes(sub)
+      ) {
+        setMediaGroupTab('CALIFICACIONES');
+        setMediaSubTab(sub);
+      } else if (
+        [
+          'ESTRATEGIAS_EVALUACION',
+          'PROGRESO_EVALUACIONES',
+          'RESULTADO_AUTOEVALUACION'
+        ].includes(sub)
+      ) {
+        setMediaGroupTab('EVALUACION');
+        setMediaSubTab(sub);
+      } else if (['RASGOS_PERSONALIDAD', 'RESULTADO_RASGOS'].includes(sub)) {
+        setMediaGroupTab('RASGOS');
+        setMediaSubTab(sub);
+      } else if (
+        [
+          'PLANES_ACCION_PERSONALIZADOS',
+          'PLANES_LAPSO',
+          'PLANES_QUINCENALES',
+          'IA_ACTION_PLANS',
+          'PLAN_LAPSO',
+          'PLAN_QUINCENAL'
+        ].includes(sub)
+      ) {
+        setMediaGroupTab('PLANES');
+        if (sub === 'IA_ACTION_PLANS') setMediaSubTab('PLANES_ACCION_PERSONALIZADOS');
+        else if (sub === 'PLAN_LAPSO') setMediaSubTab('PLANES_LAPSO');
+        else if (sub === 'PLAN_QUINCENAL') setMediaSubTab('PLANES_QUINCENALES');
+        else setMediaSubTab(sub);
+      } else if (
+        [
+          'BANCO_ESTRATEGIAS',
+          'OBSERVACIONES_BOLETIN',
+          'REVISION',
+          'CONSEJO_CURSO',
+          'ACTAS_CONSEJO',
+          'DISENADOR_DIDACTICO',
+          'DISENADOR_OFICIAL',
+          'BOLETIN_INFORMATIVO',
+          'BOLETIN',
+          'ESTRATEGIAS_PONDERACIONES',
+          'ACTAS'
+        ].includes(sub)
+      ) {
+        setMediaGroupTab('EXTRA');
+        if (sub === 'ACTAS_CONSEJO') setMediaSubTab('CONSEJO_CURSO');
+        else if (sub === 'DISENADOR_OFICIAL') setMediaSubTab('DISENADOR_DIDACTICO');
+        else if (sub === 'BOLETIN') setMediaSubTab('BOLETIN_INFORMATIVO');
+        else setMediaSubTab(sub);
+      } else {
+        setMediaSubTab(sub);
+      }
     } else if (['DIAGNOSTICA', 'PROCESAL', 'FINAL_LAPSO'].includes(sub) || (effectiveTab !== 'CONSULTAS' && sub === 'ESTADISTICAS')) {
       setLevelPillarTab('EVALUACION');
       setEvaluationSubTab(sub);
@@ -213,6 +425,12 @@ const SiscebaMainApp: React.FC = () => {
       ? escritorioSubTab
       : activeTab === 'GESTION'
       ? gestionSubTab
+      : activeTab === 'INICIAL'
+      ? inicialSubTab
+      : activeTab === 'PRIMARIA'
+      ? primariaSubTab
+      : activeTab === 'MEDIA_GENERAL'
+      ? mediaSubTab
       : activeTab === 'CONSULTAS'
       ? consultasSubTab
       : activeTab === 'COMUNIDAD'
@@ -221,18 +439,12 @@ const SiscebaMainApp: React.FC = () => {
       ? configuracionSubTab
       : activeTab === 'AYUDA'
       ? ayudaSubTab
-      : activeTab === 'INICIAL' || activeTab === 'PRIMARIA' || activeTab === 'MEDIA_GENERAL'
-      ? levelPillarTab === 'PLANIFICACION'
-        ? planningSubTab
-        : levelPillarTab === 'EVALUACION'
-        ? evaluationSubTab
-        : communicationSubTab
       : '';
 
   const handleNavigateToAI = () => {
     handleTabChange('MEDIA_GENERAL');
-    setLevelPillarTab('COMUNICACION');
-    setCommunicationSubTab('IA_ACTION_PLANS');
+    setMediaGroupTab('PLANES');
+    setMediaSubTab('PLANES_ACCION_PERSONALIZADOS');
   };
 
   const handleQuickAction = (tab: any, subTab?: string) => {
@@ -513,9 +725,12 @@ const SiscebaMainApp: React.FC = () => {
 
       const isViewingBulletin =
         (activeTab === 'CONSULTAS' && consultasSubTab === 'BOLETIN') ||
-        (['INICIAL', 'PRIMARIA', 'MEDIA_GENERAL'].includes(activeTab) &&
+        (['INICIAL', 'PRIMARIA'].includes(activeTab) &&
           levelPillarTab === 'COMUNICACION' &&
-          communicationSubTab === 'BOLETIN');
+          communicationSubTab === 'BOLETIN') ||
+        (activeTab === 'MEDIA_GENERAL' &&
+          mediaGroupTab === 'EXTRA' &&
+          mediaSubTab === 'BOLETIN_INFORMATIVO');
 
       const isAdmin = currentRole === 'ADMINISTRADOR';
 
@@ -673,18 +888,6 @@ const SiscebaMainApp: React.FC = () => {
               <AcademicPulseHero onQuickAction={handleQuickAction} />
             )}
 
-            {/* Compact Context Bar & Breadcrumbs for operational modules */}
-            {activeTab !== 'ESCRITORIO' && (
-              <CompactWorkspaceHeader
-                activeTab={activeTab}
-                activeSubTab={currentSubTab}
-                onNavigate={handleQuickAction}
-                onOpenSearch={() => setSearchModalOpen(true)}
-                currentLevel={currentLevel}
-                activeLapso={activeLapso}
-              />
-            )}
-
             {/* Module Content */}
             <div className="animate-in fade-in duration-300">
               {/* 1. ESCRITORIO */}
@@ -712,71 +915,37 @@ const SiscebaMainApp: React.FC = () => {
                 />
               )}
 
-              {/* 3, 4, 5. NIVELES PEDAGÓGICOS (INICIAL, PRIMARIA, MEDIA GENERAL) */}
-              {(activeTab === 'INICIAL' || activeTab === 'PRIMARIA' || activeTab === 'MEDIA_GENERAL') && (
-                <div className="space-y-6">
-                  {/* Pedagogical Pillar Switcher - Adaptable y visible sin recortes */}
-                  <div className="bg-white dark:bg-slate-900 rounded-2xl p-1.5 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-wrap items-center gap-1.5 sm:gap-2">
-                    <button
-                      onClick={() => setLevelPillarTab('PLANIFICACION')}
-                      className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
-                        levelPillarTab === 'PLANIFICACION'
-                          ? 'bg-[#2C2E53] text-[#D4AF37] shadow-sm'
-                          : 'text-slate-600 hover:bg-slate-100'
-                      }`}
-                    >
-                      <BookOpen className="w-4 h-4 shrink-0" />
-                      <span className="hidden sm:inline">Planificación Pedagógica</span>
-                      <span className="sm:hidden">Planificación</span>
-                    </button>
-                    <button
-                      onClick={() => setLevelPillarTab('EVALUACION')}
-                      className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
-                        levelPillarTab === 'EVALUACION'
-                          ? 'bg-[#2C2E53] text-[#D4AF37] shadow-sm'
-                          : 'text-slate-600 hover:bg-slate-100'
-                      }`}
-                    >
-                      <ClipboardList className="w-4 h-4 shrink-0" />
-                      <span className="hidden sm:inline">Evaluación Continua</span>
-                      <span className="sm:hidden">Evaluación</span>
-                    </button>
-                    <button
-                      onClick={() => setLevelPillarTab('COMUNICACION')}
-                      className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
-                        levelPillarTab === 'COMUNICACION'
-                          ? 'bg-[#2C2E53] text-[#D4AF37] shadow-sm'
-                          : 'text-slate-600 hover:bg-slate-100'
-                      }`}
-                    >
-                      <MessageSquare className="w-4 h-4 shrink-0" />
-                      <span className="hidden sm:inline">Comunicación y Reportes</span>
-                      <span className="sm:hidden">Comunicación</span>
-                    </button>
-                  </div>
+              {/* 3. SUBSISTEMA EDUCACIÓN INICIAL (AGRUPACIÓN OFICIAL: INDICADORES, PLANES, OBSERVACIONES) */}
+              {activeTab === 'INICIAL' && (
+                <InicialModule
+                  activeGroupTab={inicialGroupTab}
+                  setActiveGroupTab={setInicialGroupTab}
+                  activeSubTab={inicialSubTab}
+                  setActiveSubTab={setInicialSubTab}
+                  onNavigateToAI={handleNavigateToAI}
+                />
+              )}
 
-                  {levelPillarTab === 'PLANIFICACION' && (
-                    <PlanningModule
-                      activeSubTab={planningSubTab}
-                      setActiveSubTab={setPlanningSubTab}
-                    />
-                  )}
+              {/* 4. SUBSISTEMA EDUCACIÓN PRIMARIA (CON MÓDULO INTEGRAL Y OPCIONES DE INDICADORES) */}
+              {activeTab === 'PRIMARIA' && (
+                <PrimariaModule
+                  activeGroupTab={primariaGroupTab}
+                  setActiveGroupTab={setPrimariaGroupTab}
+                  activeSubTab={primariaSubTab}
+                  setActiveSubTab={setPrimariaSubTab}
+                  onNavigateToAI={handleNavigateToAI}
+                />
+              )}
 
-                  {levelPillarTab === 'EVALUACION' && (
-                    <EvaluationModule
-                      activeSubTab={evaluationSubTab}
-                      setActiveSubTab={setEvaluationSubTab}
-                      onNavigateToAI={handleNavigateToAI}
-                    />
-                  )}
-
-                  {levelPillarTab === 'COMUNICACION' && (
-                    <CommunicationModule
-                      activeSubTab={communicationSubTab}
-                      setActiveSubTab={setCommunicationSubTab}
-                    />
-                  )}
-                </div>
+              {/* 5. SUBSISTEMA EDUCACIÓN MEDIA GENERAL (FUNCIONES AGRUPADAS: CALIFICACIONES, EVALUACIÓN, RASGOS, PLANES, EXTRA) */}
+              {activeTab === 'MEDIA_GENERAL' && (
+                <MediaGeneralModule
+                  activeGroupTab={mediaGroupTab}
+                  setActiveGroupTab={setMediaGroupTab}
+                  activeSubTab={mediaSubTab}
+                  setActiveSubTab={setMediaSubTab}
+                  onNavigateToAI={handleNavigateToAI}
+                />
               )}
 
               {/* 6. CONSULTAS */}

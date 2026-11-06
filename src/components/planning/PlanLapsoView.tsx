@@ -142,14 +142,11 @@ export const PlanLapsoView: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header Info */}
-      <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-cba-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-cba-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-black text-[#2C2E53]">
+          <h2 className="text-2xl font-black text-[#2C2E53] dark:text-white">
             Plan de Lapso {activeLapso} ({currentLevel.replace('_', ' ')})
           </h2>
-          <p className="text-sm text-slate-500 mt-1">
-            Matriz de actividades evaluativas, ponderaciones porcentuales (100%), instrumentos y fechas de aplicación.
-          </p>
         </div>
 
         <div className="flex items-center gap-2">

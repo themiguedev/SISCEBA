@@ -1369,7 +1369,7 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
                     {
                       id: 'INICIAL' as EducationalLevel,
                       title: 'Educación Inicial',
-                      scale: 'Cualitativa (L / EP / I)',
+                      scale: 'Literal (A, B, C, D, E)',
                       icon: BookOpen,
                       color: 'text-amber-500',
                       badgeBg: 'bg-amber-500/15 text-amber-700 border-amber-300'
@@ -1377,7 +1377,7 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
                     {
                       id: 'PRIMARIA' as EducationalLevel,
                       title: 'Educación Primaria',
-                      scale: 'Formativa / Cualitativa',
+                      scale: 'Cualitativa (L / A / P / I)',
                       icon: Layers,
                       color: 'text-emerald-500',
                       badgeBg: 'bg-emerald-500/15 text-emerald-700 border-emerald-300'
@@ -2109,7 +2109,7 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
                   <div>
                     <h2 className="text-sm font-black uppercase tracking-wide">República Bolivariana de Venezuela</h2>
                     <h3 className="text-xs font-bold uppercase">Ministerio del Poder Popular para la Educación</h3>
-                    <h4 className="text-sm font-black text-[#1B1C33] mt-1">U.E. COLEGIO BELÉN SAN JUAN (SISCEBA)</h4>
+                    <h4 className="text-sm font-black text-[#1B1C33] mt-1">{schoolData?.nombre || 'U.E.P. COLEGIO BELLAS ARTES'}</h4>
                     <p className="text-[10px] font-mono text-slate-600">
                       Código DEA: {schoolData?.dea || 'OD-05241503'} • RIF: {schoolData?.rif || 'J-31456789-0'} • Circuito 05
                     </p>

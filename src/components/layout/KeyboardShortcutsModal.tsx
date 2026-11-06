@@ -71,7 +71,7 @@ const SHORTCUTS_DATA: ShortcutItem[] = [
   {
     keys: ['Alt', '3'],
     title: 'Educación Inicial',
-    description: 'Planificación quincenal y evaluación cualitativa de salas 3, 4 y 5 años.',
+    description: 'Planificación quincenal y evaluación cualitativa de salas 4 y 5 años.',
     category: 'Navegación'
   },
   {

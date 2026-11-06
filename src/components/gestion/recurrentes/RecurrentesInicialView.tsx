@@ -127,7 +127,7 @@ export const RecurrentesInicialView: React.FC<RecurrentesInicialViewProps> = ({
                 Supervisión y Tareas Recurrentes de Preescolar
               </h2>
               <p className="text-xs text-slate-300 mt-1 max-w-xl">
-                Control pedagógico de las salas de 3, 4 y 5 años: ortografía de indicadores, cobertura de evaluación formativa y banco de informes descriptivos.
+                Control pedagógico de las salas de 4 y 5 años: ortografía de indicadores, cobertura de evaluación formativa y banco de informes descriptivos.
               </p>
             </div>
           </div>

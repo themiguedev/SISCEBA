@@ -15,7 +15,6 @@ import {
 } from 'lucide-react';
 
 const ACADEMIC_GRADES_SEQUENCE = [
-  'Sala de 3 Años',
   'Sala de 4 Años',
   'Sala de 5 Años',
   '1er Grado',

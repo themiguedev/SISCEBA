@@ -1,4 +1,4 @@
-import { Student, EvaluationRecord, PassRecord, DailyAttendanceRecord } from '../types';
+import { Student, EvaluationRecord, PassRecord, DailyAttendanceRecord, QualitativeScore } from '../types';
 
 /**
  * Datos Institucionales de Muestra y Auditoría Pedagógica UCE - Colegio Bellas Artes
@@ -11,7 +11,7 @@ import { Student, EvaluationRecord, PassRecord, DailyAttendanceRecord } from '..
  * - Boletines oficiales y nóminas con exportación a Excel
  */
 
-// 1. Estudiantes de Muestra para Inicial (Salas de 3, 4 y 5 Años, Secciones A y B)
+// 1. Estudiantes de Muestra para Inicial (Salas de 4 y 5 Años, Secciones A y B)
 export const DEMO_STUDENTS_INICIAL: Student[] = [
   {
     id: 'demo-ini-3a-01',
@@ -22,7 +22,7 @@ export const DEMO_STUDENTS_INICIAL: Student[] = [
     gender: 'F',
     birthDate: '2023-04-12',
     level: 'INICIAL',
-    grade: 'Sala de 3 Años',
+    grade: 'Sala de 4 Años',
     section: 'A',
     representativeName: 'CARLOS BENITEZ',
     representativeEmail: 'carlos.benitez@gmail.com',
@@ -39,7 +39,7 @@ export const DEMO_STUDENTS_INICIAL: Student[] = [
     gender: 'M',
     birthDate: '2023-05-18',
     level: 'INICIAL',
-    grade: 'Sala de 3 Años',
+    grade: 'Sala de 4 Años',
     section: 'A',
     representativeName: 'ELENA MORALES',
     representativeEmail: 'elena.morales@gmail.com',
@@ -207,11 +207,11 @@ export const generateDemoEvaluations = (mediaStudents: Student[]): EvaluationRec
     });
   });
 
-  // 2. Evaluaciones Primaria (Cualitativa: L = Logrado, EP = En Proceso, I = Iniciado según GEMINI.md)
+  // 2. Evaluaciones Primaria (Cualitativa: L = Logrado, A = Avanzando, P = Proceso, I = Iniciado según GEMINI.md)
   const primariaAreas = ['pri-len', 'pri-mat', 'pri-soc', 'pri-ap', 'pri-ef', 'pri-rob', 'pri-ing'];
   DEMO_STUDENTS_PRIMARIA.forEach((stu, sIdx) => {
     primariaAreas.forEach((areaId, aIdx) => {
-      const qualScore: 'L' | 'EP' | 'I' = (sIdx + aIdx) % 4 === 0 ? 'EP' : 'L';
+      const qualScore: QualitativeScore = (sIdx + aIdx) % 4 === 0 ? 'P' : (sIdx + aIdx) % 4 === 1 ? 'A' : (sIdx + aIdx) % 4 === 2 ? 'I' : 'L';
       evals.push({
         id: `eval-demo-pri-${stu.id}-${areaId}-l1`,
         studentId: stu.id,

@@ -588,14 +588,117 @@ export const INITIAL_AREAS: SubjectArea[] = [
 
 export const INITIAL_COMPETENCIES: Competency[] = [
   // Inicial
+  // Formación Personal - Sala de 4 Años (Banco Oficial CBA 6 Competencias)
   {
-    id: 'comp-ini-1',
+    id: 'comp-ini-fp4-lang',
     areaId: 'ini-fp',
-    code: 'CP-INI-01',
-    title: 'Autonomía y Convivencia',
-    description: 'Expresa sus emociones básicas de manera asertiva, interactúa con sus pares respetando turnos y manifiesta seguridad en sus rutinas cotidianas.',
+    code: 'CP-INI-FP4-01',
+    title: 'Uso del lenguaje',
+    description: 'Desarrollo progresivo del lenguaje oral y escrito, comunicación fluida, coherente y respetuosa.',
     level: 'INICIAL',
-    lapso: 1
+    lapso: 1,
+    grade: 'Sala de 4 Años'
+  },
+  {
+    id: 'comp-ini-fp4-id',
+    areaId: 'ini-fp',
+    code: 'CP-INI-FP4-02',
+    title: 'Identidad personal',
+    description: 'Reconocimiento del esquema corporal, coordinación motriz, hábitos de higiene y cuidado personal.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años'
+  },
+  {
+    id: 'comp-ini-fp4-emoc',
+    areaId: 'ini-fp',
+    code: 'CP-INI-FP4-03',
+    title: 'Expresión de emociones, sentimientos y opiniones',
+    description: 'Manifestación espontánea y respetuosa de emociones, afecto y solidaridad con sus compañeros.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años'
+  },
+  {
+    id: 'comp-ini-fp4-auto',
+    areaId: 'ini-fp',
+    code: 'CP-INI-FP4-04',
+    title: 'Demostración de autonomía',
+    description: 'Iniciativa e independencia al comenzar y culminar tareas, respeto de normas y cuidado de útiles.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años'
+  },
+  {
+    id: 'comp-ini-fp4-esti',
+    areaId: 'ini-fp',
+    code: 'CP-INI-FP4-05',
+    title: 'Autoestima',
+    description: 'Confianza en sus capacidades, aprecio de sus producciones y optimismo ante nuevos desafíos.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años'
+  },
+  {
+    id: 'comp-ini-fp4-inter',
+    areaId: 'ini-fp',
+    code: 'CP-INI-FP4-06',
+    title: 'Interacción con niños y adultos',
+    description: 'Integración al grupo escolar, juego socializado y resolución pacífica de situaciones en el aula.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años'
+  },
+  // Formación Personal - Sala de 5 Años
+  {
+    id: 'comp-ini-fp5-1',
+    areaId: 'ini-fp',
+    code: 'CP-INI-FP5-01',
+    title: 'Autonomía Personal, Autoestima y Toma de Decisiones',
+    description: 'Inicia y culmina sus tareas escolares en el tiempo estipulado con independencia, demostrando autorregulación y cuidado de sus útiles y mobiliario.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 5 Años'
+  },
+  {
+    id: 'comp-ini-fp5-2',
+    areaId: 'ini-fp',
+    code: 'CP-INI-FP5-02',
+    title: 'Convivencia Ciudadana y Resolución Pacífica',
+    description: 'Resuelve desacuerdos con sus pares a través del diálogo y la mediación docente, participando activamente en los acuerdos de convivencia.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 5 Años'
+  },
+  {
+    id: 'comp-ini-fp5-3',
+    areaId: 'ini-fp',
+    code: 'CP-INI-FP5-03',
+    title: 'Identidad y Sentido de Pertenencia CBA',
+    description: 'Manifiesta afecto y solidaridad hacia sus semejantes, demostrando sentido de pertenencia y responsabilidad en la comunidad escolar CBA.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 5 Años'
+  },
+  {
+    id: 'comp-ini-fp5-4',
+    areaId: 'ini-fp',
+    code: 'CP-INI-FP5-04',
+    title: 'Expresión Oral, Diálogo y Normas de Comunicación',
+    description: 'Narra experiencias con coherencia y secuencia lógica, escucha con atención y respeta las opiniones de sus compañeros.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 5 Años'
+  },
+  {
+    id: 'comp-ini-fp5-5',
+    areaId: 'ini-fp',
+    code: 'CP-INI-FP5-05',
+    title: 'Iniciativa Personal y Cooperación Grupal',
+    description: 'Emprende proyectos y juegos colaborativos con autonomía, optimismo y alto sentido de cooperación.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 5 Años'
   },
   {
     id: 'comp-ini-2',
@@ -979,6 +1082,90 @@ export const INITIAL_COMPETENCIES: Competency[] = [
     lapso: 1,
     grade: 'Sala de 5 Años'
   },
+  // Música - Sala de 4 Años
+  {
+    id: 'comp-ini-mus4-1',
+    areaId: 'ini-mus',
+    code: 'CP-INI-MUS4-01',
+    title: 'Sensibilidad Auditiva y Exploración Rítmica',
+    description: 'Sigue patrones rítmicos binarios sencillos mediante palmas y percusión corporal, participando con alegría en rondas.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años'
+  },
+  {
+    id: 'comp-ini-mus4-2',
+    areaId: 'ini-mus',
+    code: 'CP-INI-MUS4-02',
+    title: 'Discriminación Sonora y Canto Colectivo',
+    description: 'Distingue sonidos graves y agudos, fuertes y suaves, y entona cantos infantiles con adecuada afinación.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años'
+  },
+  // Música - Sala de 5 Años
+  {
+    id: 'comp-ini-mus5-1',
+    areaId: 'ini-mus',
+    code: 'CP-INI-MUS5-01',
+    title: 'Percepción Sonora, Afinación y Expresión Musical',
+    description: 'Entona canciones institucionales y rondas del CBA con afinación y postura respetuosa, coordinando pulso y acento.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 5 Años'
+  },
+  {
+    id: 'comp-ini-mus5-2',
+    areaId: 'ini-mus',
+    code: 'CP-INI-MUS5-02',
+    title: 'Apreciación Musical y Cualidades del Sonido',
+    description: 'Identifica auditivamente familias de instrumentos musicales y reproduce esquemas rítmicos en ensambles infantiles.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 5 Años'
+  },
+  // Desarrollo Humano - Sala de 4 Años
+  {
+    id: 'comp-ini-dh4-1',
+    areaId: 'ini-dh',
+    code: 'CP-INI-DH4-01',
+    title: 'Valores Humanos, Empatía y Convivencia Armónica',
+    description: 'Practica la empatía y solidaridad prestando ayuda espontánea a sus compañeros y respetando acuerdos comunes.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años'
+  },
+  {
+    id: 'comp-ini-dh4-2',
+    areaId: 'ini-dh',
+    code: 'CP-INI-DH4-02',
+    title: 'Resolución Pacífica de Conflictos y Diálogo',
+    description: 'Acepta acuerdos grupales para el bienestar común y canaliza desacuerdos a través de la mediación docente.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años'
+  },
+  // Desarrollo Humano - Sala de 5 Años
+  {
+    id: 'comp-ini-dh5-1',
+    areaId: 'ini-dh',
+    code: 'CP-INI-DH5-01',
+    title: 'Liderazgo Positivo, Inclusión y Ética CBA',
+    description: 'Promueve actitudes de inclusión, compañerismo y respeto en proyectos colaborativos escolares.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 5 Años'
+  },
+  {
+    id: 'comp-ini-dh5-2',
+    areaId: 'ini-dh',
+    code: 'CP-INI-DH5-02',
+    title: 'Acompañamiento Socioafectivo y Resiliencia',
+    description: 'Maneja emociones con serenidad, buscando alternativas constructivas y demostrando iniciativa ética.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 5 Años'
+  },
   // Primaria - 1er Grado (13 Competencias Oficiales)
   // Lenguaje - 1er Grado (3 Competencias)
   {
@@ -1206,25 +1393,766 @@ export const INITIAL_COMPETENCIES: Competency[] = [
 
 export const INITIAL_INDICATORS: Indicator[] = [
   // Inicial
+  // Formación Personal - Sala de 4 Años (Banco Oficial CBA 58 Indicadores)
   {
-    id: 'ind-ini-101',
-    competencyId: 'comp-ini-1',
+    id: 'ind-ini-fp4-1-01',
+    competencyId: 'comp-ini-fp4-lang',
     areaId: 'ini-fp',
-    code: 'IND-INI-1.1',
-    description: 'Comparte voluntariamente materiales y espacios de trabajo con sus compañeros de sala sin requerir intervención del docente.',
+    code: 'IND-INI-FP4-1.01',
+    description: 'Se expresa con fluidez.',
     level: 'INICIAL',
     lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-1-02',
+    competencyId: 'comp-ini-fp4-lang',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-1.02',
+    description: 'Se expresa con coherencia.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-1-03',
+    competencyId: 'comp-ini-fp4-lang',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-1.03',
+    description: 'Interpreta narraciones e instrucciones.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-1-04',
+    competencyId: 'comp-ini-fp4-lang',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-1.04',
+    description: 'Se apropia progresivamente del lenguaje oral y escrito.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-1-05',
+    competencyId: 'comp-ini-fp4-lang',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-1.05',
+    description: 'Practica las normas del buen hablante.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-1-06',
+    competencyId: 'comp-ini-fp4-lang',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-1.06',
+    description: 'Practica las normas del buen oyente.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-1-07',
+    competencyId: 'comp-ini-fp4-lang',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-1.07',
+    description: 'Aplica las normas de cortesía.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-1-08',
+    competencyId: 'comp-ini-fp4-lang',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-1.08',
+    description: 'Utiliza el lenguaje oral para comunicarse.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-1-09',
+    competencyId: 'comp-ini-fp4-lang',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-1.09',
+    description: 'Se expresa con claridad.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-1-10',
+    competencyId: 'comp-ini-fp4-lang',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-1.10',
+    description: 'Usa frases.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-1-11',
+    competencyId: 'comp-ini-fp4-lang',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-1.11',
+    description: 'Usa oraciones.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-1-12',
+    competencyId: 'comp-ini-fp4-lang',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-1.12',
+    description: 'Narra sus experiencias siguiendo una secuencia lógica.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-1-13',
+    competencyId: 'comp-ini-fp4-lang',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-1.13',
+    description: 'Relata cuentos usando conectivos.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-1-14',
+    competencyId: 'comp-ini-fp4-lang',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-1.14',
+    description: 'Expresa su opinión en relación a personajes y hechos sobre una lectura o situación.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-1-15',
+    competencyId: 'comp-ini-fp4-lang',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-1.15',
+    description: 'Anticipa sucesos.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-1-16',
+    competencyId: 'comp-ini-fp4-lang',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-1.16',
+    description: 'Compara personajes y hechos.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-1-17',
+    competencyId: 'comp-ini-fp4-lang',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-1.17',
+    description: 'Sigue instrucciones orales.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-1-18',
+    competencyId: 'comp-ini-fp4-lang',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-1.18',
+    description: 'Diferencia progresivamente el dibujo de la escritura.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-1-19',
+    competencyId: 'comp-ini-fp4-lang',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-1.19',
+    description: 'Combina marcas figurativas cuando escribe espontáneamente líneas, palitos, garabatos, seudoletras.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-1-20',
+    competencyId: 'comp-ini-fp4-lang',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-1.20',
+    description: 'Utiliza un tono de voz adecuado.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-1-21',
+    competencyId: 'comp-ini-fp4-lang',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-1.21',
+    description: 'Espera su turno.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-1-22',
+    competencyId: 'comp-ini-fp4-lang',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-1.22',
+    description: 'Mira al que habla.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-1-23',
+    competencyId: 'comp-ini-fp4-lang',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-1.23',
+    description: 'Escucha con atención.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-1-24',
+    competencyId: 'comp-ini-fp4-lang',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-1.24',
+    description: 'Pide por favor y dá las gracias.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-1-25',
+    competencyId: 'comp-ini-fp4-lang',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-1.25',
+    description: 'Pide permiso.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-1-26',
+    competencyId: 'comp-ini-fp4-lang',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-1.26',
+    description: 'Se expresa espontáneamente.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-1-27',
+    competencyId: 'comp-ini-fp4-lang',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-1.27',
+    description: 'Participa en conversaciones planteadas en el aula.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-1-28',
+    competencyId: 'comp-ini-fp4-lang',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-1.28',
+    description: 'Articula sílabas simples.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-1-29',
+    competencyId: 'comp-ini-fp4-lang',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-1.29',
+    description: 'Articula sílabas complejas.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-2-01',
+    competencyId: 'comp-ini-fp4-id',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-2.01',
+    description: 'Reconoce las partes de su cuerpo.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-2-02',
+    competencyId: 'comp-ini-fp4-id',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-2.02',
+    description: 'Coordina sus movimientos.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-2-03',
+    competencyId: 'comp-ini-fp4-id',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-2.03',
+    description: 'Se identifica con su sexo.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-2-04',
+    competencyId: 'comp-ini-fp4-id',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-2.04',
+    description: 'Posee hábitos de higiene.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-2-05',
+    competencyId: 'comp-ini-fp4-id',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-2.05',
+    description: 'Se preocupa por su arreglo personal.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-2-06',
+    competencyId: 'comp-ini-fp4-id',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-2.06',
+    description: 'Posee buenos modales al comer.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-2-07',
+    competencyId: 'comp-ini-fp4-id',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-2.07',
+    description: 'Reconoce las características propias de su sexo.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-2-08',
+    competencyId: 'comp-ini-fp4-id',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-2.08',
+    description: 'Expresa sus intereses.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-3-01',
+    competencyId: 'comp-ini-fp4-emoc',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-3.01',
+    description: 'Disfruta de las tareas y juegos grupales.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-3-02',
+    competencyId: 'comp-ini-fp4-emoc',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-3.02',
+    description: 'Respeta las decisiones de los demás.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-3-03',
+    competencyId: 'comp-ini-fp4-emoc',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-3.03',
+    description: 'Manifiesta libremente sus sentimientos y emociones.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-3-04',
+    competencyId: 'comp-ini-fp4-emoc',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-3.04',
+    description: 'Se muestra solidario(a) con sus compañeros.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-3-05',
+    competencyId: 'comp-ini-fp4-emoc',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-3.05',
+    description: 'Demuestra afecto por sus semejantes.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-4-01',
+    competencyId: 'comp-ini-fp4-auto',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-4.01',
+    description: 'Expresa sus intereses y necesidades.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-4-02',
+    competencyId: 'comp-ini-fp4-auto',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-4.02',
+    description: 'Respeta las normas establecidas.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-4-03',
+    competencyId: 'comp-ini-fp4-auto',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-4.03',
+    description: 'Culmina sus tareas en el tiempo estipulado.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-4-04',
+    competencyId: 'comp-ini-fp4-auto',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-4.04',
+    description: 'Cuida sus útiles y materiales didácticos.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-4-05',
+    competencyId: 'comp-ini-fp4-auto',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-4.05',
+    description: 'Inicia las actividades sin ayuda.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-4-06',
+    competencyId: 'comp-ini-fp4-auto',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-4.06',
+    description: 'Solicita ayuda cuando la necesita.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-4-07',
+    competencyId: 'comp-ini-fp4-auto',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-4.07',
+    description: 'Explora y curiosea espontáneamente.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-4-08',
+    competencyId: 'comp-ini-fp4-auto',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-4.08',
+    description: 'Manifiesta iniciativa propia en juegos y dinámicas.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-5-01',
+    competencyId: 'comp-ini-fp4-esti',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-5.01',
+    description: 'Inicia actividades por sí mismo(a).',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-5-02',
+    competencyId: 'comp-ini-fp4-esti',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-5.02',
+    description: 'Demuestra confianza en sus capacidades.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-5-03',
+    competencyId: 'comp-ini-fp4-esti',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-5.03',
+    description: 'Aprecia sus trabajos.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-5-04',
+    competencyId: 'comp-ini-fp4-esti',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-5.04',
+    description: 'Se muestra optimista de sus posibilidades.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-6-01',
+    competencyId: 'comp-ini-fp4-inter',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-6.01',
+    description: 'Juega con niños de ambos sexos.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-6-02',
+    competencyId: 'comp-ini-fp4-inter',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-6.02',
+    description: 'Resuelve conflictos sin agredir.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-6-03',
+    competencyId: 'comp-ini-fp4-inter',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-6.03',
+    description: 'Se integra al grupo.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  {
+    id: 'ind-ini-fp4-6-04',
+    competencyId: 'comp-ini-fp4-inter',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP4-6.04',
+    description: 'Su juego es socializado.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación'
+  },
+  // Formación Personal - Sala de 5 Años
+  {
+    id: 'ind-ini-fp5-101',
+    competencyId: 'comp-ini-fp5-1',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP5-1.1',
+    description: 'Inicia y culmina sus tareas escolares en el tiempo estipulado con independencia.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 5 Años',
     evaluationInstrument: 'Escala de Estimación Cualitativa'
   },
   {
-    id: 'ind-ini-102',
-    competencyId: 'comp-ini-1',
+    id: 'ind-ini-fp5-102',
+    competencyId: 'comp-ini-fp5-1',
     areaId: 'ini-fp',
-    code: 'IND-INI-1.2',
-    description: 'Reconoce y nombra emociones como alegría, tristeza, enojo o sorpresa en sí mismo y en los demás.',
+    code: 'IND-INI-FP5-1.2',
+    description: 'Demuestra perseverancia y supera pequeñas frustraciones al realizar tareas complejas.',
     level: 'INICIAL',
     lapso: 1,
+    grade: 'Sala de 5 Años',
     evaluationInstrument: 'Registro Anecdótico'
+  },
+  {
+    id: 'ind-ini-fp5-103',
+    competencyId: 'comp-ini-fp5-1',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP5-1.3',
+    description: 'Cuida con esmero sus útiles escolares y el mobiliario del aula.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 5 Años',
+    evaluationInstrument: 'Observación Directa'
+  },
+  {
+    id: 'ind-ini-fp5-201',
+    competencyId: 'comp-ini-fp5-2',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP5-2.1',
+    description: 'Resuelve desacuerdos con sus compañeros a través del diálogo y la mediación docente.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 5 Años',
+    evaluationInstrument: 'Escala de Estimación Cualitativa'
+  },
+  {
+    id: 'ind-ini-fp5-202',
+    competencyId: 'comp-ini-fp5-2',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP5-2.2',
+    description: 'Colabora de manera espontánea en el orden y mantenimiento de los rincones de trabajo.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 5 Años',
+    evaluationInstrument: 'Observación Directa'
+  },
+  {
+    id: 'ind-ini-fp5-301',
+    competencyId: 'comp-ini-fp5-3',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP5-3.1',
+    description: 'Manifiesta afecto y solidaridad hacia sus semejantes en juegos y dinámicas grupales.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 5 Años',
+    evaluationInstrument: 'Registro Anecdótico'
+  },
+  {
+    id: 'ind-ini-fp5-302',
+    competencyId: 'comp-ini-fp5-3',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP5-3.2',
+    description: 'Demuestra sentido de pertenencia y entusiasmo en las actividades institucionales del Colegio Bellas Artes.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 5 Años',
+    evaluationInstrument: 'Escala de Estimación Cualitativa'
+  },
+  {
+    id: 'ind-ini-fp5-401',
+    competencyId: 'comp-ini-fp5-4',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP5-4.1',
+    description: 'Narra experiencias cotidianas y cuentos siguiendo una secuencia lógica y vocabulario pertinente.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 5 Años',
+    evaluationInstrument: 'Registro Anecdótico'
+  },
+  {
+    id: 'ind-ini-fp5-402',
+    competencyId: 'comp-ini-fp5-4',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP5-4.2',
+    description: 'Escucha activamente respetando el turno de palabra y las opiniones ajenas.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 5 Años',
+    evaluationInstrument: 'Observación Directa'
+  },
+  {
+    id: 'ind-ini-fp5-501',
+    competencyId: 'comp-ini-fp5-5',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP5-5.1',
+    description: 'Inicia y desarrolla actividades con iniciativa propia proponiendo ideas al grupo.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 5 Años',
+    evaluationInstrument: 'Lista de Cotejo'
+  },
+  {
+    id: 'ind-ini-fp5-502',
+    competencyId: 'comp-ini-fp5-5',
+    areaId: 'ini-fp',
+    code: 'IND-INI-FP5-5.2',
+    description: 'Trabaja en equipo solidariamente compartiendo responsabilidades y materiales.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 5 Años',
+    evaluationInstrument: 'Escala de Estimación Cualitativa'
   },
   {
     id: 'ind-ini-201',
@@ -2360,6 +3288,186 @@ export const INITIAL_INDICATORS: Indicator[] = [
     lapso: 1,
     grade: 'Sala de 5 Años',
     evaluationInstrument: 'Rúbrica de Producción Oral en Lengua Extranjera'
+  },
+  // Música - Sala de 4 Años
+  {
+    id: 'ind-ini-mus4-101',
+    competencyId: 'comp-ini-mus4-1',
+    areaId: 'ini-mus',
+    code: 'IND-INI-MUS4-1.1',
+    description: 'Sigue patrones rítmicos binarios sencillos mediante palmas y percusión corporal.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Lista de Cotejo'
+  },
+  {
+    id: 'ind-ini-mus4-102',
+    competencyId: 'comp-ini-mus4-1',
+    areaId: 'ini-mus',
+    code: 'IND-INI-MUS4-1.2',
+    description: 'Participa con entusiasmo y afinación melódica en canciones institucionales y rondas infantiles.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación Cualitativa'
+  },
+  {
+    id: 'ind-ini-mus4-201',
+    competencyId: 'comp-ini-mus4-2',
+    areaId: 'ini-mus',
+    code: 'IND-INI-MUS4-2.1',
+    description: 'Distingue sonidos graves y agudos, fuertes y suaves producidos por instrumentos o la voz.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Observación Directa'
+  },
+  {
+    id: 'ind-ini-mus4-202',
+    competencyId: 'comp-ini-mus4-2',
+    areaId: 'ini-mus',
+    code: 'IND-INI-MUS4-2.2',
+    description: 'Acompaña pulsos musicales con instrumentos de percusión menor (maracas, claves, panderos).',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Lista de Cotejo'
+  },
+  // Música - Sala de 5 Años
+  {
+    id: 'ind-ini-mus5-101',
+    competencyId: 'comp-ini-mus5-1',
+    areaId: 'ini-mus',
+    code: 'IND-INI-MUS5-1.1',
+    description: 'Entona el Himno Institucional del Colegio Bellas Artes con afinación y postura respetuosa.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 5 Años',
+    evaluationInstrument: 'Escala de Estimación Cualitativa'
+  },
+  {
+    id: 'ind-ini-mus5-102',
+    competencyId: 'comp-ini-mus5-1',
+    areaId: 'ini-mus',
+    code: 'IND-INI-MUS5-1.2',
+    description: 'Reproduce secuencias rítmicas en ensamble infantil con instrumentos de percusión.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 5 Años',
+    evaluationInstrument: 'Observación Directa'
+  },
+  {
+    id: 'ind-ini-mus5-201',
+    competencyId: 'comp-ini-mus5-2',
+    areaId: 'ini-mus',
+    code: 'IND-INI-MUS5-2.1',
+    description: 'Identifica auditivamente familias de instrumentos musicales (cuerda, viento, percusión).',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 5 Años',
+    evaluationInstrument: 'Lista de Cotejo'
+  },
+  {
+    id: 'ind-ini-mus5-202',
+    competencyId: 'comp-ini-mus5-2',
+    areaId: 'ini-mus',
+    code: 'IND-INI-MUS5-2.2',
+    description: 'Expresa corporalmente contrastes de tempo (lento-rápido) e intensidad (fuerte-débil).',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 5 Años',
+    evaluationInstrument: 'Observación Directa'
+  },
+  // Desarrollo Humano - Sala de 4 Años
+  {
+    id: 'ind-ini-dh4-101',
+    competencyId: 'comp-ini-dh4-1',
+    areaId: 'ini-dh',
+    code: 'IND-INI-DH4-1.1',
+    description: 'Practica la empatía y la solidaridad prestando ayuda espontánea a sus compañeros.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Registro Anecdótico'
+  },
+  {
+    id: 'ind-ini-dh4-102',
+    competencyId: 'comp-ini-dh4-1',
+    areaId: 'ini-dh',
+    code: 'IND-INI-DH4-1.2',
+    description: 'Aprecia y respeta las diferencias individuales en actividades lúdicas grupales.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Observación Directa'
+  },
+  {
+    id: 'ind-ini-dh4-201',
+    competencyId: 'comp-ini-dh4-2',
+    areaId: 'ini-dh',
+    code: 'IND-INI-DH4-2.1',
+    description: 'Expresa sus emociones de manera asertiva y dialoga para resolver desacuerdos.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Escala de Estimación Cualitativa'
+  },
+  {
+    id: 'ind-ini-dh4-202',
+    competencyId: 'comp-ini-dh4-2',
+    areaId: 'ini-dh',
+    code: 'IND-INI-DH4-2.2',
+    description: 'Respeta los acuerdos de convivencia y normas establecidas en el aula.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 4 Años',
+    evaluationInstrument: 'Observación Directa'
+  },
+  // Desarrollo Humano - Sala de 5 Años
+  {
+    id: 'ind-ini-dh5-101',
+    competencyId: 'comp-ini-dh5-1',
+    areaId: 'ini-dh',
+    code: 'IND-INI-DH5-1.1',
+    description: 'Promueve actitudes de inclusión, compañerismo y respeto en proyectos colaborativos.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 5 Años',
+    evaluationInstrument: 'Registro Anecdótico'
+  },
+  {
+    id: 'ind-ini-dh5-102',
+    competencyId: 'comp-ini-dh5-1',
+    areaId: 'ini-dh',
+    code: 'IND-INI-DH5-1.2',
+    description: 'Reconoce y practica valores de veracidad, responsabilidad y gratitud en la escuela.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 5 Años',
+    evaluationInstrument: 'Escala de Estimación Cualitativa'
+  },
+  {
+    id: 'ind-ini-dh5-201',
+    competencyId: 'comp-ini-dh5-2',
+    areaId: 'ini-dh',
+    code: 'IND-INI-DH5-2.1',
+    description: 'Maneja pequeñas frustraciones con serenidad y busca alternativas creativas de solución.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 5 Años',
+    evaluationInstrument: 'Observación Directa'
+  },
+  {
+    id: 'ind-ini-dh5-202',
+    competencyId: 'comp-ini-dh5-2',
+    areaId: 'ini-dh',
+    code: 'IND-INI-DH5-2.2',
+    description: 'Demuestra iniciativa ética y sentido de pertenencia a la comunidad escolar CBA.',
+    level: 'INICIAL',
+    lapso: 1,
+    grade: 'Sala de 5 Años',
+    evaluationInstrument: 'Escala de Estimación Cualitativa'
   },
   // Primaria - 1er Grado (44 Indicadores Oficiales)
   // Lenguaje - 1er Grado (14 Indicadores)

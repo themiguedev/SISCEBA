@@ -80,12 +80,9 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
             <div>
               <h2
                 id="accessibility-modal-title"
-                className="font-black text-base sm:text-lg text-slate-900 dark:text-white flex items-center gap-2"
+                className="font-black text-base sm:text-lg text-slate-900 dark:text-white"
               >
-                <span>Accesibilidad & Ergonomía</span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-800 dark:text-amber-300 font-extrabold border border-amber-400/30">
-                  WCAG AAA
-                </span>
+                Accesibilidad & Ergonomía
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">
                 Ajuste el contraste, tamaño de texto y movimiento para una experiencia óptima.

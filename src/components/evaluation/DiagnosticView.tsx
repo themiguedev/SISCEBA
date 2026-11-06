@@ -139,7 +139,7 @@ export const DiagnosticView: React.FC = () => {
           criterion: 'Expresa ideas y necesidades con fluidez verbal y gestual en las actividades de bienvenida.',
           domain: 'Lenguaje y Comunicación',
           instrument: 'Lista de Cotejo',
-          scaleType: 'Cualitativa (L/EP/I)',
+          scaleType: 'Literal (A-E)',
           level: 'INICIAL',
           areaId: selectedAreaId
         },
@@ -151,7 +151,7 @@ export const DiagnosticView: React.FC = () => {
           criterion: 'Demuestra control motriz fino en el agarre y manipulación de materiales lúdicos.',
           domain: 'Desarrollo Psicomotor',
           instrument: 'Lista de Cotejo',
-          scaleType: 'Cualitativa (L/EP/I)',
+          scaleType: 'Literal (A-E)',
           level: 'INICIAL',
           areaId: selectedAreaId
         },
@@ -163,7 +163,7 @@ export const DiagnosticView: React.FC = () => {
           criterion: 'Reconoce relaciones espaciales básicas (arriba/abajo, dentro/fuera) y agrupa por atributos.',
           domain: 'Pensamiento Lógico',
           instrument: 'Lista de Cotejo',
-          scaleType: 'Cualitativa (L/EP/I)',
+          scaleType: 'Literal (A-E)',
           level: 'INICIAL',
           areaId: selectedAreaId
         },
@@ -175,7 +175,7 @@ export const DiagnosticView: React.FC = () => {
           criterion: 'Se integra positivamente al juego colectivo y sigue acuerdos de convivencia iniciales.',
           domain: 'Socioemocional y Hábitos',
           instrument: 'Registro Descriptivo',
-          scaleType: 'Cualitativa (L/EP/I)',
+          scaleType: 'Literal (A-E)',
           level: 'INICIAL',
           areaId: selectedAreaId
         }
@@ -190,7 +190,7 @@ export const DiagnosticView: React.FC = () => {
           criterion: 'Comprende textos breves e instrucciones orales con pertinencia y vocabulario adecuado.',
           domain: 'Comprensión Lectora y Expresión',
           instrument: 'Lista de Cotejo',
-          scaleType: 'Cualitativa (L/EP/I)',
+          scaleType: 'Cualitativa (L/A/P/I)',
           level: 'PRIMARIA',
           areaId: selectedAreaId
         },
@@ -202,7 +202,7 @@ export const DiagnosticView: React.FC = () => {
           criterion: 'Aplica el cálculo mental y el valor posicional en operaciones matemáticas fundamentales.',
           domain: 'Pensamiento Lógico-Matemático',
           instrument: 'Lista de Cotejo',
-          scaleType: 'Cualitativa (L/EP/I)',
+          scaleType: 'Cualitativa (L/A/P/I)',
           level: 'PRIMARIA',
           areaId: selectedAreaId
         },
@@ -214,7 +214,7 @@ export const DiagnosticView: React.FC = () => {
           criterion: 'Muestra curiosidad científica y capacidad de observación guiada en el entorno.',
           domain: 'Indagación y Ciencias',
           instrument: 'Escala de Estimación',
-          scaleType: 'Cualitativa (L/EP/I)',
+          scaleType: 'Cualitativa (L/A/P/I)',
           level: 'PRIMARIA',
           areaId: selectedAreaId
         },
@@ -226,7 +226,7 @@ export const DiagnosticView: React.FC = () => {
           criterion: 'Mantiene hábitos de orden, atención sostenida y cumplimiento en sus producciones escritas.',
           domain: 'Hábitos de Trabajo',
           instrument: 'Registro Focalizado',
-          scaleType: 'Cualitativa (L/EP/I)',
+          scaleType: 'Cualitativa (L/A/P/I)',
           level: 'PRIMARIA',
           areaId: selectedAreaId
         }
@@ -309,7 +309,7 @@ export const DiagnosticView: React.FC = () => {
       if (rec && rec.checklistScores && rec.checklistScores.length > 0) {
         rec.checklistScores.forEach(cs => {
           const st = cs.status;
-          checklistMap[cs.criterionId] = (st === 'L' || st === 'LOGRADO') ? 'LOGRADO' : (st === 'EP' || st === 'EN_PROCESO') ? 'EN_PROCESO' : 'INICIADO';
+          checklistMap[cs.criterionId] = (st === 'L' || st === 'LOGRADO') ? 'LOGRADO' : (st === 'A' || st === 'P' || st === 'EP' || st === 'EN_PROCESO') ? 'EN_PROCESO' : 'INICIADO';
         });
       } else {
         // Inicializar cada criterio como LOGRADO por defecto
@@ -357,7 +357,7 @@ export const DiagnosticView: React.FC = () => {
       const total = statuses.length || 1;
       const ratio = logrados / total;
 
-      let newQual: QualitativeScore = ratio >= 0.75 ? 'L' : ratio >= 0.4 ? 'EP' : 'I';
+      let newQual: QualitativeScore = ratio >= 0.75 ? 'L' : ratio >= 0.5 ? 'A' : ratio >= 0.25 ? 'P' : 'I';
       let newLit: LiteralScore = ratio >= 0.85 ? 'A' : ratio >= 0.65 ? 'B' : ratio >= 0.45 ? 'C' : ratio >= 0.25 ? 'D' : 'E';
       let newNum = Math.round(10 + ratio * 9);
 
@@ -408,7 +408,7 @@ export const DiagnosticView: React.FC = () => {
           ...updated[stu.id],
           checklist: checklistMap,
           globalLiteral: 'C',
-          globalQualitative: 'EP',
+          globalQualitative: 'P',
           globalNumeric: currentLevel === 'MEDIA_GENERAL' ? 12 : undefined
         };
       });
@@ -557,41 +557,41 @@ export const DiagnosticView: React.FC = () => {
           </p>
         </div>
 
-        {/* Pestañas de Navegación del Módulo Diagnóstico */}
-        <div className="flex flex-wrap items-center gap-2 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-700">
+        {/* Pestañas de Navegación del Módulo Diagnóstico (Alto Contraste Permanente) */}
+        <div className="flex flex-wrap items-center gap-2 bg-slate-100 dark:bg-slate-950 p-1.5 rounded-2xl border-2 border-slate-200 dark:border-slate-800">
           <button
             onClick={() => setActiveTab('LISTA_COTEJO')}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all ${
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === 'LISTA_COTEJO'
-                ? 'bg-[#2C2E53] text-[#D4AF37] shadow-md'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                ? 'bg-[#2C2E53] text-white shadow-md border-2 border-[#2C2E53] dark:bg-amber-400 dark:text-slate-950 dark:border-amber-400'
+                : 'bg-white/90 dark:bg-slate-900 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 hover:text-slate-950 dark:hover:text-white hover:bg-white shadow-2xs'
             }`}
           >
-            <ClipboardCheck className="w-4 h-4" />
+            <ClipboardCheck className={`w-4 h-4 ${activeTab === 'LISTA_COTEJO' ? 'text-amber-300 dark:text-slate-950' : 'text-slate-600 dark:text-slate-400'}`} />
             <span>1. Lista de Cotejo</span>
           </button>
 
           <button
             onClick={() => setActiveTab('ANALITICA_GLOBAL')}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all ${
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === 'ANALITICA_GLOBAL'
-                ? 'bg-[#2C2E53] text-[#D4AF37] shadow-md'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                ? 'bg-[#2C2E53] text-white shadow-md border-2 border-[#2C2E53] dark:bg-amber-400 dark:text-slate-950 dark:border-amber-400'
+                : 'bg-white/90 dark:bg-slate-900 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 hover:text-slate-950 dark:hover:text-white hover:bg-white shadow-2xs'
             }`}
           >
-            <BarChart3 className="w-4 h-4" />
+            <BarChart3 className={`w-4 h-4 ${activeTab === 'ANALITICA_GLOBAL' ? 'text-amber-300 dark:text-slate-950' : 'text-slate-600 dark:text-slate-400'}`} />
             <span>2. Analítica del Curso</span>
           </button>
 
           <button
             onClick={() => setActiveTab('FICHA_INDIVIDUAL')}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all ${
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === 'FICHA_INDIVIDUAL'
-                ? 'bg-[#2C2E53] text-[#D4AF37] shadow-md'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                ? 'bg-[#2C2E53] text-white shadow-md border-2 border-[#2C2E53] dark:bg-amber-400 dark:text-slate-950 dark:border-amber-400'
+                : 'bg-white/90 dark:bg-slate-900 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 hover:text-slate-950 dark:hover:text-white hover:bg-white shadow-2xs'
             }`}
           >
-            <FileText className="w-4 h-4" />
+            <FileText className={`w-4 h-4 ${activeTab === 'FICHA_INDIVIDUAL' ? 'text-amber-300 dark:text-slate-950' : 'text-slate-600 dark:text-slate-400'}`} />
             <span>3. Ficha Individual</span>
           </button>
         </div>
@@ -718,14 +718,14 @@ export const DiagnosticView: React.FC = () => {
             <button
               onClick={handleSaveAll}
               disabled={isLockedForTeacher}
-              className={`flex items-center gap-1.5 px-4 py-2 font-black rounded-xl text-xs shadow-md transition-all border ${
+              className={`flex items-center gap-1.5 px-4 py-2 font-bold rounded-xl text-xs shadow-md transition-all border-2 ${
                 isLockedForTeacher
                   ? 'bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed dark:bg-slate-800 dark:text-slate-500'
-                  : 'bg-[#2C2E53] hover:bg-[#393b68] text-[#D4AF37] border-[#D4AF37]/30'
+                  : 'bg-[#2C2E53] hover:bg-[#393b68] text-white border-[#2C2E53] dark:bg-amber-400 dark:text-slate-950 dark:border-amber-400'
               }`}
               title={isLockedForTeacher ? 'Carga bloqueada: fecha límite superada o lapso cerrado' : 'Guardar evaluación diagnóstica'}
             >
-              {isLockedForTeacher ? <Lock className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+              {isLockedForTeacher ? <Lock className="w-4 h-4" /> : <Save className="w-4 h-4 text-amber-300 dark:text-slate-950" />}
               <span>{isLockedForTeacher ? 'Carga Bloqueada' : 'Guardar Evaluación'}</span>
             </button>
           )}
@@ -781,7 +781,7 @@ export const DiagnosticView: React.FC = () => {
                   }`}
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
-                  <span>En Proceso (EP)</span>
+                  <span>En Proceso (P)</span>
                 </button>
               </div>
             </div>
@@ -896,14 +896,14 @@ export const DiagnosticView: React.FC = () => {
                                   <button
                                     type="button"
                                     onClick={() => handleChecklistChange(stu.id, crit.id, 'EN_PROCESO')}
-                                    title="En Proceso"
+                                    title="Proceso"
                                     className={`px-2 py-1 rounded text-[10px] font-black transition-colors ${
                                       val === 'EN_PROCESO'
                                         ? 'bg-amber-500 text-white shadow-xs'
                                         : 'text-slate-600 dark:text-slate-400 hover:text-amber-600'
                                     }`}
                                   >
-                                    EP
+                                    P
                                   </button>
                                   <button
                                     type="button"
@@ -955,7 +955,8 @@ export const DiagnosticView: React.FC = () => {
                                 className="p-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded text-xs font-black text-center"
                               >
                                 <option value="L">L (Logrado)</option>
-                                <option value="EP">EP (En Proceso)</option>
+                                <option value="A">A (Avanzando)</option>
+                                <option value="P">P (Proceso)</option>
                                 <option value="I">I (Iniciado)</option>
                               </select>
                             )}

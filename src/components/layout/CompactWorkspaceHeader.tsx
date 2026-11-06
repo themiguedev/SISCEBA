@@ -47,6 +47,13 @@ export const CompactWorkspaceHeader: React.FC<CompactWorkspaceHeaderProps> = ({
   };
 
   const subTabLabels: Record<string, string> = {
+    // Inicial & Dimensiones
+    DIMENSIONES: 'Dimensiones',
+    BANCO_DIMENSIONES: 'Banco de dimensiones',
+    BANCO_INDICADORES: 'Banco de Indicadores',
+    CURADURIA_INDICADORES: 'Curaduría de Criterios',
+    REVISION_CARGA: 'Revisión de Carga',
+    INDICADORES_ACTITUDINALES: 'Indicadores Actitudinales',
     // Gestión
     INSCRIPCIONES: 'Inscripciones',
     PASES: 'Pases por Retraso',

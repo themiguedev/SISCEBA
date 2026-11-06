@@ -277,7 +277,7 @@ export const UsuariosGestionView: React.FC = () => {
     if (gradesSet.size === 0) {
       if (studentLevelFilter === 'MEDIA_GENERAL') return ['1er Año', '2do Año', '3er Año', '4to Año', '5to Año'];
       if (studentLevelFilter === 'PRIMARIA') return ['1er Grado', '2do Grado', '3er Grado', '4to Grado', '5to Grado', '6to Grado'];
-      if (studentLevelFilter === 'INICIAL') return ['Sala de 3 Años', 'Sala de 4 Años', 'Sala de 5 Años'];
+      if (studentLevelFilter === 'INICIAL') return ['Sala de 4 Años', 'Sala de 5 Años'];
       return ['1er Año', '2do Año', '3er Año', '4to Año', '5to Año'];
     }
     return Array.from(gradesSet);
@@ -1070,8 +1070,8 @@ export const UsuariosGestionView: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   {[
                     { id: 'MEDIA_GENERAL' as EducationalLevel, title: 'Media General', scale: '01 a 20 pts', icon: GraduationCap },
-                    { id: 'PRIMARIA' as EducationalLevel, title: 'Primaria', scale: 'Literal A-E', icon: Layers },
-                    { id: 'INICIAL' as EducationalLevel, title: 'Inicial', scale: 'Cualitativa L/EP/I', icon: BookOpen }
+                    { id: 'PRIMARIA' as EducationalLevel, title: 'Primaria', scale: 'Cualitativa L/A/P/I', icon: Layers },
+                    { id: 'INICIAL' as EducationalLevel, title: 'Inicial', scale: 'Literal A-E', icon: BookOpen }
                   ].map(item => {
                     const isChecked = newSelectedLevels.includes(item.id);
                     const Icon = item.icon;
@@ -1574,7 +1574,7 @@ export const UsuariosGestionView: React.FC = () => {
                             </div>
                           </div>
                           <span className="text-[10px] text-slate-400">
-                            {lvl === 'INICIAL' ? 'Salas 3 a 5 Años' : lvl === 'PRIMARIA' ? '1° a 6° Grado' : '1° a 5° Año Bachillerato'}
+                            {lvl === 'INICIAL' ? 'Salas de 4 y 5 Años' : lvl === 'PRIMARIA' ? '1° a 6° Grado' : '1° a 5° Año Bachillerato'}
                           </span>
                         </button>
                       );

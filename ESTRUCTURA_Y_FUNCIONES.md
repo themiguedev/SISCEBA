@@ -132,7 +132,7 @@ Por lineamiento oficial e institucional del Colegio Bellas Artes, el sistema imp
 
 | Subsistema Educativo | Grados / Años Oficiales | Secciones | Escala de Evaluación Oficial | Reglas de Promoción y Cálculo |
 |---|---|---|---|---|
-| **Educación Inicial** | Sala de 3 Años, Sala de 4 Años, Sala de 5 Años | Exclusivamente **A** y **B** | **Literal** (`A`, `B`, `C`, `D`, `E`) | Evaluación formativa y cualitativa. **Prohibido el uso de promedios numéricos o escalas sobre 20**. Rutina diaria y espacios de aprendizaje. |
+| **Educación Inicial** | Sala de 4 Años, Sala de 5 Años | Exclusivamente **A** y **B** | **Literal** (`A`, `B`, `C`, `D`, `E`) | Evaluación formativa y cualitativa. **Prohibido el uso de promedios numéricos o escalas sobre 20**. Rutina diaria y espacios de aprendizaje. |
 | **Educación Primaria** | 1er Grado a 6to Grado | Exclusivamente **A** y **B** | **Cualitativa / Formativa** (`L` [Logrado], `P` / `EP` [En Proceso], `I` [Iniciado]) | Proyectos de Aprendizaje (PA), ejes integradores y competencias de grado. No se emiten calificaciones cuantitativas vigesimales. |
 | **Educación Media General**| 1er Año a 5to Año | Exclusivamente **A** y **B** | **Cuantitativa Vigesimal** (`01` a `20`) | Ponderaciones porcentuales acumulativas por lapso (100%), nota mínima aprobatoria 10/20, seguimiento de inasistencias del 25% y actas de consejo. |
 

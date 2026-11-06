@@ -306,10 +306,14 @@ html[data-device="tv"] main {
 .bg-\[\#353866\] {
   background-color: var(--theme-primary-hover) !important;
 }
-.hover\:bg-\[\#353866\]:hover {
+.hover\:bg-\[\#353866\]:hover,
+.hover\:bg-\[\#393b68\]:hover,
+.hover\:bg-\[\#383b69\]:hover,
+.hover\:bg-\[\#25284B\]:hover {
   background-color: var(--theme-primary-hover) !important;
 }
-.hover\:bg-\[\#242646\]:hover {
+.hover\:bg-\[\#242646\]:hover,
+.hover\:bg-\[\#232543\]:hover {
   background-color: var(--theme-primary-dark) !important;
 }
 
@@ -335,10 +339,15 @@ html:not(.dark) .text-\[\#2C2E53\] {
   --tw-gradient-from: var(--theme-primary-hover) var(--tw-gradient-from-position) !important;
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
 }
+.via-\[\#2C2E53\] {
+  --tw-gradient-via: var(--theme-primary) var(--tw-gradient-via-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-via), var(--tw-gradient-to) !important;
+}
 .via-\[\#242646\] {
   --tw-gradient-via: var(--theme-primary-dark) var(--tw-gradient-via-position) !important;
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-via), var(--tw-gradient-to) !important;
 }
+.to-\[\#2C2E53\],
 .to-\[\#252747\] {
   --tw-gradient-to: var(--theme-primary-dark) var(--tw-gradient-to-position) !important;
 }
@@ -347,8 +356,14 @@ html:not(.dark) .text-\[\#2C2E53\] {
 }
 
 /* Translucidez primaria */
+.bg-\[\#2C2E53\]\/95 {
+  background-color: color-mix(in srgb, var(--theme-primary) 95%, transparent) !important;
+}
 .bg-\[\#2C2E53\]\/70 {
   background-color: color-mix(in srgb, var(--theme-primary) 70%, transparent) !important;
+}
+.bg-\[\#2C2E53\]\/60 {
+  background-color: color-mix(in srgb, var(--theme-primary) 60%, transparent) !important;
 }
 .bg-\[\#2C2E53\]\/50 {
   background-color: color-mix(in srgb, var(--theme-primary) 50%, transparent) !important;
@@ -359,11 +374,32 @@ html:not(.dark) .text-\[\#2C2E53\] {
 .bg-\[\#2C2E53\]\/30 {
   background-color: color-mix(in srgb, var(--theme-primary) 30%, transparent) !important;
 }
+.bg-\[\#2C2E53\]\/20 {
+  background-color: color-mix(in srgb, var(--theme-primary) 20%, transparent) !important;
+}
+.bg-\[\#2C2E53\]\/15 {
+  background-color: color-mix(in srgb, var(--theme-primary) 15%, transparent) !important;
+}
+.bg-\[\#2C2E53\]\/10 {
+  background-color: color-mix(in srgb, var(--theme-primary) 10%, transparent) !important;
+}
+.bg-\[\#2C2E53\]\/5 {
+  background-color: color-mix(in srgb, var(--theme-primary) 5%, transparent) !important;
+}
 .hover\:bg-\[\#2C2E53\]\/40:hover {
   background-color: color-mix(in srgb, var(--theme-primary) 40%, transparent) !important;
 }
 .hover\:bg-\[\#2C2E53\]\/30:hover {
   background-color: color-mix(in srgb, var(--theme-primary) 30%, transparent) !important;
+}
+.border-\[\#2C2E53\]\/30 {
+  border-color: color-mix(in srgb, var(--theme-primary) 30%, transparent) !important;
+}
+.border-\[\#2C2E53\]\/20 {
+  border-color: color-mix(in srgb, var(--theme-primary) 20%, transparent) !important;
+}
+.border-\[\#2C2E53\]\/10 {
+  border-color: color-mix(in srgb, var(--theme-primary) 10%, transparent) !important;
 }
 .border-\[\#414474\]\/50 {
   border-color: color-mix(in srgb, var(--theme-border-dark) 50%, transparent) !important;
@@ -380,11 +416,27 @@ html:not(.dark) .text-\[\#2C2E53\] {
 .bg-\[\#1B1C33\] {
   background-color: var(--theme-secondary) !important;
 }
+.bg-\[\#1B1C33\]\/20 {
+  background-color: color-mix(in srgb, var(--theme-secondary) 20%, transparent) !important;
+}
+.bg-\[\#1B1C33\]\/10 {
+  background-color: color-mix(in srgb, var(--theme-secondary) 10%, transparent) !important;
+}
+.bg-\[\#1B1C33\]\/5 {
+  background-color: color-mix(in srgb, var(--theme-secondary) 5%, transparent) !important;
+}
 .border-\[\#1B1C33\] {
   border-color: var(--theme-secondary) !important;
 }
 .text-\[\#1B1C33\] {
   color: var(--theme-secondary) !important;
+}
+.hover\:bg-\[\#1B1C33\]:hover,
+.hover\:bg-\[\#1a1c33\]:hover,
+.hover\:bg-\[\#1f213b\]:hover,
+.hover\:bg-\[\#1f203b\]:hover,
+.hover\:bg-\[\#1E2038\]:hover {
+  background-color: var(--theme-secondary) !important;
 }
 .from-\[\#1B1C33\] {
   --tw-gradient-from: var(--theme-secondary) var(--tw-gradient-from-position) !important;
@@ -397,8 +449,21 @@ html:not(.dark) .text-\[\#2C2E53\] {
 .bg-\[\#141525\] {
   background-color: var(--theme-surface-dark) !important;
 }
+.bg-\[\#141525\]\/95 {
+  background-color: color-mix(in srgb, var(--theme-surface-dark) 95%, transparent) !important;
+}
 .bg-\[\#141525\]\/80 {
   background-color: color-mix(in srgb, var(--theme-surface-dark) 80%, transparent) !important;
+}
+.bg-\[\#141525\]\/60 {
+  background-color: color-mix(in srgb, var(--theme-surface-dark) 60%, transparent) !important;
+}
+.from-\[\#141525\] {
+  --tw-gradient-from: var(--theme-surface-dark) var(--tw-gradient-from-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+.to-\[\#141525\] {
+  --tw-gradient-to: var(--theme-surface-dark) var(--tw-gradient-to-position) !important;
 }
 .hover\:bg-\[\#141525\]:hover {
   background-color: var(--theme-surface-dark) !important;
@@ -412,7 +477,18 @@ html:not(.dark) .text-\[\#2C2E53\] {
 .bg-\[\#D4AF37\] {
   background-color: var(--theme-accent) !important;
 }
-.hover\:bg-\[\#b89327\]:hover {
+.hover\:bg-\[\#D4AF37\]:hover {
+  background-color: var(--theme-accent) !important;
+}
+.hover\:bg-\[\#b89327\]:hover,
+.hover\:bg-\[\#c29f2e\]:hover,
+.hover\:bg-\[\#c49f2e\]:hover,
+.hover\:bg-\[\#c49f2c\]:hover,
+.hover\:bg-\[\#c29e2e\]:hover,
+.hover\:bg-\[\#c49f2f\]:hover,
+.hover\:bg-\[\#c29f2f\]:hover,
+.hover\:bg-\[\#c4a132\]:hover,
+.hover\:bg-\[\#e6c148\]:hover {
   background-color: var(--theme-accent-hover) !important;
 }
 /* Tipografía de acento con contraste adaptativo según modo y contenedor */
@@ -457,6 +533,13 @@ html.dark .hover\:text-\[\#D4AF37\]:hover {
   border-color: var(--theme-accent) !important;
 }
 
+.from-\[\#D4AF37\] {
+  --tw-gradient-from: var(--theme-accent) var(--tw-gradient-from-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+.to-\[\#D4AF37\] {
+  --tw-gradient-to: var(--theme-accent) var(--tw-gradient-to-position) !important;
+}
 .via-\[\#D4AF37\] {
   --tw-gradient-via: var(--theme-accent) var(--tw-gradient-via-position) !important;
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-via), var(--tw-gradient-to) !important;
@@ -479,6 +562,12 @@ html.dark .hover\:text-\[\#D4AF37\]:hover {
   background-color: color-mix(in srgb, var(--theme-accent) 5%, transparent) !important;
 }
 
+.border-\[\#D4AF37\]\/80 {
+  border-color: color-mix(in srgb, var(--theme-accent) 80%, transparent) !important;
+}
+.border-\[\#D4AF37\]\/60 {
+  border-color: color-mix(in srgb, var(--theme-accent) 60%, transparent) !important;
+}
 .border-\[\#D4AF37\]\/50 {
   border-color: color-mix(in srgb, var(--theme-accent) 50%, transparent) !important;
 }
@@ -513,6 +602,17 @@ html.dark .hover\:text-\[\#D4AF37\]:hover {
 }
 .shadow-\[\#D4AF37\]\/15 {
   --tw-shadow-color: color-mix(in srgb, var(--theme-accent) 15%, transparent) !important;
+}
+
+/* Sombras institucionales dinamizadas por tema */
+.shadow-cba-gold {
+  box-shadow: 0 4px 15px -3px color-mix(in srgb, var(--theme-accent) 35%, transparent) !important;
+}
+.shadow-cba-card {
+  box-shadow: 0 4px 20px -2px color-mix(in srgb, var(--theme-primary) 8%, transparent), 0 2px 6px -1px color-mix(in srgb, var(--theme-primary) 4%, transparent) !important;
+}
+html.dark .shadow-cba-card {
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.45), 0 2px 6px -1px rgba(0, 0, 0, 0.25) !important;
 }
 
 /* Indicador de pestaña lateral activa */
@@ -562,28 +662,48 @@ html.dark .bg-white\/80:not(.force-light):not([data-force-light]) {
 }
 
 /* Soporte para elementos que deben permanecer claros (como maquetas o previsualizaciones) */
+html.dark .cba-print-sheet,
+html.dark .bulletin-print-wrapper,
+html.dark .printable-sheet,
 html.dark .force-light,
-html.dark [data-force-light] {
+html.dark [data-force-light],
+html.dark .cba-print-sheet .bg-white,
+html.dark .bulletin-print-wrapper .bg-white,
+html.dark .printable-sheet .bg-white,
+html.dark .force-light .bg-white,
+html.dark [data-force-light] .bg-white {
   background-color: #FFFFFF !important;
   color: #0F172A !important;
 }
 html.dark .force-light-text,
 html.dark .force-light .force-light-text,
-html.dark [data-force-light] .force-light-text {
+html.dark [data-force-light] .force-light-text,
+html.dark .cba-print-sheet .force-light-text,
+html.dark .bulletin-print-wrapper .force-light-text,
+html.dark .printable-sheet .force-light-text {
   color: #0F172A !important;
 }
 
-/* Preservar contrastes de elementos simulados dentro de force-light */
+/* Preservar contrastes de elementos simulados dentro de force-light y previsualizaciones de documentos */
 html.dark .force-light .bg-slate-100,
-html.dark [data-force-light] .bg-slate-100 {
+html.dark [data-force-light] .bg-slate-100,
+html.dark .cba-print-sheet .bg-slate-100,
+html.dark .bulletin-print-wrapper .bg-slate-100,
+html.dark .printable-sheet .bg-slate-100 {
   background-color: #F1F5F9 !important;
 }
 html.dark .force-light .bg-slate-200,
-html.dark [data-force-light] .bg-slate-200 {
+html.dark [data-force-light] .bg-slate-200,
+html.dark .cba-print-sheet .bg-slate-200,
+html.dark .bulletin-print-wrapper .bg-slate-200,
+html.dark .printable-sheet .bg-slate-200 {
   background-color: #E2E8F0 !important;
 }
 html.dark .force-light .bg-slate-300,
-html.dark [data-force-light] .bg-slate-300 {
+html.dark [data-force-light] .bg-slate-300,
+html.dark .cba-print-sheet .bg-slate-300,
+html.dark .bulletin-print-wrapper .bg-slate-300,
+html.dark .printable-sheet .bg-slate-300 {
   background-color: #CBD5E1 !important;
 }
 html.dark .force-light .bg-slate-700\/80,
@@ -591,49 +711,73 @@ html.dark [data-force-light] .bg-slate-700\/80 {
   background-color: rgba(51, 65, 85, 0.8) !important;
 }
 html.dark .force-light .border-slate-200,
-html.dark [data-force-light] .border-slate-200 {
+html.dark [data-force-light] .border-slate-200,
+html.dark .cba-print-sheet .border-slate-200,
+html.dark .bulletin-print-wrapper .border-slate-200,
+html.dark .printable-sheet .border-slate-200 {
   border-color: #E2E8F0 !important;
 }
 
 /* Superficies neutras en Modo Oscuro (incluyendo cualquier variante con opacidad /80, /70, /50) */
-html.dark [class~="bg-slate-50"]:not(.force-light):not([data-force-light]),
-html.dark [class*=" bg-slate-50/"]:not(.force-light):not([data-force-light]),
-html.dark [class^="bg-slate-50/"]:not(.force-light):not([data-force-light]) {
+html.dark [class~="bg-slate-50"]:not(.force-light):not([data-force-light]):not(.cba-print-sheet *):not(.bulletin-print-wrapper *):not(.printable-sheet *),
+html.dark [class*=" bg-slate-50/"]:not(.force-light):not([data-force-light]):not(.cba-print-sheet *):not(.bulletin-print-wrapper *):not(.printable-sheet *),
+html.dark [class^="bg-slate-50/"]:not(.force-light):not([data-force-light]):not(.cba-print-sheet *):not(.bulletin-print-wrapper *):not(.printable-sheet *) {
   background-color: rgba(255, 255, 255, 0.04) !important;
 }
-html.dark [class~="bg-slate-100"]:not(.force-light):not([data-force-light]),
-html.dark [class*=" bg-slate-100/"]:not(.force-light):not([data-force-light]),
-html.dark [class^="bg-slate-100/"]:not(.force-light):not([data-force-light]) {
+html.dark [class~="bg-slate-100"]:not(.force-light):not([data-force-light]):not(.cba-print-sheet *):not(.bulletin-print-wrapper *):not(.printable-sheet *),
+html.dark [class*=" bg-slate-100/"]:not(.force-light):not([data-force-light]):not(.cba-print-sheet *):not(.bulletin-print-wrapper *):not(.printable-sheet *),
+html.dark [class^="bg-slate-100/"]:not(.force-light):not([data-force-light]):not(.cba-print-sheet *):not(.bulletin-print-wrapper *):not(.printable-sheet *) {
   background-color: rgba(255, 255, 255, 0.07) !important;
 }
-html.dark [class~="bg-slate-200"]:not(.force-light):not([data-force-light]),
-html.dark [class*=" bg-slate-200/"]:not(.force-light):not([data-force-light]),
-html.dark [class^="bg-slate-200/"]:not(.force-light):not([data-force-light]) {
+html.dark [class~="bg-slate-200"]:not(.force-light):not([data-force-light]):not(.cba-print-sheet *):not(.bulletin-print-wrapper *):not(.printable-sheet *),
+html.dark [class*=" bg-slate-200/"]:not(.force-light):not([data-force-light]):not(.cba-print-sheet *):not(.bulletin-print-wrapper *):not(.printable-sheet *),
+html.dark [class^="bg-slate-200/"]:not(.force-light):not([data-force-light]):not(.cba-print-sheet *):not(.bulletin-print-wrapper *):not(.printable-sheet *) {
   background-color: rgba(255, 255, 255, 0.10) !important;
 }
 
 /* Bordes en Modo Oscuro - sutiles, limpios y oscuros */
-html.dark .border-slate-100 {
+html.dark .border-slate-100:not(.force-light *):not([data-force-light] *):not(.cba-print-sheet *):not(.bulletin-print-wrapper *):not(.printable-sheet *) {
   border-color: rgba(255, 255, 255, 0.08) !important;
 }
-html.dark .border-slate-200,
-html.dark .border-slate-200\/90,
-html.dark .border-slate-200\/80 {
+html.dark .border-slate-200:not(.force-light *):not([data-force-light] *):not(.cba-print-sheet *):not(.bulletin-print-wrapper *):not(.printable-sheet *),
+html.dark .border-slate-200\/90:not(.force-light *):not([data-force-light] *):not(.cba-print-sheet *):not(.bulletin-print-wrapper *):not(.printable-sheet *),
+html.dark .border-slate-200\/80:not(.force-light *):not([data-force-light] *):not(.cba-print-sheet *):not(.bulletin-print-wrapper *):not(.printable-sheet *) {
   border-color: rgba(255, 255, 255, 0.12) !important;
 }
-html.dark .border-slate-300 {
+html.dark .border-slate-300:not(.force-light *):not([data-force-light] *):not(.cba-print-sheet *):not(.bulletin-print-wrapper *):not(.printable-sheet *) {
   border-color: rgba(255, 255, 255, 0.18) !important;
 }
-html.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
+html.dark .divide-slate-100:not(.force-light *):not([data-force-light] *):not(.cba-print-sheet *):not(.bulletin-print-wrapper *):not(.printable-sheet *) > :not([hidden]) ~ :not([hidden]) {
   border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
 /* 5. TIPOGRAFÍA Y LEGIBILIDAD EN MODO OSCURO (Alto Contraste Amigable a la Vista) */
-html.dark .text-slate-900:not(.force-light-text),
-html.dark .text-slate-800:not(.force-light-text),
-html.dark .text-slate-700:not(.force-light-text),
-html.dark .text-\[\#2C2E53\]:not(.force-light-text) {
+html.dark .text-slate-900:not(.force-light-text):not(.force-light *):not([data-force-light] *):not(.cba-print-sheet *):not(.bulletin-print-wrapper *):not(.printable-sheet *),
+html.dark .text-slate-800:not(.force-light-text):not(.force-light *):not([data-force-light] *):not(.cba-print-sheet *):not(.bulletin-print-wrapper *):not(.printable-sheet *),
+html.dark .text-slate-700:not(.force-light-text):not(.force-light *):not([data-force-light] *):not(.cba-print-sheet *):not(.bulletin-print-wrapper *):not(.printable-sheet *),
+html.dark .text-\[\#2C2E53\]:not(.force-light-text):not(.force-light *):not([data-force-light] *):not(.cba-print-sheet *):not(.bulletin-print-wrapper *):not(.printable-sheet *),
+html.dark .text-\[\#1B1C33\]:not(.force-light-text):not(.force-light *):not([data-force-light] *):not(.cba-print-sheet *):not(.bulletin-print-wrapper *):not(.printable-sheet *) {
   color: #F8FAFC !important;
+}
+
+/* En botones, insignias o tarjetas de acento sólido, el texto SIEMPRE debe ser oscuro y nítido para máximo contraste */
+.bg-\[\#D4AF37\] .text-\[\#2C2E53\],
+.bg-\[\#D4AF37\] .text-\[\#1B1C33\],
+.bg-\[\#D4AF37\] .text-slate-900,
+.bg-\[\#D4AF37\] .text-slate-950,
+.bg-\[\#D4AF37\].text-\[\#2C2E53\],
+.bg-\[\#D4AF37\].text-\[\#1B1C33\],
+.bg-\[\#D4AF37\].text-slate-900,
+.bg-\[\#D4AF37\].text-slate-950,
+html.dark .bg-\[\#D4AF37\] .text-\[\#2C2E53\],
+html.dark .bg-\[\#D4AF37\] .text-\[\#1B1C33\],
+html.dark .bg-\[\#D4AF37\] .text-slate-900,
+html.dark .bg-\[\#D4AF37\] .text-slate-950,
+html.dark .bg-\[\#D4AF37\].text-\[\#2C2E53\],
+html.dark .bg-\[\#D4AF37\].text-\[\#1B1C33\],
+html.dark .bg-\[\#D4AF37\].text-slate-900,
+html.dark .bg-\[\#D4AF37\].text-slate-950 {
+  color: #0F172A !important;
 }
 
 html.dark .text-slate-600:not(.force-light-text),
@@ -835,11 +979,11 @@ html.dark [class*="ring-amber-300"] {
   --tw-ring-color: rgba(245, 158, 11, 0.3) !important;
 }
 
-/* Tablas en Modo Oscuro */
-html.dark th {
+/* Tablas en Modo Oscuro (preservando colores de celdas específicas de notas y estados) */
+html.dark th:not([class*="text-"]):not([class*="text-[#"]):not(:has([class*="text-"])) {
   color: #CBD5E1 !important;
 }
-html.dark td {
+html.dark td:not([class*="text-"]):not([class*="text-[#"]):not(:has([class*="text-"])) {
   color: #E2E8F0 !important;
 }
 html.dark tr.hover\:bg-slate-50:hover,
@@ -848,7 +992,7 @@ html.dark tr:hover {
 }
 
 /* Entradas de formulario en Modo Oscuro */
-html.dark input:not([type="checkbox"]):not([type="radio"]),
+html.dark input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]),
 html.dark select,
 html.dark textarea {
   background-color: #1E2038 !important;
@@ -857,9 +1001,18 @@ html.dark textarea {
   color-scheme: dark !important;
 }
 
+html.dark input:disabled,
+html.dark select:disabled,
+html.dark textarea:disabled {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+  color: #64748B !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  cursor: not-allowed;
+}
+
 html.dark input::placeholder,
 html.dark textarea::placeholder {
-  color: #64748B !important;
+  color: #94A3B8 !important;
 }
 
 /* ============================================================

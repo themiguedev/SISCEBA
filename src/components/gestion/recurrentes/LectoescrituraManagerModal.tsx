@@ -366,7 +366,8 @@ export const LectoescrituraManagerModal: React.FC<LectoescrituraManagerModalProp
                             className="p-1 px-2 font-bold text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-emerald-700"
                           >
                             <option value="L">L (Logrado)</option>
-                            <option value="EP">EP (En Proceso)</option>
+                            <option value="A">A (Avanzando)</option>
+                            <option value="P">P (Proceso)</option>
                             <option value="I">I (Iniciado)</option>
                           </select>
                         ) : (

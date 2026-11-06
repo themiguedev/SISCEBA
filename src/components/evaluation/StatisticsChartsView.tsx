@@ -69,8 +69,9 @@ export const StatisticsChartsView: React.FC = () => {
           { name: 'Literal D/E (Acompañamiento)', value: 8, color: RED }
         ]
       : [
-          { name: 'Logrado (L)', value: 75, color: EMERALD },
-          { name: 'En Proceso (P / EP)', value: 20, color: GOLD },
+          { name: 'Logrado (L)', value: 55, color: EMERALD },
+          { name: 'Avanzando (A)', value: 25, color: '#0EA5E9' },
+          { name: 'Proceso (P)', value: 15, color: GOLD },
           { name: 'Iniciado (I)', value: 5, color: RED }
         ];
 

@@ -1443,7 +1443,6 @@ export const InscripcionesWizardView: React.FC = () => {
                   onChange={(e) => setAcademicData({ ...academicData, grado: e.target.value })}
                   className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-semibold text-slate-800"
                 >
-                  <option value="Sala de 3 Años">Sala de 3 Años (Inicial)</option>
                   <option value="Sala de 4 Años">Sala de 4 Años (Inicial)</option>
                   <option value="Sala de 5 Años">Sala de 5 Años (Inicial)</option>
                   <option value="1er Grado">1er Grado (Primaria)</option>
