@@ -256,42 +256,38 @@ export const CuraduriaPrimariaView: React.FC = () => {
   return (
     <div className="space-y-6">
       
-      {/* Banner de Cabecera y Métricas */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#2C2E53] to-[#1E2038] text-[#D4AF37] flex items-center justify-center font-black shadow-md shrink-0 border border-[#D4AF37]/30">
-            <SpellCheck className="w-7 h-7" />
+      {/* Banner Principal Informativo CBA (Diseño de Referencia Oficial) */}
+      <div className="bg-gradient-to-r from-[#2C2E53] via-[#1E2038] to-[#141525] rounded-2xl p-5 sm:p-6 text-white shadow-md border border-[#3D4066] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider bg-[#0F1122]/90 text-amber-300 border border-[#D4AF37] shadow-xs">
+              Control Curricular Oficial
+            </span>
+            <span className="text-xs text-amber-200/90 font-medium">
+              Educación Primaria • C.E.O. SISCEBA
+            </span>
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-teal-100 text-teal-800 dark:bg-teal-950/50 dark:text-teal-300">
-                Auditoría Curricular Primaria
-              </span>
-              <span className="text-[10px] font-bold text-slate-400">
-                1er a 6to Grado CBA
-              </span>
-            </div>
-            <h1 className="text-xl sm:text-2xl font-black text-[#2C2E53] dark:text-white mt-0.5">
-              Revisión, Redacción y Ortografía de los Indicadores
-            </h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-2xl">
-              Curaduría editorial continua de los criterios formativos. Verificación de verbos observables en 3ra persona, acentuación gráfica, concordancia y coherencia con la escala cualitativa (L, A, P, I).
-            </p>
-          </div>
+          <h2 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
+            <SpellCheck className="w-6 h-6 text-white" />
+            Revisión, Redacción y Ortografía de los Indicadores
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl">
+            Curaduría editorial continua de los criterios formativos. Verificación de verbos observables en 3ra persona, acentuación gráfica, concordancia y coherencia con la escala cualitativa (L, A, P, I).
+          </p>
         </div>
 
         {/* Indicadores de Rendimiento Curador */}
-        <div className="flex items-center gap-4 bg-slate-50 dark:bg-slate-800/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-700/80 shrink-0">
+        <div className="flex items-center gap-4 bg-white/10 dark:bg-black/30 border border-white/15 px-4 py-2.5 rounded-xl text-slate-100 shrink-0">
           <div>
-            <div className="text-[10px] text-slate-400 font-bold uppercase">Calidad Editorial</div>
-            <div className="text-2xl font-black text-[#2C2E53] dark:text-[#D4AF37] font-mono">
+            <div className="text-[10px] text-amber-300 font-bold uppercase">Calidad Editorial</div>
+            <div className="text-xl font-black text-white font-mono">
               {metrics.percent}%
             </div>
-            <div className="text-[10px] text-slate-500">
+            <div className="text-[10px] text-slate-300">
               {metrics.optimalCount} de {metrics.total} óptimos
             </div>
           </div>
-          <div className="w-12 h-12 rounded-full border-4 border-slate-200 dark:border-slate-700 border-t-teal-500 flex items-center justify-center font-black text-xs text-teal-600 dark:text-teal-400 font-mono">
+          <div className="w-10 h-10 rounded-full border-2 border-amber-400/40 border-t-amber-400 flex items-center justify-center font-black text-xs text-amber-300 font-mono">
             {metrics.percent}%
           </div>
         </div>

@@ -377,7 +377,7 @@ export const CatalogoReportesView: React.FC<CatalogoReportesViewProps> = ({
             }}
             className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all border ${
               activeCategory === 'ADMINISTRADOR'
-                ? 'bg-[#2C2E53] text-[#D4AF37] border-[#2C2E53] shadow-xs'
+                ? 'bg-[#2C2E53] text-white border-[#3D4066] shadow-xs'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200'
             }`}
           >
@@ -393,7 +393,7 @@ export const CatalogoReportesView: React.FC<CatalogoReportesViewProps> = ({
             }}
             className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all border ${
               activeCategory === 'TODOS'
-                ? 'bg-[#2C2E53] text-[#D4AF37] border-[#2C2E53] shadow-xs'
+                ? 'bg-[#2C2E53] text-white border-[#3D4066] shadow-xs'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200'
             }`}
           >
@@ -409,7 +409,7 @@ export const CatalogoReportesView: React.FC<CatalogoReportesViewProps> = ({
             }}
             className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all border ${
               activeCategory === 'DOCENTE'
-                ? 'bg-[#2C2E53] text-[#D4AF37] border-[#2C2E53] shadow-xs'
+                ? 'bg-[#2C2E53] text-white border-[#3D4066] shadow-xs'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200'
             }`}
           >
@@ -425,7 +425,7 @@ export const CatalogoReportesView: React.FC<CatalogoReportesViewProps> = ({
             }}
             className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all border ${
               activeCategory === 'CONTROL_EVALUACION'
-                ? 'bg-[#2C2E53] text-[#D4AF37] border-[#2C2E53] shadow-xs'
+                ? 'bg-[#2C2E53] text-white border-[#3D4066] shadow-xs'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200'
             }`}
           >

@@ -14,6 +14,7 @@ import {
   CheckCircle2,
   BookOpen
 } from 'lucide-react';
+import { exportReportToExcel } from '../../utils/excelExport';
 
 interface RendimientoAuditViewProps {
   isFamilyOrStudent: boolean;
@@ -87,6 +88,10 @@ export const RendimientoAuditView: React.FC<RendimientoAuditViewProps> = ({
     return areas.filter((a) => a.level === selectedLevel);
   }, [areas, selectedLevel]);
 
+  const inicialAreas = useMemo(() => relevantAreas.filter((a) => a.level === 'INICIAL').slice(0, 8), [relevantAreas]);
+  const primariaAreas = useMemo(() => relevantAreas.filter((a) => a.level === 'PRIMARIA').slice(0, 9), [relevantAreas]);
+  const mediaAreas = useMemo(() => relevantAreas.filter((a) => a.level === 'MEDIA_GENERAL').slice(0, 9), [relevantAreas]);
+
   // Helper para Inicial (Escala Literal: A, B, C, D, E según GEMINI.md)
   const getInicialLiteralScore = (studentId: string, areaId: string): string => {
     const recs = evaluations.filter(
@@ -126,6 +131,93 @@ export const RendimientoAuditView: React.FC<RendimientoAuditViewProps> = ({
       return Math.round(avgScore * 10) / 10;
     }
     return null;
+  };
+
+  // Exportación e Impresión Oficial en Formato Excel (Sábana de Rendimiento)
+  const handleExportExcel = () => {
+    let columns: { header: string; width: number; align: 'left' | 'center' | 'right'; format?: 'text' | 'number' }[] = [
+      { header: 'N°', width: 35, align: 'center', format: 'number' },
+      { header: 'Cédula', width: 95, align: 'center', format: 'text' },
+      { header: 'Apellidos y Nombres', width: 220, align: 'left', format: 'text' },
+      { header: 'Grado / Año', width: 85, align: 'center', format: 'text' },
+      { header: 'Sec.', width: 45, align: 'center', format: 'text' }
+    ];
+
+    let data: (string | number)[][] = [];
+
+    if (selectedLevel === 'MEDIA_GENERAL') {
+      mediaAreas.forEach((a) => {
+        columns.push({ header: a.name.length > 16 ? a.name.slice(0, 15) + '…' : a.name, width: 80, align: 'center', format: 'number' });
+      });
+      columns.push({ header: 'Definitiva Lapso', width: 105, align: 'center', format: 'number' });
+
+      data = filteredStudents.map((stu, idx) => {
+        const scores = mediaAreas.map((a) => {
+          const val = getMediaNumericScore(stu.id, a.id);
+          return val !== null ? (val < 10 ? `0${val}` : val) : '-';
+        });
+        const numScores = mediaAreas.map((a) => getMediaNumericScore(stu.id, a.id)).filter((val): val is number => val !== null);
+        const avg = numScores.length > 0 ? (Math.round((numScores.reduce((a, b) => a + b, 0) / numScores.length) * 10) / 10).toFixed(1) : '-';
+        return [idx + 1, stu.cedula || 'S/C', stu.fullName.toUpperCase(), stu.grade, stu.section, ...scores, avg];
+      });
+    } else if (selectedLevel === 'PRIMARIA') {
+      primariaAreas.forEach((a) => {
+        columns.push({ header: a.name.length > 16 ? a.name.slice(0, 15) + '…' : a.name, width: 80, align: 'center', format: 'text' });
+      });
+
+      data = filteredStudents.map((stu, idx) => {
+        const quals = primariaAreas.map((a) => {
+          const q = getPrimariaQualitativeScore(stu.id, a.id);
+          return q.code !== '-' ? `${q.code} (${q.label})` : '-';
+        });
+        return [idx + 1, stu.cedula || 'S/C', stu.fullName.toUpperCase(), stu.grade, stu.section, ...quals];
+      });
+    } else if (selectedLevel === 'INICIAL') {
+      inicialAreas.forEach((a) => {
+        columns.push({ header: a.name.length > 16 ? a.name.slice(0, 15) + '…' : a.name, width: 85, align: 'center', format: 'text' });
+      });
+
+      data = filteredStudents.map((stu, idx) => {
+        const lits = inicialAreas.map((a) => getInicialLiteralScore(stu.id, a.id));
+        return [idx + 1, stu.cedula || 'S/C', stu.fullName.toUpperCase(), stu.grade, stu.section, ...lits];
+      });
+    } else {
+      columns.push({ header: 'Nivel', width: 100, align: 'center', format: 'text' });
+      columns.push({ header: 'Escala / Promedio', width: 130, align: 'center', format: 'text' });
+
+      data = filteredStudents.map((stu, idx) => {
+        let scoreLabel = '-';
+        if (stu.level === 'MEDIA_GENERAL') {
+          const numScores = mediaAreas.map((a) => getMediaNumericScore(stu.id, a.id)).filter((val): val is number => val !== null);
+          scoreLabel = numScores.length > 0 ? `${(numScores.reduce((a, b) => a + b, 0) / numScores.length).toFixed(1)} / 20` : '-';
+        } else if (stu.level === 'PRIMARIA') {
+          scoreLabel = 'Cualitativa (L/A/P/I)';
+        } else if (stu.level === 'INICIAL') {
+          scoreLabel = 'Literal (A-E)';
+        }
+        return [idx + 1, stu.cedula || 'S/C', stu.fullName.toUpperCase(), stu.grade, stu.section, stu.level, scoreLabel];
+      });
+    }
+
+    exportReportToExcel({
+      title: 'SÁBANA OFICIAL DE RENDIMIENTO Y CALIFICACIONES',
+      subtitle: `Control de Estudios (UCE) • Lapso ${selectedLapso}`,
+      schoolYear: '2026 - 2027',
+      lapso: selectedLapso,
+      level: selectedLevel === 'ALL' ? 'TODOS LOS NIVELES' : selectedLevel,
+      grade: selectedGrade === 'ALL' ? 'TODAS LAS SECCIONES' : selectedGrade,
+      section: selectedSection === 'ALL' ? 'A y B' : selectedSection,
+      orientation: 'landscape',
+      columns,
+      data,
+      signatures: [
+        { title: 'Docente Titular / Evaluador', subtitle: 'Docente de Aula' },
+        { title: 'Coordinación Pedagógica', subtitle: 'UCE Bellas Artes' },
+        { title: 'Dirección General', subtitle: 'U.E.P. Colegio Bellas Artes' }
+      ],
+      filename: `Sabana_Rendimiento_Lapso${selectedLapso}_${selectedLevel}_${Date.now()}.xls`,
+      sheetName: 'Sabana_Calificaciones'
+    });
   };
 
   return (
@@ -194,17 +286,29 @@ export const RendimientoAuditView: React.FC<RendimientoAuditViewProps> = ({
             </div>
           )}
 
-          {/* Search Input for Staff */}
+          {/* Search Input & Excel Export for Staff */}
           {!isFamilyOrStudent && (
-            <div className="relative w-full sm:w-64">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-              <input
-                type="text"
-                placeholder="Buscar por estudiante, cédula..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#2C2E53]"
-              />
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <button
+                onClick={handleExportExcel}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition cursor-pointer shrink-0"
+                title="Exportar e imprimir sábana oficial de calificaciones en Microsoft Excel"
+              >
+                <FileSpreadsheet className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Imprimir en Excel</span>
+                <span className="sm:hidden">Excel</span>
+              </button>
+
+              <div className="relative w-full sm:w-64">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                <input
+                  type="text"
+                  placeholder="Buscar por estudiante, cédula..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#2C2E53]"
+                />
+              </div>
             </div>
           )}
         </div>
@@ -229,7 +333,7 @@ export const RendimientoAuditView: React.FC<RendimientoAuditViewProps> = ({
                   }}
                   className={`px-2.5 py-1 text-xs font-bold rounded-lg transition ${
                     selectedLevel === lvl.id
-                      ? 'bg-[#1B1C33] text-[#D4AF37] shadow-xs'
+                      ? 'bg-[#1B1C33] text-white font-black shadow-xs'
                       : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                   }`}
                 >
@@ -247,7 +351,7 @@ export const RendimientoAuditView: React.FC<RendimientoAuditViewProps> = ({
                   onClick={() => setSelectedLapso(l)}
                   className={`px-2.5 py-1 text-xs font-black rounded-lg transition ${
                     selectedLapso === l
-                      ? 'bg-[#2C2E53] text-[#D4AF37] shadow-xs'
+                      ? 'bg-[#2C2E53] text-white font-black shadow-xs'
                       : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                   }`}
                 >

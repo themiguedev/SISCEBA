@@ -94,26 +94,28 @@ export const ProgresoEvaluacionesMediaView: React.FC = () => {
   return (
     <div className="space-y-6">
       
-      {/* Selector de Lapso y Resumen Global */}
-      <div className="bg-gradient-to-r from-[#2C2E53] via-[#1E2038] to-[#2C2E53] text-white rounded-3xl p-6 shadow-md border border-[#D4AF37]/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      {/* Banner Principal Informativo CBA (Diseño Oficial de Referencia) */}
+      <div className="bg-gradient-to-r from-[#2C2E53] via-[#1E2038] to-[#141525] rounded-2xl p-5 sm:p-6 text-white shadow-md border border-[#3D4066] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#D4AF37] text-slate-950">
-              Supervisión de Carga
+          <div className="flex items-center gap-2 mb-1">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider bg-[#0F1122]/90 text-amber-300 border border-[#D4AF37] shadow-xs">
+              Control Curricular Oficial
             </span>
-            <span className="text-xs text-slate-300 font-mono">
-              Bachillerato CBA
+            <span className="text-xs text-amber-200/90 font-medium">
+              Educación Media General • C.E.O. SISCEBA
             </span>
           </div>
-          <h2 className="text-xl sm:text-2xl font-black mt-1 text-white">
-            Progreso y Semáforo de Evaluaciones
+          <h2 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
+            <TrendingUp className="w-6 h-6 text-white" />
+            Progreso de Evaluaciones
           </h2>
-          <p className="text-xs text-slate-300 mt-0.5 max-w-xl">
+          <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl">
             Monitoreo en tiempo real del cumplimiento de asentamiento de calificaciones vigesimales por año escolar y sección oficial ("A" y "B").
           </p>
         </div>
 
-        <div className="flex items-center gap-4 bg-white/10 p-3 rounded-2xl border border-white/10 shrink-0">
+        {/* Resumen de aula activa y lapso */}
+        <div className="flex items-center gap-4 bg-white/10 dark:bg-black/30 border border-white/15 p-3 rounded-2xl shrink-0">
           <div>
             <div className="text-[10px] font-bold text-slate-300 uppercase">Avance General</div>
             <div className="text-2xl font-black text-[#D4AF37] font-mono">{globalProgress}%</div>

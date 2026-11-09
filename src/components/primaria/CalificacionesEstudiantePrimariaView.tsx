@@ -131,42 +131,38 @@ export const CalificacionesEstudiantePrimariaView: React.FC = () => {
   return (
     <div className="space-y-6">
       
-      {/* Header Institucional */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#2C2E53] to-[#1E2038] text-[#D4AF37] flex items-center justify-center font-black shadow-md shrink-0 border border-[#D4AF37]/30">
-            <Award className="w-7 h-7" />
+      {/* Banner Principal Informativo CBA (Diseño de Referencia Oficial) */}
+      <div className="bg-gradient-to-r from-[#2C2E53] via-[#1E2038] to-[#141525] rounded-2xl p-5 sm:p-6 text-white shadow-md border border-[#3D4066] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider bg-[#0F1122]/90 text-amber-300 border border-[#D4AF37] shadow-xs">
+              Control Curricular Oficial
+            </span>
+            <span className="text-xs text-amber-200/90 font-medium">
+              Educación Primaria • C.E.O. SISCEBA
+            </span>
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-900 dark:bg-blue-950/50 dark:text-blue-300">
-                Auditoría de Rendimiento Individual
-              </span>
-              <span className="text-[10px] font-bold text-slate-400">
-                Comparativa Ministerial vs Institucional
-              </span>
-            </div>
-            <h1 className="text-xl sm:text-2xl font-black text-[#2C2E53] dark:text-white mt-0.5">
-              Calificaciones por Estudiante: Promedio MPPE y Promedio CBA
-            </h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-2xl">
-              Análisis comparativo de calificaciones por estudiante: asignaturas oficiales del Pensum MPPE vs. Pensum Integral CBA (incluyendo Robótica, Inglés y programas especiales).
-            </p>
-          </div>
+          <h2 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
+            <Award className="w-6 h-6 text-white" />
+            Calificaciones por Estudiante: Promedio MPPE y Promedio CBA
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl">
+            Análisis comparativo de calificaciones por estudiante: asignaturas oficiales del Pensum MPPE vs. Pensum Integral CBA (incluyendo Robótica, Inglés y programas especiales).
+          </p>
         </div>
 
         {/* Selector de Lapso */}
-        <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/80 p-2 rounded-2xl border border-slate-200 dark:border-slate-700">
-          <span className="text-xs font-bold text-slate-500 px-2">Momento:</span>
+        <div className="flex items-center gap-2 bg-white/10 dark:bg-black/30 p-2 rounded-2xl border border-white/15">
+          <span className="text-xs font-bold text-amber-200 px-2">Momento:</span>
           {([1, 2, 3] as const).map(lap => (
             <button
               key={lap}
               type="button"
               onClick={() => setSelectedLapso(lap)}
-              className={`px-3 py-1.5 text-xs font-black rounded-xl transition ${
+              className={`px-3 py-1.5 text-xs font-black rounded-xl transition cursor-pointer ${
                 selectedLapso === lap
-                  ? 'bg-[#2C2E53] text-[#D4AF37] shadow-sm'
-                  : 'text-slate-600 dark:text-slate-300 hover:bg-white/80'
+                  ? 'bg-amber-400 text-slate-950 shadow-sm'
+                  : 'text-slate-200 hover:bg-white/10'
               }`}
             >
               Lapso {lap}

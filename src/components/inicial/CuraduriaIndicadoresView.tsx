@@ -173,13 +173,13 @@ export const CuraduriaIndicadoresView: React.FC = () => {
       <div className="bg-gradient-to-r from-[#2C2E53] via-[#1E2038] to-[#141525] rounded-2xl p-6 text-white shadow-md border border-[#3D4066] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider bg-amber-400 text-slate-900">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider bg-[#0F1122]/90 text-amber-300 border border-[#D4AF37] shadow-xs">
               Curaduría de Criterios
             </span>
             <span className="text-xs text-amber-200/90 font-medium">Educación Inicial</span>
           </div>
           <h2 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
-            <SpellCheck className="w-6 h-6 text-[#D4AF37]" />
+            <SpellCheck className="w-6 h-6 text-white" />
             Revisión, Redacción y Ortografía de los Indicadores
           </h2>
           <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl">

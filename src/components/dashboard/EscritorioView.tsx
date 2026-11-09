@@ -41,7 +41,8 @@ import {
   Filter,
   Users,
   Info,
-  School
+  School,
+  Code2
 } from 'lucide-react';
 import { EducationalLevel, UserSchedule, ScheduleBlock, ScheduleDay, AcademicAssignment, LEVEL_GRADES_CATALOG, Student } from '../../types';
 import { OFFICIAL_AVATARS, getDefaultAvatarForUser } from '../../utils/avatarCatalog';
@@ -795,12 +796,12 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
 
               {/* Roles Asignados */}
               <div>
-                <span className="text-xs font-bold text-slate-600 block mb-2">Rol y Perfil Asignado en esta Cuenta:</span>
+                <span className="text-xs font-bold text-slate-600 dark:text-slate-400 block mb-2">Rol y Perfil Asignado en esta Cuenta:</span>
                 <div className="flex flex-wrap gap-2">
-                  <span className={`px-3 py-1.5 rounded-xl text-xs font-bold border shadow-sm flex items-center gap-1.5 ${ROLE_METADATA[currentRole]?.badgeBg || 'bg-[#1B1C33] text-[#D4AF37] border-[#2C2E53]'}`}>
-                    <ShieldCheck className="w-4 h-4" />
+                  <span className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold border shadow-sm flex items-center gap-2 ${ROLE_METADATA[currentRole]?.badgeBg || 'bg-[#1B1C33] text-white border-[#D4AF37]'}`}>
+                    <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0" />
                     <span>{ROLE_METADATA[currentRole]?.label || currentRole}</span>
-                    <span className="opacity-75 text-[10px]">({currentRole})</span>
+                    <span className="text-amber-300 font-mono text-[10px] font-black">({currentRole})</span>
                   </span>
                 </div>
               </div>
@@ -940,36 +941,46 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
               </div>
             </div>
 
-            {/* Canal Institucional CBA / Lidsoftware */}
-            <div className="bg-gradient-to-br from-[#1B1C33] to-[#252747] text-white rounded-2xl p-6 border border-[#2C2E53] shadow-lg">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center p-1 border border-[#D4AF37]/50 shadow-md">
-                  <span className="text-[#2C2E53] font-black text-sm">CBA</span>
+            {/* Canal Institucional CBA / Autoría y Desarrollo */}
+            <div className="bg-gradient-to-br from-[#1B1C33] via-[#16172E] to-[#101120] text-white rounded-2xl p-5 sm:p-6 border border-[#3D4066] shadow-xl relative overflow-hidden flex flex-col gap-3.5">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-xl bg-white flex items-center justify-center p-1 border-2 border-[#D4AF37] shadow-md shrink-0">
+                  <span className="text-[#2C2E53] font-black text-base tracking-tight">CBA</span>
                 </div>
-                <div>
-                  <h4 className="font-extrabold text-xs text-white">Canal Institucional • SICE-CBA</h4>
-                  <p className="text-[10px] text-slate-300">Colegio Bellas Artes</p>
+                <div className="min-w-0 flex-1">
+                  <h4 className="font-black text-xs sm:text-sm text-white tracking-wide">
+                    Canal Institucional • SICE-CBA
+                  </h4>
+                  <p className="text-[11px] text-slate-300 font-medium truncate mt-0.5">
+                    Colegio Bellas Artes
+                  </p>
                 </div>
               </div>
-              <p className="text-[11px] text-slate-300 leading-relaxed mb-3">
+
+              <p className="text-xs text-slate-300 leading-relaxed">
                 Plataforma oficial sincronizada para el control escolar, notas oficiales, gestión docente y comunicación con las familias para el periodo escolar 2026-2027.
               </p>
-              <div className="p-3 rounded-xl bg-[#141525]/80 border border-white/10 mb-3">
-                <span className="text-[10px] text-slate-400 font-semibold block uppercase tracking-wider">
+
+              {/* Bloque de Autoría con Alto Contraste */}
+              <div className="p-3.5 rounded-xl bg-[#0D0E1C] border border-[#2F3358] shadow-inner">
+                <span className="text-[9.5px] text-slate-400 font-bold uppercase tracking-wider block mb-1.5">
                   Autor y Desarrollador del Sistema:
                 </span>
-                <p className="text-xs font-black text-[#D4AF37] mt-0.5">
-                  Ing. en Informática Miguelangel Contreras Guillén
-                </p>
-                <p className="text-[10px] text-slate-300 mt-0.5">
+                <div className="flex items-center gap-2">
+                  <Code2 className="w-4 h-4 text-amber-400 shrink-0" />
+                  <p className="text-xs sm:text-sm font-black text-white tracking-tight">
+                    Ing. en Informática Miguelangel Contreras Guillén
+                  </p>
+                </div>
+                <p className="text-[10.5px] text-slate-300 mt-1 font-medium">
                   Desarrollo de Software & Arquitectura SICE-CBA
                 </p>
               </div>
-              <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[11px]">
-                <span className="text-slate-400 font-mono">v1.0.0-DEV</span>
-                <span className="text-[#D4AF37] font-semibold flex items-center gap-1">
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  Soporte Activo
+
+              {/* Barra Inferior */}
+              <div className="pt-2.5 border-t border-white/10 flex items-center justify-between text-xs">
+                <span className="text-slate-400 font-mono text-[10.5px]">
+                  v1.0.0-DEV
                 </span>
               </div>
             </div>
@@ -2267,43 +2278,44 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
         return (
           <div className="space-y-6">
             {/* Header de Mi Horario */}
-            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-cba-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="bg-gradient-to-r from-[#2C2E53] via-[#1E2038] to-[#141525] rounded-2xl p-5 sm:p-6 text-white shadow-md border border-[#3D4066] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                    Cronograma Personal & Académico
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#0F1122]/90 text-amber-300 border border-[#D4AF37] shadow-xs">
+                    Cronograma Oficial
                   </span>
-                  <span className="text-[10px] font-mono text-slate-400">
-                    Año: {schedule.schoolYear}
+                  <span className="text-xs text-amber-200/90 font-medium">
+                    Año Escolar: {schedule.schoolYear} • Ciclo Oficial CBA
                   </span>
                 </div>
-                <h3 className="text-lg font-black text-[#2C2E53] mt-1 flex items-center gap-2">
+                <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-white shrink-0" />
                   <span>Horario de: {currentUser?.fullName || 'Personal CBA'}</span>
-                  <span className="text-xs font-bold text-slate-500 font-normal">
+                  <span className="text-xs font-semibold text-slate-300">
                     (@{currentUser?.username || 'usuario'} • {currentRole})
                   </span>
                 </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Visualice y gestione sus bloques de clase, horas de atención o labores asignadas con sincronización en tiempo real.
+                <p className="text-xs text-slate-300 mt-0.5">
+                  Visualice y gestione sus bloques de clase, horas de atención o labores asignadas con sincronización institucional.
                 </p>
               </div>
 
-              <div className="flex items-center gap-2 w-full sm:w-auto">
+              <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
                 <button
                   type="button"
                   onClick={() => setShowAddBlockModal(true)}
-                  className="px-3.5 py-2 rounded-xl bg-[#2C2E53] hover:bg-[#1B1C33] text-[#D4AF37] font-bold text-xs shadow-sm transition flex items-center gap-1.5 cursor-pointer shrink-0"
+                  className="px-3.5 py-2 rounded-xl bg-[#1B1C33] hover:bg-[#25284B] text-white border border-amber-400/60 font-black text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer shrink-0"
                 >
-                  <Plus className="w-4 h-4" />
+                  <Plus className="w-4 h-4 text-amber-400" />
                   <span>Añadir Bloque</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => window.print()}
-                  className="px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-xs transition flex items-center gap-1.5"
+                  className="px-3.5 py-2 rounded-xl bg-[#2C2E53] hover:bg-[#1E2038] text-white border border-[#3D4066] font-bold text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer"
                   title="Imprimir copia de mi horario"
                 >
-                  <Printer className="w-4 h-4 text-slate-500" />
+                  <Printer className="w-4 h-4 text-amber-300" />
                   <span className="hidden sm:inline">Imprimir</span>
                 </button>
               </div>
@@ -2317,17 +2329,17 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
             )}
 
             {/* Toolbar de Filtro por Día y Resumen */}
-            <div className="bg-white p-3 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-3 shadow-sm">
+            <div className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-300 dark:border-slate-700 flex flex-wrap items-center justify-between gap-3 shadow-2xs">
               <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-                <Filter className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                <span className="text-xs font-bold text-slate-600 mr-1">Filtrar Día:</span>
+                <Filter className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400 shrink-0" />
+                <span className="text-xs font-black text-slate-800 dark:text-slate-200 mr-1">Filtrar Día:</span>
                 <button
                   type="button"
                   onClick={() => setScheduleDayFilter('TODOS')}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-black transition cursor-pointer ${
                     scheduleDayFilter === 'TODOS'
-                      ? 'bg-[#2C2E53] text-[#D4AF37]'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      ? 'bg-[#1B1C33] text-white border border-[#D4AF37] shadow-xs'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 border border-slate-200 dark:border-slate-700'
                   }`}
                 >
                   Semana Completa ({totalHours} Horas)
@@ -2339,10 +2351,10 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
                       key={d}
                       type="button"
                       onClick={() => setScheduleDayFilter(d)}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${
+                      className={`px-2.5 py-1.5 rounded-lg text-xs font-black transition cursor-pointer ${
                         scheduleDayFilter === d
-                          ? 'bg-[#2C2E53] text-[#D4AF37]'
-                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                          ? 'bg-[#1B1C33] text-white border border-[#D4AF37] shadow-xs'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 border border-slate-200 dark:border-slate-700'
                       }`}
                     >
                       {d} ({dayCount})
@@ -2351,8 +2363,8 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
                 })}
               </div>
 
-              <div className="text-xs text-slate-500 font-medium">
-                Total de sesiones registradas: <strong className="text-slate-800 font-black">{totalHours}</strong>
+              <div className="text-xs text-slate-600 dark:text-slate-400 font-medium">
+                Total de sesiones registradas: <strong className="text-slate-900 dark:text-slate-100 font-black">{totalHours}</strong>
               </div>
             </div>
 
@@ -2366,29 +2378,29 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
                 return (
                   <div
                     key={day}
-                    className={`bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col overflow-hidden transition-all ${
+                    className={`bg-white dark:bg-slate-900 rounded-2xl border border-slate-300 dark:border-slate-700 shadow-xs flex flex-col overflow-hidden transition-all ${
                       scheduleDayFilter === day ? 'md:col-span-5' : ''
                     }`}
                   >
                     {/* Encabezado del Día */}
-                    <div className="p-3 bg-gradient-to-r from-slate-50 to-slate-100/60 border-b border-slate-200 flex items-center justify-between">
+                    <div className="p-3 bg-[#2C2E53] text-white border-b border-[#3D4066] flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <CalendarCheck className="w-4 h-4 text-[#D4AF37]" />
-                        <h4 className="font-extrabold text-xs text-slate-800 tracking-wide">
+                        <CalendarCheck className="w-4 h-4 text-amber-300" />
+                        <h4 className="font-extrabold text-xs text-white tracking-wide uppercase">
                           {day}
                         </h4>
                       </div>
-                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">
+                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-white/10 text-amber-300 border border-white/20">
                         {dayBlocks.length} {dayBlocks.length === 1 ? 'bloque' : 'bloques'}
                       </span>
                     </div>
 
                     {/* Bloques de Clase / Labor en el Día */}
-                    <div className="p-3 space-y-2.5 flex-1 min-h-[140px] bg-slate-50/30">
+                    <div className="p-3 space-y-2.5 flex-1 min-h-[140px] bg-slate-50/50 dark:bg-slate-950/20">
                       {dayBlocks.length === 0 ? (
                         <div className="h-full flex flex-col items-center justify-center text-center p-4 text-slate-400">
-                          <Clock className="w-6 h-6 text-slate-300 mb-1 stroke-1" />
-                          <p className="text-[11px] italic">Sin actividades asignadas</p>
+                          <Clock className="w-6 h-6 text-slate-300 dark:text-slate-600 mb-1 stroke-1" />
+                          <p className="text-[11px] font-medium italic text-slate-500 dark:text-slate-400">Sin actividades asignadas</p>
                         </div>
                       ) : (
                         dayBlocks.map(block => {
@@ -2486,7 +2498,7 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
                 <div className="bg-white rounded-2xl max-w-lg w-full p-6 border border-slate-200 shadow-2xl animate-in fade-in zoom-in-95">
                   <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg bg-[#2C2E53] text-[#D4AF37] flex items-center justify-center font-bold">
+                      <div className="w-8 h-8 rounded-lg bg-[#1B1C33] text-amber-400 border border-amber-400/40 flex items-center justify-center font-bold shadow-xs">
                         <Clock className="w-4 h-4" />
                       </div>
                       <div>
@@ -2673,9 +2685,9 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
                       <button
                         type="submit"
                         disabled={isSavingCloud}
-                        className="px-5 py-2 rounded-xl bg-[#2C2E53] hover:bg-[#1B1C33] text-[#D4AF37] font-bold text-xs shadow-md transition flex items-center gap-1.5"
+                        className="px-5 py-2 rounded-xl bg-[#1B1C33] hover:bg-[#25284B] text-white border border-amber-400/60 font-black text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                       >
-                        <Check className="w-4 h-4 text-[#D4AF37]" />
+                        <Check className="w-4 h-4 text-amber-400" />
                         <span>{isSavingCloud ? 'Guardando...' : 'Guardar Bloque'}</span>
                       </button>
                     </div>

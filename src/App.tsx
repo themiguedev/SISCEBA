@@ -52,7 +52,7 @@ const SiscebaMainApp: React.FC = () => {
       const p = new URLSearchParams(window.location.search).get('tab');
       if (p) {
         const upper = p.toUpperCase() as MainNavigationTab;
-        if (['ESCRITORIO', 'GESTION', 'PLANIFICACION', 'EVALUACION', 'CONSULTAS', 'COMUNIDAD', 'CONFIGURACION', 'AYUDA'].includes(upper)) {
+        if (['ESCRITORIO', 'GESTION', 'INICIAL', 'PRIMARIA', 'MEDIA_GENERAL', 'PLANIFICACION', 'EVALUACION', 'CONSULTAS', 'COMUNIDAD', 'CONFIGURACION', 'AYUDA'].includes(upper)) {
           return upper;
         }
       }
@@ -70,9 +70,9 @@ const SiscebaMainApp: React.FC = () => {
   const [inicialGroupTab, setInicialGroupTab] = useState<InicialGroup>('DIMENSIONES');
   const [inicialSubTab, setInicialSubTab] = useState<string>('BANCO_DIMENSIONES');
   const [primariaGroupTab, setPrimariaGroupTab] = useState<PrimariaGroup>('INDICADORES');
-  const [primariaSubTab, setPrimariaSubTab] = useState<string>('CURADURIA_INDICADORES');
-  const [mediaGroupTab, setMediaGroupTab] = useState<MediaGroup>('CALIFICACIONES');
-  const [mediaSubTab, setMediaSubTab] = useState<string>('CALIFICACIONES');
+  const [primariaSubTab, setPrimariaSubTab] = useState<string>('BANCO_INDICADORES');
+  const [mediaGroupTab, setMediaGroupTab] = useState<MediaGroup>('EVALUACION');
+  const [mediaSubTab, setMediaSubTab] = useState<string>('ESTRATEGIAS_EVALUACION');
   const [planningSubTab, setPlanningSubTab] = useState<string>('AREAS_PERFILES');
   const [evaluationSubTab, setEvaluationSubTab] = useState<string>('PROCESAL');
   const [communicationSubTab, setCommunicationSubTab] = useState<string>('BOLETIN');
@@ -250,6 +250,7 @@ const SiscebaMainApp: React.FC = () => {
       effectiveTab === 'PRIMARIA' ||
       (activeTab === 'PRIMARIA' &&
         [
+          'INDICADORES',
           'CURADURIA_INDICADORES',
           'PROCESAL',
           'SEGUIMIENTO_INDICADORES',
@@ -258,21 +259,24 @@ const SiscebaMainApp: React.FC = () => {
           'INDICADORES_LECTOESCRITURA',
           'PROGRESO_INDICADORES',
           'BANCO_INDICADORES',
+          'CALIFICACIONES',
           'CALIFICACIONES_ESTUDIANTE',
           'CALIFICACIONES_CURSO',
-          'BOLETIN_INFORMATIVO',
           'BOLETIN',
+          'BOLETIN_INFORMATIVO',
           'OBSERVACIONES_BOLETIN',
           'AREAS_FORMACION',
           'AREAS_PERFILES',
           'DISENADOR_DIDACTICO',
           'DISENADOR_OFICIAL',
+          'COMPETENCIAS_DIDACTICO',
           'COMPETENCIAS',
           'BANCO_COMPETENCIAS'
         ].includes(sub))
     ) {
       if (
         [
+          'INDICADORES',
           'CURADURIA_INDICADORES',
           'PROCESAL',
           'SEGUIMIENTO_INDICADORES',
@@ -284,11 +288,11 @@ const SiscebaMainApp: React.FC = () => {
         ].includes(sub)
       ) {
         setPrimariaGroupTab('INDICADORES');
-        setPrimariaSubTab(sub === 'SEGUIMIENTO_INDICADORES' ? 'PROCESAL' : sub);
-      } else if (['CALIFICACIONES_ESTUDIANTE', 'CALIFICACIONES_CURSO'].includes(sub)) {
+        setPrimariaSubTab(sub === 'INDICADORES' ? 'BANCO_INDICADORES' : (sub === 'SEGUIMIENTO_INDICADORES' ? 'PROCESAL' : sub));
+      } else if (['CALIFICACIONES', 'CALIFICACIONES_ESTUDIANTE', 'CALIFICACIONES_CURSO'].includes(sub)) {
         setPrimariaGroupTab('CALIFICACIONES');
-        setPrimariaSubTab(sub);
-      } else if (['BOLETIN_INFORMATIVO', 'BOLETIN', 'OBSERVACIONES_BOLETIN'].includes(sub)) {
+        setPrimariaSubTab(sub === 'CALIFICACIONES' ? 'CALIFICACIONES_ESTUDIANTE' : sub);
+      } else if (['BOLETIN', 'BOLETIN_INFORMATIVO', 'OBSERVACIONES_BOLETIN'].includes(sub)) {
         setPrimariaGroupTab('BOLETIN');
         setPrimariaSubTab(sub === 'BOLETIN' ? 'BOLETIN_INFORMATIVO' : sub);
       } else if (['AREAS_FORMACION', 'AREAS_PERFILES'].includes(sub)) {
@@ -297,7 +301,7 @@ const SiscebaMainApp: React.FC = () => {
       } else if (['DISENADOR_DIDACTICO', 'DISENADOR_OFICIAL'].includes(sub)) {
         setPrimariaGroupTab('DISENADOR_DIDACTICO');
         setPrimariaSubTab('DISENADOR_DIDACTICO');
-      } else if (['COMPETENCIAS', 'BANCO_COMPETENCIAS'].includes(sub)) {
+      } else if (['COMPETENCIAS_DIDACTICO', 'COMPETENCIAS', 'BANCO_COMPETENCIAS'].includes(sub)) {
         setPrimariaGroupTab('COMPETENCIAS_DIDACTICO');
         setPrimariaSubTab('COMPETENCIAS');
       } else {
@@ -307,15 +311,11 @@ const SiscebaMainApp: React.FC = () => {
       effectiveTab === 'MEDIA_GENERAL' ||
       (activeTab === 'MEDIA_GENERAL' &&
         [
-          // Calificaciones
-          'CALIFICACIONES',
-          'CALIFICACIONES_ESTUDIANTE',
-          'CALIFICACIONES_CRP',
-          'CALIFICACIONES_ORIENTACION_CONVIVENCIA',
-          'CALIFICACIONES_MATERIAS_PENDIENTES',
-          'CALIFICACIONES_POR_LAPSO',
-          'CALIFICACIONES_GENERALES',
-          'CALIFICACIONES_NUMERICAS',
+          // Submódulos Oficiales
+          'EVALUACION',
+          'RASGOS',
+          'PLANES',
+          'EXTRA',
           // Evaluación
           'ESTRATEGIAS_EVALUACION',
           'PROGRESO_EVALUACIONES',
@@ -345,20 +345,7 @@ const SiscebaMainApp: React.FC = () => {
         ].includes(sub))
     ) {
       if (
-        [
-          'CALIFICACIONES',
-          'CALIFICACIONES_ESTUDIANTE',
-          'CALIFICACIONES_CRP',
-          'CALIFICACIONES_ORIENTACION_CONVIVENCIA',
-          'CALIFICACIONES_MATERIAS_PENDIENTES',
-          'CALIFICACIONES_POR_LAPSO',
-          'CALIFICACIONES_GENERALES',
-          'CALIFICACIONES_NUMERICAS'
-        ].includes(sub)
-      ) {
-        setMediaGroupTab('CALIFICACIONES');
-        setMediaSubTab(sub);
-      } else if (
+        sub === 'EVALUACION' ||
         [
           'ESTRATEGIAS_EVALUACION',
           'PROGRESO_EVALUACIONES',
@@ -366,11 +353,12 @@ const SiscebaMainApp: React.FC = () => {
         ].includes(sub)
       ) {
         setMediaGroupTab('EVALUACION');
-        setMediaSubTab(sub);
-      } else if (['RASGOS_PERSONALIDAD', 'RESULTADO_RASGOS'].includes(sub)) {
+        setMediaSubTab(sub === 'EVALUACION' ? 'ESTRATEGIAS_EVALUACION' : sub);
+      } else if (sub === 'RASGOS' || ['RASGOS_PERSONALIDAD', 'RESULTADO_RASGOS'].includes(sub)) {
         setMediaGroupTab('RASGOS');
-        setMediaSubTab(sub);
+        setMediaSubTab(sub === 'RASGOS' ? 'RASGOS_PERSONALIDAD' : sub);
       } else if (
+        sub === 'PLANES' ||
         [
           'PLANES_ACCION_PERSONALIZADOS',
           'PLANES_LAPSO',
@@ -381,11 +369,12 @@ const SiscebaMainApp: React.FC = () => {
         ].includes(sub)
       ) {
         setMediaGroupTab('PLANES');
-        if (sub === 'IA_ACTION_PLANS') setMediaSubTab('PLANES_ACCION_PERSONALIZADOS');
+        if (sub === 'PLANES' || sub === 'IA_ACTION_PLANS') setMediaSubTab('PLANES_ACCION_PERSONALIZADOS');
         else if (sub === 'PLAN_LAPSO') setMediaSubTab('PLANES_LAPSO');
         else if (sub === 'PLAN_QUINCENAL') setMediaSubTab('PLANES_QUINCENALES');
         else setMediaSubTab(sub);
       } else if (
+        sub === 'EXTRA' ||
         [
           'BANCO_ESTRATEGIAS',
           'OBSERVACIONES_BOLETIN',
@@ -401,12 +390,14 @@ const SiscebaMainApp: React.FC = () => {
         ].includes(sub)
       ) {
         setMediaGroupTab('EXTRA');
-        if (sub === 'ACTAS_CONSEJO') setMediaSubTab('CONSEJO_CURSO');
+        if (sub === 'EXTRA') setMediaSubTab('BANCO_ESTRATEGIAS');
+        else if (sub === 'ACTAS_CONSEJO') setMediaSubTab('CONSEJO_CURSO');
         else if (sub === 'DISENADOR_OFICIAL') setMediaSubTab('DISENADOR_DIDACTICO');
         else if (sub === 'BOLETIN') setMediaSubTab('BOLETIN_INFORMATIVO');
         else setMediaSubTab(sub);
       } else {
-        setMediaSubTab(sub);
+        setMediaGroupTab('EVALUACION');
+        setMediaSubTab('ESTRATEGIAS_EVALUACION');
       }
     } else if (['DIAGNOSTICA', 'PROCESAL', 'FINAL_LAPSO'].includes(sub) || (effectiveTab !== 'CONSULTAS' && sub === 'ESTADISTICAS')) {
       setLevelPillarTab('EVALUACION');

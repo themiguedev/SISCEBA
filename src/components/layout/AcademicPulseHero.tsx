@@ -2,7 +2,6 @@ import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { EvaluationRecord, MainNavigationTab } from '../../types';
 import {
-  Sparkles,
   Users,
   BookOpen,
   Award,
@@ -59,9 +58,9 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6">
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-400/15 text-amber-200 border border-amber-400/30 text-[11px] font-extrabold tracking-widest uppercase shadow-xs">
-                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                Año Escolar 2026 - 2027
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-400 via-[#D4AF37] to-amber-500 text-slate-950 font-black text-xs shadow-md shadow-[#D4AF37]/30 ring-1 ring-white/30 tracking-wider uppercase select-none">
+                <Award className="w-3.5 h-3.5 text-slate-950 shrink-0" />
+                <span>Año Escolar 2026 - 2027</span>
               </span>
               <span className="text-slate-300 text-xs font-semibold">• Lapso {activeLapso}</span>
 

@@ -196,42 +196,38 @@ export const SeguimientoIndicadoresPrimariaView: React.FC<SeguimientoIndicadores
   return (
     <div className="space-y-6">
       
-      {/* Header Institucional */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#2C2E53] to-[#1E2038] text-[#D4AF37] flex items-center justify-center font-black shadow-md shrink-0 border border-[#D4AF37]/30">
-            <ClipboardList className="w-7 h-7" />
+      {/* Banner Principal Informativo CBA (Diseño de Referencia Oficial) */}
+      <div className="bg-gradient-to-r from-[#2C2E53] via-[#1E2038] to-[#141525] rounded-2xl p-5 sm:p-6 text-white shadow-md border border-[#3D4066] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider bg-[#0F1122]/90 text-amber-300 border border-[#D4AF37] shadow-xs">
+              Control Curricular Oficial
+            </span>
+            <span className="text-xs text-amber-200/90 font-medium">
+              Educación Primaria • C.E.O. SISCEBA
+            </span>
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-teal-100 text-teal-800 dark:bg-teal-950/50 dark:text-teal-300">
-                Evaluación Continua Primaria
-              </span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold">
-                Escala Cualitativa: L • A • P • I
-              </span>
-            </div>
-            <h1 className="text-xl sm:text-2xl font-black text-[#2C2E53] dark:text-white mt-0.5">
-              Seguimiento de los Indicadores de Evaluación
-            </h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-2xl">
-              Registro y acompañamiento procesal del logro de los estudiantes por cada indicador planificado. Prohibido el uso de escalas numéricas o literales en Primaria.
-            </p>
-          </div>
+          <h2 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
+            <ClipboardList className="w-6 h-6 text-white" />
+            Seguimiento de los Indicadores de Evaluación
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl">
+            Registro y acompañamiento procesal continuo del logro de los estudiantes por cada indicador en escala cualitativa exclusiva (L, A, P, I).
+          </p>
         </div>
 
         {/* Cobertura del Aula Activa */}
-        <div className="flex items-center gap-4 bg-slate-50 dark:bg-slate-800/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-700/80 shrink-0">
+        <div className="flex items-center gap-4 bg-white/10 dark:bg-black/30 border border-white/15 px-4 py-2.5 rounded-xl text-slate-100 shrink-0">
           <div>
-            <div className="text-[10px] text-slate-400 font-bold uppercase">Avance del Salón</div>
-            <div className="text-2xl font-black text-[#2C2E53] dark:text-[#D4AF37] font-mono">
+            <div className="text-[10px] text-amber-300 font-bold uppercase">Avance del Salón</div>
+            <div className="text-xl font-black text-white font-mono">
               {classroomMetrics.percent}%
             </div>
-            <div className="text-[10px] text-slate-500">
+            <div className="text-[10px] text-slate-300">
               {classroomMetrics.filledCells} de {classroomMetrics.totalCells} criterios
             </div>
           </div>
-          <div className="w-12 h-12 rounded-full border-4 border-slate-200 dark:border-slate-700 border-t-emerald-500 flex items-center justify-center font-black text-xs text-emerald-600 dark:text-emerald-400 font-mono">
+          <div className="w-10 h-10 rounded-full border-2 border-emerald-400/40 border-t-emerald-400 flex items-center justify-center font-black text-xs text-emerald-300 font-mono">
             {classroomMetrics.percent}%
           </div>
         </div>

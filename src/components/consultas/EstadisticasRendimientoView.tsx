@@ -11,10 +11,11 @@ import {
   Search,
   Filter,
   Award,
-  Sparkles,
   TrendingUp,
   CheckCircle2,
-  Users
+  Users,
+  FileSpreadsheet,
+  ShieldCheck
 } from 'lucide-react';
 import { Student, EvaluationRecord } from '../../types';
 
@@ -219,56 +220,89 @@ export const EstadisticasRendimientoView: React.FC<EstadisticasRendimientoViewPr
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-cba-card space-y-1">
-          <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider block">
-            Matrícula Activa
-          </span>
-          <p className="text-3xl font-black text-[#2C2E53] dark:text-white">{students.length}</p>
+        {/* Card 1: Matrícula Activa */}
+        <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-cyan-400 dark:border-cyan-600/60 shadow-xs space-y-1">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider block">
+              Matrícula Activa
+            </span>
+            <div className="w-8 h-8 rounded-lg bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0">
+              <Users className="w-4 h-4" />
+            </div>
+          </div>
+          <p className="text-3xl font-black text-cyan-700 dark:text-cyan-400">{students.length}</p>
           <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold">Estudiantes inscritos CBA</p>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-cba-card space-y-1">
-          <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider block">
-            Evaluaciones Procesales
-          </span>
-          <p className="text-3xl font-black text-[#D4AF37]">{evaluations.length}</p>
+        {/* Card 2: Evaluaciones Procesales */}
+        <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-amber-400 dark:border-amber-600/60 shadow-xs space-y-1">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider block">
+              Evaluaciones Procesales
+            </span>
+            <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+              <FileSpreadsheet className="w-4 h-4" />
+            </div>
+          </div>
+          <p className="text-3xl font-black text-amber-600 dark:text-amber-400">{evaluations.length}</p>
           <p className="text-[11px] text-slate-500 font-semibold">Registros en Lapso {semaphoreLapso}</p>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-cba-card space-y-1">
-          <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider block">
-            Cumplimiento UCE Lapso {semaphoreLapso}
-          </span>
+        {/* Card 3: Cumplimiento UCE */}
+        <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-indigo-400 dark:border-indigo-600/60 shadow-xs space-y-1">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider block">
+              Cumplimiento UCE Lapso {semaphoreLapso}
+            </span>
+            <div className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+              <BarChart3 className="w-4 h-4" />
+            </div>
+          </div>
           <div className="flex items-baseline gap-2">
             <p className="text-3xl font-black text-indigo-600 dark:text-indigo-400">{globalRate}%</p>
-            <span className="text-xs text-slate-400 font-bold">
+            <span className="text-xs text-indigo-500/80 font-bold">
               ({completedCourses}/{totalCourses} cátedras)
             </span>
           </div>
           <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 mt-2 overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-indigo-500 to-emerald-500 rounded-full transition-all duration-500"
+              className="h-full bg-gradient-to-r from-indigo-500 to-indigo-400 rounded-full transition-all duration-500"
               style={{ width: `${globalRate}%` }}
             />
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-cba-card space-y-1">
-          <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider block">
-            Puntualidad & Asistencia
-          </span>
-          <p className="text-3xl font-black text-amber-600">{passes.length}</p>
-          <p className="text-[11px] text-slate-500 font-semibold">Pases de retraso emitidos</p>
+        {/* Card 4: Puntualidad & Asistencia */}
+        <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-emerald-400 dark:border-emerald-600/60 shadow-xs space-y-1">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider block">
+              Puntualidad & Asistencia
+            </span>
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+              <ShieldCheck className="w-4 h-4" />
+            </div>
+          </div>
+          <p className="text-3xl font-black text-emerald-700 dark:text-emerald-400">{passes.length}</p>
+          <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold">Pases de retraso emitidos</p>
         </div>
       </div>
 
       {/* Semáforo de Carga Docente UCE */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-cba-card overflow-hidden">
         {/* Header */}
-        <div className="p-5 bg-[#2C2E53] dark:bg-[#14162B] text-white flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-transparent dark:border-slate-800">
+        <div className="p-5 bg-gradient-to-r from-[#2C2E53] via-[#1E2038] to-[#141525] text-white flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#3D4066]">
           <div>
-            <h3 className="font-black text-base tracking-wide">
-              Semáforo UCE • Control de Carga de Calificaciones
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#0F1122]/90 text-amber-300 border border-[#D4AF37] shadow-xs">
+                Auditoría UCE
+              </span>
+              <span className="text-xs text-amber-200/90 font-medium">
+                Control de Carga de Calificaciones
+              </span>
+            </div>
+            <h3 className="font-black text-base sm:text-lg tracking-wide flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-white" />
+              Semáforo UCE • Seguimiento Docente
             </h3>
             <p className="text-xs text-slate-300 mt-1">
               Auditoría institucional en tiempo real del progreso de asimilación de notas por docente y sección.
@@ -279,10 +313,10 @@ export const EstadisticasRendimientoView: React.FC<EstadisticasRendimientoViewPr
             {emptyCourses + inProgressCourses > 0 && (
               <button
                 onClick={handleSendAllPendingReminders}
-                className="px-3.5 py-2 rounded-xl text-xs font-bold bg-[#D4AF37] hover:bg-[#c29f2f] text-[#2C2E53] flex items-center gap-1.5 shadow-sm transition"
+                className="px-3.5 py-2 rounded-xl text-xs font-black bg-[#1B1C33] hover:bg-[#25284B] text-white border border-amber-400/60 shadow-xs flex items-center gap-2 transition cursor-pointer"
                 title="Enviar recordatorio automático a todos los docentes con carga pendiente"
               >
-                <Bell className="w-3.5 h-3.5" />
+                <Bell className="w-3.5 h-3.5 text-amber-400" />
                 <span>Notificar Pendientes ({emptyCourses + inProgressCourses})</span>
               </button>
             )}
@@ -293,7 +327,7 @@ export const EstadisticasRendimientoView: React.FC<EstadisticasRendimientoViewPr
         <div className="p-4 bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
             {/* Lapso */}
-            <div className="flex items-center gap-1 bg-white dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-1 bg-white dark:bg-slate-800 p-1 rounded-xl border border-slate-300 dark:border-slate-700 shadow-2xs">
               <span className="text-[11px] font-bold text-slate-500 px-2">Lapso:</span>
               {([1, 2, 3] as const).map((l) => (
                 <button
@@ -301,7 +335,7 @@ export const EstadisticasRendimientoView: React.FC<EstadisticasRendimientoViewPr
                   onClick={() => setSemaphoreLapso(l)}
                   className={`px-2.5 py-1 text-xs font-black rounded-lg transition ${
                     semaphoreLapso === l
-                      ? 'bg-[#2C2E53] text-[#D4AF37] shadow-xs'
+                      ? 'bg-[#2C2E53] text-white font-black shadow-xs'
                       : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
                   }`}
                 >
@@ -311,7 +345,7 @@ export const EstadisticasRendimientoView: React.FC<EstadisticasRendimientoViewPr
             </div>
 
             {/* Nivel */}
-            <div className="flex items-center gap-1 bg-white dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-1 bg-white dark:bg-slate-800 p-1 rounded-xl border border-slate-300 dark:border-slate-700 shadow-2xs">
               <span className="text-[11px] font-bold text-slate-500 px-2">Nivel:</span>
               {[
                 { id: 'ALL', label: 'Todos' },
@@ -334,7 +368,7 @@ export const EstadisticasRendimientoView: React.FC<EstadisticasRendimientoViewPr
             </div>
 
             {/* Estatus */}
-            <div className="flex items-center gap-1 bg-white dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-1 bg-white dark:bg-slate-800 p-1 rounded-xl border border-slate-300 dark:border-slate-700 shadow-2xs">
               <span className="text-[11px] font-bold text-slate-500 px-2">Estatus:</span>
               {[
                 { id: 'ALL', label: 'Todos' },
@@ -347,7 +381,7 @@ export const EstadisticasRendimientoView: React.FC<EstadisticasRendimientoViewPr
                   onClick={() => setSemaphoreStatusFilter(s.id as any)}
                   className={`px-2.5 py-1 text-xs font-bold rounded-lg transition ${
                     semaphoreStatusFilter === s.id
-                      ? 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white font-black'
+                      ? 'bg-[#2C2E53] text-white font-black shadow-xs'
                       : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
                   }`}
                 >
@@ -365,7 +399,7 @@ export const EstadisticasRendimientoView: React.FC<EstadisticasRendimientoViewPr
               value={semaphoreSearch}
               onChange={(e) => setSemaphoreSearch(e.target.value)}
               placeholder="Filtrar por año, materia o docente..."
-              className="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2C2E53]"
+              className="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 text-xs text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2C2E53]"
             />
           </div>
         </div>
@@ -373,14 +407,14 @@ export const EstadisticasRendimientoView: React.FC<EstadisticasRendimientoViewPr
         {/* Tabla del Semáforo */}
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 uppercase font-black tracking-wider text-[10px] border-b border-slate-200 dark:border-slate-800">
+            <thead className="bg-[#2C2E53] text-white uppercase font-black tracking-wider text-[10px] border-b border-[#3D4066]">
               <tr>
-                <th className="py-3 px-4">Grado & Sección</th>
-                <th className="py-3 px-4">Asignatura / Cátedra</th>
-                <th className="py-3 px-4">Docente Titular Asignado</th>
-                <th className="py-3 px-4 text-center">Avance Alumnos</th>
-                <th className="py-3 px-4 text-center min-w-[140px]">Porcentaje</th>
-                <th className="py-3 px-4 text-center">Semáforo</th>
+                <th className="py-3 px-4 border-r border-white/10">Grado & Sección</th>
+                <th className="py-3 px-4 border-r border-white/10">Asignatura / Cátedra</th>
+                <th className="py-3 px-4 border-r border-white/10">Docente Titular Asignado</th>
+                <th className="py-3 px-4 text-center border-r border-white/10">Avance Alumnos</th>
+                <th className="py-3 px-4 text-center min-w-[140px] border-r border-white/10">Porcentaje</th>
+                <th className="py-3 px-4 text-center border-r border-white/10">Semáforo</th>
                 <th className="py-3 px-4 text-center">Acción UCE</th>
               </tr>
             </thead>

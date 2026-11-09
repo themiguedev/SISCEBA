@@ -40,7 +40,7 @@ export const AyudaModule: React.FC<AyudaModuleProps> = ({
       <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 no-print">
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-xl bg-[#1B1C33] text-[#D4AF37] flex items-center justify-center font-black text-lg shadow-sm border border-[#2C2E53]">
-            <HelpCircle className="w-6 h-6 text-[#D4AF37]" />
+            <HelpCircle className="w-6 h-6 text-white" />
           </div>
           <div>
             <div className="flex items-center gap-2">

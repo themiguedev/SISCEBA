@@ -18,7 +18,11 @@ import {
   ArrowLeftRight,
   Briefcase,
   Users,
-  Eye
+  Eye,
+  Landmark,
+  FolderOpen,
+  BookOpen,
+  Check
 } from 'lucide-react';
 import { SeasonalAccessoryIcon } from '../auth/LogoSeasonalAccessory';
 import { ThemeSwitcherDropdown } from './ThemeSwitcherDropdown';
@@ -48,6 +52,74 @@ interface ModernHeaderProps {
   onNavigate?: (tab: MainNavigationTab, subTab?: string) => void;
   activeTab?: string;
 }
+
+const ROLE_VISUAL_CONFIG: Record<
+  UserRole,
+  {
+    icon: React.ElementType;
+    iconBg: string;
+    iconColor: string;
+    iconBorder: string;
+    subtitle: string;
+  }
+> = {
+  ADMINISTRADOR: {
+    icon: ShieldCheck,
+    iconBg: 'bg-purple-950/70',
+    iconColor: 'text-purple-300',
+    iconBorder: 'border-purple-500/40',
+    subtitle: 'Control Total del Sistema'
+  },
+  DIRECTOR: {
+    icon: Landmark,
+    iconBg: 'bg-blue-950/70',
+    iconColor: 'text-blue-300',
+    iconBorder: 'border-blue-500/40',
+    subtitle: 'Máxima Autoridad y Firma'
+  },
+  COORDINACION: {
+    icon: Layers,
+    iconBg: 'bg-emerald-950/70',
+    iconColor: 'text-emerald-300',
+    iconBorder: 'border-emerald-500/40',
+    subtitle: 'Control de Estudios y UCE'
+  },
+  COORDINADOR: {
+    icon: Layers,
+    iconBg: 'bg-emerald-950/70',
+    iconColor: 'text-emerald-300',
+    iconBorder: 'border-emerald-500/40',
+    subtitle: 'Control de Estudios y UCE'
+  },
+  SECRETARIA: {
+    icon: FolderOpen,
+    iconBg: 'bg-fuchsia-950/70',
+    iconColor: 'text-fuchsia-300',
+    iconBorder: 'border-fuchsia-500/40',
+    subtitle: 'Asistencia y Disciplina'
+  },
+  DOCENTE: {
+    icon: GraduationCap,
+    iconBg: 'bg-teal-950/70',
+    iconColor: 'text-teal-300',
+    iconBorder: 'border-teal-500/40',
+    subtitle: 'Notas y Planificación'
+  },
+  REPRESENTANTE: {
+    icon: Users,
+    iconBg: 'bg-sky-950/70',
+    iconColor: 'text-sky-300',
+    iconBorder: 'border-sky-500/40',
+    subtitle: 'Consultas Familiares'
+  },
+  ESTUDIANTE: {
+    icon: BookOpen,
+    iconBg: 'bg-cyan-950/70',
+    iconColor: 'text-cyan-300',
+    iconBorder: 'border-cyan-500/40',
+    subtitle: 'Portal del Alumno'
+  }
+};
 
 export const ModernHeader: React.FC<ModernHeaderProps> = ({
   sidebarOpen,
@@ -420,33 +492,38 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
                   className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-40 sm:hidden"
                   onClick={() => setRoleMenuOpen(false)}
                 />
-                <div className="fixed sm:absolute right-3 sm:right-0 top-16 sm:top-full mt-1 w-[calc(100vw-24px)] max-w-sm sm:w-72 max-h-[85vh] overflow-y-auto bg-[#1B1C33] border border-[#414474] rounded-2xl sm:rounded-xl shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95">
-                  <div className="px-3 py-2 border-b border-[#2C2E53] mb-1.5 flex items-center gap-2.5">
+                <div className="fixed sm:absolute right-3 sm:right-0 top-16 sm:top-full mt-1.5 w-[calc(100vw-24px)] max-w-sm sm:w-80 max-h-[88vh] overflow-y-auto bg-gradient-to-b from-[#1A1C35] via-[#16172D] to-[#121324] border border-[#414474] rounded-2xl sm:rounded-xl shadow-2xl p-2.5 z-50 animate-in fade-in zoom-in-95">
+                  <div className="p-3 bg-[#24264A]/70 border border-[#383C66] rounded-xl mb-2 flex items-center gap-3 shadow-xs">
                     {(() => {
                       const avatarSrc = currentUser?.avatarUrl || (currentUser ? getDefaultAvatarForUser(currentUser) : '');
                       return avatarSrc ? (
                         <img
                           src={avatarSrc}
                           alt={currentUser?.fullName || 'Avatar'}
-                          className="w-8 h-8 rounded-xl object-contain border border-[#D4AF37]/50 shrink-0 bg-white"
+                          className="w-10 h-10 rounded-xl object-contain border-2 border-[#D4AF37] shrink-0 bg-white shadow-sm"
                         />
                       ) : (
-                        <div className="w-8 h-8 rounded-xl bg-[#2C2E53] text-[#D4AF37] border border-[#D4AF37]/40 flex items-center justify-center font-bold text-xs shrink-0">
+                        <div className="w-10 h-10 rounded-xl bg-[#2C2E53] text-[#D4AF37] border-2 border-[#D4AF37] flex items-center justify-center font-black text-sm shrink-0 shadow-sm">
                           {(currentUser?.fullName?.[0] || currentRole[0] || 'U').toUpperCase()}
                         </div>
                       );
                     })()}
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-bold text-white truncate">
+                      <p className="text-xs font-black text-white truncate leading-tight">
                         {currentUser?.fullName || 'Usuario CBA'}
                       </p>
-                      <p className="text-[10px] font-mono text-[#D4AF37] truncate">
-                        @{currentUser?.username || 'usuario'} • {currentRole}
-                      </p>
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <span className="text-[9.5px] font-black font-mono px-2 py-0.5 rounded-md bg-amber-400/15 text-amber-300 border border-amber-400/40 truncate">
+                          {currentRole}
+                        </span>
+                        <span className="text-[10px] font-mono text-slate-400 truncate">
+                          @{currentUser?.username || 'usuario'}
+                        </span>
+                      </div>
                       {currentUser?.roles && currentUser.roles.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-1">
+                        <div className="flex flex-wrap gap-1 mt-1.5">
                           <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-400/20 text-amber-300 font-bold border border-amber-400/30 whitespace-nowrap">
-                            Rol Principal: {currentUser.role}
+                            Principal: {currentUser.role}
                           </span>
                           {currentUser.roles.map(r => (
                             <span key={r} className="text-[9px] px-1.5 py-0.5 rounded bg-sky-400/20 text-sky-300 font-bold border border-sky-400/30 whitespace-nowrap">
@@ -459,45 +536,51 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
                   </div>
 
                   {/* Acceso Directo a Mi Perfil y Mi Horario */}
-                  <div className="space-y-1 mb-1.5">
+                  <div className="grid grid-cols-2 gap-2 mb-2">
                     <button
+                      type="button"
                       onClick={() => {
                         setRoleMenuOpen(false);
                         onNavigate?.('ESCRITORIO', 'PERFIL');
                       }}
-                      className="w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs font-bold text-sky-300 hover:bg-sky-500/15 transition border border-transparent hover:border-sky-500/30"
+                      className="p-2 rounded-xl bg-[#25284B] hover:bg-[#2F335E] border border-[#3D4066] hover:border-sky-400/60 text-white font-bold text-[11px] transition flex items-center justify-between cursor-pointer shadow-xs group"
                     >
-                      <span className="flex items-center gap-2">
-                        <User className="w-3.5 h-3.5" />
-                        <span>Mi Perfil</span>
+                      <span className="flex items-center gap-1.5 min-w-0">
+                        <User className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+                        <span className="truncate">Mi Perfil</span>
                       </span>
-                      <span className="text-[10px] text-sky-400 font-mono">Editar →</span>
+                      <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-sky-400/20 text-sky-300 border border-sky-400/30 font-mono shrink-0">
+                        Editar →
+                      </span>
                     </button>
                     <button
+                      type="button"
                       onClick={() => {
                         setRoleMenuOpen(false);
                         onNavigate?.('ESCRITORIO', 'HORARIO');
                       }}
-                      className="w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs font-bold text-amber-300 hover:bg-amber-500/15 transition border border-transparent hover:border-amber-500/30"
+                      className="p-2 rounded-xl bg-[#25284B] hover:bg-[#2F335E] border border-[#3D4066] hover:border-amber-400/60 text-white font-bold text-[11px] transition flex items-center justify-between cursor-pointer shadow-xs group"
                     >
-                      <span className="flex items-center gap-2">
-                        <Clock className="w-3.5 h-3.5 text-amber-400" />
-                        <span>Mi Horario de Clases</span>
+                      <span className="flex items-center gap-1.5 min-w-0">
+                        <Clock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                        <span className="truncate">Mi Horario</span>
                       </span>
-                      <span className="text-[10px] text-amber-400 font-mono">Ver →</span>
+                      <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/30 font-mono shrink-0">
+                        Ver →
+                      </span>
                     </button>
                   </div>
 
                   {currentUser?.role === 'ADMINISTRADOR' ? (
                     <div className="space-y-1.5 pt-1">
                       {currentRole !== 'ADMINISTRADOR' && (
-                        <div className="p-2.5 mb-2 rounded-xl bg-amber-500/15 border border-amber-500/40 flex items-center justify-between gap-2 shadow-inner">
+                        <div className="p-2.5 mb-2 rounded-xl bg-amber-500/15 border border-amber-500/50 flex items-center justify-between gap-2 shadow-inner">
                           <div className="min-w-0">
                             <span className="text-[10px] uppercase tracking-wider font-extrabold text-amber-300 flex items-center gap-1.5">
                               <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
                               Simulando Rol
                             </span>
-                            <span className="text-[11px] font-bold text-white truncate block">
+                            <span className="text-xs font-black text-white truncate block">
                               {ROLE_METADATA[currentRole]?.label || currentRole}
                             </span>
                           </div>
@@ -511,47 +594,74 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
                         </div>
                       )}
 
-                      <div className="px-2 py-1 mb-0.5 flex items-center justify-between gap-2">
+                      <div className="px-2 py-1 mb-1 flex items-center justify-between gap-2 border-b border-[#2C2E53]">
                         <span className="text-[10px] font-black text-amber-300 uppercase tracking-wider flex items-center gap-1.5 truncate">
                           <ShieldCheck className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                           <span className="truncate">Simular Rol (Modo Admin)</span>
                         </span>
-                        <span className="text-[9px] px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 font-bold border border-amber-400/30 whitespace-nowrap shrink-0">
+                        <span className="text-[9px] px-2 py-0.5 rounded-full bg-amber-400/15 text-amber-300 font-black border border-amber-400/30 whitespace-nowrap shrink-0">
                           7 Roles
                         </span>
                       </div>
 
-                      {(['ADMINISTRADOR', 'DIRECTOR', 'COORDINACION', 'SECRETARIA', 'DOCENTE', 'REPRESENTANTE', 'ESTUDIANTE'] as UserRole[]).map((r) => {
-                        const meta = ROLE_METADATA[r];
-                        const isSelected = currentRole === r;
-                        return (
-                          <button
-                            key={r}
-                            type="button"
-                            onClick={() => handleSwitchRole(r)}
-                            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left font-medium transition-all cursor-pointer ${
-                              isSelected
-                                ? 'bg-[#2C2E53] text-[#D4AF37] border border-[#D4AF37]/50 shadow-sm'
-                                : 'text-slate-300 hover:bg-[#2C2E53]/50 hover:text-white border border-transparent'
-                            }`}
-                          >
-                            <div className="min-w-0 pr-2">
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-xs font-bold truncate">{meta?.label || r}</span>
-                                {r === 'ADMINISTRADOR' && (
-                                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-purple-400/20 text-purple-300 font-bold whitespace-nowrap">
-                                    Nativo
+                      <div className="space-y-1">
+                        {(['ADMINISTRADOR', 'DIRECTOR', 'COORDINACION', 'SECRETARIA', 'DOCENTE', 'REPRESENTANTE', 'ESTUDIANTE'] as UserRole[]).map((r) => {
+                          const meta = ROLE_METADATA[r];
+                          const isSelected = currentRole === r;
+                          const visual = ROLE_VISUAL_CONFIG[r] || {
+                            icon: ShieldCheck,
+                            iconBg: 'bg-slate-800',
+                            iconColor: 'text-slate-300',
+                            iconBorder: 'border-slate-700',
+                            subtitle: meta?.scope || meta?.description
+                          };
+                          const IconComponent = visual.icon;
+
+                          return (
+                            <button
+                              key={r}
+                              type="button"
+                              onClick={() => handleSwitchRole(r)}
+                              className={`w-full flex items-center justify-between p-2 rounded-xl text-left transition-all cursor-pointer ${
+                                isSelected
+                                  ? 'bg-[#2C2E53] text-white border-1.5 border-[#D4AF37] shadow-md'
+                                  : 'text-slate-200 hover:bg-[#242749] hover:text-white border border-transparent'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2.5 min-w-0 pr-1">
+                                <div
+                                  className={`w-7 h-7 rounded-lg ${visual.iconBg} ${visual.iconColor} border ${visual.iconBorder} flex items-center justify-center shrink-0 shadow-2xs`}
+                                >
+                                  <IconComponent className="w-3.5 h-3.5" />
+                                </div>
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className={`text-xs truncate ${isSelected ? 'font-black text-white' : 'font-bold text-slate-100'}`}>
+                                      {meta?.label || r}
+                                    </span>
+                                    {r === 'ADMINISTRADOR' && (
+                                      <span className="text-[8.5px] px-1.5 py-0.2 rounded bg-purple-400/20 text-purple-300 font-extrabold border border-purple-400/40 whitespace-nowrap">
+                                        Nativo
+                                      </span>
+                                    )}
+                                  </div>
+                                  <span className="text-[9.5px] text-slate-400 block truncate font-mono mt-0.5">
+                                    {r} • {visual.subtitle}
                                   </span>
-                                )}
+                                </div>
                               </div>
-                              <span className="text-[10px] text-slate-400 block truncate font-mono">
-                                {r}
-                              </span>
-                            </div>
-                            {isSelected && <ShieldCheck className="w-4 h-4 text-[#D4AF37] shrink-0" />}
-                          </button>
-                        );
-                      })}
+                              {isSelected && (
+                                <div className="flex items-center gap-1 shrink-0">
+                                  <span className="text-[8.5px] font-black uppercase px-1.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/40">
+                                    Activo
+                                  </span>
+                                  <Check className="w-4 h-4 text-amber-300 shrink-0" />
+                                </div>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
                   ) : hasMultipleRoles ? (
                     <div className="space-y-2 mb-2 p-2.5 rounded-xl bg-gradient-to-br from-[#141525] to-[#242646] border border-[#D4AF37]/40 shadow-inner">
@@ -573,6 +683,15 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
                         {userEffectiveRoles.map((role) => {
                           const meta = ROLE_METADATA[role];
                           const isActive = currentRole === role;
+                          const visual = ROLE_VISUAL_CONFIG[role] || {
+                            icon: ShieldCheck,
+                            iconBg: 'bg-slate-800',
+                            iconColor: 'text-slate-300',
+                            iconBorder: 'border-slate-700',
+                            subtitle: meta?.scope || meta?.description
+                          };
+                          const IconComp = visual.icon;
+
                           return (
                             <button
                               key={role}
@@ -581,23 +700,28 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
                               className={`w-full p-2 rounded-xl border text-left transition-all flex items-center justify-between gap-2 cursor-pointer ${
                                 isActive
                                   ? 'bg-[#2C2E53] border-[#D4AF37] text-white shadow-md ring-1 ring-[#D4AF37]/50'
-                                  : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10 hover:text-white'
+                                  : 'bg-white/5 border-white/10 text-slate-200 hover:bg-white/10 hover:text-white'
                               }`}
                             >
-                              <div className="min-w-0">
-                                <div className="flex items-center gap-1.5">
-                                  <span className="text-xs font-bold truncate">
-                                    {meta?.label || role}
-                                  </span>
-                                  {isActive && (
-                                    <span className="text-[8px] font-black uppercase px-1.5 py-0.2 rounded bg-[#D4AF37] text-slate-950">
-                                      Activo
-                                    </span>
-                                  )}
+                              <div className="flex items-center gap-2 min-w-0">
+                                <div className={`w-7 h-7 rounded-lg ${visual.iconBg} ${visual.iconColor} border ${visual.iconBorder} flex items-center justify-center shrink-0`}>
+                                  <IconComp className="w-3.5 h-3.5" />
                                 </div>
-                                <span className="text-[9px] text-slate-400 truncate block">
-                                  {meta?.scope || meta?.description}
-                                </span>
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-xs font-black text-white truncate">
+                                      {meta?.label || role}
+                                    </span>
+                                    {isActive && (
+                                      <span className="text-[8px] font-black uppercase px-1.5 py-0.2 rounded bg-[#D4AF37] text-slate-950">
+                                        Activo
+                                      </span>
+                                    )}
+                                  </div>
+                                  <span className="text-[9px] text-slate-400 truncate block font-mono">
+                                    {role} • {visual.subtitle}
+                                  </span>
+                                </div>
                               </div>
                               {isActive ? (
                                 <CheckCircle2 className="w-4 h-4 text-[#D4AF37] shrink-0" />
@@ -610,22 +734,23 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
                       </div>
                     </div>
                   ) : (
-                    <div className="px-3 py-2 bg-[#2C2E53]/40 rounded-lg text-[11px] text-slate-300 mb-1.5">
-                      <span className="text-[#D4AF37] font-semibold block mb-0.5">Acceso Verificado</span>
-                      Cuenta institucional CBA con permisos oficiales de <strong className="text-white">{currentRole}</strong>.
+                    <div className="px-3 py-2 bg-[#24264A]/70 rounded-xl text-[11px] text-slate-200 border border-[#383C66] mb-1.5">
+                      <span className="text-amber-300 font-bold block mb-0.5">Acceso Verificado</span>
+                      Cuenta institucional CBA con permisos oficiales de <strong className="text-white font-extrabold">{currentRole}</strong>.
                     </div>
                   )}
 
-                  <div className="pt-1.5 mt-1.5 border-t border-[#2C2E53]">
+                  {/* Cerrar Sesión */}
+                  <div className="pt-2 mt-2 border-t border-[#2C2E53]">
                     <button
                       onClick={() => {
                         setRoleMenuOpen(false);
                         logout();
                       }}
-                      className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold text-rose-400 hover:bg-rose-500/20 hover:text-rose-300 transition"
+                      className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-rose-300 hover:text-rose-200 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/25 transition cursor-pointer"
                     >
                       <span>Cerrar Sesión</span>
-                      <LogOut className="w-3.5 h-3.5" />
+                      <LogOut className="w-3.5 h-3.5 text-rose-300" />
                     </button>
                   </div>
                 </div>

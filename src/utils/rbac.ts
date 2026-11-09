@@ -49,7 +49,7 @@ export const ROLE_METADATA: Record<UserRole, RoleMetadata> = {
     id: 'ADMINISTRADOR',
     label: 'Administrador de Sistemas',
     badge: '👑 Administrador',
-    badgeBg: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
+    badgeBg: 'bg-[#1B1C33] text-white border-[#D4AF37] shadow-sm',
     description: 'Control y configuración global de base de datos, seguridad, usuarios y auditoría técnica.',
     department: 'Dirección de Tecnología',
     scope: 'Acceso Total al Sistema'
@@ -58,7 +58,7 @@ export const ROLE_METADATA: Record<UserRole, RoleMetadata> = {
     id: 'DIRECTOR',
     label: 'Director General CBA',
     badge: '🏛️ Dirección',
-    badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+    badgeBg: 'bg-amber-100 text-amber-950 border-amber-400 dark:bg-amber-950/60 dark:text-amber-200 dark:border-amber-600',
     description: 'Máxima autoridad académica y directiva. Firma de títulos, aprobación de boletines y circulares.',
     department: 'Dirección General',
     scope: 'Supervisión Institucional y Firma'
@@ -67,7 +67,7 @@ export const ROLE_METADATA: Record<UserRole, RoleMetadata> = {
     id: 'COORDINACION',
     label: 'Coordinación Pedagógica / UCE',
     badge: '📋 Coordinación',
-    badgeBg: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+    badgeBg: 'bg-blue-100 text-blue-950 border-blue-400 dark:bg-blue-950/60 dark:text-blue-200 dark:border-blue-600',
     description: 'Control de Estudios y Evaluación. Aprobación de planes didácticos, pases, notas y matrículas.',
     department: 'Unidad de Control de Estudios (UCE)',
     scope: 'Gestión Pedagógica y Operativa'
@@ -76,7 +76,7 @@ export const ROLE_METADATA: Record<UserRole, RoleMetadata> = {
     id: 'COORDINADOR',
     label: 'Coordinador Pedagógico',
     badge: '📋 Coordinación',
-    badgeBg: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+    badgeBg: 'bg-blue-100 text-blue-950 border-blue-400 dark:bg-blue-950/60 dark:text-blue-200 dark:border-blue-600',
     description: 'Control de Estudios y Evaluación.',
     department: 'Unidad de Control de Estudios (UCE)',
     scope: 'Gestión Pedagógica y Operativa'
@@ -85,7 +85,7 @@ export const ROLE_METADATA: Record<UserRole, RoleMetadata> = {
     id: 'DOCENTE',
     label: 'Docente de Aula / Especialista',
     badge: '🔬 Docente',
-    badgeBg: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+    badgeBg: 'bg-emerald-100 text-emerald-950 border-emerald-400 dark:bg-emerald-950/60 dark:text-emerald-200 dark:border-emerald-600',
     description: 'Planificación didáctica oficial, asentamiento de notas procesales y asistencia diaria de clase.',
     department: 'Cuerpo Docente CBA',
     scope: 'Planificación, Evaluación y Asistencia de Aula'
@@ -94,7 +94,7 @@ export const ROLE_METADATA: Record<UserRole, RoleMetadata> = {
     id: 'SECRETARIA',
     label: 'Secretaría / Asistencia y Conducta',
     badge: '📂 Secretaría',
-    badgeBg: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
+    badgeBg: 'bg-indigo-100 text-indigo-950 border-indigo-400 dark:bg-indigo-950/60 dark:text-indigo-200 dark:border-indigo-600',
     description: 'Gestión y control de inasistencias diarias de estudiantes y registro de conducta y disciplina.',
     department: 'Secretaría Escolar / Control de Asistencia y Disciplina',
     scope: 'Inasistencias Diarias y Registro de Conducta'
@@ -103,7 +103,7 @@ export const ROLE_METADATA: Record<UserRole, RoleMetadata> = {
     id: 'REPRESENTANTE',
     label: 'Padre o Representante Legal',
     badge: '👨‍👩‍👦 Representante',
-    badgeBg: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
+    badgeBg: 'bg-cyan-100 text-cyan-950 border-cyan-400 dark:bg-cyan-950/60 dark:text-cyan-200 dark:border-cyan-600',
     description: 'Portal de consulta familiar: boletines de notas, récord de asistencias y avisos de su representado.',
     department: 'Comunidad de Padres y Representantes',
     scope: 'Solo Consultas de su Representado'
@@ -112,7 +112,7 @@ export const ROLE_METADATA: Record<UserRole, RoleMetadata> = {
     id: 'ESTUDIANTE',
     label: 'Estudiante CBA',
     badge: '🎒 Alumno',
-    badgeBg: 'bg-teal-500/20 text-teal-300 border-teal-500/30',
+    badgeBg: 'bg-teal-100 text-teal-950 border-teal-400 dark:bg-teal-950/60 dark:text-teal-200 dark:border-teal-600',
     description: 'Portal del alumno: consulta de calificaciones personales, boletín por lapso y cartelera escolar.',
     department: 'Cuerpo Estudiantil CBA',
     scope: 'Solo Consulta Personal'
@@ -245,7 +245,11 @@ export const ALL_LEVEL_SUBTABS: string[] = [
   'AREAS_FORMACION',
   'DISENADOR_DIDACTICO',
   'COMPETENCIAS',
-  // Nuevas Funciones Oficiales de Media General (Calificaciones, Evaluación, Rasgos, Planes, Extra)
+  'COMPETENCIAS_DIDACTICO',
+  // Nuevas Funciones Oficiales de Media General (Evaluación, Rasgos, Planes, Extra)
+  'EVALUACION',
+  'RASGOS',
+  'EXTRA',
   'CALIFICACIONES',
   'CALIFICACIONES_CRP',
   'CALIFICACIONES_ORIENTACION_CONVIVENCIA',

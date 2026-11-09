@@ -241,32 +241,18 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
       activeSubTabStyle: 'bg-teal-500/15 text-teal-200 border-l-2 border-teal-400 font-bold shadow-sm',
       subTabActiveIcon: 'text-teal-300',
       subTabs: [
-        // Indicadores (6 Opciones Oficiales CBA)
-        { id: 'CURADURIA_INDICADORES', label: 'Revisión y Ortografía', icon: SpellCheck, group: 'Indicadores' },
-        { id: 'PROCESAL', label: 'Seguimiento de Indicadores', icon: ClipboardList, group: 'Indicadores' },
-        { id: 'REVISION_CARGA', label: 'Revisión de la Carga', icon: Clock, group: 'Indicadores' },
-        { id: 'INDICADORES_ACTITUDINALES', label: 'Indicadores Actitudinales', icon: Heart, group: 'Indicadores' },
-        { id: 'INDICADORES_LECTOESCRITURA', label: 'Indicadores de Lectoescritura', icon: BookOpen, group: 'Indicadores' },
-        { id: 'PROGRESO_INDICADORES', label: 'Progreso de Indicadores', icon: TrendingUp, group: 'Indicadores' },
-        { id: 'BANCO_INDICADORES', label: 'Banco de Indicadores', icon: Tag, group: 'Indicadores' },
-        // Calificaciones
-        { id: 'CALIFICACIONES_ESTUDIANTE', label: 'Calificaciones por Estudiante', icon: UserCheck, group: 'Calificaciones' },
-        { id: 'CALIFICACIONES_CURSO', label: 'Calificaciones por Curso', icon: FileSpreadsheet, group: 'Calificaciones' },
-        // Boletín
-        { id: 'BOLETIN_INFORMATIVO', label: 'Boletín Informativo', icon: GraduationCap, group: 'Boletín' },
-        { id: 'OBSERVACIONES_BOLETIN', label: 'Lista de Observaciones', icon: MessageSquare, group: 'Boletín' },
-        // Áreas de Formación
-        { id: 'AREAS_FORMACION', label: 'Áreas de Formación', icon: BookOpen, group: 'Áreas de Formación' },
-        // Diseñador Didáctico
-        { id: 'DISENADOR_DIDACTICO', label: 'Diseñador Didáctico', icon: Sparkles, group: 'Diseñador Didáctico' },
-        // Competencias Didáctico
-        { id: 'COMPETENCIAS', label: 'Competencias', icon: Layers, group: 'Competencias Didáctico' }
+        { id: 'INDICADORES', label: 'Indicadores', icon: Tag },
+        { id: 'CALIFICACIONES', label: 'Calificaciones', icon: Award },
+        { id: 'BOLETIN', label: 'Boletín', icon: GraduationCap },
+        { id: 'AREAS_FORMACION', label: 'Áreas de Formación', icon: BookOpen },
+        { id: 'DISENADOR_DIDACTICO', label: 'Diseñador Didactico', icon: Sparkles },
+        { id: 'COMPETENCIAS_DIDACTICO', label: 'Competencias Didactico', icon: Layers }
       ]
     },
     {
       id: 'MEDIA_GENERAL',
       categoryGroup: 'NIVELES',
-      label: 'Media General',
+      label: 'Educación Media General',
       shortLabel: 'Media General',
       icon: GraduationCap,
       color: 'text-indigo-400',
@@ -275,35 +261,10 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
       activeSubTabStyle: 'bg-indigo-500/15 text-indigo-200 border-l-2 border-indigo-400 font-bold shadow-sm',
       subTabActiveIcon: 'text-indigo-300',
       subTabs: [
-        // Calificaciones
-        { id: 'CALIFICACIONES', label: 'Calificaciones', icon: Award, group: 'Calificaciones' },
-        { id: 'CALIFICACIONES_ESTUDIANTE', label: 'Calificaciones por estudiantes', icon: UserCheck, group: 'Calificaciones' },
-        { id: 'CALIFICACIONES_CRP', label: 'Calificaciones Grupos CRP', icon: Palette, group: 'Calificaciones' },
-        { id: 'CALIFICACIONES_ORIENTACION_CONVIVENCIA', label: 'Calificaciones de Orientación y Convivencia', icon: HeartHandshake, group: 'Calificaciones' },
-        { id: 'CALIFICACIONES_MATERIAS_PENDIENTES', label: 'Calificaciones Materias Pendientes', icon: Clock, group: 'Calificaciones' },
-        { id: 'CALIFICACIONES_POR_LAPSO', label: 'Calificaciones por Lapso', icon: Layers, group: 'Calificaciones' },
-        { id: 'CALIFICACIONES_GENERALES', label: 'Calificaciones Generales', icon: FileSpreadsheet, group: 'Calificaciones' },
-        { id: 'CALIFICACIONES_NUMERICAS', label: 'Calificaciones Numéricas', icon: FileSpreadsheet, group: 'Calificaciones' },
-        // Evaluación
-        { id: 'ESTRATEGIAS_EVALUACION', label: 'Estrategias de Evaluación', icon: ClipboardList, group: 'Evaluación' },
-        { id: 'PROGRESO_EVALUACIONES', label: 'Progreso de Evaluaciones', icon: TrendingUp, group: 'Evaluación' },
-        { id: 'RESULTADO_AUTOEVALUACION', label: 'Resultado de Autoevaluación cronograma', icon: Calendar, group: 'Evaluación' },
-        // Rasgos
-        { id: 'RASGOS_PERSONALIDAD', label: 'Rasgos de Personalidad', icon: Sliders, group: 'Rasgos' },
-        { id: 'RESULTADO_RASGOS', label: 'Resultado de Rasgos', icon: Heart, group: 'Rasgos' },
-        // Planes
-        { id: 'PLANES_ACCION_PERSONALIZADOS', label: 'Planes de accion personalizado', icon: Sparkles, group: 'Planes' },
-        { id: 'PLANES_LAPSO', label: 'Planes de Lapso', icon: Calendar, group: 'Planes' },
-        { id: 'PLANES_QUINCENALES', label: 'Planes Quincenales', icon: BookOpen, group: 'Planes' },
-        // Extra
-        { id: 'BANCO_ESTRATEGIAS', label: 'Banco de estrategias', icon: Layers, group: 'Extra' },
-        { id: 'OBSERVACIONES_BOLETIN', label: 'Observaciones al boletín', icon: MessageSquare, group: 'Extra' },
-        { id: 'REVISION', label: 'Revisión', icon: Scale, group: 'Extra' },
-        { id: 'CONSEJO_CURSO', label: 'Consejo de Curso', icon: Scale, group: 'Extra' },
-        { id: 'DISENADOR_DIDACTICO', label: 'Diseñador didáctico', icon: Sparkles, group: 'Extra' },
-        { id: 'BOLETIN_INFORMATIVO', label: 'Boletín informativo', icon: GraduationCap, group: 'Extra' },
-        { id: 'ESTRATEGIAS_PONDERACIONES', label: 'Estrategias y ponderaciones', icon: Percent, group: 'Extra' },
-        { id: 'ACTAS', label: 'Actas', icon: FileText, group: 'Extra' }
+        { id: 'EVALUACION', label: 'Evaluación', icon: ClipboardList },
+        { id: 'RASGOS', label: 'Rasgos', icon: Heart },
+        { id: 'PLANES', label: 'Planes', icon: BookOpen },
+        { id: 'EXTRA', label: 'Extra', icon: Sparkles }
       ]
     },
 
@@ -457,7 +418,7 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
               })
               .map((section) => ({
                 ...section,
-                subTabs: (section.id === 'INICIAL' || section.id === 'PRIMARIA')
+                subTabs: (section.id === 'INICIAL' || section.id === 'PRIMARIA' || section.id === 'MEDIA_GENERAL')
                   ? section.subTabs.filter((sub) => hasSubTabAccess(effectiveUserOrRole, section.id, sub.id))
                   : sortSubTabsByFrequency(
                       userId,
@@ -581,6 +542,20 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
                             (sub.id === 'OBSERVACIONES' && ['OBSERVACIONES', 'BOLETIN', 'OBS_PREESCOLAR'].includes(activeSubTab)) ||
                             (sub.id === 'DIAGNOSTICO_CIERRE' && ['DIAGNOSTICO_CIERRE', 'DIAGNOSTICA', 'FINAL_LAPSO', 'ESTADISTICAS', 'ACTAS_CONSEJO', 'REPORTES_INSTITUCIONALES'].includes(activeSubTab)) ||
                             (sub.id === 'MALLA_RECURSOS' && ['MALLA_RECURSOS', 'AREAS_PERFILES', 'BANCO_COMPETENCIAS', 'BANCO_ESTRATEGIAS', 'BANCO_RECURSOS'].includes(activeSubTab))
+                          )) ||
+                          (section.id === 'PRIMARIA' && (
+                            (sub.id === 'INDICADORES' && ['INDICADORES', 'CURADURIA_INDICADORES', 'PROCESAL', 'SEGUIMIENTO_INDICADORES', 'REVISION_CARGA', 'INDICADORES_ACTITUDINALES', 'INDICADORES_LECTOESCRITURA', 'PROGRESO_INDICADORES', 'BANCO_INDICADORES'].includes(activeSubTab)) ||
+                            (sub.id === 'CALIFICACIONES' && ['CALIFICACIONES', 'CALIFICACIONES_ESTUDIANTE', 'CALIFICACIONES_CURSO'].includes(activeSubTab)) ||
+                            (sub.id === 'BOLETIN' && ['BOLETIN', 'BOLETIN_INFORMATIVO', 'OBSERVACIONES_BOLETIN'].includes(activeSubTab)) ||
+                            (sub.id === 'AREAS_FORMACION' && ['AREAS_FORMACION', 'AREAS_PERFILES'].includes(activeSubTab)) ||
+                            (sub.id === 'DISENADOR_DIDACTICO' && ['DISENADOR_DIDACTICO', 'DISENADOR_OFICIAL'].includes(activeSubTab)) ||
+                            (sub.id === 'COMPETENCIAS_DIDACTICO' && ['COMPETENCIAS_DIDACTICO', 'COMPETENCIAS', 'BANCO_COMPETENCIAS'].includes(activeSubTab))
+                          )) ||
+                          (section.id === 'MEDIA_GENERAL' && (
+                            (sub.id === 'EVALUACION' && ['EVALUACION', 'ESTRATEGIAS_EVALUACION', 'PROGRESO_EVALUACIONES', 'RESULTADO_AUTOEVALUACION'].includes(activeSubTab)) ||
+                            (sub.id === 'RASGOS' && ['RASGOS', 'RASGOS_PERSONALIDAD', 'RESULTADO_RASGOS'].includes(activeSubTab)) ||
+                            (sub.id === 'PLANES' && ['PLANES', 'PLANES_ACCION_PERSONALIZADOS', 'PLANES_LAPSO', 'PLANES_QUINCENALES', 'IA_ACTION_PLANS', 'PLAN_LAPSO', 'PLAN_QUINCENAL'].includes(activeSubTab)) ||
+                            (sub.id === 'EXTRA' && ['EXTRA', 'BANCO_ESTRATEGIAS', 'OBSERVACIONES_BOLETIN', 'REVISION', 'CONSEJO_CURSO', 'ACTAS_CONSEJO', 'DISENADOR_DIDACTICO', 'DISENADOR_OFICIAL', 'BOLETIN_INFORMATIVO', 'BOLETIN', 'ESTRATEGIAS_PONDERACIONES', 'ACTAS'].includes(activeSubTab))
                           )));
                       const SubIcon = sub.icon;
                       const showGroupHeader = sub.group && (sIdx === 0 || section.subTabs[sIdx - 1]?.group !== sub.group);

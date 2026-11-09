@@ -155,9 +155,9 @@ export const QuickActionDock: React.FC<QuickActionDockProps> = ({
         {isOpen && (
           <div className="flex flex-col items-end gap-2 mb-1 animate-in fade-in slide-in-from-bottom-3 duration-200">
             {/* Header chip indicativo */}
-            <div className="px-3.5 py-1.5 rounded-full bg-[#1B1C33] border border-[#D4AF37]/50 text-white text-[11px] font-black uppercase tracking-wider flex items-center justify-between gap-3 shadow-2xl mb-0.5">
-              <span className="flex items-center gap-1.5 text-[#D4AF37]">
-                <Zap className="w-3.5 h-3.5 fill-[#D4AF37]" />
+            <div className="px-3.5 py-1.5 rounded-full bg-[#1B1C33] border border-amber-400/50 text-white text-[11px] font-black uppercase tracking-wider flex items-center justify-between gap-3 shadow-2xl mb-0.5">
+              <span className="flex items-center gap-1.5 text-white font-black">
+                <Zap className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                 Acciones Rápidas
               </span>
               <span className="text-[10px] text-slate-300 font-normal normal-case">
@@ -206,7 +206,7 @@ export const QuickActionDock: React.FC<QuickActionDockProps> = ({
           className={`min-h-[48px] flex items-center justify-center gap-2.5 px-4.5 py-3 rounded-2xl font-black text-xs shadow-2xl transition-all duration-200 border-2 cursor-pointer active:scale-95 ${
             isOpen
               ? 'bg-rose-600 hover:bg-rose-700 text-white border-rose-400 scale-105 shadow-rose-600/40 ring-4 ring-rose-500/20'
-              : 'bg-[#2C2E53] hover:bg-[#242646] text-[#D4AF37] border-[#D4AF37] hover:border-[#F5C842] shadow-[#2C2E53]/60 ring-4 ring-[#D4AF37]/20'
+              : 'bg-[#2C2E53] hover:bg-[#1E2038] text-white border-amber-400/80 hover:border-amber-300 shadow-[#2C2E53]/60 ring-4 ring-amber-400/20'
           }`}
           title="Atajos de acción rápida institucional"
           aria-label="Acciones rápidas"
@@ -218,8 +218,8 @@ export const QuickActionDock: React.FC<QuickActionDockProps> = ({
             </>
           ) : (
             <>
-              <Zap className="w-4 h-4 fill-[#D4AF37] text-[#D4AF37]" />
-              <span className="hidden sm:inline tracking-wide font-extrabold">Acciones Rápidas</span>
+              <Zap className="w-4 h-4 fill-amber-400 text-amber-400" />
+              <span className="hidden sm:inline tracking-wide font-extrabold text-white">Acciones Rápidas</span>
             </>
           )}
         </button>

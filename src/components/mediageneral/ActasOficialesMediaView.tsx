@@ -48,6 +48,35 @@ export const ActasOficialesMediaView: React.FC = () => {
   return (
     <div className="space-y-6">
       
+      {/* Banner Principal Informativo CBA (Diseño Oficial de Referencia) */}
+      <div className="bg-gradient-to-r from-[#2C2E53] via-[#1E2038] to-[#141525] rounded-2xl p-5 sm:p-6 text-white shadow-md border border-[#3D4066] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider bg-[#0F1122]/90 text-amber-300 border border-[#D4AF37] shadow-xs">
+              Control Curricular Oficial
+            </span>
+            <span className="text-xs text-amber-200/90 font-medium">
+              Educación Media General • C.E.O. SISCEBA
+            </span>
+          </div>
+          <h2 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
+            <FileText className="w-6 h-6 text-white" />
+            Actas Oficiales
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl">
+            Generación, foliado institucional y emisión de actas oficiales de calificaciones y consejo docente para Media General.
+          </p>
+        </div>
+
+        {/* Resumen de aula activa */}
+        <div className="flex items-center gap-2 bg-white/10 dark:bg-black/30 border border-white/15 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-100 shrink-0">
+          <Layers className="w-4 h-4 text-amber-300" />
+          <span>
+            {selectedGrade} • Sec. {selectedSection} • L{selectedLapso} • 2026-2027
+          </span>
+        </div>
+      </div>
+
       {/* Controles de Selección */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3">
