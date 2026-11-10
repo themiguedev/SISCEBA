@@ -1,7 +1,7 @@
 @echo off
 title SICE-CBA - Detener Servicios
 chcp 65001 >nul
-cd /d "D:\Usuarios\UCE.FCBA\Documents\SIS-CBA"
+cd /d "%~dp0"
 echo ======================================================================
 echo           DETENIENDO SERVICIOS LOCALES SICE-CBA
 echo ======================================================================

@@ -4759,10 +4759,81 @@ export const INITIAL_USERS: AppUser[] = [
     gender: 'MASCULINO',
     active: true,
     avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150'
+  },
+  {
+    id: 'usr-directora',
+    username: 'directora',
+    cedula: 'V-11.234.567',
+    password: 'cba2026*directora',
+    fullName: 'Prof. Carmen Elena Rodríguez',
+    email: 'directora@bellasartes.edu.ve',
+    role: 'DIRECTOR',
+    defaultLevel: 'MEDIA_GENERAL',
+    allowedLevels: ['INICIAL', 'PRIMARIA', 'MEDIA_GENERAL'],
+    gender: 'FEMENINO',
+    active: true
+  },
+  {
+    id: 'usr-coord-inicial',
+    username: 'coord.inicial',
+    cedula: 'V-18.452.101',
+    password: 'cba2026*inicial',
+    fullName: 'Lic. María Gabriela Pacheco',
+    email: 'coord.inicial@bellasartes.edu.ve',
+    role: 'COORDINACION',
+    defaultLevel: 'INICIAL',
+    allowedLevels: ['INICIAL'],
+    gender: 'FEMENINO',
+    active: true
+  },
+  {
+    id: 'usr-coord-primaria',
+    username: 'coord.primaria',
+    cedula: 'V-16.789.202',
+    password: 'cba2026*primaria',
+    fullName: 'Prof. Roberto Antonio Mendoza',
+    email: 'coord.primaria@bellasartes.edu.ve',
+    role: 'COORDINACION',
+    defaultLevel: 'PRIMARIA',
+    allowedLevels: ['PRIMARIA'],
+    gender: 'MASCULINO',
+    active: true
+  },
+  {
+    id: 'usr-coord-media',
+    username: 'coord.media',
+    cedula: 'V-14.321.303',
+    password: 'cba2026*media',
+    fullName: 'Prof. Patricia Coromoto Leal',
+    email: 'coord.media@bellasartes.edu.ve',
+    role: 'COORDINACION',
+    defaultLevel: 'MEDIA_GENERAL',
+    allowedLevels: ['MEDIA_GENERAL'],
+    gender: 'FEMENINO',
+    active: true
+  },
+  {
+    id: 'usr-coord-temp',
+    username: 'coordinador',
+    cedula: 'V-20.123.456',
+    password: 'cba2026*coord',
+    fullName: 'Lic. Coordinador General (Temporal)',
+    email: 'coordinador.prueba@bellasartes.edu.ve',
+    role: 'COORDINACION',
+    defaultLevel: 'MEDIA_GENERAL',
+    allowedLevels: ['INICIAL', 'PRIMARIA', 'MEDIA_GENERAL'],
+    gender: 'MASCULINO',
+    active: true
   }
 ];
 
 export const INITIAL_USER_SCHEDULES: UserSchedule[] = [
+  {
+    userId: 'usr-coord-temp',
+    userRole: 'COORDINACION',
+    schoolYear: '2026 - 2027',
+    blocks: []
+  },
   {
     userId: 'usr-admin',
     userRole: 'ADMINISTRADOR',

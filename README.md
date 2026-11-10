@@ -67,6 +67,16 @@ SICE-CBA implementa un sistema riguroso de permisos y visibilidad segmentado en 
 | **Representante** | `REPRESENTANTE` | Consulta de boletines oficiales, seguimiento de inasistencias, solicitud de trámites de secretaría y cartelera comunitaria. |
 | **Estudiante** | `ESTUDIANTE` | Consulta de evaluaciones, cronograma de actividades, cartelera escolar y recursos pedagógicos. |
 
+### 🔐 Cuentas y Credenciales de Acceso (Desarrollo y Pruebas)
+
+Para pruebas funcionales y administración, se encuentran habilitadas las siguientes credenciales institucionales (detalles completos en [CREDENCIALES_ROLES.md](file:///c:/Users/migue/Documents/Proyectos/SICE-CBA/CREDENCIALES_ROLES.md)):
+
+| Rol | Usuario / Cédula | Contraseña | Nombre del Perfil | Alcance |
+|---|---|---|---|---|
+| **ADMINISTRADOR** | `admin` | `cba2026*admin` | Administrador General de Sistemas | Control Total (Nivel 100) |
+| **COORDINACIÓN** | `coordinador` *(o `V-20.123.456`)* | `cba2026*coord` | Lic. Coordinador General (Temporal) | Inicial, Primaria y Media (Nivel 60) |
+| **DIRECTOR** | `directora` | `cba2026*directora` | Prof. Carmen Elena Rodríguez | Dirección y Firma de Títulos (Nivel 80) |
+
 ---
 
 ## 📐 Reglas de Negocio Institucionales

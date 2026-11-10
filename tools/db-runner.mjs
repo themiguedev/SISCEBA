@@ -7,11 +7,44 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '..');
 
-const pgsqlBin = path.join(rootDir, '.local_db', 'pgsql', 'bin');
+const defaultPgsqlBin = path.join(rootDir, '.local_db', 'pgsql', 'bin');
 const pgData = path.join(rootDir, '.local_db', 'data');
-const postgresExe = path.join(pgsqlBin, 'postgres.exe');
-const psqlExe = path.join(pgsqlBin, 'psql.exe');
-const pgCtlExe = path.join(pgsqlBin, 'pg_ctl.exe');
+
+function resolvePostgresBinaries() {
+  if (fs.existsSync(path.join(defaultPgsqlBin, 'postgres.exe'))) {
+    return {
+      pgsqlBin: defaultPgsqlBin,
+      postgresExe: path.join(defaultPgsqlBin, 'postgres.exe'),
+      psqlExe: path.join(defaultPgsqlBin, 'psql.exe'),
+      pgCtlExe: path.join(defaultPgsqlBin, 'pg_ctl.exe')
+    };
+  }
+
+  const standardPaths = [
+    'C:\\Program Files\\PostgreSQL\\16\\bin',
+    'C:\\Program Files\\PostgreSQL\\17\\bin',
+    'C:\\Program Files\\PostgreSQL\\15\\bin'
+  ];
+  for (const sp of standardPaths) {
+    if (fs.existsSync(path.join(sp, 'postgres.exe'))) {
+      return {
+        pgsqlBin: sp,
+        postgresExe: path.join(sp, 'postgres.exe'),
+        psqlExe: path.join(sp, 'psql.exe'),
+        pgCtlExe: path.join(sp, 'pg_ctl.exe')
+      };
+    }
+  }
+
+  return {
+    pgsqlBin: defaultPgsqlBin,
+    postgresExe: path.join(defaultPgsqlBin, 'postgres.exe'),
+    psqlExe: path.join(defaultPgsqlBin, 'psql.exe'),
+    pgCtlExe: path.join(defaultPgsqlBin, 'pg_ctl.exe')
+  };
+}
+
+const { pgsqlBin, postgresExe, psqlExe, pgCtlExe } = resolvePostgresBinaries();
 const apiServerScript = path.join(__dirname, 'api-server.mjs');
 const pidFile = path.join(rootDir, '.local_db', 'services.pid');
 
@@ -98,10 +131,19 @@ async function start() {
   }
 
   // 1. Iniciar PostgreSQL
+  if (!fs.existsSync(postgresExe)) {
+    console.error('\n❌ Error: No se encontró el ejecutable de PostgreSQL en: ' + postgresExe);
+    console.log('💡 Ejecuta "npm run db:setup" para descargar e inicializar PostgreSQL local automáticamente.\n');
+    process.exit(1);
+  }
+
   console.log('🐘 Iniciando motor PostgreSQL 16...');
   pgProcess = spawn(postgresExe, ['-D', pgData], {
     stdio: 'ignore',
     windowsHide: true
+  });
+  pgProcess.on('error', (err) => {
+    console.error('[PostgreSQL Error]:', err.message);
   });
 
   await waitForPostgres();

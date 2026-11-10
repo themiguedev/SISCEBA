@@ -9,6 +9,7 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
+    "db:setup": "node tools/setup-local-db.mjs",
     "db:init": "node tools/init-db.mjs",
     "db:start": "node tools/db-runner.mjs",
     "db:stop": "node tools/db-stop.mjs",

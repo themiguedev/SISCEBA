@@ -9,7 +9,8 @@ import {
   ShieldCheck,
   TrendingUp,
   Clock,
-  FileText
+  FileText,
+  Sparkles
 } from 'lucide-react';
 import { canEditGrades, hasTabAccess } from '../../utils/rbac';
 import { useTheme } from '../../context/ThemeContext';
@@ -58,9 +59,11 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6">
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-400 via-[#D4AF37] to-amber-500 text-slate-950 font-black text-xs shadow-md shadow-[#D4AF37]/30 ring-1 ring-white/30 tracking-wider uppercase select-none">
-                <Award className="w-3.5 h-3.5 text-slate-950 shrink-0" />
-                <span>Año Escolar 2026 - 2027</span>
+              <span className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-gradient-to-r from-slate-900 via-[#1e1b10] to-slate-900 border border-amber-300/40 shadow-[0_2px_10px_rgba(212,175,55,0.2)]">
+                <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-spin [animation-duration:12s]" />
+                <span className="text-[11px] font-black tracking-widest uppercase bg-gradient-to-r from-amber-200 via-amber-100 to-amber-300 bg-clip-text text-transparent">
+                  Año Escolar 2026 - 2027
+                </span>
               </span>
               <span className="text-slate-300 text-xs font-semibold">• Lapso {activeLapso}</span>
 

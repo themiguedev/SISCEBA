@@ -516,14 +516,16 @@ export const getUserAllowedLevels = (
     ? roleOrUser
     : getUserEffectiveRoles(typeof roleOrUser === 'string' && user ? { ...user, role: roleOrUser } : roleOrUser);
 
-  // 1. Roles directivos y de supervisión general tienen acceso a todos los niveles
-  if (roles.some(r => r === 'ADMINISTRADOR' || r === 'DIRECTOR' || r === 'COORDINACION' || r === 'COORDINADOR')) {
-    return ['INICIAL', 'PRIMARIA', 'MEDIA_GENERAL'];
+  const targetUser = typeof roleOrUser === 'object' && !Array.isArray(roleOrUser) ? roleOrUser : user;
+
+  // 1. Si el usuario tiene niveles pedagógicos o de coordinación explícitamente configurados
+  if (targetUser?.allowedLevels && targetUser.allowedLevels.length > 0) {
+    return targetUser.allowedLevels;
   }
 
-  // 2. Si el usuario tiene niveles pedagógicos explícitamente configurados (ej: docente)
-  if (user?.allowedLevels && user.allowedLevels.length > 0) {
-    return user.allowedLevels;
+  // 2. Roles directivos y de supervisión general sin restricción explícita tienen acceso a todos los niveles
+  if (roles.some(r => r === 'ADMINISTRADOR' || r === 'DIRECTOR' || r === 'COORDINACION' || r === 'COORDINADOR')) {
+    return ['INICIAL', 'PRIMARIA', 'MEDIA_GENERAL'];
   }
 
   // 3. Si alguno de los roles es docente pero no tiene allowedLevels especificado

@@ -1017,9 +1017,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Si Supabase está configurado, validamos directamente contra la tabla app_users en tiempo real
     if (isSupabaseConfigured()) {
       try {
-        const queryFilter = normalizedCedulaInput && normalizedCedulaInput !== trimmedInput
-          ? `username.ilike.${trimmedInput},email.ilike.${trimmedInput},username.ilike.${normalizedCedulaInput}`
-          : `username.ilike.${trimmedInput},email.ilike.${trimmedInput}`;
+        const filterParts = [`username.ilike.${trimmedInput}`, `email.ilike.${trimmedInput}`];
+        if (normalizedCedulaInput && normalizedCedulaInput !== trimmedInput) {
+          filterParts.push(`username.ilike.${normalizedCedulaInput}`);
+        }
+        if (!trimmedInput.includes('.') && trimmedInput.startsWith('coord')) {
+          const dotted = trimmedInput.replace(/^coord/, 'coord.');
+          filterParts.push(`username.ilike.${dotted}`);
+        }
+        const queryFilter = filterParts.join(',');
 
         const { data, error } = await supabase
           .from('app_users')

@@ -9,11 +9,44 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '..');
 
-const pgsqlBin = path.join(rootDir, '.local_db', 'pgsql', 'bin');
+const defaultPgsqlBin = path.join(rootDir, '.local_db', 'pgsql', 'bin');
 const pgData = path.join(rootDir, '.local_db', 'data');
-const postgresExe = path.join(pgsqlBin, 'postgres.exe');
-const psqlExe = path.join(pgsqlBin, 'psql.exe');
-const pgCtlExe = path.join(pgsqlBin, 'pg_ctl.exe');
+
+function resolvePostgresBinaries() {
+  if (fs.existsSync(path.join(defaultPgsqlBin, 'postgres.exe'))) {
+    return {
+      pgsqlBin: defaultPgsqlBin,
+      postgresExe: path.join(defaultPgsqlBin, 'postgres.exe'),
+      psqlExe: path.join(defaultPgsqlBin, 'psql.exe'),
+      pgCtlExe: path.join(defaultPgsqlBin, 'pg_ctl.exe')
+    };
+  }
+
+  const standardPaths = [
+    'C:\\Program Files\\PostgreSQL\\16\\bin',
+    'C:\\Program Files\\PostgreSQL\\17\\bin',
+    'C:\\Program Files\\PostgreSQL\\15\\bin'
+  ];
+  for (const sp of standardPaths) {
+    if (fs.existsSync(path.join(sp, 'postgres.exe'))) {
+      return {
+        pgsqlBin: sp,
+        postgresExe: path.join(sp, 'postgres.exe'),
+        psqlExe: path.join(sp, 'psql.exe'),
+        pgCtlExe: path.join(sp, 'pg_ctl.exe')
+      };
+    }
+  }
+
+  return {
+    pgsqlBin: defaultPgsqlBin,
+    postgresExe: path.join(defaultPgsqlBin, 'postgres.exe'),
+    psqlExe: path.join(defaultPgsqlBin, 'psql.exe'),
+    pgCtlExe: path.join(defaultPgsqlBin, 'pg_ctl.exe')
+  };
+}
+
+const { pgsqlBin, postgresExe, psqlExe, pgCtlExe } = resolvePostgresBinaries();
 const apiServerScript = path.join(__dirname, 'api-server.mjs');
 const viteBin = path.join(rootDir, 'node_modules', 'vite', 'bin', 'vite.js');
 const cfBin = path.join(rootDir, 'tools', 'bin', 'cloudflared.exe');
@@ -104,11 +137,36 @@ async function checkUrl(url, timeoutMs = 1500) {
 }
 
 async function isPostgresRunning() {
+  if (fs.existsSync(psqlExe)) {
+    try {
+      execSync(`"${psqlExe}" -U postgres -h 127.0.0.1 -p 5432 -c "SELECT 1;"`, {
+        stdio: 'ignore'
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  // Si psql no existe aún, comprobar socket TCP al puerto 5432
   try {
-    execSync(`"${psqlExe}" -U postgres -h 127.0.0.1 -p 5432 -c "SELECT 1;"`, {
-      stdio: 'ignore'
+    const net = await import('net');
+    return await new Promise((resolve) => {
+      const socket = new net.Socket();
+      socket.setTimeout(800);
+      socket.on('connect', () => {
+        socket.destroy();
+        resolve(true);
+      });
+      socket.on('timeout', () => {
+        socket.destroy();
+        resolve(false);
+      });
+      socket.on('error', () => {
+        resolve(false);
+      });
+      socket.connect(5432, '127.0.0.1');
     });
-    return true;
   } catch {
     return false;
   }
@@ -326,9 +384,25 @@ async function start() {
   // 1. Iniciar PostgreSQL 16
   process.stdout.write(`  ${c.yellow}⏳${c.reset} [1/4] Base de Datos PostgreSQL 16 (Local)... `);
   if (!pgAlreadyRunning) {
+    if (!fs.existsSync(postgresExe)) {
+      console.log(`${c.boldMagenta}[NO CONFIGURADO]${c.reset}\n`);
+      console.log(`${c.boldYellow}════════════════════════════════════════════════════════════════════════════════${c.reset}`);
+      console.log(`${c.boldWhite}⚠️  NO SE ENCONTRÓ EL MOTOR DE BASE DE DATOS POSTGRESQL 16${c.reset}`);
+      console.log(`${c.gray}   Ubicación esperada: ${postgresExe}${c.reset}`);
+      console.log(`${c.boldYellow}════════════════════════════════════════════════════════════════════════════════${c.reset}\n`);
+      console.log(`${c.cyan}💡 Para descargar y configurar PostgreSQL 16 automáticamente en 1 paso, ejecuta:${c.reset}`);
+      console.log(`   ${c.boldGreen}npm run db:setup${c.reset}\n`);
+      console.log(`${c.gray}Este comando descargará los binarios portables y creará la base de datos "sisceba".${c.reset}\n`);
+      throw new Error('PostgreSQL 16 no está configurado en .local_db/pgsql.');
+    }
+
     pgProcess = spawn(postgresExe, ['-D', pgData], {
       stdio: 'ignore',
       windowsHide: true
+    });
+
+    pgProcess.on('error', (err) => {
+      console.error(`\n[PostgreSQL Process Error]: ${err.message}`);
     });
 
     let pgReady = false;
