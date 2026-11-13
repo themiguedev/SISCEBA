@@ -992,6 +992,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     totpCode?: string
   ): Promise<{ success: boolean; message?: string; requires2FA?: boolean; userRole?: UserRole }> => {
     const trimmedInput = userInput.trim().toLowerCase();
+    const trimmedPassword = password ? password.trim() : '';
 
     // 1. Defensa contra fuerza bruta (Rate Limiting)
     const rateCheck = checkRateLimit(trimmedInput);
@@ -1109,7 +1110,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         };
       }
 
-      const verifyResult = await verifyPassword(password, matched.password);
+      const verifyResult = await verifyPassword(trimmedPassword, matched.password);
       if (!verifyResult.valid) {
         const attempt = recordFailedAttempt(trimmedInput);
         if (attempt.isBlocked) {
@@ -1127,7 +1128,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       // Si la contraseña estaba en texto plano, migrarla de inmediato a hash seguro
       if (verifyResult.needsMigration) {
         try {
-          const newHashed = await hashPassword(password);
+          const newHashed = await hashPassword(trimmedPassword);
           matched.password = newHashed;
           matched.passwordLastChanged = new Date().toISOString();
           setUsers(prev => prev.map(u => (u.id === matched!.id ? { ...matched! } : u)));

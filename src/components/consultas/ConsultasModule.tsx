@@ -388,14 +388,14 @@ export const ConsultasModule: React.FC<ConsultasModuleProps> = ({
                 onClick={() => setActiveTab(tabKey)}
                 className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
                   isSubActive
-                    ? 'bg-[#2C2E53] text-white shadow-md border-2 border-[#2C2E53] dark:bg-amber-400 dark:text-slate-950 dark:border-amber-400'
-                    : 'bg-white/90 dark:bg-slate-900 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 hover:text-slate-950 dark:hover:text-white hover:bg-white dark:hover:bg-slate-800 hover:border-slate-400 dark:hover:border-slate-600 shadow-2xs'
+                    ? 'bg-[#2C2E53] dark:!bg-[#1B1C33] text-white dark:!text-white shadow-md border-2 border-[#2C2E53] dark:!border-[#D4AF37]'
+                    : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 hover:text-slate-950 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-400 dark:hover:border-slate-600 shadow-2xs'
                 }`}
                 title={config.description}
               >
                 <SubIcon
                   className={`w-3.5 h-3.5 transition-colors ${
-                    isSubActive ? 'text-amber-300 dark:text-slate-950' : 'text-slate-600 dark:text-slate-400'
+                    isSubActive ? 'text-amber-300 dark:!text-amber-400' : 'text-slate-600 dark:text-slate-400'
                   }`}
                 />
                 <span>{config.label}</span>

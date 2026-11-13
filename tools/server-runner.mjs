@@ -420,6 +420,14 @@ async function start() {
   }
   console.log(`${c.boldGreen}[ LISTO ]${c.reset}`);
 
+  // Sincronizar cuentas institucionales y roles en PostgreSQL
+  try {
+    const seedScript = path.join(__dirname, 'seed-temp-accounts.mjs');
+    if (fs.existsSync(seedScript)) {
+      execSync(`node "${seedScript}"`, { stdio: 'ignore' });
+    }
+  } catch {}
+
   // 2. Iniciar Servidor API REST Local
   process.stdout.write(`  ${c.yellow}⏳${c.reset} [2/4] Servidor API REST Nativo (Puerto 54321)... `);
   const apiAlreadyRunning = await checkUrl('http://127.0.0.1:54321/health');

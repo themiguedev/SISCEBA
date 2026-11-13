@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
+import { hasSubTabAccess } from '../../utils/rbac';
 
 // 1. Grupo Evaluación
 import { EstrategiasEvaluacionMediaView } from './EstrategiasEvaluacionMediaView';
@@ -24,6 +25,7 @@ import { DisenadorPlanificacionView } from '../planning/DisenadorPlanificacionVi
 import { BoletinInformativoView } from '../communication/BoletinInformativoView';
 import { ControlPonderacionesMediaView } from './ControlPonderacionesMediaView';
 import { ActasOficialesMediaView } from './ActasOficialesMediaView';
+import { CalificacionesCRPMediaView } from './CalificacionesCRPMediaView';
 
 // Iconos
 import {
@@ -40,7 +42,8 @@ import {
   Percent,
   TrendingUp,
   ShieldCheck,
-  GraduationCap
+  GraduationCap,
+  Palette
 } from 'lucide-react';
 
 export type MediaGroup =
@@ -197,23 +200,52 @@ export const MediaGeneralModule: React.FC<MediaGeneralModuleProps> = ({
           label: 'Actas',
           shortDesc: 'Emisión de actas oficiales institucionales y de calificaciones.',
           icon: FileText
+        },
+        {
+          id: 'CALIFICACIONES_CRP',
+          label: 'Grupos CRP',
+          shortDesc: 'Reporte de estudiantes de Grupos CRP (Creación, Recreación y Producción) y carga de notas.',
+          icon: Palette
         }
       ]
     }
   ];
 
-  const currentGroupConfig = groupsConfig.find(g => g.id === activeGroupTab) || groupsConfig[0];
+  const filteredGroupsConfig = useMemo(() => {
+    return groupsConfig
+      .filter(g => hasSubTabAccess(currentRole, 'MEDIA_GENERAL', g.id))
+      .map(g => ({
+        ...g,
+        subTabs: g.subTabs.filter(st => hasSubTabAccess(currentRole, 'MEDIA_GENERAL', st.id))
+      }))
+      .filter(g => g.subTabs.length > 0);
+  }, [currentRole]);
+
+  const currentGroupConfig = filteredGroupsConfig.find(g => g.id === activeGroupTab) || filteredGroupsConfig[0] || groupsConfig[0];
   const CurrentGroupIcon = currentGroupConfig.icon;
 
   const handleGroupSelect = (groupId: MediaGroup) => {
     setActiveGroupTab(groupId);
-    const targetGroup = groupsConfig.find(g => g.id === groupId);
+    const targetGroup = filteredGroupsConfig.find(g => g.id === groupId);
     if (targetGroup && targetGroup.subTabs.length > 0) {
       if (!targetGroup.subTabs.some(st => st.id === activeSubTab)) {
         setActiveSubTab(targetGroup.subTabs[0].id);
       }
     }
   };
+
+  useEffect(() => {
+    if (filteredGroupsConfig.length > 0 && !filteredGroupsConfig.some(g => g.id === activeGroupTab)) {
+      setActiveGroupTab(filteredGroupsConfig[0].id);
+      if (filteredGroupsConfig[0].subTabs.length > 0) {
+        setActiveSubTab(filteredGroupsConfig[0].subTabs[0].id);
+      }
+    } else if (currentGroupConfig && !currentGroupConfig.subTabs.some(st => st.id === activeSubTab)) {
+      if (currentGroupConfig.subTabs.length > 0) {
+        setActiveSubTab(currentGroupConfig.subTabs[0].id);
+      }
+    }
+  }, [activeGroupTab, activeSubTab, filteredGroupsConfig, currentGroupConfig, setActiveGroupTab, setActiveSubTab]);
 
   return (
     <div className="space-y-4">
@@ -269,12 +301,12 @@ export const MediaGeneralModule: React.FC<MediaGeneralModuleProps> = ({
                 onClick={() => setActiveSubTab(subTab.id)}
                 className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
                   isSubActive
-                    ? 'bg-[#2C2E53] text-white shadow-md border-2 border-[#2C2E53] dark:bg-amber-400 dark:text-slate-950 dark:border-amber-400'
-                    : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 hover:text-slate-950 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 shadow-2xs'
+                    ? 'bg-[#2C2E53] dark:!bg-[#1B1C33] text-white dark:!text-white shadow-md border-2 border-[#2C2E53] dark:!border-[#D4AF37]'
+                    : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 hover:text-slate-950 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-400 dark:hover:border-slate-600 shadow-2xs'
                 }`}
                 title={subTab.shortDesc}
               >
-                <SubIcon className={`w-3.5 h-3.5 shrink-0 transition-colors ${isSubActive ? 'text-amber-300 dark:text-slate-950' : 'text-slate-600 dark:text-slate-400'}`} />
+                <SubIcon className={`w-3.5 h-3.5 shrink-0 transition-colors ${isSubActive ? 'text-amber-300 dark:!text-amber-400' : 'text-slate-600 dark:text-slate-400'}`} />
                 <span>{subTab.label}</span>
               </button>
             );
@@ -352,6 +384,9 @@ export const MediaGeneralModule: React.FC<MediaGeneralModuleProps> = ({
             )}
             {activeSubTab === 'ACTAS' && (
               <ActasOficialesMediaView />
+            )}
+            {activeSubTab === 'CALIFICACIONES_CRP' && (
+              <CalificacionesCRPMediaView />
             )}
           </>
         )}

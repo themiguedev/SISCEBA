@@ -1,6 +1,6 @@
 export type EducationalLevel = 'INICIAL' | 'PRIMARIA' | 'MEDIA_GENERAL';
 
-export type UserRole = 'DOCENTE' | 'COORDINACION' | 'COORDINADOR' | 'DIRECTOR' | 'ADMINISTRADOR' | 'REPRESENTANTE' | 'ESTUDIANTE' | 'SECRETARIA';
+export type UserRole = 'DOCENTE' | 'COORDINACION' | 'COORDINADOR' | 'DIRECTOR' | 'ADMINISTRADOR' | 'REPRESENTANTE' | 'ESTUDIANTE' | 'SECRETARIA' | 'ORIENTACION';
 
 export interface AppUser {
   id: string;

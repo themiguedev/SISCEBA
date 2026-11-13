@@ -80,6 +80,8 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight">
               {currentRole === 'SECRETARIA'
                 ? 'Panel de Control de Asistencia y Disciplina'
+                : currentRole === 'ORIENTACION'
+                ? 'Panel de Orientación y Bienestar Estudiantil'
                 : 'Panel Académico'}
             </h1>
             <p className="text-xs sm:text-sm text-slate-300/90 mt-1 max-w-xl font-medium">
@@ -89,28 +91,28 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
 
           {/* Quick Shortcuts Flotantes con Glassmorphism y Micro-Resplandor (60 FPS) */}
           <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto">
-            {currentRole === 'SECRETARIA' ? (
+            {currentRole === 'SECRETARIA' || currentRole === 'ORIENTACION' ? (
               <>
                 <button
                   onClick={() => onQuickAction('GESTION', 'INASISTENCIAS')}
                   className="min-h-[46px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 via-[#D4AF37] to-amber-500 hover:brightness-110 text-slate-950 text-xs font-black transition-all duration-200 shadow-md shadow-[#D4AF37]/25 hover:shadow-lg hover:shadow-[#D4AF37]/40 hover:-translate-y-0.5 active:scale-95 cursor-pointer ring-1 ring-white/20"
                 >
                   <Users className="w-4 h-4 shrink-0" />
-                  <span>Pase de Lista</span>
+                  <span>{currentRole === 'ORIENTACION' ? 'Control Asistencia' : 'Pase de Lista'}</span>
                 </button>
                 <button
                   onClick={() => onQuickAction('GESTION', 'CONDUCTAS')}
                   className="min-h-[46px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all duration-200 border border-white/15 backdrop-blur-md hover:-translate-y-0.5 active:scale-95 cursor-pointer shadow-xs"
                 >
                   <ShieldCheck className="w-4 h-4 text-[#D4AF37] shrink-0" />
-                  <span>Registrar Conducta</span>
+                  <span>Registro de Conducta</span>
                 </button>
                 <button
-                  onClick={() => onQuickAction('CONSULTAS', 'NOMINAS')}
+                  onClick={() => onQuickAction('CONSULTAS', currentRole === 'ORIENTACION' ? 'RENDIMIENTO' : 'NOMINAS')}
                   className="col-span-2 sm:col-span-1 min-h-[46px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-black transition-all duration-200 shadow-md hover:-translate-y-0.5 active:scale-95 cursor-pointer border border-indigo-400/30"
                 >
                   <ClipboardList className="w-4 h-4 text-[#D4AF37] shrink-0" />
-                  <span>Nóminas Oficiales</span>
+                  <span>{currentRole === 'ORIENTACION' ? 'Rendimiento y Métricas' : 'Nóminas Oficiales'}</span>
                 </button>
               </>
             ) : hasAcademicModules ? (
@@ -189,22 +191,22 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
           <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-amber-400 to-[#D4AF37] opacity-80 group-hover:opacity-100 transition-opacity" />
           <div className="flex items-center justify-between mb-2.5">
             <span className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">
-              {currentRole === 'SECRETARIA' ? 'Control de Asistencia' : 'Malla Curricular'}
+              {currentRole === 'SECRETARIA' || currentRole === 'ORIENTACION' ? 'Control de Asistencia' : 'Malla Curricular'}
             </span>
             <div className="w-9 h-9 rounded-xl bg-amber-50 text-[#D4AF37] flex items-center justify-center group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300 shadow-xs">
-              {currentRole === 'SECRETARIA' ? <Users className="w-4 h-4" /> : <BookOpen className="w-4 h-4" />}
+              {currentRole === 'SECRETARIA' || currentRole === 'ORIENTACION' ? <Users className="w-4 h-4" /> : <BookOpen className="w-4 h-4" />}
             </div>
           </div>
           <div className="flex items-baseline gap-2">
             <span className="text-2xl sm:text-3xl font-black text-slate-900">
-              {currentRole === 'SECRETARIA' ? levelStudents.length : levelAreas.length}
+              {currentRole === 'SECRETARIA' || currentRole === 'ORIENTACION' ? levelStudents.length : levelAreas.length}
             </span>
             <span className="text-[11px] font-bold text-[#2C2E53] bg-amber-50/80 px-2 py-0.5 rounded-full border border-amber-200/50">
-              {currentRole === 'SECRETARIA' ? 'Alumnos' : 'Asignaturas'}
+              {currentRole === 'SECRETARIA' || currentRole === 'ORIENTACION' ? 'Alumnos' : 'Asignaturas'}
             </span>
           </div>
           <p className="text-[11px] text-slate-400 mt-2 truncate font-medium">
-            {currentRole === 'SECRETARIA' ? 'Gestión diaria de inasistencias' : 'Incluye Robótica y Bellas Artes'}
+            {currentRole === 'SECRETARIA' || currentRole === 'ORIENTACION' ? 'Gestión diaria de inasistencias' : 'Incluye Robótica y Bellas Artes'}
           </p>
         </div>
 
@@ -213,22 +215,22 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
           <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-emerald-500 to-teal-600 opacity-80 group-hover:opacity-100 transition-opacity" />
           <div className="flex items-center justify-between mb-2.5">
             <span className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">
-              {currentRole === 'SECRETARIA' ? 'Disciplina y Conducta' : 'Evaluación Pedagógica'}
+              {currentRole === 'SECRETARIA' || currentRole === 'ORIENTACION' ? 'Convivencia y Conducta' : 'Evaluación Pedagógica'}
             </span>
             <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-xs">
-              {currentRole === 'SECRETARIA' ? <ShieldCheck className="w-4 h-4" /> : <Award className="w-4 h-4" />}
+              {currentRole === 'SECRETARIA' || currentRole === 'ORIENTACION' ? <ShieldCheck className="w-4 h-4" /> : <Award className="w-4 h-4" />}
             </div>
           </div>
           <div className="flex items-baseline gap-2">
             <span className="text-2xl sm:text-3xl font-black text-slate-900">
-              {currentRole === 'SECRETARIA'
+              {currentRole === 'SECRETARIA' || currentRole === 'ORIENTACION'
                 ? 'Activo'
                 : levelRecords.length > 0
                 ? (currentLevel === 'MEDIA_GENERAL' ? '18.4' : 'L')
                 : '—'}
             </span>
             <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60">
-              {currentRole === 'SECRETARIA'
+              {currentRole === 'SECRETARIA' || currentRole === 'ORIENTACION'
                 ? 'Seguimiento'
                 : levelRecords.length > 0
                 ? (currentLevel === 'MEDIA_GENERAL' ? '/ 20 Promedio' : 'Logrado (L)')
@@ -236,7 +238,7 @@ export const AcademicPulseHero: React.FC<AcademicPulseHeroProps> = ({ onQuickAct
             </span>
           </div>
           <p className="text-[11px] text-slate-400 mt-2 truncate font-medium">
-            {currentRole === 'SECRETARIA' ? 'Registro de conductas e incidencias' : currentInfo.scale}
+            {currentRole === 'SECRETARIA' || currentRole === 'ORIENTACION' ? 'Registro de conductas e incidencias' : currentInfo.scale}
           </p>
         </div>
       </div>

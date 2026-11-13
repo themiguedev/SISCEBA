@@ -555,7 +555,7 @@ export const ModernSidebar: React.FC<ModernSidebarProps> = ({
                             (sub.id === 'EVALUACION' && ['EVALUACION', 'ESTRATEGIAS_EVALUACION', 'PROGRESO_EVALUACIONES', 'RESULTADO_AUTOEVALUACION'].includes(activeSubTab)) ||
                             (sub.id === 'RASGOS' && ['RASGOS', 'RASGOS_PERSONALIDAD', 'RESULTADO_RASGOS'].includes(activeSubTab)) ||
                             (sub.id === 'PLANES' && ['PLANES', 'PLANES_ACCION_PERSONALIZADOS', 'PLANES_LAPSO', 'PLANES_QUINCENALES', 'IA_ACTION_PLANS', 'PLAN_LAPSO', 'PLAN_QUINCENAL'].includes(activeSubTab)) ||
-                            (sub.id === 'EXTRA' && ['EXTRA', 'BANCO_ESTRATEGIAS', 'OBSERVACIONES_BOLETIN', 'REVISION', 'CONSEJO_CURSO', 'ACTAS_CONSEJO', 'DISENADOR_DIDACTICO', 'DISENADOR_OFICIAL', 'BOLETIN_INFORMATIVO', 'BOLETIN', 'ESTRATEGIAS_PONDERACIONES', 'ACTAS'].includes(activeSubTab))
+                            (sub.id === 'EXTRA' && ['EXTRA', 'BANCO_ESTRATEGIAS', 'OBSERVACIONES_BOLETIN', 'REVISION', 'CONSEJO_CURSO', 'ACTAS_CONSEJO', 'DISENADOR_DIDACTICO', 'DISENADOR_OFICIAL', 'BOLETIN_INFORMATIVO', 'BOLETIN', 'ESTRATEGIAS_PONDERACIONES', 'ACTAS', 'CALIFICACIONES_CRP'].includes(activeSubTab))
                           )));
                       const SubIcon = sub.icon;
                       const showGroupHeader = sub.group && (sIdx === 0 || section.subTabs[sIdx - 1]?.group !== sub.group);

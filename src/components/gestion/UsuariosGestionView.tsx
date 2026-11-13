@@ -32,7 +32,8 @@ import {
   Eye,
   EyeOff,
   Plus,
-  X
+  X,
+  Compass
 } from 'lucide-react';
 
 export const UsuariosGestionView: React.FC = () => {
@@ -309,6 +310,7 @@ export const UsuariosGestionView: React.FC = () => {
       ADMINISTRADOR: 0,
       DIRECTOR: 0,
       COORDINACION: 0,
+      ORIENTACION: 0,
       DOCENTE: 0,
       SECRETARIA: 0,
       REPRESENTANTE: 0,
@@ -510,6 +512,7 @@ export const UsuariosGestionView: React.FC = () => {
     { id: 'ADMINISTRADOR', title: 'Administradores', color: 'text-red-700 dark:text-red-300', bg: 'bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-900/50', icon: ShieldCheck },
     { id: 'DIRECTOR', title: 'Directores', color: 'text-purple-700 dark:text-purple-300', bg: 'bg-purple-50 dark:bg-purple-950/40 border-purple-200 dark:border-purple-900/50', icon: Briefcase },
     { id: 'COORDINACION', title: 'Coordinación UCE', color: 'text-blue-700 dark:text-blue-300', bg: 'bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-900/50', icon: UserCheck },
+    { id: 'ORIENTACION', title: 'Orientación', color: 'text-teal-700 dark:text-teal-300', bg: 'bg-teal-50 dark:bg-teal-950/40 border-teal-200 dark:border-teal-900/50', icon: Compass },
     { id: 'DOCENTE', title: 'Cuerpo Docente', color: 'text-emerald-700 dark:text-emerald-300', bg: 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900/50', icon: BookOpen },
     { id: 'SECRETARIA', title: 'Secretaría', color: 'text-indigo-700 dark:text-indigo-300', bg: 'bg-indigo-50 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-900/50', icon: Layers },
     { id: 'REPRESENTANTE', title: 'Representantes', color: 'text-cyan-700 dark:text-cyan-300', bg: 'bg-cyan-50 dark:bg-cyan-950/40 border-cyan-200 dark:border-cyan-900/50', icon: Users },
@@ -966,6 +969,7 @@ export const UsuariosGestionView: React.FC = () => {
                   className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-[#2C2E53] outline-none font-bold text-slate-800 dark:text-slate-100"
                 >
                   <option value="DOCENTE">DOCENTE (Evaluación y Planificación)</option>
+                  <option value="ORIENTACION">ORIENTACION (Orientación y Convivencia)</option>
                   <option value="SECRETARIA">SECRETARIA (Asistencia y Conducta)</option>
                   <option value="COORDINACION">COORDINACION (Coordinación UCE)</option>
                   <option value="DIRECTOR">DIRECTOR (Dirección General)</option>
@@ -1025,7 +1029,7 @@ export const UsuariosGestionView: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
-                  {(['DOCENTE', 'SECRETARIA', 'REPRESENTANTE', 'COORDINACION'] as UserRole[])
+                  {(['DOCENTE', 'ORIENTACION', 'SECRETARIA', 'REPRESENTANTE', 'COORDINACION'] as UserRole[])
                     .filter(r => r !== newRole)
                     .map(r => {
                       const isChecked = newAdditionalRoles.includes(r);
@@ -1444,6 +1448,7 @@ export const UsuariosGestionView: React.FC = () => {
                       className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-[#2C2E53] outline-none font-bold text-slate-800 dark:text-slate-100"
                     >
                       <option value="DOCENTE">DOCENTE (Evaluación y Planificación)</option>
+                      <option value="ORIENTACION">ORIENTACION (Orientación y Convivencia)</option>
                       <option value="SECRETARIA">SECRETARIA (Asistencia y Conducta)</option>
                       <option value="COORDINACION">COORDINACION (Coordinación UCE)</option>
                       <option value="DIRECTOR">DIRECTOR (Dirección General)</option>
@@ -1503,7 +1508,7 @@ export const UsuariosGestionView: React.FC = () => {
                     </div>
 
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1">
-                      {(['DOCENTE', 'SECRETARIA', 'REPRESENTANTE', 'COORDINACION', 'DIRECTOR'] as UserRole[])
+                      {(['DOCENTE', 'ORIENTACION', 'SECRETARIA', 'REPRESENTANTE', 'COORDINACION', 'DIRECTOR'] as UserRole[])
                         .filter(r => r !== editPrimaryRole)
                         .map(r => {
                           const isChecked = editAdditionalRoles.includes(r);

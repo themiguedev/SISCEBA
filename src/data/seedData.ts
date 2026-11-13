@@ -4756,6 +4756,7 @@ export const INITIAL_USERS: AppUser[] = [
     email: 'admin@bellasartes.edu.ve',
     role: 'ADMINISTRADOR',
     defaultLevel: 'MEDIA_GENERAL',
+    allowedLevels: ['INICIAL', 'PRIMARIA', 'MEDIA_GENERAL'],
     gender: 'MASCULINO',
     active: true,
     avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150'
@@ -4823,6 +4824,19 @@ export const INITIAL_USERS: AppUser[] = [
     defaultLevel: 'MEDIA_GENERAL',
     allowedLevels: ['INICIAL', 'PRIMARIA', 'MEDIA_GENERAL'],
     gender: 'MASCULINO',
+    active: true
+  },
+  {
+    id: 'usr-orientacion',
+    username: 'orientador',
+    cedula: 'V-19.876.543',
+    password: 'cba2026*orienta',
+    fullName: 'Lic. Sofía Valentina Navarro',
+    email: 'orientacion@bellasartes.edu.ve',
+    role: 'ORIENTACION',
+    defaultLevel: 'MEDIA_GENERAL',
+    allowedLevels: ['INICIAL', 'PRIMARIA', 'MEDIA_GENERAL'],
+    gender: 'FEMENINO',
     active: true
   }
 ];

@@ -78,9 +78,12 @@ export async function verifyPassword(
     return { valid: false, needsMigration: false };
   }
 
+  const cleanPlain = plainPassword.trim();
+  const cleanStored = storedHashOrPlain.trim();
+
   // Si no tiene el prefijo de hash PBKDF2 o Argon/Bcrypt, está en texto plano (requiere migración)
   if (!storedHashOrPlain.startsWith('$pbkdf2$')) {
-    const isMatch = plainPassword === storedHashOrPlain;
+    const isMatch = plainPassword === storedHashOrPlain || cleanPlain === cleanStored;
     return { valid: isMatch, needsMigration: isMatch };
   }
 
@@ -95,31 +98,41 @@ export async function verifyPassword(
     const salt = hexToBuffer(saltHex);
 
     const enc = new TextEncoder();
-    const keyMaterial = await crypto.subtle.importKey(
-      'raw',
-      enc.encode(plainPassword),
-      { name: 'PBKDF2' },
-      false,
-      ['deriveBits', 'deriveKey']
-    );
 
-    const derivedKey = await crypto.subtle.deriveKey(
-      {
-        name: 'PBKDF2',
-        salt: salt as unknown as Uint8Array<ArrayBuffer>,
-        iterations: iterations,
-        hash: 'SHA-256'
-      },
-      keyMaterial,
-      { name: 'AES-GCM', length: 256 },
-      true,
-      ['encrypt', 'decrypt']
-    );
+    const checkHash = async (pwd: string) => {
+      const keyMaterial = await crypto.subtle.importKey(
+        'raw',
+        enc.encode(pwd),
+        { name: 'PBKDF2' },
+        false,
+        ['deriveBits', 'deriveKey']
+      );
 
-    const exported = await crypto.subtle.exportKey('raw', derivedKey);
-    const computedHashHex = bufferToHex(exported);
+      const derivedKey = await crypto.subtle.deriveKey(
+        {
+          name: 'PBKDF2',
+          salt: salt as unknown as Uint8Array<ArrayBuffer>,
+          iterations: iterations,
+          hash: 'SHA-256'
+        },
+        keyMaterial,
+        { name: 'AES-GCM', length: 256 },
+        true,
+        ['encrypt', 'decrypt']
+      );
 
-    return { valid: computedHashHex === expectedHashHex, needsMigration: false };
+      const exported = await crypto.subtle.exportKey('raw', derivedKey);
+      return bufferToHex(exported) === expectedHashHex;
+    };
+
+    if (await checkHash(plainPassword)) {
+      return { valid: true, needsMigration: false };
+    }
+    if (cleanPlain !== plainPassword && (await checkHash(cleanPlain))) {
+      return { valid: true, needsMigration: false };
+    }
+
+    return { valid: false, needsMigration: false };
   } catch (err) {
     console.error('Error al verificar hash criptográfico:', err);
     return { valid: false, needsMigration: false };

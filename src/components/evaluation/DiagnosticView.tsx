@@ -563,11 +563,11 @@ export const DiagnosticView: React.FC = () => {
             onClick={() => setActiveTab('LISTA_COTEJO')}
             className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === 'LISTA_COTEJO'
-                ? 'bg-[#2C2E53] text-white shadow-md border-2 border-[#2C2E53] dark:bg-amber-400 dark:text-slate-950 dark:border-amber-400'
-                : 'bg-white/90 dark:bg-slate-900 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 hover:text-slate-950 dark:hover:text-white hover:bg-white shadow-2xs'
+                ? 'bg-[#2C2E53] dark:!bg-[#1B1C33] text-white dark:!text-white shadow-md border-2 border-[#2C2E53] dark:!border-[#D4AF37]'
+                : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 hover:text-slate-950 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 shadow-2xs'
             }`}
           >
-            <ClipboardCheck className={`w-4 h-4 ${activeTab === 'LISTA_COTEJO' ? 'text-amber-300 dark:text-slate-950' : 'text-slate-600 dark:text-slate-400'}`} />
+            <ClipboardCheck className={`w-4 h-4 ${activeTab === 'LISTA_COTEJO' ? 'text-amber-300 dark:!text-amber-400' : 'text-slate-600 dark:text-slate-400'}`} />
             <span>1. Lista de Cotejo</span>
           </button>
 
@@ -575,11 +575,11 @@ export const DiagnosticView: React.FC = () => {
             onClick={() => setActiveTab('ANALITICA_GLOBAL')}
             className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === 'ANALITICA_GLOBAL'
-                ? 'bg-[#2C2E53] text-white shadow-md border-2 border-[#2C2E53] dark:bg-amber-400 dark:text-slate-950 dark:border-amber-400'
-                : 'bg-white/90 dark:bg-slate-900 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 hover:text-slate-950 dark:hover:text-white hover:bg-white shadow-2xs'
+                ? 'bg-[#2C2E53] dark:!bg-[#1B1C33] text-white dark:!text-white shadow-md border-2 border-[#2C2E53] dark:!border-[#D4AF37]'
+                : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 hover:text-slate-950 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 shadow-2xs'
             }`}
           >
-            <BarChart3 className={`w-4 h-4 ${activeTab === 'ANALITICA_GLOBAL' ? 'text-amber-300 dark:text-slate-950' : 'text-slate-600 dark:text-slate-400'}`} />
+            <BarChart3 className={`w-4 h-4 ${activeTab === 'ANALITICA_GLOBAL' ? 'text-amber-300 dark:!text-amber-400' : 'text-slate-600 dark:text-slate-400'}`} />
             <span>2. Analítica del Curso</span>
           </button>
 
@@ -587,11 +587,11 @@ export const DiagnosticView: React.FC = () => {
             onClick={() => setActiveTab('FICHA_INDIVIDUAL')}
             className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === 'FICHA_INDIVIDUAL'
-                ? 'bg-[#2C2E53] text-white shadow-md border-2 border-[#2C2E53] dark:bg-amber-400 dark:text-slate-950 dark:border-amber-400'
-                : 'bg-white/90 dark:bg-slate-900 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 hover:text-slate-950 dark:hover:text-white hover:bg-white shadow-2xs'
+                ? 'bg-[#2C2E53] dark:!bg-[#1B1C33] text-white dark:!text-white shadow-md border-2 border-[#2C2E53] dark:!border-[#D4AF37]'
+                : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 hover:text-slate-950 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 shadow-2xs'
             }`}
           >
-            <FileText className={`w-4 h-4 ${activeTab === 'FICHA_INDIVIDUAL' ? 'text-amber-300 dark:text-slate-950' : 'text-slate-600 dark:text-slate-400'}`} />
+            <FileText className={`w-4 h-4 ${activeTab === 'FICHA_INDIVIDUAL' ? 'text-amber-300 dark:!text-amber-400' : 'text-slate-600 dark:text-slate-400'}`} />
             <span>3. Ficha Individual</span>
           </button>
         </div>
@@ -721,11 +721,11 @@ export const DiagnosticView: React.FC = () => {
               className={`flex items-center gap-1.5 px-4 py-2 font-bold rounded-xl text-xs shadow-md transition-all border-2 ${
                 isLockedForTeacher
                   ? 'bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed dark:bg-slate-800 dark:text-slate-500'
-                  : 'bg-[#2C2E53] hover:bg-[#393b68] text-white border-[#2C2E53] dark:bg-amber-400 dark:text-slate-950 dark:border-amber-400'
+                  : 'bg-[#2C2E53] hover:bg-[#393b68] text-white border-[#2C2E53] dark:!bg-[#1B1C33] dark:!text-white dark:!border-[#D4AF37] hover:dark:!bg-[#232543]'
               }`}
               title={isLockedForTeacher ? 'Carga bloqueada: fecha límite superada o lapso cerrado' : 'Guardar evaluación diagnóstica'}
             >
-              {isLockedForTeacher ? <Lock className="w-4 h-4" /> : <Save className="w-4 h-4 text-amber-300 dark:text-slate-950" />}
+              {isLockedForTeacher ? <Lock className="w-4 h-4" /> : <Save className="w-4 h-4 text-amber-300 dark:!text-amber-400" />}
               <span>{isLockedForTeacher ? 'Carga Bloqueada' : 'Guardar Evaluación'}</span>
             </button>
           )}

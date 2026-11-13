@@ -69,6 +69,18 @@ const accounts = [
     active: true,
     avatar_url: 'cba-meta:{"g":"MASCULINO","c":"V-20.123.456","r":"COORDINACION","al":["INICIAL","PRIMARIA","MEDIA_GENERAL"],"a":"preset:male-cyan"}',
     academic_assignments: []
+  },
+  {
+    id: 'usr-orientacion',
+    username: 'orientador',
+    password: 'cba2026*orienta',
+    full_name: 'Lic. Sofía Valentina Navarro',
+    email: 'orientacion@bellasartes.edu.ve',
+    role: 'ORIENTACION',
+    default_level: 'MEDIA_GENERAL',
+    active: true,
+    avatar_url: 'cba-meta:{"g":"FEMENINO","c":"V-19.876.543","r":"ORIENTACION","al":["INICIAL","PRIMARIA","MEDIA_GENERAL"],"a":"preset:female-teal-circle"}',
+    academic_assignments: []
   }
 ];
 
@@ -118,7 +130,7 @@ async function main() {
     const res = await client.query(`
       SELECT id, username, full_name, role, default_level, email 
       FROM app_users 
-      WHERE id IN ('usr-directora', 'usr-coord-inicial', 'usr-coord-primaria', 'usr-coord-media', 'usr-coord-temp');
+      WHERE id IN ('usr-directora', 'usr-coord-inicial', 'usr-coord-primaria', 'usr-coord-media', 'usr-coord-temp', 'usr-orientacion');
     `);
     console.log('\n📊 Registros actuales en PostgreSQL:');
     console.table(res.rows);

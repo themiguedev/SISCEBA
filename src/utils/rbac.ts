@@ -25,6 +25,7 @@ export const ROLE_HIERARCHY: Record<UserRole, number> = {
   DIRECTOR: 80,
   COORDINACION: 60,
   COORDINADOR: 60, // Alias de compatibilidad
+  ORIENTACION: 50,
   SECRETARIA: 50,
   DOCENTE: 40,
   REPRESENTANTE: 20,
@@ -80,6 +81,15 @@ export const ROLE_METADATA: Record<UserRole, RoleMetadata> = {
     description: 'Control de Estudios y Evaluación.',
     department: 'Unidad de Control de Estudios (UCE)',
     scope: 'Gestión Pedagógica y Operativa'
+  },
+  ORIENTACION: {
+    id: 'ORIENTACION',
+    label: 'Departamento de Orientación',
+    badge: '🧭 Orientación',
+    badgeBg: 'bg-teal-100 text-teal-950 border-teal-400 dark:bg-teal-950/60 dark:text-teal-200 dark:border-teal-600',
+    description: 'Seguimiento de convivencia escolar, indicadores evaluados, asistencia y registros de conducta.',
+    department: 'Departamento de Orientación y Bienestar Estudiantil',
+    scope: 'Conducta, Asistencia, Indicadores y Convivencia'
   },
   DOCENTE: {
     id: 'DOCENTE',
@@ -168,6 +178,17 @@ export const ROLE_TAB_PERMISSIONS: Record<UserRole, MainNavigationTab[]> = {
     'AYUDA'
   ],
   DOCENTE: [
+    'ESCRITORIO',
+    'GESTION',
+    'INICIAL',
+    'PRIMARIA',
+    'MEDIA_GENERAL',
+    'CONSULTAS',
+    'COMUNIDAD',
+    'CONFIGURACION',
+    'AYUDA'
+  ],
+  ORIENTACION: [
     'ESCRITORIO',
     'GESTION',
     'INICIAL',
@@ -272,6 +293,72 @@ export const ALL_LEVEL_SUBTABS: string[] = [
 ];
 
 /**
+ * Subpestañas exclusivas autorizadas institucionalmente para Coordinación Docente (Inicial, Primaria, Media General)
+ */
+export const COORDINACION_INICIAL_SUBTABS: string[] = [
+  'INDICADORES',
+  'OBSERVACIONES',
+  'DIAGNOSTICO_CIERRE',
+  'REVISION_CARGA',
+  'INDICADORES_ACTITUDINALES',
+  'BOLETIN',
+  'OBS_PREESCOLAR',
+  'FINAL_LAPSO',
+  'ESTADISTICAS'
+];
+
+export const COORDINACION_PRIMARIA_SUBTABS: string[] = [
+  'INDICADORES',
+  'CALIFICACIONES',
+  'REVISION_CARGA',
+  'PROCESAL',
+  'PROGRESO_INDICADORES',
+  'CALIFICACIONES_ESTUDIANTE',
+  'CALIFICACIONES_CURSO'
+];
+
+export const COORDINACION_MEDIA_SUBTABS: string[] = [
+  'EVALUACION',
+  'EXTRA',
+  'ESTRATEGIAS_EVALUACION',
+  'PROGRESO_EVALUACIONES',
+  'ESTRATEGIAS_PONDERACIONES',
+  'CALIFICACIONES_CRP'
+];
+
+/**
+ * Subpestañas autorizadas para el Departamento de Orientación
+ */
+export const ORIENTACION_INICIAL_SUBTABS: string[] = [
+  'INDICADORES',
+  'OBSERVACIONES',
+  'DIAGNOSTICO_CIERRE',
+  'REVISION_CARGA',
+  'INDICADORES_ACTITUDINALES',
+  'BOLETIN',
+  'OBS_PREESCOLAR',
+  'FINAL_LAPSO',
+  'ESTADISTICAS'
+];
+
+export const ORIENTACION_PRIMARIA_SUBTABS: string[] = [
+  'INDICADORES',
+  'CALIFICACIONES',
+  'REVISION_CARGA',
+  'PROCESAL',
+  'PROGRESO_INDICADORES',
+  'CALIFICACIONES_ESTUDIANTE',
+  'CALIFICACIONES_CURSO'
+];
+
+export const ORIENTACION_MEDIA_SUBTABS: string[] = [
+  'EVALUACION',
+  'ESTRATEGIAS_EVALUACION',
+  'PROGRESO_EVALUACIONES',
+  'ESTRATEGIAS_PONDERACIONES'
+];
+
+/**
  * Matriz de acceso granular a subpestañas por módulo
  */
 export const ROLE_SUBTAB_PERMISSIONS: Record<UserRole, Partial<Record<MainNavigationTab, string[]>>> = {
@@ -299,10 +386,10 @@ export const ROLE_SUBTAB_PERMISSIONS: Record<UserRole, Partial<Record<MainNaviga
   },
   COORDINACION: {
     ESCRITORIO: ['DASHBOARD', 'PERFIL', 'HORARIO', 'SUGERENCIAS'],
-    GESTION: ['TAREAS_RECURRENTES', 'INSCRIPCIONES', 'PASES', 'INASISTENCIAS', 'CONDUCTAS', 'DOCUMENTOS', 'TITULOS', 'TALLERES_CRP'], // Bloqueo reservado a Director/Admin, Matrícula reservada a Admin
-    INICIAL: ALL_LEVEL_SUBTABS,
-    PRIMARIA: ALL_LEVEL_SUBTABS,
-    MEDIA_GENERAL: ALL_LEVEL_SUBTABS,
+    GESTION: ['TAREAS_RECURRENTES', 'PASES', 'INASISTENCIAS', 'CONDUCTAS'],
+    INICIAL: COORDINACION_INICIAL_SUBTABS,
+    PRIMARIA: COORDINACION_PRIMARIA_SUBTABS,
+    MEDIA_GENERAL: COORDINACION_MEDIA_SUBTABS,
     CONSULTAS: ['RENDIMIENTO', 'BOLETIN', 'ASISTENCIA', 'ESTADISTICAS', 'NOMINAS'],
     COMUNIDAD: ['NOTICIAS', 'CUMPLEANOS', 'COMUNICADOS'],
     CONFIGURACION: ['LAPSOS', 'ESTRUCTURA', 'TEMAS'],
@@ -310,13 +397,24 @@ export const ROLE_SUBTAB_PERMISSIONS: Record<UserRole, Partial<Record<MainNaviga
   },
   COORDINADOR: {
     ESCRITORIO: ['DASHBOARD', 'PERFIL', 'HORARIO', 'SUGERENCIAS'],
-    GESTION: ['TAREAS_RECURRENTES', 'INSCRIPCIONES', 'PASES', 'INASISTENCIAS', 'CONDUCTAS', 'DOCUMENTOS', 'TITULOS', 'TALLERES_CRP'],
-    INICIAL: ALL_LEVEL_SUBTABS,
-    PRIMARIA: ALL_LEVEL_SUBTABS,
-    MEDIA_GENERAL: ALL_LEVEL_SUBTABS,
+    GESTION: ['TAREAS_RECURRENTES', 'PASES', 'INASISTENCIAS', 'CONDUCTAS'],
+    INICIAL: COORDINACION_INICIAL_SUBTABS,
+    PRIMARIA: COORDINACION_PRIMARIA_SUBTABS,
+    MEDIA_GENERAL: COORDINACION_MEDIA_SUBTABS,
     CONSULTAS: ['RENDIMIENTO', 'BOLETIN', 'ASISTENCIA', 'ESTADISTICAS', 'NOMINAS'],
     COMUNIDAD: ['NOTICIAS', 'CUMPLEANOS', 'COMUNICADOS'],
     CONFIGURACION: ['LAPSOS', 'ESTRUCTURA', 'TEMAS'],
+    AYUDA: ['MANUAL']
+  },
+  ORIENTACION: {
+    ESCRITORIO: ['DASHBOARD', 'PERFIL', 'HORARIO', 'SUGERENCIAS'],
+    GESTION: ['PASES', 'INASISTENCIAS', 'CONDUCTAS'], // Asistencia, Pases y Conductas (sin matrículas, inscripciones ni usuarios)
+    INICIAL: ORIENTACION_INICIAL_SUBTABS,
+    PRIMARIA: ORIENTACION_PRIMARIA_SUBTABS,
+    MEDIA_GENERAL: ORIENTACION_MEDIA_SUBTABS,
+    CONSULTAS: ['RENDIMIENTO', 'BOLETIN', 'ASISTENCIA', 'ESTADISTICAS', 'NOMINAS'],
+    COMUNIDAD: ['NOTICIAS', 'CUMPLEANOS', 'COMUNICADOS'],
+    CONFIGURACION: ['TEMAS'],
     AYUDA: ['MANUAL']
   },
   DOCENTE: {
@@ -454,7 +552,7 @@ export const canIssueTitles = (
   const roles = Array.isArray(roleOrUser)
     ? roleOrUser
     : getUserEffectiveRoles(roleOrUser);
-  return roles.some(r => r === 'ADMINISTRADOR' || r === 'DIRECTOR' || r === 'COORDINACION' || r === 'COORDINADOR');
+  return roles.some(r => r === 'ADMINISTRADOR' || r === 'DIRECTOR');
 };
 
 /**
@@ -478,7 +576,7 @@ export const canPublishCommunity = (
   const roles = Array.isArray(roleOrUser)
     ? roleOrUser
     : getUserEffectiveRoles(roleOrUser);
-  return roles.some(r => r === 'ADMINISTRADOR' || r === 'DIRECTOR' || r === 'COORDINACION' || r === 'COORDINADOR' || r === 'DOCENTE');
+  return roles.some(r => r === 'ADMINISTRADOR' || r === 'DIRECTOR' || r === 'COORDINACION' || r === 'COORDINADOR' || r === 'ORIENTACION' || r === 'DOCENTE');
 };
 
 /**
@@ -518,13 +616,18 @@ export const getUserAllowedLevels = (
 
   const targetUser = typeof roleOrUser === 'object' && !Array.isArray(roleOrUser) ? roleOrUser : user;
 
-  // 1. Si el usuario tiene niveles pedagógicos o de coordinación explícitamente configurados
+  // 1. Roles de máxima autoridad institucional (ADMINISTRADOR y DIRECTOR) siempre tienen acceso pleno e irrestricto a todos los subsistemas
+  if (roles.some(r => r === 'ADMINISTRADOR' || r === 'DIRECTOR')) {
+    return ['INICIAL', 'PRIMARIA', 'MEDIA_GENERAL'];
+  }
+
+  // 2. Si el usuario tiene niveles pedagógicos o de coordinación explícitamente configurados
   if (targetUser?.allowedLevels && targetUser.allowedLevels.length > 0) {
     return targetUser.allowedLevels;
   }
 
-  // 2. Roles directivos y de supervisión general sin restricción explícita tienen acceso a todos los niveles
-  if (roles.some(r => r === 'ADMINISTRADOR' || r === 'DIRECTOR' || r === 'COORDINACION' || r === 'COORDINADOR')) {
+  // 3. Roles de supervisión y orientación general sin restricción explícita tienen acceso a todos los niveles
+  if (roles.some(r => r === 'COORDINACION' || r === 'COORDINADOR' || r === 'ORIENTACION')) {
     return ['INICIAL', 'PRIMARIA', 'MEDIA_GENERAL'];
   }
 
@@ -572,7 +675,7 @@ export const isStaffWithRepresentativeRole = (user: AppUser | null | undefined):
   if (!user) return false;
   if (user.role === 'ADMINISTRADOR') return false; // Administrador cuenta con simulador propio de sistema
 
-  const staffRoles: UserRole[] = ['DOCENTE', 'SECRETARIA', 'COORDINACION', 'COORDINADOR', 'DIRECTOR'];
+  const staffRoles: UserRole[] = ['DOCENTE', 'SECRETARIA', 'COORDINACION', 'COORDINADOR', 'DIRECTOR', 'ORIENTACION'];
 
   // Caso 1: Su rol primario es personal institucional y tiene 'REPRESENTANTE' en sus roles adicionales
   if (staffRoles.includes(user.role) && Array.isArray(user.roles) && user.roles.includes('REPRESENTANTE')) {
@@ -592,7 +695,7 @@ export const isStaffWithRepresentativeRole = (user: AppUser | null | undefined):
  */
 export const getStaffRoleForUser = (user: AppUser | null | undefined): UserRole => {
   if (!user) return 'DOCENTE';
-  const staffRoles: UserRole[] = ['DOCENTE', 'SECRETARIA', 'COORDINACION', 'COORDINADOR', 'DIRECTOR'];
+  const staffRoles: UserRole[] = ['DOCENTE', 'SECRETARIA', 'COORDINACION', 'COORDINADOR', 'DIRECTOR', 'ORIENTACION'];
   if (staffRoles.includes(user.role)) return user.role;
   const match = user.roles?.find(r => staffRoles.includes(r));
   return match || 'DOCENTE';

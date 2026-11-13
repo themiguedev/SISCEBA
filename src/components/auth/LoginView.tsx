@@ -60,11 +60,14 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!userInput.trim()) {
+    const cleanUser = userInput.trim();
+    const cleanPass = password.trim();
+
+    if (!cleanUser) {
       setErrorMsg('Por favor ingrese su usuario o correo institucional.');
       return;
     }
-    if (!password.trim()) {
+    if (!cleanPass) {
       setErrorMsg('Por favor ingrese su contraseña.');
       return;
     }
@@ -74,7 +77,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
     setSuccessInfoMsg('');
 
     try {
-      const res = await login(userInput, password);
+      const res = await login(cleanUser, cleanPass);
       if (!res.success) {
         setLoginState('IDLE');
         setErrorMsg(res.message || 'Credenciales inválidas. Acceso restringido a cuentas registradas en la base de datos.');

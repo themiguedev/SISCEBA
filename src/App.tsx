@@ -170,6 +170,19 @@ const SiscebaMainApp: React.FC = () => {
       } else if (currentLevel !== activeTab) {
         setCurrentLevel(activeTab);
       }
+
+      if (activeTab === 'INICIAL' && !hasSubTabAccess(currentRole, 'INICIAL', inicialSubTab)) {
+        setInicialGroupTab('INDICADORES');
+        setInicialSubTab('REVISION_CARGA');
+      }
+      if (activeTab === 'PRIMARIA' && !hasSubTabAccess(currentRole, 'PRIMARIA', primariaSubTab)) {
+        setPrimariaGroupTab('INDICADORES');
+        setPrimariaSubTab('REVISION_CARGA');
+      }
+      if (activeTab === 'MEDIA_GENERAL' && !hasSubTabAccess(currentRole, 'MEDIA_GENERAL', mediaSubTab)) {
+        setMediaGroupTab('EVALUACION');
+        setMediaSubTab('ESTRATEGIAS_EVALUACION');
+      }
     }
   }, [currentLevel, currentRole, activeTab, currentUser, gestionSubTab, consultasSubTab, configuracionSubTab]);
 

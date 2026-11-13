@@ -178,6 +178,73 @@ export const ROLE_SPECIFIC_MANUALS: Record<UserRole, DetailedRoleGuide> = {
     }
   },
 
+  ORIENTACION: {
+    roleId: 'ORIENTACION',
+    roleTitle: 'Departamento de Orientación y Bienestar',
+    badgeEmoji: '🧭',
+    department: 'Departamento de Orientación y Bienestar Estudiantil',
+    roleGreeting: '¡Bienvenida al Departamento de Orientación CBA!',
+    roleOverview: 'Tu función en SICE-CBA comprende el acompañamiento socioemocional, la convivencia escolar, el monitoreo del récord de asistencias, expedientes de conducta e indicadores evaluados en los tres subsistemas (Inicial, Primaria y Media General).',
+    badgeColor: 'bg-teal-500/20 text-teal-300 border-teal-500/30',
+    missions: [
+      {
+        id: 'ori-m1',
+        title: 'Seguimiento de Convivencia y Registros de Conducta',
+        badge: 'Convivencia',
+        summary: 'Consulta y asienta expedientes de convivencia, actas de compromiso y acuerdos de resolución pacífica.',
+        iconName: 'ShieldAlert',
+        targetTab: 'GESTION',
+        targetSubTab: 'CONDUCTAS',
+        recommendedSteps: [
+          'Entra a Gestión Escolar → Registro de Conductas.',
+          'Filtra por estudiante, curso o nivel educativo.',
+          'Revisa el histórico disciplinario y acuerdos previos.',
+          'Emite el reporte o registra nuevas intervenciones de acompañamiento.'
+        ]
+      },
+      {
+        id: 'ori-m2',
+        title: 'Monitoreo de Asistencia e Inasistencias',
+        badge: 'Asistencia',
+        summary: 'Audita registros de inasistencias acumuladas y pases de portería para prevenir deserción escolar.',
+        iconName: 'CheckCircle2',
+        targetTab: 'GESTION',
+        targetSubTab: 'INASISTENCIAS',
+        recommendedSteps: [
+          'Ve a Gestión Escolar → Inasistencias o Consultas → Asistencia.',
+          'Selecciona el nivel (Inicial, Primaria o Media General) y curso.',
+          'Identifica estudiantes con alertas de inasistencia.',
+          'Exporta las estadísticas de asistencia por sección.'
+        ]
+      },
+      {
+        id: 'ori-m3',
+        title: 'Reporte de Indicadores y Estrategias Evaluadas',
+        badge: 'Seguimiento Pedagógico',
+        summary: 'Supervisa el avance de los indicadores evaluados en Inicial/Primaria y las estrategias en Media General.',
+        iconName: 'FileSpreadsheet',
+        targetTab: 'CONSULTAS',
+        targetSubTab: 'RENDIMIENTO',
+        recommendedSteps: [
+          'Accede a Inicial/Primaria (Indicadores) o Media General (Estrategias Evaluadas).',
+          'Consulta la sábana por curso y estudiante tanto en Pensum MPPE como CBA.',
+          'Genera cuadros estadísticos de valoración por curso.'
+        ]
+      }
+    ],
+    dosAndDonts: {
+      dos: [
+        'Documentar acuerdos pedagógicos y compromisos con representantes de forma confidencial y empática.',
+        'Contrastar registros de inasistencia con rendimiento académico para alertas tempranas.',
+        'Utilizar los reportes estadísticos en consejos de curso y comités de convivencia.'
+      ],
+      donts: [
+        'No modificar calificaciones numéricas o literales de los docentes.',
+        'No alterar datos de matrícula o registros que corresponden a Secretaría o Dirección.'
+      ]
+    }
+  },
+
   COORDINACION: {
     roleId: 'COORDINACION',
     roleTitle: 'Coordinación Pedagógica / UCE',

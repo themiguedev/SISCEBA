@@ -22,7 +22,8 @@ import {
   Landmark,
   FolderOpen,
   BookOpen,
-  Check
+  Check,
+  Compass
 } from 'lucide-react';
 import { SeasonalAccessoryIcon } from '../auth/LogoSeasonalAccessory';
 import { ThemeSwitcherDropdown } from './ThemeSwitcherDropdown';
@@ -90,6 +91,13 @@ const ROLE_VISUAL_CONFIG: Record<
     iconColor: 'text-emerald-300',
     iconBorder: 'border-emerald-500/40',
     subtitle: 'Control de Estudios y UCE'
+  },
+  ORIENTACION: {
+    icon: Compass,
+    iconBg: 'bg-teal-950/70',
+    iconColor: 'text-teal-300',
+    iconBorder: 'border-teal-500/40',
+    subtitle: 'Convivencia y Orientación'
   },
   SECRETARIA: {
     icon: FolderOpen,
@@ -600,12 +608,12 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
                           <span className="truncate">Simular Rol (Modo Admin)</span>
                         </span>
                         <span className="text-[9px] px-2 py-0.5 rounded-full bg-amber-400/15 text-amber-300 font-black border border-amber-400/30 whitespace-nowrap shrink-0">
-                          7 Roles
+                          8 Roles
                         </span>
                       </div>
 
                       <div className="space-y-1">
-                        {(['ADMINISTRADOR', 'DIRECTOR', 'COORDINACION', 'SECRETARIA', 'DOCENTE', 'REPRESENTANTE', 'ESTUDIANTE'] as UserRole[]).map((r) => {
+                        {(['ADMINISTRADOR', 'DIRECTOR', 'COORDINACION', 'ORIENTACION', 'SECRETARIA', 'DOCENTE', 'REPRESENTANTE', 'ESTUDIANTE'] as UserRole[]).map((r) => {
                           const meta = ROLE_METADATA[r];
                           const isSelected = currentRole === r;
                           const visual = ROLE_VISUAL_CONFIG[r] || {

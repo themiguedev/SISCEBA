@@ -35,6 +35,7 @@ const AVAILABLE_ROLES: { id: UserRole; label: string; desc: string }[] = [
   { id: 'ADMINISTRADOR', label: 'Admin / Rector', desc: 'Acceso total y configuración' },
   { id: 'DIRECTOR', label: 'Director', desc: 'Supervisión general y firma institucional' },
   { id: 'COORDINACION', label: 'Coordinación', desc: 'Validación de planes y actas' },
+  { id: 'ORIENTACION', label: 'Orientación', desc: 'Conductas, asistencia e indicadores' },
   { id: 'SECRETARIA', label: 'Secretaria', desc: 'Asistencia y registro de conducta' },
   { id: 'DOCENTE', label: 'Docente', desc: 'Evaluación y planificación de aula' },
   { id: 'REPRESENTANTE', label: 'Representante', desc: 'Portal de familia y notas' },

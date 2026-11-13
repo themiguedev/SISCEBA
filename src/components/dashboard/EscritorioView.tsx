@@ -944,8 +944,12 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
             {/* Canal Institucional CBA / Autoría y Desarrollo */}
             <div className="bg-gradient-to-br from-[#1B1C33] via-[#16172E] to-[#101120] text-white rounded-2xl p-5 sm:p-6 border border-[#3D4066] shadow-xl relative overflow-hidden flex flex-col gap-3.5">
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-xl bg-white flex items-center justify-center p-1 border-2 border-[#D4AF37] shadow-md shrink-0">
-                  <span className="text-[#2C2E53] font-black text-base tracking-tight">CBA</span>
+                <div className="w-11 h-11 rounded-xl bg-white flex items-center justify-center p-1.5 border-2 border-[#D4AF37] shadow-md shrink-0">
+                  <img
+                    src={`${import.meta.env.BASE_URL}logo-cba.png`}
+                    alt="Logo Colegio Bellas Artes"
+                    className="w-full h-full object-contain"
+                  />
                 </div>
                 <div className="min-w-0 flex-1">
                   <h4 className="font-black text-xs sm:text-sm text-white tracking-wide">
