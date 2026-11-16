@@ -4838,6 +4838,48 @@ export const INITIAL_USERS: AppUser[] = [
     allowedLevels: ['INICIAL', 'PRIMARIA', 'MEDIA_GENERAL'],
     gender: 'FEMENINO',
     active: true
+  },
+  {
+    id: 'usr-sec-inicial',
+    username: 'sec.inicial',
+    cedula: 'V-22.345.678',
+    password: 'cba2026*secinicial',
+    fullName: 'Lic. Mariana del Carmen Morales',
+    email: 'sec.inicial@bellasartes.edu.ve',
+    role: 'SECRETARIA',
+    defaultLevel: 'INICIAL',
+    allowedLevels: ['INICIAL'],
+    gender: 'FEMENINO',
+    active: true,
+    avatarUrl: 'cba-meta:{"g":"FEMENINO","c":"V-22.345.678","r":"SECRETARIA","al":["INICIAL"],"a":"preset:female-teal-circle"}'
+  },
+  {
+    id: 'usr-sec-primaria',
+    username: 'sec.primaria',
+    cedula: 'V-20.987.654',
+    password: 'cba2026*secprimaria',
+    fullName: 'Lic. Beatriz Elena Rincón',
+    email: 'sec.primaria@bellasartes.edu.ve',
+    role: 'SECRETARIA',
+    defaultLevel: 'PRIMARIA',
+    allowedLevels: ['PRIMARIA'],
+    gender: 'FEMENINO',
+    active: true,
+    avatarUrl: 'cba-meta:{"g":"FEMENINO","c":"V-20.987.654","r":"SECRETARIA","al":["PRIMARIA"],"a":"preset:female-cyan"}'
+  },
+  {
+    id: 'usr-sec-media',
+    username: 'sec.media',
+    cedula: 'V-19.456.789',
+    password: 'cba2026*secmedia',
+    fullName: 'Lic. Daniela Alejandra Sulbarán',
+    email: 'sec.media@bellasartes.edu.ve',
+    role: 'SECRETARIA',
+    defaultLevel: 'MEDIA_GENERAL',
+    allowedLevels: ['MEDIA_GENERAL'],
+    gender: 'FEMENINO',
+    active: true,
+    avatarUrl: 'cba-meta:{"g":"FEMENINO","c":"V-19.456.789","r":"SECRETARIA","al":["MEDIA_GENERAL"],"a":"preset:female-teal-circle"}'
   }
 ];
 

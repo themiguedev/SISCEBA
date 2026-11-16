@@ -16,6 +16,9 @@ A continuación se detallan las cuentas institucionales configuradas para admini
 | **COORDINACIÓN INICIAL** | Lic. María Gabriela Pacheco | `coord.inicial` | `V-18.452.101` | `cba2026*inicial` | `coord.inicial@bellasartes.edu.ve` | Educación Inicial |
 | **COORDINACIÓN PRIMARIA** | Prof. Roberto Antonio Mendoza | `coord.primaria` | `V-16.789.202` | `cba2026*primaria` | `coord.primaria@bellasartes.edu.ve` | Educación Primaria |
 | **COORDINACIÓN MEDIA** | Prof. Patricia Coromoto Leal | `coord.media` | `V-14.321.303` | `cba2026*media` | `coord.media@bellasartes.edu.ve` | Media General |
+| **SECRETARÍA INICIAL** | Lic. Mariana del Carmen Morales | `sec.inicial` | `V-22.345.678` | `cba2026*secinicial` | `sec.inicial@bellasartes.edu.ve` | Educación Inicial (Salas de 4 y 5 Años) |
+| **SECRETARÍA PRIMARIA** | Lic. Beatriz Elena Rincón | `sec.primaria` | `V-20.987.654` | `cba2026*secprimaria` | `sec.primaria@bellasartes.edu.ve` | Educación Primaria (1er a 6to Grado) |
+| **SECRETARÍA MEDIA GENERAL** | Lic. Daniela Alejandra Sulbarán | `sec.media` | `V-19.456.789` | `cba2026*secmedia` | `sec.media@bellasartes.edu.ve` | Media General (1er a 5to Año) |
 | **ORIENTACIÓN ESCOLAR** *(Prueba)* | Lic. Sofía Valentina Navarro | `orientador` | `V-19.876.543` | `cba2026*orienta` | `orientacion@bellasartes.edu.ve` | Todos (Inicial, Primaria, Media General) |
 | **DIRECCIÓN GENERAL** | Prof. Carmen Elena Rodríguez | `directora` | `V-11.234.567` | `cba2026*directora` | `directora@bellasartes.edu.ve` | Todos los niveles |
 
@@ -134,7 +137,72 @@ A continuación se detallan las cuentas institucionales configuradas para admini
 
 ---
 
-## 🚀 5. Inicio Rápido del Sistema
+## 📂 5. Perfil y Alcance del Rol de Secretaría (`SECRETARIA`) por Subsistema
+
+* **Nivel Jerárquico en RBAC:** `50` (Secretaría Escolar / Registro de Asistencia y Convivencia).
+* **Propósito Institucional:** Gestión operativa y control diario de la asistencia escolar, justificaciones médicas/familiares, registro sistemático de conducta y disciplina, y consulta de nóminas oficiales, garantizando la fidelidad de la información y el cumplimiento del límite de inasistencias sin permisos de carga ni alteración de calificaciones académicas.
+* **Módulos Habilitados (Regla Institucional CBA):**
+  * `ESCRITORIO`: Dashboard operativo con métricas de asistencia, perfil institucional y horario.
+  * `GESTION`: Exclusivamente **Inasistencias** (`INASISTENCIAS`) y **Registro de Conducta / Disciplina** (`CONDUCTAS`). *(Sin acceso a Inscripciones, Documentos, Títulos de Bachiller, Talleres CRP, Bloqueo Administrativo ni Matrícula y Prosecución)*.
+  * `CONSULTAS`: Sábanas de rendimiento (solo lectura), boletines oficiales, récord de asistencia, estadísticas y **Nóminas Oficiales**.
+  * `COMUNIDAD`: Cartelera informativa, cumpleaños institucionales y comunicados.
+  * `AYUDA`: Manual interactivo del rol Secretaría.
+
+---
+
+### 🧸 5.1. Perfil de Secretaría de Educación Inicial (`sec.inicial`)
+* **Titular Institucional:** Lic. Mariana del Carmen Morales (`sec.inicial@bellasartes.edu.ve`).
+* **Población Escolar:** Exclusivamente **Sala de 4 Años** y **Sala de 5 Años** en las secciones oficiales **`A`** y **`B`** (no existe Sala de 3 Años ni sección C).
+* **Escala Evaluativa Referencial:** Escala **Literal** (`A`, `B`, `C`, `D`, `E`) — visualización en reportes y nóminas sin cálculo numérico.
+* **Atribuciones Específicas:**
+  1. **Control de Asistencia Diaria en Preescolar:**
+     - Registro y pase de asistencia diaria en salas de 4 y 5 años (secciones A y B).
+     - Asiento y validación de justificaciones por motivos de salud infantil o adaptación escolar presentadas por los representantes.
+  2. **Registro de Hábitos y Convivencia Infantil:**
+     - Registro de observaciones conductuales formativas, llamados de atención pedagógicos y acuerdos de corresponsabilidad con los padres.
+     - Registro de méritos y reconocimientos tempranos en hábitos escolares.
+  3. **Padrón y Nóminas de Educación Inicial:**
+     - Emisión y consulta de nóminas oficiales con cédulas de identidad escolar (C.E.) y datos de contacto de los representantes legales.
+     - Cuadros de porcentaje de asistencia mensual para el archivo de coordinación inicial.
+
+---
+
+### 🎒 5.2. Perfil de Secretaría de Educación Primaria (`sec.primaria`)
+* **Titular Institucional:** Lic. Beatriz Elena Rincón (`sec.primaria@bellasartes.edu.ve`).
+* **Población Escolar:** De **1er Grado a 6to Grado** en las secciones oficiales **`A`** y **`B`**.
+* **Escala Evaluativa Referencial:** Escala **Cualitativa / Formativa** (`L` [Logrado], `A` [Avanzando], `P` [Proceso], `I` [Iniciado]).
+* **Atribuciones Específicas:**
+  1. **Control Diario de Asistencia por Grado y Sección:**
+     - Registro diario de asistencia y verificación de justificativos médicos y constancias de inasistencia.
+     - Monitoreo preventivo del porcentaje acumulativo de inasistencias en el lapso.
+  2. **Gestión Disciplinaria y Acuerdos de Convivencia:**
+     - Asiento de incidencias leves y graves conforme al Manual de Convivencia Escolar CBA.
+     - Registro de compromisos firmados por los representantes y citaciones enviadas por inasistencias reiteradas.
+  3. **Consultas Institucionales de Primaria:**
+     - Consulta y descarga de nóminas de estudiantes por grado (1ero a 6to) y sección (A y B) en formato Excel oficial.
+     - Cuadros estadísticos de asistencia y reportes de récord de conducta para consejos de docentes.
+
+---
+
+### 🎓 5.3. Perfil de Secretaría de Educación Media General (`sec.media`)
+* **Titular Institucional:** Lic. Daniela Alejandra Sulbarán (`sec.media@bellasartes.edu.ve`).
+* **Población Escolar:** De **1er Año a 5to Año** en las secciones oficiales **`A`** y **`B`**.
+* **Escala Evaluativa Referencial:** Escala **Cuantitativa Vigesimal** (`01` a `20`).
+* **Atribuciones Específicas:**
+  1. **Auditoría Estricta de Asistencia y Límite del 25% (Art. 109 LOE):**
+     - Control diario y acumulado de inasistencias por curso y sección.
+     - Supervisión de la alerta reglamentaria automática del 25% de faltas injustificadas: despacho de citaciones obligatorias a los representantes legales.
+     - Asiento de pases de entrada por retraso y justificaciones formales.
+  2. **Expedientes Disciplinarios y Conducta Escolar:**
+     - Asiento de faltas al uniforme, retardos reiterados, uso no autorizado de dispositivos móviles y faltas al orden institucional.
+     - Archivo digital de compromisos y acuerdos sancionados por Coordinación y Dirección.
+  3. **Padrón Estudiantil y Consultas de Bachillerato:**
+     - Control y auditoría de nóminas con cédulas de identidad laminadas de los cursantes.
+     - Consulta de sábanas de rendimiento cuantitativo por lapso y notas de corte para auditoría de asistencia en consejos de curso.
+
+---
+
+## 🚀 6. Inicio Rápido del Sistema
 
 Para ejecutar el sistema con base de datos PostgreSQL local y API Gateway nativa:
 

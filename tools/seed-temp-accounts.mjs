@@ -81,6 +81,42 @@ const accounts = [
     active: true,
     avatar_url: 'cba-meta:{"g":"FEMENINO","c":"V-19.876.543","r":"ORIENTACION","al":["INICIAL","PRIMARIA","MEDIA_GENERAL"],"a":"preset:female-teal-circle"}',
     academic_assignments: []
+  },
+  {
+    id: 'usr-sec-inicial',
+    username: 'sec.inicial',
+    password: 'cba2026*secinicial',
+    full_name: 'Lic. Mariana del Carmen Morales',
+    email: 'sec.inicial@bellasartes.edu.ve',
+    role: 'SECRETARIA',
+    default_level: 'INICIAL',
+    active: true,
+    avatar_url: 'cba-meta:{"g":"FEMENINO","c":"V-22.345.678","r":"SECRETARIA","al":["INICIAL"],"a":"preset:female-teal-circle"}',
+    academic_assignments: []
+  },
+  {
+    id: 'usr-sec-primaria',
+    username: 'sec.primaria',
+    password: 'cba2026*secprimaria',
+    full_name: 'Lic. Beatriz Elena Rincón',
+    email: 'sec.primaria@bellasartes.edu.ve',
+    role: 'SECRETARIA',
+    default_level: 'PRIMARIA',
+    active: true,
+    avatar_url: 'cba-meta:{"g":"FEMENINO","c":"V-20.987.654","r":"SECRETARIA","al":["PRIMARIA"],"a":"preset:female-cyan"}',
+    academic_assignments: []
+  },
+  {
+    id: 'usr-sec-media',
+    username: 'sec.media',
+    password: 'cba2026*secmedia',
+    full_name: 'Lic. Daniela Alejandra Sulbarán',
+    email: 'sec.media@bellasartes.edu.ve',
+    role: 'SECRETARIA',
+    default_level: 'MEDIA_GENERAL',
+    active: true,
+    avatar_url: 'cba-meta:{"g":"FEMENINO","c":"V-19.456.789","r":"SECRETARIA","al":["MEDIA_GENERAL"],"a":"preset:female-teal-circle"}',
+    academic_assignments: []
   }
 ];
 
@@ -130,7 +166,7 @@ async function main() {
     const res = await client.query(`
       SELECT id, username, full_name, role, default_level, email 
       FROM app_users 
-      WHERE id IN ('usr-directora', 'usr-coord-inicial', 'usr-coord-primaria', 'usr-coord-media', 'usr-coord-temp', 'usr-orientacion');
+      WHERE id IN ('usr-directora', 'usr-coord-inicial', 'usr-coord-primaria', 'usr-coord-media', 'usr-coord-temp', 'usr-orientacion', 'usr-sec-inicial', 'usr-sec-primaria', 'usr-sec-media');
     `);
     console.log('\n📊 Registros actuales en PostgreSQL:');
     console.table(res.rows);

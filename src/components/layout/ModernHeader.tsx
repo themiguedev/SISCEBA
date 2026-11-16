@@ -302,6 +302,20 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
             );
           }
 
+          // Si es Secretaría institucional, mostrar insignia con su nivel asignado
+          if (currentRole === 'SECRETARIA') {
+            const assignedLvl = userLevels.length === 1 ? userLevels[0] : currentLevel;
+            const data = levelDetails[assignedLvl] || { label: assignedLvl.replace('_', ' '), icon: '📂' };
+            return (
+              <div className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#141525] border border-indigo-400/50 shadow-inner">
+                <span className="text-base">{data.icon}</span>
+                <span className="text-xs font-black text-indigo-300 tracking-wider uppercase">
+                  Secretaría • {data.label}
+                </span>
+              </div>
+            );
+          }
+
           // Si el usuario/docente tiene exactamente 1 nivel asignado
           if (userLevels.length === 1) {
             const singleLvl = userLevels[0];
@@ -327,14 +341,12 @@ export const ModernHeader: React.FC<ModernHeaderProps> = ({
             );
           }
 
-          // Para roles no pedagógicos (SECRETARIA, REPRESENTANTE, ESTUDIANTE)
+          // Para roles de consulta o comunidad (REPRESENTANTE, ESTUDIANTE)
           return (
             <div className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#141525] border border-[#D4AF37]/50 shadow-inner">
               <span className="w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse shrink-0"></span>
               <span className="text-xs font-black text-[#D4AF37] tracking-wider uppercase">
-                {currentRole === 'SECRETARIA'
-                  ? 'Secretaría • Asistencia y Conducta'
-                  : currentRole === 'REPRESENTANTE'
+                {currentRole === 'REPRESENTANTE'
                   ? 'Portal de Consultas • Representantes'
                   : currentRole === 'ESTUDIANTE'
                   ? 'Portal del Alumno CBA'

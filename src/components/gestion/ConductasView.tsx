@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useApp } from '../../context/AppContext';
 import { ConductEntry } from '../../types';
+import { getUserAllowedLevels } from '../../utils/rbac';
 import {
   ShieldAlert,
   Award,
@@ -15,19 +16,39 @@ import {
 } from 'lucide-react';
 
 export const ConductasView: React.FC = () => {
-  const { conducts, addConduct, students, activeLapso } = useApp();
+  const { conducts, addConduct, students, activeLapso, currentUser, currentLevel } = useApp();
   const [filterType, setFilterType] = useState<string>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const allowedLevels = getUserAllowedLevels(currentUser?.role || 'SECRETARIA', currentUser);
+  const relevantStudents = allowedLevels.length > 0 && allowedLevels.length < 3
+    ? students.filter(s => allowedLevels.includes(s.level))
+    : students;
+
   // Form State
-  const [selectedStudentId, setSelectedStudentId] = useState(students[0]?.id || '');
+  const [selectedStudentId, setSelectedStudentId] = useState(relevantStudents[0]?.id || students[0]?.id || '');
   const [type, setType] = useState<ConductEntry['type']>('LEVE');
   const [description, setDescription] = useState('');
   const [agreements, setAgreements] = useState('');
-  const [reportedBy, setReportedBy] = useState('Docente de Aula / Coordinación');
+  const defaultReportedBy = currentUser?.role === 'SECRETARIA'
+    ? `Secretaría Escolar (${currentLevel.replace('_', ' ')})`
+    : 'Docente de Aula / Coordinación';
+  const [reportedBy, setReportedBy] = useState(defaultReportedBy);
+
+  useEffect(() => {
+    if (relevantStudents.length > 0 && !relevantStudents.some(s => s.id === selectedStudentId)) {
+      setSelectedStudentId(relevantStudents[0].id);
+    }
+  }, [relevantStudents, selectedStudentId]);
 
   const filteredConducts = conducts.filter((c) => {
+    if (allowedLevels.length > 0 && allowedLevels.length < 3) {
+      const studentMatch = students.find(s => s.id === c.studentId);
+      if (studentMatch && !allowedLevels.includes(studentMatch.level)) {
+        return false;
+      }
+    }
     const matchesType = filterType === 'ALL' || c.type === filterType;
     const matchesSearch =
       c.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -196,7 +217,7 @@ export const ConductasView: React.FC = () => {
                   onChange={(e) => setSelectedStudentId(e.target.value)}
                   className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-semibold text-slate-800"
                 >
-                  {students.map((s) => (
+                  {relevantStudents.map((s) => (
                     <option key={s.id} value={s.id}>
                       {s.fullName} ({s.grade} {s.section})
                     </option>

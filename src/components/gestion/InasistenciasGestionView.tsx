@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { DailyAttendanceRecord, SubjectAttendanceAccumulated } from '../../types';
+import { DailyAttendanceRecord, SubjectAttendanceAccumulated, EducationalLevel } from '../../types';
+import { getUserAllowedLevels } from '../../utils/rbac';
 import {
   Calendar,
   CheckCircle2,
@@ -17,6 +18,13 @@ import {
   Send
 } from 'lucide-react';
 
+const LEVEL_GRADES: Record<EducationalLevel, string[]> = {
+  INICIAL: ['Sala de 4 Años', 'Sala de 5 Años'],
+  PRIMARIA: ['1er Grado', '2do Grado', '3er Grado', '4to Grado', '5to Grado', '6to Grado'],
+  MEDIA_GENERAL: ['1er Año', '2do Año', '3er Año', '4to Año', '5to Año']
+};
+const SECTIONS = ['A', 'B'];
+
 export const InasistenciasGestionView: React.FC = () => {
   const {
     students,
@@ -25,6 +33,10 @@ export const InasistenciasGestionView: React.FC = () => {
     accumulatedAttendance,
     activeLapso,
     currentSection,
+    setCurrentSection,
+    currentLevel,
+    setCurrentLevel,
+    currentUser,
     sendNotification
   } = useApp();
 
@@ -32,6 +44,25 @@ export const InasistenciasGestionView: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<string>('2026-09-17');
   const [saveBanner, setSaveBanner] = useState(false);
   const [citacionSentBanner, setCitacionSentBanner] = useState<string | null>(null);
+
+  const allowedLevels = getUserAllowedLevels(currentUser?.role || 'SECRETARIA', currentUser);
+
+  // Parsear grado y sección actuales
+  const lastSpaceIdx = currentSection.lastIndexOf(' ');
+  const currentGradeFromSec = lastSpaceIdx !== -1 ? currentSection.substring(0, lastSpaceIdx) : currentSection;
+  const currentSecLetter = lastSpaceIdx !== -1 ? currentSection.substring(lastSpaceIdx + 1) : 'A';
+
+  const validGrades = LEVEL_GRADES[currentLevel] || [];
+  const activeGrade = validGrades.includes(currentGradeFromSec) ? currentGradeFromSec : (validGrades[0] || '1er Grado');
+  const activeSec = SECTIONS.includes(currentSecLetter) ? currentSecLetter : 'A';
+
+  const handleGradeChange = (newGrade: string) => {
+    setCurrentSection(`${newGrade} ${activeSec}`);
+  };
+
+  const handleSectionChange = (newSec: string) => {
+    setCurrentSection(`${activeGrade} ${newSec}`);
+  };
 
   // Filter students by section
   const sectionStudents = students.filter(
@@ -158,8 +189,8 @@ export const InasistenciasGestionView: React.FC = () => {
       {/* VIEW 1: INASISTENCIAS DIARIAS */}
       {activeTab === 'DIARIA' && (
         <div className="space-y-4">
-          <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
+          <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-3">
               <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700">
                 <Calendar className="w-4 h-4 text-[#D4AF37]" />
                 <span>Fecha:</span>
@@ -170,14 +201,65 @@ export const InasistenciasGestionView: React.FC = () => {
                   className="bg-transparent border-none text-slate-800 focus:outline-none"
                 />
               </div>
-              <span className="text-xs text-slate-500 font-semibold">
-                Sección Activa: <strong className="text-[#2C2E53]">{currentSection}</strong>
+
+              {/* Selector de Nivel (si tiene múltiples niveles asignados) */}
+              {allowedLevels.length > 1 && (
+                <div className="flex items-center gap-1.5 bg-slate-50 px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700">
+                  <Layers className="w-3.5 h-3.5 text-indigo-600" />
+                  <span>Nivel:</span>
+                  <select
+                    value={currentLevel}
+                    onChange={(e) => {
+                      const lvl = e.target.value as EducationalLevel;
+                      setCurrentLevel(lvl);
+                    }}
+                    className="bg-transparent border-none text-slate-800 font-bold focus:outline-none cursor-pointer"
+                  >
+                    {allowedLevels.map((lvl) => (
+                      <option key={lvl} value={lvl}>{lvl.replace('_', ' ')}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Selector de Grado / Sala / Año */}
+              <div className="flex items-center gap-1.5 bg-slate-50 px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700">
+                <BookOpen className="w-3.5 h-3.5 text-[#D4AF37]" />
+                <span>Grado/Año:</span>
+                <select
+                  value={activeGrade}
+                  onChange={(e) => handleGradeChange(e.target.value)}
+                  className="bg-transparent border-none text-slate-800 font-bold focus:outline-none cursor-pointer"
+                >
+                  {(LEVEL_GRADES[currentLevel] || []).map((g) => (
+                    <option key={g} value={g}>{g}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Selector de Sección (Exclusivamente A y B según Directrices Institucionales) */}
+              <div className="flex items-center gap-1.5 bg-slate-50 px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700">
+                <Users className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Sección:</span>
+                <select
+                  value={activeSec}
+                  onChange={(e) => handleSectionChange(e.target.value)}
+                  className="bg-transparent border-none text-slate-800 font-bold focus:outline-none cursor-pointer"
+                >
+                  {SECTIONS.map((sec) => (
+                    <option key={sec} value={sec}>Sección {sec}</option>
+                  ))}
+                </select>
+              </div>
+
+              <span className="text-[11px] text-slate-500 font-medium hidden sm:inline">
+                ({sectionStudents.length} estudiantes)
               </span>
             </div>
 
             <button
               onClick={handleSaveAll}
-              className="px-4 py-2 rounded-xl bg-[#2C2E53] hover:bg-[#1B1C33] text-[#D4AF37] font-bold text-xs shadow-md transition flex items-center gap-2"
+              className="px-4 py-2 rounded-xl bg-[#2C2E53] hover:bg-[#1B1C33] text-[#D4AF37] font-bold text-xs shadow-md transition flex items-center gap-2 cursor-pointer shrink-0"
             >
               <Save className="w-3.5 h-3.5" />
               Guardar Asistencias
