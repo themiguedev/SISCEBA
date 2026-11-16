@@ -4880,6 +4880,60 @@ export const INITIAL_USERS: AppUser[] = [
     gender: 'FEMENINO',
     active: true,
     avatarUrl: 'cba-meta:{"g":"FEMENINO","c":"V-19.456.789","r":"SECRETARIA","al":["MEDIA_GENERAL"],"a":"preset:female-teal-circle"}'
+  },
+  {
+    id: 'usr-doc-inicial',
+    username: 'doc.inicial',
+    cedula: 'V-24.123.456',
+    password: 'cba2026*docinicial',
+    fullName: 'Prof. Ana Valentina Castillo',
+    email: 'doc.inicial@bellasartes.edu.ve',
+    role: 'DOCENTE',
+    defaultLevel: 'INICIAL',
+    allowedLevels: ['INICIAL'],
+    gender: 'FEMENINO',
+    active: true,
+    avatarUrl: 'cba-meta:{"g":"FEMENINO","c":"V-24.123.456","r":"DOCENTE","al":["INICIAL"],"a":"preset:female-teal-circle"}',
+    academicAssignments: [
+      { id: 'asig-ini-fp-5a', level: 'INICIAL', grade: 'Sala de 5 Años', section: 'A', areaId: 'ini-fp', areaCode: 'INI-FP', areaName: 'Formación personal', subjectName: 'Formación personal' },
+      { id: 'asig-ini-ca-5a', level: 'INICIAL', grade: 'Sala de 5 Años', section: 'A', areaId: 'ini-ca', areaCode: 'INI-CA', areaName: 'Relación entre los componentes del ambiente', subjectName: 'Relación entre los componentes del ambiente' }
+    ]
+  },
+  {
+    id: 'usr-doc-primaria',
+    username: 'doc.primaria',
+    cedula: 'V-17.654.321',
+    password: 'cba2026*docprimaria',
+    fullName: 'Prof. Carlos Eduardo Méndez',
+    email: 'doc.primaria@bellasartes.edu.ve',
+    role: 'DOCENTE',
+    defaultLevel: 'PRIMARIA',
+    allowedLevels: ['PRIMARIA'],
+    gender: 'MASCULINO',
+    active: true,
+    avatarUrl: 'cba-meta:{"g":"MASCULINO","c":"V-17.654.321","r":"DOCENTE","al":["PRIMARIA"],"a":"preset:male-cyan"}',
+    academicAssignments: [
+      { id: 'asig-pri-len-5a', level: 'PRIMARIA', grade: '5to Grado', section: 'A', areaId: 'pri-len', areaCode: 'PRI-LEN', areaName: 'Lenguaje', subjectName: 'Lenguaje' },
+      { id: 'asig-pri-mat-5a', level: 'PRIMARIA', grade: '5to Grado', section: 'A', areaId: 'pri-mat', areaCode: 'PRI-MAT', areaName: 'Matemáticas', subjectName: 'Matemáticas' }
+    ]
+  },
+  {
+    id: 'usr-doc-media',
+    username: 'doc.media',
+    cedula: 'V-15.345.678',
+    password: 'cba2026*docmedia',
+    fullName: 'Prof. Gabriela Alejandra Rivas',
+    email: 'doc.media@bellasartes.edu.ve',
+    role: 'DOCENTE',
+    defaultLevel: 'MEDIA_GENERAL',
+    allowedLevels: ['MEDIA_GENERAL'],
+    gender: 'FEMENINO',
+    active: true,
+    avatarUrl: 'cba-meta:{"g":"FEMENINO","c":"V-15.345.678","r":"DOCENTE","al":["MEDIA_GENERAL"],"a":"preset:female-teal-circle"}',
+    academicAssignments: [
+      { id: 'asig-med-mat-4a', level: 'MEDIA_GENERAL', grade: '4to Año', section: 'A', areaId: 'med-mat', areaCode: 'MED-MAT', areaName: 'Matemáticas', subjectName: 'Matemáticas' },
+      { id: 'asig-med-cas-4a', level: 'MEDIA_GENERAL', grade: '4to Año', section: 'A', areaId: 'med-cas', areaCode: 'MED-CAS', areaName: 'Castellano', subjectName: 'Castellano' }
+    ]
   }
 ];
 
@@ -4898,6 +4952,24 @@ export const INITIAL_USER_SCHEDULES: UserSchedule[] = [
   },
   {
     userId: 'usr-doc-ciencias',
+    userRole: 'DOCENTE',
+    schoolYear: '2026 - 2027',
+    blocks: []
+  },
+  {
+    userId: 'usr-doc-inicial',
+    userRole: 'DOCENTE',
+    schoolYear: '2026 - 2027',
+    blocks: []
+  },
+  {
+    userId: 'usr-doc-primaria',
+    userRole: 'DOCENTE',
+    schoolYear: '2026 - 2027',
+    blocks: []
+  },
+  {
+    userId: 'usr-doc-media',
     userRole: 'DOCENTE',
     schoolYear: '2026 - 2027',
     blocks: []

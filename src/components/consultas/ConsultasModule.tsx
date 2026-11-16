@@ -143,10 +143,10 @@ export const ConsultasModule: React.FC<ConsultasModuleProps> = ({
         label: 'Boletines y Reportes',
         badgeLabel: 'Boletines',
         icon: GraduationCap,
-        description: 'Emisión de boletines informativos, constancias y catálogo oficial C.E.O.',
+        description: 'Emisión de boletines informativos, constancias y catálogo de reportes.',
         bannerTitle: 'Centro de Emisión de Reportes y Boletines',
         bannerDescription:
-          'Generación e impresión oficial de boletines informativos, constancias de estudio certificadas y formatos del Control de Estudios (C.E.O.).',
+          'Generación e impresión de boletines informativos, constancias de estudio certificadas y formatos del Control de Estudios.',
         bannerScope: `Documentos Oficiales • L${activeLapso} • 2026-2027`
       },
       ASISTENCIA: {
@@ -309,18 +309,6 @@ export const ConsultasModule: React.FC<ConsultasModuleProps> = ({
               <h1 className="text-base sm:text-lg font-extrabold tracking-tight text-slate-950 dark:text-white">
                 Consultas y Reportes
               </h1>
-              <span className="text-[11px] font-extrabold text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-md border-2 border-slate-300 dark:border-slate-600">
-                Inicial • Primaria • Media General
-              </span>
-              {currentRole === 'ADMINISTRADOR' ? (
-                <span className="text-[10px] font-black text-purple-950 dark:text-purple-200 bg-purple-100 dark:bg-purple-950 px-2 py-0.5 rounded-md border-2 border-purple-300 dark:border-purple-700">
-                  Admin
-                </span>
-              ) : (
-                <span className="text-[10px] font-black text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md border border-slate-300 dark:border-slate-700">
-                  {ROLE_METADATA[currentRole]?.label || currentRole}
-                </span>
-              )}
             </div>
           </div>
 
@@ -353,7 +341,7 @@ export const ConsultasModule: React.FC<ConsultasModuleProps> = ({
               <button
                 onClick={() => setIsAuditModalOpen(true)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition border border-slate-200 dark:border-slate-700 shadow-xs cursor-pointer"
-                title="Auditoría de Reportes y Comunicaciones (C.E.O.)"
+                title="Auditoría de Reportes y Comunicaciones Institucionales"
               >
                 <ShieldAlert className="w-3.5 h-3.5 text-amber-500" />
                 <span className="hidden sm:inline">Bitácora</span>
@@ -411,11 +399,8 @@ export const ConsultasModule: React.FC<ConsultasModuleProps> = ({
       <div className="bg-gradient-to-r from-[#2C2E53] via-[#1E2038] to-[#141525] rounded-2xl p-5 sm:p-6 text-white shadow-md border border-[#3D4066] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider bg-[#0F1122]/90 text-amber-300 border border-[#D4AF37] shadow-xs">
-              Control Curricular Oficial
-            </span>
             <span className="text-xs text-amber-200/90 font-medium">
-              Consultas y Reportes • C.E.O. SISCEBA
+              Consultas y Reportes • SICE-CBA
             </span>
           </div>
           <h2 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2">

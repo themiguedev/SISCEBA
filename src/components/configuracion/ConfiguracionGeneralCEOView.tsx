@@ -216,7 +216,7 @@ export const ConfiguracionGeneralCEOView: React.FC = () => {
         </div>
         <h3 className="text-lg font-black text-rose-950">Acceso Restringido - Configuración CEO</h3>
         <p className="text-xs text-rose-700 max-w-md mx-auto">
-          Esta vista administrativa del sistema CEO está reservada exclusivamente para el Administrador de Sistemas.
+          Esta vista administrativa del sistema SICE-CBA está reservada exclusivamente para el Administrador de Sistemas.
         </p>
       </div>
     );

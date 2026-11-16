@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>PostgreSQL Console - Constraints Verification</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #0c1017;
+      font-family: "Consolas", "Cascadia Code", "Courier New", monospace;
+      color: #c9d1d9;
+      padding: 20px;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .terminal-window {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.6);
+    }
+    .terminal-titlebar {
+      background: #21262d;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid #30363d;
+    }
+    .window-buttons {
+      display: flex;
+      gap: 7px;
+      margin-right: 14px;
+    }
+    .btn { width: 11px; height: 11px; border-radius: 50%; }
+    .btn-close { background: #ff5f56; }
+    .btn-min { background: #ffbd2e; }
+    .btn-max { background: #27c93f; }
+    .title-text {
+      color: #8b949e;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .terminal-body {
+      padding: 18px 20px;
+      overflow-y: auto;
+      font-size: 13px;
+      line-height: 1.45;
+      flex-grow: 1;
+    }
+    .prompt { color: #58a6ff; font-weight: bold; }
+    .cmd { color: #f0f6fc; }
+    .comment { color: #8b949e; font-style: italic; }
+    .error { color: #f85149; font-weight: bold; }
+    .error-detail { color: #ff7b72; }
+    .success { color: #56d364; }
+    .table-output {
+      color: #e6edf3;
+      margin: 8px 0;
+    }
+    .header-sep { color: #484f58; }
+  </style>
+</head>
+<body>
+
+  <div class="terminal-window">
+    <div class="terminal-titlebar">
+      <div class="window-buttons">
+        <div class="btn btn-close"></div>
+        <div class="btn btn-min"></div>
+        <div class="btn btn-max"></div>
+      </div>
+      <div class="title-text">psql -U postgres -h 127.0.0.1 -d sisceba (PostgreSQL 16.2 Enterprise Engine)</div>
+    </div>
+
+    <div class="terminal-body">
+      <div><span class="comment">-- SISCEBA PostgreSQL 16: Verificación de Integridad Referencial y Restricciones CHECK</span></div>
+      <div><span class="prompt">sisceba=#</span> <span class="cmd">\d students</span></div>
+      <div class="table-output">
+                                      Tabla "public.students"<br>
+       Columna        |           Tipo           | Nulable  |          Por omisión           <br>
+----------------------+--------------------------+----------+------------------------------<br>
+ id                   | character varying(60)    | not null | <br>
+ cedula               | character varying(20)    | not null | <br>
+ full_name            | character varying(150)   | not null | <br>
+ gender               | character(1)             |          | <br>
+ birth_date           | date                     | not null | <br>
+ level                | character varying(20)    | not null | <br>
+ grade                | character varying(40)    | not null | <br>
+ section              | character varying(10)    | not null | <br>
+ representative_name  | character varying(150)   | not null | <br>
+ status               | character varying(25)    |          | 'REGULAR'::character varying<br>
+Índices:<br>
+    "students_pkey" PRIMARY KEY, btree (id)<br>
+    "students_cedula_key" UNIQUE CONSTRAINT, btree (cedula)<br>
+Restricciones CHECK:<br>
+    "students_gender_check" CHECK (gender = ANY (ARRAY['M'::bpchar, 'F'::bpchar]))<br>
+    "students_level_check" CHECK (level::text = ANY (ARRAY['INICIAL'::character varying, 'PRIMARIA'::character varying, 'MEDIA_GENERAL'::character varying]::text[]))<br>
+    "students_status_check" CHECK (status::text = ANY (ARRAY['REGULAR'::character varying, 'EN_REVISION'::character varying, 'MATERIA_PENDIENTE'::character varying]::text[]))<br>
+Referenciada por:<br>
+    TABLE "evaluation_records" CONSTRAINT "evaluation_records_student_id_fkey" FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE<br>
+    TABLE "conduct_entries" CONSTRAINT "conduct_entries_student_id_fkey" FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE<br>
+    TABLE "daily_attendance" CONSTRAINT "daily_attendance_student_id_fkey" FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE<br>
+    TABLE "crp_enrollments" CONSTRAINT "crp_enrollments_student_id_fkey" FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE<br>
+    TABLE "administrative_blocks" CONSTRAINT "administrative_blocks_student_id_fkey" FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
+      </div>
+      <br>
+
+      <div><span class="comment">-- PRUEBA 1: Intento de insertar calificación con un student_id que no existe en students</span></div>
+      <div><span class="prompt">sisceba=#</span> <span class="cmd">INSERT INTO evaluation_records (id, student_id, area_id, moment, lapso, score_numeric) VALUES ('err-fk-01', 'ALUMNO_INEXISTENTE_999', 'ini-fp', 'PROCESAL', 1, 19.50);</span></div>
+      <div><span class="error">ERROR:  insert or update on table "evaluation_records" violates foreign key constraint "evaluation_records_student_id_fkey"</span></div>
+      <div><span class="error-detail">DETALLE:  Key (student_id)=(ALUMNO_INEXISTENTE_999) is not present in table "students".</span></div>
+      <div><span class="success">✓ Integridad Referencial FK: BLOQUEO EXITOSO (La base de datos rechaza registros huérfanos).</span></div>
+      <br>
+
+      <div><span class="comment">-- PRUEBA 2: Intento de registrar estudiante violando la restricción institucional CHECK (Nivel no permitido)</span></div>
+      <div><span class="prompt">sisceba=#</span> <span class="cmd">INSERT INTO students (id, cedula, full_name, birth_date, level, grade, section, representative_name) VALUES ('err-chk-02', 'V-00000000', 'ESTUDIANTE INVALIDO', '2015-01-01', 'UNIVERSITARIO', '1er Grado', 'A', 'REPRESENTANTE');</span></div>
+      <div><span class="error">ERROR:  new row for relation "students" violates check constraint "students_level_check"</span></div>
+      <div><span class="error-detail">DETALLE:  Failing row contains (err-chk-02, V-00000000, ESTUDIANTE INVALIDO, null, 2015-01-01, UNIVERSITARIO, 1er Grado, A, REPRESENTANTE...).</span></div>
+      <div><span class="success">✓ Validación de Dominio CHECK: BLOQUEO EXITOSO (Solo admite 'INICIAL', 'PRIMARIA', 'MEDIA_GENERAL').</span></div>
+      <br>
+      <div><span class="prompt">sisceba=#</span> <span class="cmd">_</span></div>
+    </div>
+  </div>
+
+</body>
+</html>

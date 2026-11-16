@@ -19,6 +19,9 @@ A continuación se detallan las cuentas institucionales configuradas para admini
 | **SECRETARÍA INICIAL** | Lic. Mariana del Carmen Morales | `sec.inicial` | `V-22.345.678` | `cba2026*secinicial` | `sec.inicial@bellasartes.edu.ve` | Educación Inicial (Salas de 4 y 5 Años) |
 | **SECRETARÍA PRIMARIA** | Lic. Beatriz Elena Rincón | `sec.primaria` | `V-20.987.654` | `cba2026*secprimaria` | `sec.primaria@bellasartes.edu.ve` | Educación Primaria (1er a 6to Grado) |
 | **SECRETARÍA MEDIA GENERAL** | Lic. Daniela Alejandra Sulbarán | `sec.media` | `V-19.456.789` | `cba2026*secmedia` | `sec.media@bellasartes.edu.ve` | Media General (1er a 5to Año) |
+| **DOCENTE INICIAL** | Prof. Ana Valentina Castillo | `doc.inicial` | `V-24.123.456` | `cba2026*docinicial` | `doc.inicial@bellasartes.edu.ve` | Educación Inicial (Salas de 4 y 5 Años) |
+| **DOCENTE PRIMARIA** | Prof. Carlos Eduardo Méndez | `doc.primaria` | `V-17.654.321` | `cba2026*docprimaria` | `doc.primaria@bellasartes.edu.ve` | Educación Primaria (1er a 6to Grado) |
+| **DOCENTE MEDIA GENERAL** | Prof. Gabriela Alejandra Rivas | `doc.media` | `V-15.345.678` | `cba2026*docmedia` | `doc.media@bellasartes.edu.ve` | Media General (1er a 5to Año) |
 | **ORIENTACIÓN ESCOLAR** *(Prueba)* | Lic. Sofía Valentina Navarro | `orientador` | `V-19.876.543` | `cba2026*orienta` | `orientacion@bellasartes.edu.ve` | Todos (Inicial, Primaria, Media General) |
 | **DIRECCIÓN GENERAL** | Prof. Carmen Elena Rodríguez | `directora` | `V-11.234.567` | `cba2026*directora` | `directora@bellasartes.edu.ve` | Todos los niveles |
 
@@ -202,7 +205,73 @@ A continuación se detallan las cuentas institucionales configuradas para admini
 
 ---
 
-## 🚀 6. Inicio Rápido del Sistema
+## 👩‍🏫 6. Perfil y Alcance del Rol de Docente (`DOCENTE`) por Subsistema
+
+* **Nivel Jerárquico en RBAC:** `40` (Cuerpo Docente de Aula y Especialistas).
+* **Propósito Institucional:** Planificación curricular quincenal y por lapso, mediación pedagógica de los aprendizajes, registro continuo de evaluaciones procesales conforme a la escala oficial del subsistema, registro de asistencia diaria y acompañamiento formativo del estudiante.
+* **Módulos Habilitados (Regla Institucional CBA):**
+  * `ESCRITORIO`: Dashboard operativo con métricas de aula, perfil docente, horario académico y buzón interno.
+  * `GESTION`: **Asistencia Diaria / Inasistencias** (`INASISTENCIAS`), **Pases de Portería** (`PASES`), **Registro de Conducta / Disciplina** (`CONDUCTAS`) y **Talleres CRP** (`TALLERES_CRP`). *(Sin acceso a Inscripciones, Documentos, Títulos de Bachiller, Bloqueo Administrativo, Usuarios ni Matrícula y Prosecución).*
+  * **Subsistema Curricular Asignado** (`INICIAL`, `PRIMARIA` o `MEDIA_GENERAL`): Acceso pleno a Planificación Quincenal, Banco de Competencias/Indicadores, Carga de Evaluaciones Procesales, Rasgos Personales y Observaciones al Boletín.
+  * `CONSULTAS`: Sábanas de Rendimiento de sus asignaturas/secciones, Boletines del lapso, Récord de Asistencias y Nóminas oficiales de sus cursos.
+  * `COMUNIDAD`: Cartelera informativa, cumpleaños y comunicados institucionales.
+  * `CONFIGURACION`: Personalización de temas visuales (`TEMAS`).
+  * `AYUDA`: Manual interactivo del rol Docente.
+
+---
+
+### 🧸 6.1. Perfil de Docente de Educación Inicial (`doc.inicial`)
+* **Titular Institucional:** Prof. Ana Valentina Castillo (`doc.inicial@bellasartes.edu.ve`).
+* **Población Escolar:** Exclusivamente **Sala de 4 Años** y **Sala de 5 Años** en las secciones oficiales **`A`** y **`B`** (no existe Sala de 3 Años ni sección C).
+* **Escala Evaluativa Exclusiva:** Escala **Literal** (`A`, `B`, `C`, `D`, `E`). **Queda terminantemente prohibido calcular o mostrar promedios numéricos o escalas sobre 20 en este subsistema.**
+* **Atribuciones Específicas:**
+  1. **Planificación Didáctica Preescolar:**
+     - Elaboración de planes quincenales basados en los Ejes Integradores y Áreas de Aprendizaje: Formación Personal, Social y Comunicación, y Relación con otros Componentes del Ambiente.
+     - Curaduría y selección de indicadores pedagógicos y actitudinales del banco oficial de preescolar.
+  2. **Evaluación Cualitativa Continua:**
+     - Valoración formativa mediante registro de escala literal (`A`: Consolidado, `B`: En proceso avanzado, etc.).
+     - Registro descriptivo de rasgos de adaptación, motricidad, expresión artística y lenguaje en Observaciones al Boletín.
+  3. **Control de Aula y Familia:**
+     - Pase de asistencia diaria en salas y reporte oportuno de novedades fisiológicas o socioafectivas a la Coordinación de Inicial.
+
+---
+
+### 🎒 6.2. Perfil de Docente de Educación Primaria (`doc.primaria`)
+* **Titular Institucional:** Prof. Carlos Eduardo Méndez (`doc.primaria@bellasartes.edu.ve`).
+* **Población Escolar:** De **1er Grado a 6to Grado** en las secciones oficiales **`A`** y **`B`**.
+* **Escala Evaluativa Exclusiva:** Escala **Cualitativa / Formativa** (`L` [Logrado], `A` [Avanzando], `P` [Proceso], `I` [Iniciado]). El código `EP` no existe.
+* **Atribuciones Específicas:**
+  1. **Planificación por Proyectos de Aprendizaje (P.A.):**
+     - Diseño de planes quincenales contextualizados en las áreas fundamentales: Lenguaje, Matemáticas, Ciencias Naturales y Ciencias Sociales, integradas con Robótica y Bellas Artes.
+     - Selección de competencias e indicadores del Currículo Nacional Bolivariano articulados con el estándar CBA.
+  2. **Evaluación Formativa y Cualitativa:**
+     - Registro procesal de indicadores en las 4 ponderaciones formativas (`L`, `A`, `P`, `I`).
+     - Registro de niveles de lectoescritura (Presilábico, Silábico, Silábico-Alfabético, Alfabético) y fluidez lectora (PPM).
+     - Redacción de informes pedagógicos y observaciones descriptivas para los boletines de cada momento/lapso.
+  3. **Gestión de Aula:**
+     - Control diario de asistencia, detección de rezago y fomento de los acuerdos de convivencia en aula.
+
+---
+
+### 🎓 6.3. Perfil de Docente de Educación Media General (`doc.media`)
+* **Titular Institucional:** Prof. Gabriela Alejandra Rivas (`doc.media@bellasartes.edu.ve`).
+* **Población Escolar:** De **1er Año a 5to Año** en las secciones oficiales **`A`** y **`B`**.
+* **Escala Evaluativa Exclusiva:** Escala **Cuantitativa Vigesimal** (`01` a `20`) con cálculo de promedios ponderados por lapso (ponderación acumulativa del 100%).
+* **Atribuciones Específicas:**
+  1. **Plan de Evaluación y Estrategias por Lapso:**
+     - Planificación y publicación del Plan de Evaluación por Lapso con especificación de estrategias, instrumentos, fechas y ponderaciones porcentuales (máximo 20% por evaluación individual).
+     - Carga y publicación del Plan Quincenal con temas generadores y referentes teórico-prácticos.
+  2. **Carga y Publicación de Calificaciones:**
+     - Asiento continuo de calificaciones en escala vigesimal (`01` a `20`).
+     - Evaluación de autoevaluación (10%), coevaluación (10%) y rasgos de personalidad/actitudinales.
+     - Ajuste por actividades remediales o superación pedagógica antes del cierre formal del lapso.
+  3. **Control Académico y Grupos CRP:**
+     - Registro de asistencia hora por hora en sus bloques académicos.
+     - Gestión pedagógica de los Grupos de Creación, Recreación y Producción (CRP).
+
+---
+
+## 🚀 7. Inicio Rápido del Sistema
 
 Para ejecutar el sistema con base de datos PostgreSQL local y API Gateway nativa:
 

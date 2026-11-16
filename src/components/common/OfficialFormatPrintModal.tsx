@@ -320,7 +320,7 @@ export const OfficialFormatPrintModal: React.FC<OfficialFormatPrintModalProps> =
 
           {/* Cláusula de Validez Legal */}
           <div className="text-center text-[9pt] text-slate-500 italic border-t border-slate-200 pt-4 font-sans">
-            Válida por treinta (30) días continuos a partir de su fecha de emisión • Documento emitido mediante el Sistema C.E.O. SICE-CBA
+            Válida por treinta (30) días continuos a partir de su fecha de emisión • Documento emitido mediante el Sistema SICE-CBA
           </div>
         </div>
       )}
@@ -417,7 +417,7 @@ export const OfficialFormatPrintModal: React.FC<OfficialFormatPrintModalProps> =
 
           {/* Cláusula de Validez Legal */}
           <div className="text-center text-[9pt] text-slate-500 italic border-t border-slate-200 pt-4 font-sans">
-            Válida por treinta (30) días continuos a partir de su fecha de emisión • Documento emitido mediante el Sistema C.E.O. SICE-CBA
+            Válida por treinta (30) días continuos a partir de su fecha de emisión • Documento emitido mediante el Sistema SICE-CBA
           </div>
         </div>
       )}

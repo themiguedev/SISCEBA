@@ -103,7 +103,7 @@ export const ReportesCentroView: React.FC<ReportesCentroViewProps> = ({
               }`}
             >
               <Printer className={`w-4 h-4 ${activeSubOption === 'CATALOGO' ? 'text-amber-300' : 'text-slate-500'}`} />
-              <span>Catálogo Oficial de Reportes (C.E.O.)</span>
+              <span>Catálogo General de Reportes</span>
             </button>
           )}
 

@@ -1203,7 +1203,7 @@ export const ReporteInstitucionalModal: React.FC<ReporteInstitucionalModalProps>
                     {/* PIE DE PÁGINA OFICIAL C.E.O. (IDÉNTICO A LA FOTO) */}
                     <div className="flex justify-between items-center text-[7pt] font-mono text-slate-600 pt-2 border-t border-slate-300 mt-2">
                       <div>Página 1/2 - Fecha de Impresión {printDateString}</div>
-                      <div className="font-bold">Control Estudiantil Online, C.E.O.</div>
+                      <div className="font-bold">SICE-CBA • U.E.P. Colegio Bellas Artes</div>
                     </div>
                   </div>
                 );

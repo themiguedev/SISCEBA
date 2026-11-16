@@ -90,7 +90,7 @@ const getMenuItems = (
   { id: 'VACUNAS', label: 'VACUNAS', icon: Syringe, count: `${vacunasCount}`, badge: 'BD' },
   { id: 'SERVICIOS_MEDICOS', label: 'SERVICIOS MÉDICOS', icon: Stethoscope, count: `${serviciosCount}`, badge: 'BD' },
   { id: 'DATOS_ESCUELA', label: 'DATOS DE LA ESCUELA', icon: School, badge: 'BD' },
-  { id: 'EXPORTAR_CALIFICACIONES', label: 'EXPORTAR CALIFICACIONES', icon: FileSpreadsheet, badge: 'Oficial' }
+  { id: 'EXPORTAR_CALIFICACIONES', label: 'EXPORTAR CALIFICACIONES', icon: FileSpreadsheet }
 ];
 
 export const ConfiguracionAvanzadaView: React.FC = () => {
@@ -253,7 +253,7 @@ export const ConfiguracionAvanzadaView: React.FC = () => {
         </div>
         <h3 className="text-lg font-black text-rose-950">Acceso Restringido - Configuración Avanzada</h3>
         <p className="text-xs text-rose-700 max-w-md mx-auto">
-          Este apartado contiene parámetros estructurales del sistema CEO y está reservado exclusivamente para el Administrador de Sistemas.
+          Este apartado contiene parámetros estructurales del sistema SICE-CBA y está reservado exclusivamente para el Administrador de Sistemas.
         </p>
       </div>
     );

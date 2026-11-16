@@ -117,6 +117,51 @@ const accounts = [
     active: true,
     avatar_url: 'cba-meta:{"g":"FEMENINO","c":"V-19.456.789","r":"SECRETARIA","al":["MEDIA_GENERAL"],"a":"preset:female-teal-circle"}',
     academic_assignments: []
+  },
+  {
+    id: 'usr-doc-inicial',
+    username: 'doc.inicial',
+    password: 'cba2026*docinicial',
+    full_name: 'Prof. Ana Valentina Castillo',
+    email: 'doc.inicial@bellasartes.edu.ve',
+    role: 'DOCENTE',
+    default_level: 'INICIAL',
+    active: true,
+    avatar_url: 'cba-meta:{"g":"FEMENINO","c":"V-24.123.456","r":"DOCENTE","al":["INICIAL"],"a":"preset:female-teal-circle"}',
+    academic_assignments: [
+      { id: 'asig-ini-fp-5a', level: 'INICIAL', grade: 'Sala de 5 Años', section: 'A', areaId: 'ini-fp', areaCode: 'INI-FP', areaName: 'Formación personal', subjectName: 'Formación personal' },
+      { id: 'asig-ini-ca-5a', level: 'INICIAL', grade: 'Sala de 5 Años', section: 'A', areaId: 'ini-ca', areaCode: 'INI-CA', areaName: 'Relación entre los componentes del ambiente', subjectName: 'Relación entre los componentes del ambiente' }
+    ]
+  },
+  {
+    id: 'usr-doc-primaria',
+    username: 'doc.primaria',
+    password: 'cba2026*docprimaria',
+    full_name: 'Prof. Carlos Eduardo Méndez',
+    email: 'doc.primaria@bellasartes.edu.ve',
+    role: 'DOCENTE',
+    default_level: 'PRIMARIA',
+    active: true,
+    avatar_url: 'cba-meta:{"g":"MASCULINO","c":"V-17.654.321","r":"DOCENTE","al":["PRIMARIA"],"a":"preset:male-cyan"}',
+    academic_assignments: [
+      { id: 'asig-pri-len-5a', level: 'PRIMARIA', grade: '5to Grado', section: 'A', areaId: 'pri-len', areaCode: 'PRI-LEN', areaName: 'Lenguaje', subjectName: 'Lenguaje' },
+      { id: 'asig-pri-mat-5a', level: 'PRIMARIA', grade: '5to Grado', section: 'A', areaId: 'pri-mat', areaCode: 'PRI-MAT', areaName: 'Matemáticas', subjectName: 'Matemáticas' }
+    ]
+  },
+  {
+    id: 'usr-doc-media',
+    username: 'doc.media',
+    password: 'cba2026*docmedia',
+    full_name: 'Prof. Gabriela Alejandra Rivas',
+    email: 'doc.media@bellasartes.edu.ve',
+    role: 'DOCENTE',
+    default_level: 'MEDIA_GENERAL',
+    active: true,
+    avatar_url: 'cba-meta:{"g":"FEMENINO","c":"V-15.345.678","r":"DOCENTE","al":["MEDIA_GENERAL"],"a":"preset:female-teal-circle"}',
+    academic_assignments: [
+      { id: 'asig-med-mat-4a', level: 'MEDIA_GENERAL', grade: '4to Año', section: 'A', areaId: 'med-mat', areaCode: 'MED-MAT', areaName: 'Matemáticas', subjectName: 'Matemáticas' },
+      { id: 'asig-med-cas-4a', level: 'MEDIA_GENERAL', grade: '4to Año', section: 'A', areaId: 'med-cas', areaCode: 'MED-CAS', areaName: 'Castellano', subjectName: 'Castellano' }
+    ]
   }
 ];
 
@@ -137,7 +182,8 @@ async function main() {
           role = EXCLUDED.role,
           default_level = EXCLUDED.default_level,
           active = EXCLUDED.active,
-          avatar_url = EXCLUDED.avatar_url;
+          avatar_url = EXCLUDED.avatar_url,
+          academic_assignments = EXCLUDED.academic_assignments;
       `;
       await client.query(query, [
         acc.id,
@@ -166,7 +212,7 @@ async function main() {
     const res = await client.query(`
       SELECT id, username, full_name, role, default_level, email 
       FROM app_users 
-      WHERE id IN ('usr-directora', 'usr-coord-inicial', 'usr-coord-primaria', 'usr-coord-media', 'usr-coord-temp', 'usr-orientacion', 'usr-sec-inicial', 'usr-sec-primaria', 'usr-sec-media');
+      WHERE id IN ('usr-directora', 'usr-coord-inicial', 'usr-coord-primaria', 'usr-coord-media', 'usr-coord-temp', 'usr-orientacion', 'usr-sec-inicial', 'usr-sec-primaria', 'usr-sec-media', 'usr-doc-inicial', 'usr-doc-primaria', 'usr-doc-media');
     `);
     console.log('\n📊 Registros actuales en PostgreSQL:');
     console.table(res.rows);

@@ -2285,11 +2285,8 @@ export const EscritorioView: React.FC<EscritorioViewProps> = ({
             <div className="bg-gradient-to-r from-[#2C2E53] via-[#1E2038] to-[#141525] rounded-2xl p-5 sm:p-6 text-white shadow-md border border-[#3D4066] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2 mb-1.5">
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#0F1122]/90 text-amber-300 border border-[#D4AF37] shadow-xs">
-                    Cronograma Oficial
-                  </span>
                   <span className="text-xs text-amber-200/90 font-medium">
-                    Año Escolar: {schedule.schoolYear} • Ciclo Oficial CBA
+                    Año Escolar: {schedule.schoolYear}
                   </span>
                 </div>
                 <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2">

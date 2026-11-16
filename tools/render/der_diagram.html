@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Diagrama Entidad-Relación (DER) - SISCEBA PostgreSQL</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #0f172a;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #e2e8f0;
+      padding: 30px;
+      min-width: 1750px;
+    }
+    .header {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 24px 32px;
+      margin-bottom: 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    }
+    .header-title h1 {
+      font-size: 26px;
+      font-weight: 800;
+      color: #f8fafc;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .header-title p {
+      font-size: 14px;
+      color: #94a3b8;
+      margin-top: 6px;
+    }
+    .badge {
+      background: #2563eb;
+      color: #fff;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .legend {
+      display: flex;
+      gap: 18px;
+      font-size: 13px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dot-pk { width: 10px; height: 10px; border-radius: 50%; background: #eab308; }
+    .dot-fk { width: 10px; height: 10px; border-radius: 50%; background: #38bdf8; }
+    .dot-chk { width: 10px; height: 10px; border-radius: 50%; background: #a855f7; }
+
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+      display: flex;
+      flex-direction: column;
+    }
+    .card.highlight {
+      border-color: #3b82f6;
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.25);
+    }
+    .card-header {
+      padding: 10px 14px;
+      font-weight: 700;
+      font-size: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .ch-blue { background: #1d4ed8; color: #fff; }
+    .ch-indigo { background: #4338ca; color: #fff; }
+    .ch-emerald { background: #047857; color: #fff; }
+    .ch-purple { background: #6d28d9; color: #fff; }
+    .ch-amber { background: #b45309; color: #fff; }
+    .ch-rose { background: #be123c; color: #fff; }
+    .ch-cyan { background: #0e7490; color: #fff; }
+
+    .tag {
+      font-size: 10px;
+      background: rgba(0,0,0,0.3);
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
+    .table-body {
+      padding: 8px 12px;
+      font-size: 12px;
+      font-family: "Consolas", "Courier New", monospace;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      background: #0f172a;
+      flex-grow: 1;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 3px 0;
+      border-bottom: 1px dashed #1e293b;
+    }
+    .row:last-child { border-bottom: none; }
+    .col-name { display: flex; align-items: center; gap: 6px; color: #f1f5f9; }
+    .col-type { color: #94a3b8; font-size: 11px; }
+
+    .pk { color: #facc15; font-weight: 700; }
+    .fk { color: #38bdf8; font-weight: 700; }
+    .ref-tag {
+      font-size: 9px;
+      background: #0369a1;
+      color: #fff;
+      padding: 1px 4px;
+      border-radius: 4px;
+      margin-left: 4px;
+      font-family: sans-serif;
+    }
+    .chk-tag {
+      font-size: 9px;
+      background: #7e22ce;
+      color: #fff;
+      padding: 1px 4px;
+      border-radius: 4px;
+      margin-left: 4px;
+      font-family: sans-serif;
+    }
+
+    .card-footer {
+      background: #182234;
+      padding: 6px 12px;
+      font-size: 10.5px;
+      color: #64748b;
+      border-top: 1px solid #1e293b;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="header-title">
+      <h1>
+        <span>🗄️ SISCEBA — Modelo de Base de Datos PostgreSQL 16</span>
+        <span class="badge">Esquema Relacional Oficial (14 Tablas Núcleo)</span>
+      </h1>
+      <p>Unidad Educativa Privada Colegio "Bellas Artes" | Motor: PostgreSQL 16 Nativo | Integridad Referencial Estricta & Restricciones CHECK</p>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><div class="dot-pk"></div><span>Primary Key (PK)</span></div>
+      <div class="legend-item"><div class="dot-fk"></div><span>Foreign Key (FK ON DELETE CASCADE)</span></div>
+      <div class="legend-item"><div class="dot-chk"></div><span>CHECK Constraint</span></div>
+    </div>
+  </div>
+
+  <div class="grid-container">
+
+    <!-- 1. students -->
+    <div class="card highlight">
+      <div class="card-header ch-blue">
+        <span>students</span>
+        <span class="tag">63 Registros</span>
+      </div>
+      <div class="table-body">
+        <div class="row"><span class="col-name pk">🔑 id</span><span class="col-type">varchar(60) [PK]</span></div>
+        <div class="row"><span class="col-name">cedula</span><span class="col-type">varchar(20) [UQ]</span></div>
+        <div class="row"><span class="col-name">full_name</span><span class="col-type">varchar(150)</span></div>
+        <div class="row"><span class="col-name">gender <span class="chk-tag">M/F</span></span><span class="col-type">char(1)</span></div>
+        <div class="row"><span class="col-name">birth_date</span><span class="col-type">date</span></div>
+        <div class="row"><span class="col-name">level <span class="chk-tag">INI|PRI|MED</span></span><span class="col-type">varchar(20)</span></div>
+        <div class="row"><span class="col-name">grade</span><span class="col-type">varchar(40)</span></div>
+        <div class="row"><span class="col-name">section <span class="chk-tag">A | B</span></span><span class="col-type">varchar(10)</span></div>
+        <div class="row"><span class="col-name">representative_name</span><span class="col-type">varchar(150)</span></div>
+        <div class="row"><span class="col-name">representative_phone</span><span class="col-type">varchar(30)</span></div>
+        <div class="row"><span class="col-name">status <span class="chk-tag">REG|REV|MAT</span></span><span class="col-type">varchar(25)</span></div>
+        <div class="row"><span class="col-name">pending_subjects</span><span class="col-type">text[]</span></div>
+        <div class="row"><span class="col-name">updated_at</span><span class="col-type">timestamptz</span></div>
+      </div>
+      <div class="card-footer">Entidad central de alumnos con reglas de sección estricta (A/B)</div>
+    </div>
+
+    <!-- 2. evaluation_records -->
+    <div class="card highlight">
+      <div class="card-header ch-indigo">
+        <span>evaluation_records</span>
+        <span class="tag">Calificaciones</span>
+      </div>
+      <div class="table-body">
+        <div class="row"><span class="col-name pk">🔑 id</span><span class="col-type">varchar(60) [PK]</span></div>
+        <div class="row"><span class="col-name fk">🔗 student_id <span class="ref-tag">→ students</span></span><span class="col-type">varchar(60)</span></div>
+        <div class="row"><span class="col-name fk">🔗 area_id <span class="ref-tag">→ subject_areas</span></span><span class="col-type">varchar(60)</span></div>
+        <div class="row"><span class="col-name">moment <span class="chk-tag">DIAG|PROC|FIN</span></span><span class="col-type">varchar(20)</span></div>
+        <div class="row"><span class="col-name">lapso <span class="chk-tag">1, 2, 3</span></span><span class="col-type">int</span></div>
+        <div class="row"><span class="col-name">score_numeric</span><span class="col-type">numeric(4,2) (01-20)</span></div>
+        <div class="row"><span class="col-name">score_qualitative <span class="chk-tag">L|P|EP|I</span></span><span class="col-type">varchar(2)</span></div>
+        <div class="row"><span class="col-name">score_literal <span class="chk-tag">A..E</span></span><span class="col-type">char(1)</span></div>
+        <div class="row"><span class="col-name">robotics_score</span><span class="col-type">jsonb</span></div>
+        <div class="row"><span class="col-name">checklist_scores</span><span class="col-type">jsonb</span></div>
+        <div class="row"><span class="col-name">observations</span><span class="col-type">text</span></div>
+        <div class="row"><span class="col-name">teacher_id</span><span class="col-type">varchar(60)</span></div>
+        <div class="row"><span class="col-name">recorded_at</span><span class="col-type">date</span></div>
+      </div>
+      <div class="card-footer">Evaluaciones multi-subsistema (Literal, Cualitativo y Vigesimal)</div>
+    </div>
+
+    <!-- 3. subject_areas -->
+    <div class="card">
+      <div class="card-header ch-emerald">
+        <span>subject_areas</span>
+        <span class="tag">Malla Curricular</span>
+      </div>
+      <div class="table-body">
+        <div class="row"><span class="col-name pk">🔑 id</span><span class="col-type">varchar(60) [PK]</span></div>
+        <div class="row"><span class="col-name">code</span><span class="col-type">varchar(20) [UQ]</span></div>
+        <div class="row"><span class="col-name">name</span><span class="col-type">varchar(100)</span></div>
+        <div class="row"><span class="col-name">level <span class="chk-tag">INI|PRI|MED</span></span><span class="col-type">varchar(20)</span></div>
+        <div class="row"><span class="col-name">type <span class="chk-tag">REG|INT|ESP</span></span><span class="col-type">varchar(20)</span></div>
+        <div class="row"><span class="col-name">order_index</span><span class="col-type">int</span></div>
+        <div class="row"><span class="col-name">is_active</span><span class="col-type">boolean</span></div>
+        <div class="row"><span class="col-name">created_at</span><span class="col-type">timestamptz</span></div>
+      </div>
+      <div class="card-footer">Catálogo de materias y áreas formativas</div>
+    </div>
+
+    <!-- 4. app_users -->
+    <div class="card">
+      <div class="card-header ch-purple">
+        <span>app_users</span>
+        <span class="tag">147 Usuarios</span>
+      </div>
+      <div class="table-body">
+        <div class="row"><span class="col-name pk">🔑 id</span><span class="col-type">varchar(60) [PK]</span></div>
+        <div class="row"><span class="col-name">username</span><span class="col-type">varchar(50) [UQ]</span></div>
+        <div class="row"><span class="col-name">email</span><span class="col-type">varchar(120) [UQ]</span></div>
+        <div class="row"><span class="col-name">password_hash</span><span class="col-type">varchar(255)</span></div>
+        <div class="row"><span class="col-name">role <span class="chk-tag">RBAC</span></span><span class="col-type">varchar(30)</span></div>
+        <div class="row"><span class="col-name">full_name</span><span class="col-type">varchar(150)</span></div>
+        <div class="row"><span class="col-name">is_active</span><span class="col-type">boolean</span></div>
+        <div class="row"><span class="col-name">default_level</span><span class="col-type">varchar(20)</span></div>
+        <div class="row"><span class="col-name">created_at</span><span class="col-type">timestamptz</span></div>
+      </div>
+      <div class="card-footer">Control de acceso y roles institucionales</div>
+    </div>
+
+    <!-- 5. daily_attendance -->
+    <div class="card">
+      <div class="card-header ch-cyan">
+        <span>daily_attendance</span>
+        <span class="tag">Inasistencias</span>
+      </div>
+      <div class="table-body">
+        <div class="row"><span class="col-name pk">🔑 id</span><span class="col-type">varchar(60) [PK]</span></div>
+        <div class="row"><span class="col-name fk">🔗 student_id <span class="ref-tag">→ students</span></span><span class="col-type">varchar(60)</span></div>
+        <div class="row"><span class="col-name">date</span><span class="col-type">date</span></div>
+        <div class="row"><span class="col-name">status <span class="chk-tag">PRES|JUST|INJ|RET</span></span><span class="col-type">varchar(30)</span></div>
+        <div class="row"><span class="col-name">justification</span><span class="col-type">text</span></div>
+        <div class="row"><span class="col-name">lapso <span class="chk-tag">1, 2, 3</span></span><span class="col-type">int</span></div>
+        <div class="row"><span class="col-name">recorded_by</span><span class="col-type">varchar(100)</span></div>
+        <div class="row"><span class="col-name">created_at</span><span class="col-type">timestamptz</span></div>
+      </div>
+      <div class="card-footer">Registro de asistencia y control de secretaría</div>
+    </div>
+
+    <!-- 6. conduct_entries -->
+    <div class="card">
+      <div class="card-header ch-rose">
+        <span>conduct_entries</span>
+        <span class="tag">Disciplina</span>
+      </div>
+      <div class="table-body">
+        <div class="row"><span class="col-name pk">🔑 id</span><span class="col-type">varchar(60) [PK]</span></div>
+        <div class="row"><span class="col-name fk">🔗 student_id <span class="ref-tag">→ students</span></span><span class="col-type">varchar(60)</span></div>
+        <div class="row"><span class="col-name">date</span><span class="col-type">date</span></div>
+        <div class="row"><span class="col-name">type <span class="chk-tag">POS|LEV|GRA|MGRA</span></span><span class="col-type">varchar(20)</span></div>
+        <div class="row"><span class="col-name">description</span><span class="col-type">text</span></div>
+        <div class="row"><span class="col-name">action_taken</span><span class="col-type">text</span></div>
+        <div class="row"><span class="col-name">reported_by</span><span class="col-type">varchar(100)</span></div>
+        <div class="row"><span class="col-name">lapso <span class="chk-tag">1, 2, 3</span></span><span class="col-type">int</span></div>
+        <div class="row"><span class="col-name">created_at</span><span class="col-type">timestamptz</span></div>
+      </div>
+      <div class="card-footer">Expediente conductual y acuerdos de paz escolar</div>
+    </div>
+
+    <!-- 7. competencies -->
+    <div class="card">
+      <div class="card-header ch-amber">
+        <span>competencies</span>
+        <span class="tag">Competencias</span>
+      </div>
+      <div class="table-body">
+        <div class="row"><span class="col-name pk">🔑 id</span><span class="col-type">varchar(60) [PK]</span></div>
+        <div class="row"><span class="col-name">code</span><span class="col-type">varchar(20) [UQ]</span></div>
+        <div class="row"><span class="col-name">title</span><span class="col-type">text</span></div>
+        <div class="row"><span class="col-name">description</span><span class="col-type">text</span></div>
+        <div class="row"><span class="col-name">level <span class="chk-tag">INI|PRI|MED</span></span><span class="col-type">varchar(20)</span></div>
+        <div class="row"><span class="col-name fk">🔗 area_id <span class="ref-tag">→ subject_areas</span></span><span class="col-type">varchar(60)</span></div>
+        <div class="row"><span class="col-name">lapso <span class="chk-tag">1, 2, 3</span></span><span class="col-type">int</span></div>
+      </div>
+      <div class="card-footer">Competencias formativas por subsistema</div>
+    </div>
+
+    <!-- 8. indicators -->
+    <div class="card">
+      <div class="card-header ch-amber">
+        <span>indicators</span>
+        <span class="tag">Indicadores</span>
+      </div>
+      <div class="table-body">
+        <div class="row"><span class="col-name pk">🔑 id</span><span class="col-type">varchar(60) [PK]</span></div>
+        <div class="row"><span class="col-name fk">🔗 competency_id <span class="ref-tag">→ competencies</span></span><span class="col-type">varchar(60)</span></div>
+        <div class="row"><span class="col-name">code</span><span class="col-type">varchar(20)</span></div>
+        <div class="row"><span class="col-name">description</span><span class="col-type">text</span></div>
+        <div class="row"><span class="col-name">level <span class="chk-tag">INI|PRI|MED</span></span><span class="col-type">varchar(20)</span></div>
+        <div class="row"><span class="col-name fk">🔗 area_id <span class="ref-tag">→ subject_areas</span></span><span class="col-type">varchar(60)</span></div>
+        <div class="row"><span class="col-name">lapso <span class="chk-tag">1, 2, 3</span></span><span class="col-type">int</span></div>
+      </div>
+      <div class="card-footer">Criterios de logro y evaluación cualitativa</div>
+    </div>
+
+    <!-- 9. crp_workshops -->
+    <div class="card">
+      <div class="card-header ch-emerald">
+        <span>crp_workshops</span>
+        <span class="tag">Talleres CRP</span>
+      </div>
+      <div class="table-body">
+        <div class="row"><span class="col-name pk">🔑 id</span><span class="col-type">varchar(60) [PK]</span></div>
+        <div class="row"><span class="col-name">nombre</span><span class="col-type">varchar(150)</span></div>
+        <div class="row"><span class="col-name">descripcion</span><span class="col-type">text</span></div>
+        <div class="row"><span class="col-name">nivel_educativo <span class="chk-tag">INI|PRI|MED</span></span><span class="col-type">varchar(20)</span></div>
+        <div class="row"><span class="col-name">docente_id</span><span class="col-type">varchar(60)</span></div>
+        <div class="row"><span class="col-name">cupo_maximo</span><span class="col-type">int</span></div>
+        <div class="row"><span class="col-name">periodo_academico</span><span class="col-type">varchar(20)</span></div>
+        <div class="row"><span class="col-name">activo</span><span class="col-type">boolean</span></div>
+      </div>
+      <div class="card-footer">Talleres de Creación, Recreación y Producción</div>
+    </div>
+
+    <!-- 10. crp_enrollments -->
+    <div class="card">
+      <div class="card-header ch-emerald">
+        <span>crp_enrollments</span>
+        <span class="tag">Inscripción CRP</span>
+      </div>
+      <div class="table-body">
+        <div class="row"><span class="col-name pk">🔑 id</span><span class="col-type">varchar(60) [PK]</span></div>
+        <div class="row"><span class="col-name fk">🔗 student_id <span class="ref-tag">→ students</span></span><span class="col-type">varchar(60)</span></div>
+        <div class="row"><span class="col-name fk">🔗 taller_id <span class="ref-tag">→ crp_workshops</span></span><span class="col-type">varchar(60)</span></div>
+        <div class="row"><span class="col-name">periodo_academico</span><span class="col-type">varchar(20)</span></div>
+        <div class="row"><span class="col-name">asignacion_metodo <span class="chk-tag">MAN|AUTO</span></span><span class="col-type">varchar(20)</span></div>
+        <div class="row"><span class="col-name">created_at</span><span class="col-type">timestamptz</span></div>
+      </div>
+      <div class="card-footer">Asignación de estudiantes a talleres extracurriculares</div>
+    </div>
+
+    <!-- 11. administrative_blocks -->
+    <div class="card">
+      <div class="card-header ch-rose">
+        <span>administrative_blocks</span>
+        <span class="tag">Bloqueos</span>
+      </div>
+      <div class="table-body">
+        <div class="row"><span class="col-name pk">🔑 id</span><span class="col-type">varchar(60) [PK]</span></div>
+        <div class="row"><span class="col-name fk">🔗 student_id <span class="ref-tag">→ students</span></span><span class="col-type">varchar(60)</span></div>
+        <div class="row"><span class="col-name">type</span><span class="col-type">varchar(30)</span></div>
+        <div class="row"><span class="col-name">reason</span><span class="col-type">text</span></div>
+        <div class="row"><span class="col-name">is_active</span><span class="col-type">boolean</span></div>
+        <div class="row"><span class="col-name">applied_by</span><span class="col-type">varchar(100)</span></div>
+        <div class="row"><span class="col-name">applied_at</span><span class="col-type">timestamptz</span></div>
+      </div>
+      <div class="card-footer">Bloqueo administrativo para emisión de documentos</div>
+    </div>
+
+    <!-- 12. pass_records -->
+    <div class="card">
+      <div class="card-header ch-cyan">
+        <span>pass_records</span>
+        <span class="tag">Pases</span>
+      </div>
+      <div class="table-body">
+        <div class="row"><span class="col-name pk">🔑 id</span><span class="col-type">varchar(60) [PK]</span></div>
+        <div class="row"><span class="col-name fk">🔗 student_id <span class="ref-tag">→ students</span></span><span class="col-type">varchar(60)</span></div>
+        <div class="row"><span class="col-name">issue_date</span><span class="col-type">date</span></div>
+        <div class="row"><span class="col-name">type</span><span class="col-type">varchar(30)</span></div>
+        <div class="row"><span class="col-name">reason</span><span class="col-type">text</span></div>
+        <div class="row"><span class="col-name">issued_by</span><span class="col-type">varchar(100)</span></div>
+        <div class="row"><span class="col-name">status</span><span class="col-type">varchar(20)</span></div>
+      </div>
+      <div class="card-footer">Control de salida y pases autorizados</div>
+    </div>
+
+    <!-- 13. title_records -->
+    <div class="card">
+      <div class="card-header ch-indigo">
+        <span>title_records</span>
+        <span class="tag">Títulos</span>
+      </div>
+      <div class="table-body">
+        <div class="row"><span class="col-name pk">🔑 id</span><span class="col-type">varchar(60) [PK]</span></div>
+        <div class="row"><span class="col-name fk">🔗 student_id <span class="ref-tag">→ students</span></span><span class="col-type">varchar(60)</span></div>
+        <div class="row"><span class="col-name">registration_number</span><span class="col-type">varchar(50) [UQ]</span></div>
+        <div class="row"><span class="col-name">folio_number</span><span class="col-type">varchar(50)</span></div>
+        <div class="row"><span class="col-name">book_number</span><span class="col-type">varchar(50)</span></div>
+        <div class="row"><span class="col-name">graduation_date</span><span class="col-type">date</span></div>
+        <div class="row"><span class="col-name">average_score</span><span class="col-type">numeric(4,2)</span></div>
+        <div class="row"><span class="col-name">status</span><span class="col-type">varchar(25)</span></div>
+      </div>
+      <div class="card-footer">Registro oficial de egresados de Media General</div>
+    </div>
+
+    <!-- 14. document_requests -->
+    <div class="card">
+      <div class="card-header ch-blue">
+        <span>document_requests</span>
+        <span class="tag">Trámites</span>
+      </div>
+      <div class="table-body">
+        <div class="row"><span class="col-name pk">🔑 id</span><span class="col-type">varchar(60) [PK]</span></div>
+        <div class="row"><span class="col-name">requester_name</span><span class="col-type">varchar(150)</span></div>
+        <div class="row"><span class="col-name">requester_role</span><span class="col-type">varchar(30)</span></div>
+        <div class="row"><span class="col-name">document_type</span><span class="col-type">varchar(50)</span></div>
+        <div class="row"><span class="col-name">status <span class="chk-tag">PEND|TRAM|LIST|ENT</span></span><span class="col-type">varchar(30)</span></div>
+        <div class="row"><span class="col-name">created_at</span><span class="col-type">timestamptz</span></div>
+      </div>
+      <div class="card-footer">Solicitud de constancias y certificaciones</div>
+    </div>
+
+  </div>
+
+</body>
+</html>

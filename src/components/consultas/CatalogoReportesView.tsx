@@ -338,7 +338,7 @@ export const CatalogoReportesView: React.FC<CatalogoReportesViewProps> = ({
         <Printer className="w-10 h-10 text-[#D4AF37] mx-auto mb-3 opacity-80" />
         <h3 className="text-base font-bold text-slate-800 dark:text-white">Acceso Reservado</h3>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-md mx-auto">
-          El Catálogo Oficial de Reportes (C.E.O.) está disponible únicamente para usuarios con el rol de Administrador.
+          El Catálogo General de Reportes está disponible únicamente para usuarios con el rol de Administrador.
         </p>
       </div>
     );
@@ -362,7 +362,7 @@ export const CatalogoReportesView: React.FC<CatalogoReportesViewProps> = ({
 
           <div className="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
-            <span>C.E.O. Control Estudiantil Online • U.E. Bellas Artes</span>
+            <span>Control de Estudios • U.E.P. Colegio Bellas Artes</span>
           </div>
         </div>
 

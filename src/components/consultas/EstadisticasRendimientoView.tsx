@@ -293,11 +293,8 @@ export const EstadisticasRendimientoView: React.FC<EstadisticasRendimientoViewPr
         <div className="p-5 bg-gradient-to-r from-[#2C2E53] via-[#1E2038] to-[#141525] text-white flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#3D4066]">
           <div>
             <div className="flex items-center gap-2 mb-1.5">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#0F1122]/90 text-amber-300 border border-[#D4AF37] shadow-xs">
-                Auditoría UCE
-              </span>
               <span className="text-xs text-amber-200/90 font-medium">
-                Control de Carga de Calificaciones
+                Control de Carga de Calificaciones • SICE-CBA
               </span>
             </div>
             <h3 className="font-black text-base sm:text-lg tracking-wide flex items-center gap-2">

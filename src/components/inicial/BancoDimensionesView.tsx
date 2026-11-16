@@ -2105,7 +2105,7 @@ export const BancoDimensionesView: React.FC = () => {
                     Página 1/{printPages.totalPages} - Fecha de Impresión {currentFormattedDateTime}
                   </div>
                   <div className="font-medium text-slate-700">
-                    Control Estudiantil Online, C.E.O. • SICE-CBA
+                    Sistema Institucional de Control Escolar • SICE-CBA
                   </div>
                 </div>
               </div>
@@ -2208,7 +2208,7 @@ export const BancoDimensionesView: React.FC = () => {
                       Página 2/{printPages.totalPages} - Fecha de Impresión {currentFormattedDateTime}
                     </div>
                     <div className="font-medium text-slate-700">
-                      Control Estudiantil Online, C.E.O. • SICE-CBA
+                      Sistema Institucional de Control Escolar • SICE-CBA
                     </div>
                   </div>
                 </div>

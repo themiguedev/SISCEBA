@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>pgAdmin 4 - SISCEBA</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #f4f6f9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      color: #333;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .top-nav {
+      background: #2b3a4a;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      padding: 6px 14px;
+      font-size: 13px;
+      gap: 16px;
+      border-bottom: 2px solid #1f2a36;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: bold;
+      font-size: 14px;
+      color: #72afd2;
+    }
+    .menu-bar { display: flex; gap: 14px; font-size: 12px; color: #cfd8dc; }
+    
+    .main-workspace {
+      display: flex;
+      flex-grow: 1;
+      height: calc(100vh - 35px);
+    }
+
+    /* Left Sidebar Tree */
+    .browser-pane {
+      width: 320px;
+      background: #ffffff;
+      border-right: 1px solid #dcdfe6;
+      display: flex;
+      flex-direction: column;
+    }
+    .pane-header {
+      background: #e9ecef;
+      padding: 7px 12px;
+      font-weight: 600;
+      font-size: 12px;
+      border-bottom: 1px solid #ced4da;
+      color: #495057;
+      display: flex;
+      justify-content: space-between;
+    }
+    .tree-view {
+      padding: 10px 8px;
+      overflow-y: auto;
+      font-size: 12px;
+      color: #212529;
+    }
+    .tree-node {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 4px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .tree-node.active { background: #e2e8f0; font-weight: 600; }
+    .level-0 { padding-left: 4px; font-weight: bold; }
+    .level-1 { padding-left: 18px; }
+    .level-2 { padding-left: 32px; }
+    .level-3 { padding-left: 46px; }
+    .level-4 { padding-left: 60px; font-size: 11.5px; }
+
+    /* Right Main Content */
+    .content-pane {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+    }
+    .tabs-bar {
+      display: flex;
+      background: #dfe4ea;
+      border-bottom: 1px solid #ced4da;
+    }
+    .tab {
+      padding: 8px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      border-right: 1px solid #ced4da;
+      background: #e9ecef;
+      color: #6c757d;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tab.active {
+      background: #ffffff;
+      color: #1e293b;
+      border-bottom: 2px solid #2563eb;
+    }
+
+    .editor-section {
+      height: 38%;
+      background: #1e1e1e;
+      color: #d4d4d4;
+      font-family: "Consolas", monospace;
+      font-size: 13px;
+      padding: 12px 16px;
+      line-height: 1.5;
+      overflow-y: auto;
+      border-bottom: 4px solid #ced4da;
+    }
+    .sql-kw { color: #569cd6; font-weight: bold; }
+    .sql-fn { color: #dcdcaa; }
+    .sql-str { color: #ce9178; }
+    .sql-cmt { color: #6a9955; font-style: italic; }
+
+    .results-toolbar {
+      background: #f1f3f5;
+      padding: 6px 12px;
+      font-size: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #dee2e6;
+    }
+    .results-grid {
+      flex-grow: 1;
+      overflow: auto;
+      background: #ffffff;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      text-align: left;
+    }
+    th {
+      background: #f8f9fa;
+      padding: 7px 10px;
+      border-bottom: 2px solid #dee2e6;
+      border-right: 1px solid #e9ecef;
+      color: #495057;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+    }
+    td {
+      padding: 6px 10px;
+      border-bottom: 1px solid #f1f3f5;
+      border-right: 1px solid #f1f3f5;
+      color: #212529;
+      font-family: "Consolas", monospace;
+      font-size: 11.5px;
+    }
+    tr:nth-child(even) { background-color: #fafbfc; }
+    tr:hover { background-color: #edf2f7; }
+
+    .status-bar {
+      background: #2b3a4a;
+      color: #cfd8dc;
+      padding: 4px 12px;
+      font-size: 11px;
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top bar -->
+  <div class="top-nav">
+    <div class="brand">🐘 pgAdmin 4</div>
+    <div class="menu-bar">
+      <span>File</span>
+      <span>Object</span>
+      <span>Tools</span>
+      <span>Help</span>
+    </div>
+    <div style="margin-left: auto; font-size: 12px; color: #a0aec0;">
+      Connected to: <strong>PostgreSQL 16 (Local & LAN: 5432)</strong> | Database: <strong>sisceba</strong>
+    </div>
+  </div>
+
+  <div class="main-workspace">
+
+    <!-- Left Browser Tree -->
+    <div class="browser-pane">
+      <div class="pane-header">
+        <span>Object Browser</span>
+        <span>🔍</span>
+      </div>
+      <div class="tree-view">
+        <div class="tree-node level-0">🗄️ Servers (1)</div>
+        <div class="tree-node level-1">🐘 SISCEBA Local Cluster (127.0.0.1:5432)</div>
+        <div class="tree-node level-2">📁 Databases (4)</div>
+        <div class="tree-node level-3">🗄️ <strong>sisceba</strong></div>
+        <div class="tree-node level-3" style="padding-left: 54px;">📁 Schemas (1)</div>
+        <div class="tree-node level-4" style="padding-left: 68px;">📁 <strong>public</strong></div>
+        <div class="tree-node level-4 active" style="padding-left: 80px;">📋 <strong>Tables (28)</strong></div>
+        
+        <!-- Table list -->
+        <div class="tree-node level-4" style="padding-left: 92px;">📄 students (PK, 7 FK ref, 63 rows)</div>
+        <div class="tree-node level-4" style="padding-left: 92px;">📄 subject_areas (PK, 5 FK ref)</div>
+        <div class="tree-node level-4" style="padding-left: 92px;">📄 evaluation_records (PK, FK: students, areas)</div>
+        <div class="tree-node level-4" style="padding-left: 92px;">📄 conduct_entries (PK, FK: students)</div>
+        <div class="tree-node level-4" style="padding-left: 92px;">📄 daily_attendance (PK, FK: students)</div>
+        <div class="tree-node level-4" style="padding-left: 92px;">📄 crp_workshops (PK, 1 FK ref)</div>
+        <div class="tree-node level-4" style="padding-left: 92px;">📄 crp_enrollments (PK, FK: students, crp)</div>
+        <div class="tree-node level-4" style="padding-left: 92px;">📄 administrative_blocks (PK, FK: students)</div>
+        <div class="tree-node level-4" style="padding-left: 92px;">📄 pass_records (PK, FK: students)</div>
+        <div class="tree-node level-4" style="padding-left: 92px;">📄 title_records (PK, FK: students)</div>
+        <div class="tree-node level-4" style="padding-left: 92px;">📄 document_requests (PK)</div>
+        <div class="tree-node level-4" style="padding-left: 92px;">📄 competencies (PK, FK: areas)</div>
+        <div class="tree-node level-4" style="padding-left: 92px;">📄 indicators (PK, FK: comp, areas)</div>
+        <div class="tree-node level-4" style="padding-left: 92px;">📄 app_users (PK, 147 rows)</div>
+      </div>
+    </div>
+
+    <!-- Right Content Area -->
+    <div class="content-pane">
+      <div class="tabs-bar">
+        <div class="tab active">⚡ Query: sisceba@PostgreSQL 16</div>
+        <div class="tab">📊 Statistics</div>
+        <div class="tab">🔒 Constraints & Dependencies</div>
+      </div>
+
+      <!-- SQL Query Editor -->
+      <div class="editor-section">
+<span class="sql-cmt">-- Demostración de Integridad Referencial: Relación Estudiantes - Evaluaciones - Materias</span>
+<span class="sql-kw">SELECT</span> 
+    s.id <span class="sql-kw">AS</span> student_id,
+    s.cedula,
+    s.full_name <span class="sql-kw">AS</span> estudiante,
+    s.level <span class="sql-kw">AS</span> subsistema,
+    s.grade <span class="sql-kw">AS</span> grado_ano,
+    s.section <span class="sql-kw">AS</span> seccion,
+    sa.name <span class="sql-kw">AS</span> asignatura_relacionada,
+    er.lapso,
+    er.score_numeric <span class="sql-kw">AS</span> calificacion
+<span class="sql-kw">FROM</span> public.students s
+<span class="sql-kw">LEFT JOIN</span> public.evaluation_records er <span class="sql-kw">ON</span> s.id = er.student_id
+<span class="sql-kw">LEFT JOIN</span> public.subject_areas sa <span class="sql-kw">ON</span> er.area_id = sa.id
+<span class="sql-kw">WHERE</span> s.section <span class="sql-kw">IN</span> (<span class="sql-str">'A'</span>, <span class="sql-str">'B'</span>)
+<span class="sql-kw">ORDER BY</span> s.grade, s.section, s.full_name
+<span class="sql-kw">LIMIT</span> 6;
+      </div>
+
+      <!-- Toolbar -->
+      <div class="results-toolbar">
+        <div><strong>Data Output (6 rows)</strong> | Query returned successfully in 12 msec.</div>
+        <div>Total Rows: 6 of 63 students</div>
+      </div>
+
+      <!-- Results Grid -->
+      <div class="results-grid">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>student_id [PK]</th>
+              <th>cedula [UQ]</th>
+              <th>estudiante</th>
+              <th>subsistema</th>
+              <th>grado_ano</th>
+              <th>seccion [CHK]</th>
+              <th>asignatura_relacionada</th>
+              <th>lapso</th>
+              <th>calificacion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>stu-med-1a-01</td>
+              <td>V-36020640</td>
+              <td>AL SAFADI ALSAFADI MALAK GABRIELA</td>
+              <td>MEDIA_GENERAL</td>
+              <td>1er Año</td>
+              <td><strong>A</strong></td>
+              <td>Matemática</td>
+              <td>1</td>
+              <td>18.50</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>stu-med-1a-02</td>
+              <td>V-36070966</td>
+              <td>ALDANA VELASQUEZ MAXIMILIANO</td>
+              <td>MEDIA_GENERAL</td>
+              <td>1er Año</td>
+              <td><strong>A</strong></td>
+              <td>Ciencias Naturales</td>
+              <td>1</td>
+              <td>17.00</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>stu-med-1a-13</td>
+              <td>V-36730224</td>
+              <td>LINAREZ YANCE LUNA EVA</td>
+              <td>MEDIA_GENERAL</td>
+              <td>1er Año</td>
+              <td><strong>A</strong></td>
+              <td>Castellano</td>
+              <td>1</td>
+              <td>19.00</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>stu-med-1a-29</td>
+              <td>V-36033301</td>
+              <td>VARGAS SARMIENTO MIA MARIA</td>
+              <td>MEDIA_GENERAL</td>
+              <td>1er Año</td>
+              <td><strong>A</strong></td>
+              <td>Inglés</td>
+              <td>1</td>
+              <td>20.00</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>stu-med-1b-15</td>
+              <td>V-34613240</td>
+              <td>LEAL VALECILLOS CARLOS ARTURO</td>
+              <td>MEDIA_GENERAL</td>
+              <td>1er Año</td>
+              <td><strong>B</strong></td>
+              <td>Física</td>
+              <td>1</td>
+              <td>16.50</td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td>stu-med-1b-16</td>
+              <td>V-35128904</td>
+              <td>MARTINEZ RIVAS SEBASTIAN JOSE</td>
+              <td>MEDIA_GENERAL</td>
+              <td>1er Año</td>
+              <td><strong>B</strong></td>
+              <td>Química</td>
+              <td>1</td>
+              <td>18.00</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Footer Status -->
+      <div class="status-bar">
+        <span>UTF8 | Auto-commit: on | Isolation Level: Read Committed</span>
+        <span>Database: sisceba | User: postgres | Port: 5432</span>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>
